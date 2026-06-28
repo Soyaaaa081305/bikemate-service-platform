@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="BIKEMATES_ADMIN.SignOut"
+             BackgroundColor="{StaticResource PageBg}"
+             Title="Sign Out"
+             Shell.NavBarIsVisible="False">
+    <Grid RowDefinitions="Auto,*,Auto" BackgroundColor="{StaticResource PageBg}">
+        <Grid Padding="18,16,18,18" BackgroundColor="{StaticResource Navy}" ColumnDefinitions="Auto,*" ColumnSpacing="12">
+            <Frame WidthRequest="48" HeightRequest="48" CornerRadius="14" Padding="0" HasShadow="False" BackgroundColor="{StaticResource Orange}" BorderColor="{StaticResource Orange}">
+                <Image Source="bikemate_logo.png" HeightRequest="34" WidthRequest="34" HorizontalOptions="Center" VerticalOptions="Center" />
+            </Frame>
+            <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                <Label Text="Sign Out" Style="{StaticResource HeaderTitle}" />
+                <Label Text="Leave the admin app safely" Style="{StaticResource HeaderSubtitle}" />
+            </VerticalStackLayout>
+        </Grid>
+
+        <VerticalStackLayout Grid.Row="1" Padding="24" Spacing="18" VerticalOptions="Center">
+            <Frame Style="{StaticResource CardFrame}" Padding="18">
+                <VerticalStackLayout Spacing="14">
+                    <Label Text="Do you want to sign out?" FontSize="22" FontAttributes="Bold" HorizontalTextAlignment="Center" />
+                    <Label Text="Your current admin session will be cleared and the app will return to the introduction screen." HorizontalTextAlignment="Center" TextColor="{StaticResource MutedText}" LineBreakMode="WordWrap" />
+                    <Button Text="Sign Out" BackgroundColor="{StaticResource Red}" TextColor="White" CornerRadius="14" Clicked="OnConfirmSignOutClicked" />
+                    <Button Text="Cancel" Style="{StaticResource OutlineButton}" Clicked="OnCancelClicked" />
+                </VerticalStackLayout>
+            </Frame>
+        </VerticalStackLayout>
+
+        <Grid Grid.Row="2" BackgroundColor="White" Padding="0,7,0,12" ColumnDefinitions="*,*,*,*" HeightRequest="64">
+            <Button Text="Home" BackgroundColor="Transparent" TextColor="#6B7280" FontSize="11" Clicked="OnHomeClicked" />
+            <Button Grid.Column="1" Text="Settings" BackgroundColor="Transparent" TextColor="#6B7280" FontSize="11" Clicked="OnSettingsClicked" />
+            <Button Grid.Column="2" Text="Menu" BackgroundColor="Transparent" TextColor="#6B7280" FontSize="11" Clicked="OnMenuClicked" />
+            <Button Grid.Column="3" Text="Sign Out" BackgroundColor="Transparent" TextColor="{StaticResource Red}" FontSize="11" FontAttributes="Bold" />
+        </Grid>
+    </Grid>
+</ContentPage>

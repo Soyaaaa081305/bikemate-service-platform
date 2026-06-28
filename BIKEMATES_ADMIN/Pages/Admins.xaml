@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="BIKEMATES_ADMIN.Pages.Admins"
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="{StaticResource PageBg}">
+
+    <Grid RowDefinitions="Auto,*">
+        <VerticalStackLayout Grid.Row="0" BackgroundColor="{StaticResource Navy}" Padding="18,16,18,18" Spacing="4">
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                <VerticalStackLayout Spacing="2">
+                    <Label Text="Admins" Style="{StaticResource HeaderTitle}" />
+                    <Label Text="Owner-only admin tools and access-code management." Style="{StaticResource HeaderSubtitle}" />
+                </VerticalStackLayout>
+                <Button Grid.Column="1" Text="Exit" Style="{StaticResource MiniButton}" Clicked="Exit_Clicked" VerticalOptions="Center" />
+            </Grid>
+        </VerticalStackLayout>
+
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="14,12,14,30" Spacing="14">
+                <Frame Style="{StaticResource CardFrame}">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="Account Creation Codes" Style="{StaticResource SectionLabel}" />
+                        <Label Text="The first shop code is created by the shop registration API. Owner-generated admin codes will appear here once the API exposes that endpoint." Style="{StaticResource SmallMuted}" />
+                        <Entry x:Name="GeneratedCodeEntry" Placeholder="No generated admin code yet" IsReadOnly="True" Style="{StaticResource InputEntry}" />
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                            <Button Text="Generate Code" Style="{StaticResource PrimaryButton}" Clicked="GenerateCode_Clicked" />
+                            <Button Grid.Column="1" Text="Copy" Style="{StaticResource OutlineButton}" Clicked="CopyCode_Clicked" />
+                        </Grid>
+                    </VerticalStackLayout>
+                </Frame>
+
+                <Label Text="Admin Accounts" Style="{StaticResource SectionLabel}" />
+                <Frame Style="{StaticResource CardFrame}">
+                    <Label Text="Admin account management will load from dbo.Users and shop roles once the owner/admin listing API is available." Style="{StaticResource SmallMuted}" />
+                </Frame>
+
+                <Label Text="Audit Logs" Style="{StaticResource SectionLabel}" />
+                <Frame Style="{StaticResource CardFrame}">
+                    <Label Text="No audit log data is shown until the API returns real admin events." Style="{StaticResource SmallMuted}" />
+                </Frame>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+
+</ContentPage>

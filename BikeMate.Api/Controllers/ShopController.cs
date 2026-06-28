@@ -1,4 +1,4 @@
-using BikeMate.Api.Helpers;
+﻿using BikeMate.Api.Helpers;
 using BikeMate.Api.Services;
 using BikeMate.Core.Constants;
 using BikeMate.Core.DTOs;
@@ -12,7 +12,7 @@ namespace BikeMate.Api.Controllers;
 
 [ApiController]
 [Route("api/shop")]
-[Authorize(Roles = AppRoles.ShopAdmin)]
+[Authorize(Roles = $"{AppRoles.ShopAdmin},{AppRoles.SystemAdmin}")]
 public sealed class ShopController(BikeMateDbContext db) : ControllerBase
 {
     [HttpGet("dashboard")]
@@ -312,6 +312,11 @@ public sealed class ShopController(BikeMateDbContext db) : ControllerBase
 
     private async Task<Shop> GetOwnedShopAsync(CancellationToken cancellationToken)
     {
+        if (User.IsInRole(AppRoles.SystemAdmin))
+        {
+            return await db.Shops.OrderBy(x => x.ShopId).FirstAsync(cancellationToken);
+        }
+
         var userId = User.GetUserId();
         return await db.Shops.OrderBy(x => x.ShopId).FirstAsync(x => x.OwnerUserId == userId, cancellationToken);
     }
@@ -331,3 +336,4 @@ public sealed class ShopController(BikeMateDbContext db) : ControllerBase
         return new ProductDto(product.ProductId, product.ShopId, product.ProductName, product.ProductDescription, product.Price, product.StockQuantity, product.IsActive);
     }
 }
+

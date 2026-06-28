@@ -1,0 +1,75 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="BIKEMATES_ADMIN.Pages.Messages"
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="{StaticResource PageBg}">
+
+    <Grid RowDefinitions="Auto,*">
+        <VerticalStackLayout Grid.Row="0" BackgroundColor="{StaticResource Navy}" Padding="18,16,18,18" Spacing="8">
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                <Label Text="Messages" Style="{StaticResource HeaderTitle}" VerticalOptions="Center" />
+                <Button Grid.Column="1" Text="Exit" Style="{StaticResource MiniButton}" Clicked="Exit_Clicked" VerticalOptions="Center" />
+            </Grid>
+            <SearchBar Placeholder="Search conversations" Style="{StaticResource SearchInput}" TextChanged="SearchBar_TextChanged" />
+            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
+                <Button x:Name="CustomerTabButton" Text="Customers" Style="{StaticResource PrimaryButton}" Clicked="CustomerTab_Clicked" />
+                <Button x:Name="AdminTabButton" Grid.Column="1" Text="Admins" Style="{StaticResource OutlineButton}" Clicked="AdminTab_Clicked" />
+                <Button x:Name="MechanicTabButton" Grid.Column="2" Text="Mechanics" Style="{StaticResource OutlineButton}" Clicked="MechanicTab_Clicked" />
+            </Grid>
+        </VerticalStackLayout>
+
+        <Grid Grid.Row="1" RowDefinitions="Auto,* ,Auto" Padding="14,12,14,12" RowSpacing="10">
+            <CollectionView x:Name="ConversationCollectionView" ItemsSource="{Binding VisibleConversations}" SelectionMode="Single" SelectionChanged="ConversationCollectionView_SelectionChanged" HeightRequest="205">
+                <CollectionView.EmptyView>
+                    <Frame Style="{StaticResource CardFrame}">
+                        <Label Text="No conversations returned by the API for this section yet." Style="{StaticResource SmallMuted}" />
+                    </Frame>
+                </CollectionView.EmptyView>
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Frame Margin="0,4" Style="{StaticResource SmallCardFrame}">
+                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="10">
+                                <Frame WidthRequest="46" HeightRequest="46" CornerRadius="23" Padding="0" BackgroundColor="{Binding AvatarColor}" HasShadow="False">
+                                    <Label Text="{Binding Initials}" TextColor="White" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center" />
+                                </Frame>
+                                <VerticalStackLayout Grid.Column="1" Spacing="2">
+                                    <Label Text="{Binding Name}" Style="{StaticResource ItemTitle}" />
+                                    <Label Text="{Binding LastMessage}" Style="{StaticResource SmallMuted}" LineBreakMode="TailTruncation" />
+                                </VerticalStackLayout>
+                                <VerticalStackLayout Grid.Column="2" HorizontalOptions="End">
+                                    <Label Text="{Binding Time}" Style="{StaticResource TinyMuted}" HorizontalTextAlignment="End" />
+                                    <Label Text="{Binding Unread}" TextColor="White" BackgroundColor="{StaticResource Blue}" FontSize="10" FontAttributes="Bold" Padding="7,3" IsVisible="{Binding HasUnread}" />
+                                </VerticalStackLayout>
+                            </Grid>
+                        </Frame>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <Frame Grid.Row="1" Style="{StaticResource CardFrame}" Padding="0">
+                <Grid RowDefinitions="Auto,*">
+                    <Grid BackgroundColor="White" Padding="14" ColumnDefinitions="Auto,*">
+                        <Frame WidthRequest="40" HeightRequest="40" CornerRadius="20" Padding="0" BackgroundColor="{StaticResource Blue}" HasShadow="False">
+                            <Label x:Name="ChatAvatarLabel" Text="BM" TextColor="White" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center" />
+                        </Frame>
+                        <VerticalStackLayout Grid.Column="1" Margin="10,0,0,0">
+                            <Label x:Name="ChatNameLabel" Text="No conversation selected" Style="{StaticResource ItemTitle}" />
+                            <Label Text="Messenger-style conversation" Style="{StaticResource TinyMuted}" />
+                        </VerticalStackLayout>
+                    </Grid>
+                    <ScrollView Grid.Row="1" Padding="14">
+                        <VerticalStackLayout x:Name="ChatThreadLayout" Spacing="8" />
+                    </ScrollView>
+                </Grid>
+            </Frame>
+
+            <Grid Grid.Row="2" ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                <Entry x:Name="ReplyEntry" Placeholder="Aa" Style="{StaticResource InputEntry}" />
+                <Button Grid.Column="1" Text="Send" Style="{StaticResource PrimaryButton}" WidthRequest="86" Clicked="SendReply_Clicked" />
+            </Grid>
+        </Grid>
+    </Grid>
+
+</ContentPage>
+

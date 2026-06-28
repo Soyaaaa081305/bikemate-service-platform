@@ -1,4 +1,4 @@
-using BikeMate.Api.Helpers;
+﻿using BikeMate.Api.Helpers;
 using BikeMate.Core.Constants;
 using BikeMate.Core.DTOs;
 using BikeMate.Core.Entities;
@@ -135,9 +135,17 @@ public sealed class ShopsController(BikeMateDbContext db) : ControllerBase
     }
 
     [HttpGet("my")]
-    [Authorize(Roles = AppRoles.ShopAdmin)]
+    [Authorize(Roles = $"{AppRoles.ShopAdmin},{AppRoles.SystemAdmin}")]
     public async Task<ActionResult<IReadOnlyCollection<ShopDetailsDto>>> GetMine(CancellationToken cancellationToken)
     {
+        if (User.IsInRole(AppRoles.SystemAdmin))
+        {
+            return Ok(await db.Shops
+                .OrderBy(x => x.ShopId)
+                .Select(x => new ShopDetailsDto(x.ShopId, x.ShopName, x.ShopDescription, x.AddressLine, x.City, x.Province, x.ContactNumber, x.ShopStatus, x.Latitude, x.Longitude))
+                .ToArrayAsync(cancellationToken));
+        }
+
         var userId = User.GetUserId();
         return Ok(await db.Shops
             .Where(x => x.OwnerUserId == userId)
@@ -442,3 +450,5 @@ public sealed class ShopsController(BikeMateDbContext db) : ControllerBase
         return degrees * Math.PI / 180d;
     }
 }
+
+

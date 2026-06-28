@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="BIKEMATES_ADMIN.Pages.Intro.AppIntro4"
+             BackgroundColor="#F6F6F6">
+
+    <Grid Padding="20,34,20,28" RowDefinitions="*,Auto">
+        <Border BackgroundColor="White" Stroke="#E6E6E6" Padding="22" VerticalOptions="Center">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="8" />
+            </Border.StrokeShape>
+            <VerticalStackLayout Spacing="16">
+                <Label Text="Store tools"
+                       FontFamily="OpenSansSemibold"
+                       FontSize="13"
+                       TextColor="#FF6B2C"
+                       HorizontalTextAlignment="Center" />
+                <Label Text="Grow your business faster"
+                       FontFamily="OpenSansSemibold"
+                       FontSize="22"
+                       FontAttributes="Bold"
+                       TextColor="#242424"
+                       HorizontalTextAlignment="Center" />
+                <Label Text="Track orders, products, admins, and shop operations without leaving BikeMate."
+                       FontSize="14"
+                       TextColor="#6E6E6E"
+                       HorizontalTextAlignment="Center" />
+            </VerticalStackLayout>
+        </Border>
+
+        <Button Grid.Row="1"
+                Text="Continue"
+                BackgroundColor="#FF6B2C"
+                TextColor="White"
+                FontAttributes="Bold"
+                CornerRadius="8"
+                HeightRequest="50"
+                Clicked="OnContinueClicked" />
+    </Grid>
+</ContentPage>

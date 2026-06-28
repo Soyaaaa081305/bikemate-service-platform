@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="BIKEMATES_ADMIN.Operations"
+             BackgroundColor="{StaticResource PageBg}"
+             Title="Operations"
+             Shell.NavBarIsVisible="False">
+    <Grid RowDefinitions="Auto,*,Auto" BackgroundColor="{StaticResource PageBg}">
+        <Grid Padding="18,16,18,18" BackgroundColor="{StaticResource Navy}" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+            <Frame WidthRequest="48" HeightRequest="48" CornerRadius="14" Padding="0" HasShadow="False" BackgroundColor="{StaticResource Orange}" BorderColor="{StaticResource Orange}">
+                <Image Source="bikemate_logo.png" HeightRequest="34" WidthRequest="34" HorizontalOptions="Center" VerticalOptions="Center" />
+            </Frame>
+            <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                <Label Text="Operations" Style="{StaticResource HeaderTitle}" />
+                <Label Text="Daily tasks and service work" Style="{StaticResource HeaderSubtitle}" />
+            </VerticalStackLayout>
+            <Button Grid.Column="2" Text="Menu" WidthRequest="54" HeightRequest="38" Padding="0" BackgroundColor="#223145" TextColor="White" CornerRadius="12" Clicked="OnMenuClicked" />
+        </Grid>
+
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="14" Spacing="12">
+                <Frame Style="{StaticResource CardFrame}">
+                    <VerticalStackLayout Spacing="12">
+                        <Label Text="Work Board" FontSize="18" FontAttributes="Bold" />
+                        <Picker x:Name="StatusFilterPicker" Title="Filter by status" SelectedIndexChanged="OnFilterChanged" />
+                        <Entry x:Name="TaskEntry" Placeholder="Task name" Style="{StaticResource InputEntry}" />
+                        <Picker x:Name="PriorityPicker" Title="Priority" />
+                        <Button Text="Assign Task" Style="{StaticResource PrimaryButton}" Clicked="OnAssignTaskClicked" />
+                    </VerticalStackLayout>
+                </Frame>
+
+                <Frame Style="{StaticResource CardFrame}">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="Tasks" FontSize="18" FontAttributes="Bold" />
+                        <Picker x:Name="TaskPicker" Title="Select task" />
+                        <Label x:Name="WorkBoardLabel" TextColor="{StaticResource MutedText}" LineBreakMode="WordWrap" />
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                            <Button Text="Mark Active" Style="{StaticResource DarkButton}" Clicked="OnMarkActiveClicked" />
+                            <Button Grid.Column="1" Text="Complete" BackgroundColor="{StaticResource Green}" TextColor="White" CornerRadius="14" Clicked="OnCompleteTaskClicked" />
+                        </Grid>
+                    </VerticalStackLayout>
+                </Frame>
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <Grid Grid.Row="2" BackgroundColor="White" Padding="0,7,0,12" ColumnDefinitions="*,*,*,*" HeightRequest="64">
+            <Button Text="Home" BackgroundColor="Transparent" TextColor="#6B7280" FontSize="11" Clicked="OnHomeClicked" />
+            <Button Grid.Column="1" Text="Calendar" BackgroundColor="Transparent" TextColor="#6B7280" FontSize="11" Clicked="OnCalendarClicked" />
+            <Button Grid.Column="2" Text="Dispatch" BackgroundColor="Transparent" TextColor="#6B7280" FontSize="11" Clicked="OnDispatchClicked" />
+            <Button Grid.Column="3" Text="Operations" BackgroundColor="Transparent" TextColor="{StaticResource Orange}" FontSize="11" FontAttributes="Bold" />
+        </Grid>
+    </Grid>
+</ContentPage>

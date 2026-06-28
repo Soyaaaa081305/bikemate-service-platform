@@ -1,0 +1,101 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="BIKEMATES_ADMIN.Pages.Account.Login"
+             BackgroundColor="#F6F6F6">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20,30,20,28" Spacing="18">
+            <VerticalStackLayout Spacing="8">
+                <Image Source="bikemate_logo.png" HeightRequest="88" HorizontalOptions="Center" />
+                <Label Text="BIKEMATES ADMIN"
+                       FontFamily="OpenSansSemibold"
+                       FontSize="19"
+                       FontAttributes="Bold"
+                       TextColor="#242424"
+                       HorizontalTextAlignment="Center" />
+                <Label Text="Manage your bike shop, team, orders, and service requests."
+                       FontSize="13"
+                       TextColor="#6E6E6E"
+                       HorizontalTextAlignment="Center" />
+            </VerticalStackLayout>
+
+            <Border BackgroundColor="White" Stroke="#E6E6E6" Padding="18">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="8" />
+                </Border.StrokeShape>
+                <VerticalStackLayout Spacing="14">
+                    <VerticalStackLayout Spacing="4">
+                        <Label Text="Shop admin sign in"
+                               FontFamily="OpenSansSemibold"
+                               FontSize="18"
+                               FontAttributes="Bold"
+                               TextColor="#242424" />
+                        <Label Text="Your role and assigned bike shop are loaded after login."
+                               FontSize="13"
+                               TextColor="#6E6E6E" />
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Email address" FontSize="11" FontAttributes="Bold" TextColor="#242424" />
+                        <Border Stroke="#DCDCDC" BackgroundColor="#FAFAFA" Padding="12,2">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="8" />
+                            </Border.StrokeShape>
+                            <Entry x:Name="EmailEntry"
+                                   Placeholder="admin@bikemate.test"
+                                   Keyboard="Email"
+                                   ReturnType="Next"
+                                   TextColor="#242424"
+                                   PlaceholderColor="#6E6E6E" />
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Password" FontSize="11" FontAttributes="Bold" TextColor="#242424" />
+                        <Border Stroke="#DCDCDC" BackgroundColor="#FAFAFA" Padding="12,2">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="8" />
+                            </Border.StrokeShape>
+                            <Entry x:Name="PasswordEntry"
+                                   Placeholder="Enter your password"
+                                   IsPassword="True"
+                                   ReturnType="Go"
+                                   TextColor="#242424"
+                                   PlaceholderColor="#6E6E6E" />
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <Button x:Name="LoginButton"
+                            Text="Log in"
+                            BackgroundColor="#FF6B2C"
+                            TextColor="White"
+                            FontAttributes="Bold"
+                            CornerRadius="8"
+                            HeightRequest="48"
+                            Clicked="OnLoginClicked" />
+
+                    <Button Text="Create Account"
+                            BackgroundColor="White"
+                            TextColor="#242424"
+                            BorderColor="#DADCE0"
+                            BorderWidth="1"
+                            FontAttributes="Bold"
+                            CornerRadius="8"
+                            HeightRequest="48"
+                            Clicked="OnCreateAccountClicked" />
+
+                    <Button Text="Forgot password?"
+                            BackgroundColor="Transparent"
+                            TextColor="#FF6B2C"
+                            FontAttributes="Bold"
+                            HeightRequest="34"
+                            MinimumHeightRequest="34"
+                            Clicked="OnForgotPasswordClicked" />
+                </VerticalStackLayout>
+            </Border>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
+
+

@@ -1,0 +1,104 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="BIKEMATES_ADMIN.Pages.MainPage"
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="{StaticResource PageBg}">
+
+    <Grid RowDefinitions="Auto,*">
+        <VerticalStackLayout Grid.Row="0" BackgroundColor="{StaticResource Navy}" Padding="18,16,18,18" Spacing="12">
+            <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="12">
+                <Frame WidthRequest="46" HeightRequest="46" CornerRadius="14" BackgroundColor="{StaticResource Orange}" Padding="0" HasShadow="False">
+                    <Label Text="BM" TextColor="White" FontAttributes="Bold" FontSize="18" HorizontalOptions="Center" VerticalOptions="Center" />
+                </Frame>
+                <VerticalStackLayout Grid.Column="1" Spacing="2">
+                    <HorizontalStackLayout Spacing="8">
+                        <Label x:Name="WelcomeLabel" Text="Welcome, Admin" Style="{StaticResource HeaderTitle}" />
+                        <Label x:Name="RolePillLabel" Text="ADMIN" Style="{StaticResource Pill}" BackgroundColor="{StaticResource Orange}" />
+                    </HorizontalStackLayout>
+                    <Label x:Name="ShopNameLabel" Text="Loading assigned bike shop..." Style="{StaticResource HeaderSubtitle}" />
+                </VerticalStackLayout>
+                <Button Grid.Column="2" x:Name="NotificationsButton" Text="Alerts" Style="{StaticResource MiniButton}" Clicked="Notifications_Clicked" />
+                <Button Grid.Column="3" Text="Exit" Style="{StaticResource MiniButton}" Clicked="SignOut_Clicked" />
+            </Grid>
+            <Frame Style="{StaticResource DarkCardFrame}" Padding="14">
+                <Grid ColumnDefinitions="*,Auto">
+                    <VerticalStackLayout>
+                        <Label Text="MONTHLY REVENUE" Style="{StaticResource TinyMuted}" TextColor="#DDE6EF" />
+                        <Label x:Name="RevenueLabel" Text="PHP 0.00" Style="{StaticResource HeaderTitle}" FontSize="22" />
+                    </VerticalStackLayout>
+                    <Label x:Name="ApiStatusLabel" Grid.Column="1" Text="API" TextColor="{StaticResource Orange}" FontAttributes="Bold" VerticalOptions="Center" />
+                </Grid>
+            </Frame>
+        </VerticalStackLayout>
+
+        <RefreshView Grid.Row="1" x:Name="DashboardRefreshView" Refreshing="DashboardRefreshView_Refreshing">
+            <ScrollView>
+                <VerticalStackLayout Padding="14,12,14,30" Spacing="14">
+                    <Label Text="Today's Summary" Style="{StaticResource SectionLabel}" />
+                    <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="8" RowSpacing="8">
+                        <Frame Style="{StaticResource SmallCardFrame}">
+                            <VerticalStackLayout>
+                                <Label x:Name="ServicesLabel" Text="0" Style="{StaticResource StatNumber}" />
+                                <Label Text="Active Services" Style="{StaticResource SmallMuted}" />
+                            </VerticalStackLayout>
+                        </Frame>
+                        <Frame Grid.Column="1" Style="{StaticResource SmallCardFrame}">
+                            <VerticalStackLayout>
+                                <Label x:Name="ActiveBookingsLabel" Text="0" Style="{StaticResource StatNumber}" />
+                                <Label Text="Active Dispatches" Style="{StaticResource SmallMuted}" />
+                            </VerticalStackLayout>
+                        </Frame>
+                        <Frame Grid.Row="1" Style="{StaticResource SmallCardFrame}">
+                            <VerticalStackLayout>
+                                <Label x:Name="TodaysBookingsLabel" Text="0" Style="{StaticResource StatNumber}" />
+                                <Label Text="Bookings Today" Style="{StaticResource SmallMuted}" />
+                            </VerticalStackLayout>
+                        </Frame>
+                        <Frame Grid.Row="1" Grid.Column="1" Style="{StaticResource SmallCardFrame}">
+                            <VerticalStackLayout>
+                                <Label x:Name="LowStockLabel" Text="0" Style="{StaticResource StatNumber}" />
+                                <Label Text="Low Stock Items" Style="{StaticResource SmallMuted}" />
+                            </VerticalStackLayout>
+                        </Frame>
+                    </Grid>
+
+                    <Label Text="Quick Actions" Style="{StaticResource SectionLabel}" />
+                    <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="8" RowSpacing="8">
+                        <Button Text="+ New Product" Style="{StaticResource DarkButton}" Clicked="Products_Clicked" />
+                        <Button Grid.Column="1" Text="Dispatch Now" Style="{StaticResource PrimaryButton}" Clicked="Dispatch_Clicked" />
+                        <Button Grid.Row="1" Text="View Reports" Style="{StaticResource OutlineButton}" Clicked="Reports_Clicked" />
+                        <Button Grid.Row="1" Grid.Column="1" Text="Generate Code" Style="{StaticResource OutlineButton}" Clicked="Admins_Clicked" />
+                    </Grid>
+
+                    <Label Text="Mechanic Status" Style="{StaticResource SectionLabel}" />
+                    <CollectionView x:Name="MechanicsCollectionView" ItemsSource="{Binding Mechanics}" HeightRequest="92" ItemsLayout="HorizontalList">
+                        <CollectionView.EmptyView>
+                            <Frame Style="{StaticResource CardFrame}">
+                                <Label Text="No mechanics returned by the API yet." Style="{StaticResource SmallMuted}" />
+                            </Frame>
+                        </CollectionView.EmptyView>
+                        <CollectionView.ItemTemplate>
+                            <DataTemplate>
+                                <VerticalStackLayout WidthRequest="86" Spacing="4" HorizontalOptions="Center">
+                                    <Frame WidthRequest="42" HeightRequest="42" CornerRadius="14" Padding="0" BackgroundColor="{Binding StatusColor}" HasShadow="False">
+                                        <Label Text="{Binding Initials}" TextColor="White" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center" />
+                                    </Frame>
+                                    <Label Text="{Binding Name}" Style="{StaticResource TinyMuted}" HorizontalTextAlignment="Center" />
+                                    <Label Text="{Binding Status}" FontSize="9" TextColor="{Binding StatusColor}" HorizontalTextAlignment="Center" />
+                                </VerticalStackLayout>
+                            </DataTemplate>
+                        </CollectionView.ItemTemplate>
+                    </CollectionView>
+
+                    <Label Text="Recent Activity" Style="{StaticResource SectionLabel}" />
+                    <Frame Style="{StaticResource CardFrame}">
+                        <Label x:Name="ActivityLabel" Text="Recent activity will appear when the API returns orders, dispatch changes, messages, and inventory events." Style="{StaticResource SmallMuted}" />
+                    </Frame>
+                </VerticalStackLayout>
+            </ScrollView>
+        </RefreshView>
+    </Grid>
+
+</ContentPage>
+
