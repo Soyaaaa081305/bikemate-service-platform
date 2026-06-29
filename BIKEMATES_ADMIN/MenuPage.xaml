@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="BIKEMATES_ADMIN.MenuPage"
+             BackgroundColor="{StaticResource PageBg}"
+             Title="Menu"
+             Shell.NavBarIsVisible="False">
+
+    <Grid RowDefinitions="Auto,*,Auto" BackgroundColor="{StaticResource PageBg}">
+        <Grid Grid.Row="0" BackgroundColor="{StaticResource Navy}" Padding="18,16,18,18" ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+            <Frame WidthRequest="48" HeightRequest="48" CornerRadius="14" Padding="0" HasShadow="False" BackgroundColor="{StaticResource Orange}" BorderColor="{StaticResource Orange}">
+                <Image Source="bikemate_logo.png" HeightRequest="34" WidthRequest="34" HorizontalOptions="Center" VerticalOptions="Center" />
+            </Frame>
+            <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                <HorizontalStackLayout Spacing="8">
+                    <Label Text="Menu" Style="{StaticResource HeaderTitle}" />
+                    <Label Text="OWNER" Style="{StaticResource Pill}" />
+                </HorizontalStackLayout>
+                <Label x:Name="AdminNameLabel" Text="Admin" Style="{StaticResource HeaderSubtitle}" />
+                <Label x:Name="ShopNameLabel" Text="Assigned Bikeshop" IsVisible="False" />
+            </VerticalStackLayout>
+            <Button Grid.Column="2" Text="X" WidthRequest="38" HeightRequest="38" Padding="0" BackgroundColor="#223145" TextColor="White" CornerRadius="12" Clicked="OnCloseClicked" />
+        </Grid>
+
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="14" Spacing="12">
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                    <Frame Style="{StaticResource SmallCardFrame}">
+                        <VerticalStackLayout Spacing="3">
+                            <Label Text="5" FontSize="22" FontAttributes="Bold" TextColor="{StaticResource Orange}" />
+                            <Label Text="Orders" Style="{StaticResource SmallMuted}" />
+                        </VerticalStackLayout>
+                    </Frame>
+                    <Frame Grid.Column="1" Style="{StaticResource SmallCardFrame}">
+                        <VerticalStackLayout Spacing="3">
+                            <Label Text="PHP 2.4k" FontSize="22" FontAttributes="Bold" TextColor="{StaticResource Green}" />
+                            <Label Text="Today Sales" Style="{StaticResource SmallMuted}" />
+                        </VerticalStackLayout>
+                    </Frame>
+                </Grid>
+
+                <Label Text="Shop Management" Style="{StaticResource SectionLabel}" />
+                <Frame Style="{StaticResource CardFrame}">
+                    <VerticalStackLayout Spacing="8">
+                        <Button Text="Home - Dashboard and daily summary" Style="{StaticResource OutlineButton}" Clicked="OnHomeClicked" />
+                        <Button Text="Shop Profile - Customize public page" Style="{StaticResource OutlineButton}" Clicked="OnShopProfileClicked" />
+                        <Button Text="Products - Parts and stock" Style="{StaticResource OutlineButton}" Clicked="OnProductsClicked" />
+                        <Button Text="Logistics - Sales and payments" Style="{StaticResource OutlineButton}" Clicked="OnLogisticsClicked" />
+                    </VerticalStackLayout>
+                </Frame>
+
+                <Label Text="Operations" Style="{StaticResource SectionLabel}" />
+                <Frame Style="{StaticResource CardFrame}">
+                    <VerticalStackLayout Spacing="8">
+                        <Button Text="Calendar - Bookings and schedule" Style="{StaticResource OutlineButton}" Clicked="OnCalendarClicked" />
+                        <Button Text="Operations - Internal task board" Style="{StaticResource OutlineButton}" Clicked="OnOperationsClicked" />
+                        <Button Text="Dispatch and Requests - Assign mechanics" Style="{StaticResource OutlineButton}" Clicked="OnDispatchClicked" />
+                    </VerticalStackLayout>
+                </Frame>
+
+                <Label Text="Admin Tools" Style="{StaticResource SectionLabel}" />
+                <Frame Style="{StaticResource CardFrame}">
+                    <VerticalStackLayout Spacing="8">
+                        <Button Text="Admins - Owner-only invite codes" Style="{StaticResource OutlineButton}" Clicked="OnAdminsClicked" />
+                        <Button Text="Messages - Customer and staff chats" Style="{StaticResource OutlineButton}" Clicked="OnMessagesClicked" />
+                        <Button Text="Reports - Analytics and exports" Style="{StaticResource OutlineButton}" Clicked="OnReportsClicked" />
+                    </VerticalStackLayout>
+                </Frame>
+
+                <Label Text="Account" Style="{StaticResource SectionLabel}" />
+                <Frame Style="{StaticResource CardFrame}">
+                    <VerticalStackLayout Spacing="8">
+                        <Button Text="Notifications - Alerts and updates" Style="{StaticResource OutlineButton}" Clicked="OnNotificationsClicked" />
+                        <Button Text="Settings - Preferences" Style="{StaticResource OutlineButton}" Clicked="OnSettingsClicked" />
+                        <Button Text="Help and Support - FAQs and contact" Style="{StaticResource OutlineButton}" Clicked="OnHelpClicked" />
+                        <Button Text="Sign Out" BackgroundColor="{StaticResource SoftRed}" TextColor="{StaticResource Red}" BorderColor="#FCA5A5" BorderWidth="1" CornerRadius="14" HeightRequest="44" FontAttributes="Bold" Clicked="OnSignOutClicked" />
+                    </VerticalStackLayout>
+                </Frame>
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <Grid Grid.Row="2" BackgroundColor="White" Padding="0,7,0,12" ColumnDefinitions="*,*,*,*" HeightRequest="64">
+            <Button Text="Home" BackgroundColor="Transparent" TextColor="#6B7280" FontSize="11" Clicked="OnHomeClicked" />
+            <Button Grid.Column="1" Text="Messages" BackgroundColor="Transparent" TextColor="#6B7280" FontSize="11" Clicked="OnMessagesClicked" />
+            <Button Grid.Column="2" Text="Profile" BackgroundColor="Transparent" TextColor="#6B7280" FontSize="11" Clicked="OnShopProfileClicked" />
+            <Button Grid.Column="3" Text="Menu" BackgroundColor="Transparent" TextColor="{StaticResource Orange}" FontSize="11" FontAttributes="Bold" />
+        </Grid>
+    </Grid>
+</ContentPage>

@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="BIKEMATES_ADMIN.Pages.Calendar"
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="{StaticResource PageBg}">
+
+    <Grid RowDefinitions="Auto,*">
+        <VerticalStackLayout Grid.Row="0" BackgroundColor="{StaticResource Navy}" Padding="18,16,18,18" Spacing="4">
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                <VerticalStackLayout Spacing="2">
+                    <Label Text="Calendar" Style="{StaticResource HeaderTitle}" />
+                    <Label Text="Bookings and mechanic schedules." Style="{StaticResource HeaderSubtitle}" />
+                </VerticalStackLayout>
+                <Button Grid.Column="1" Text="Exit" Style="{StaticResource MiniButton}" Clicked="Exit_Clicked" VerticalOptions="Center" />
+            </Grid>
+        </VerticalStackLayout>
+
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="14,12,14,30" Spacing="14">
+                <Frame Style="{StaticResource CardFrame}">
+                    <VerticalStackLayout Spacing="10">
+                        <Grid ColumnDefinitions="Auto,*,Auto">
+                            <Button Text="Prev" Style="{StaticResource MiniButton}" />
+                            <Label Grid.Column="1" Text="Bookings Calendar" Style="{StaticResource PageTitle}" HorizontalTextAlignment="Center" />
+                            <Button Grid.Column="2" Text="Next" Style="{StaticResource MiniButton}" />
+                        </Grid>
+                        <Label Text="Calendar data will be populated from customer bookings and mechanic schedules once those API fields are available." Style="{StaticResource SmallMuted}" />
+                    </VerticalStackLayout>
+                </Frame>
+
+                <Label Text="Today&apos;s Bookings" Style="{StaticResource SectionLabel}" />
+                <Frame Style="{StaticResource CardFrame}">
+                    <Label Text="No bookings returned by the API for today yet." Style="{StaticResource SmallMuted}" />
+                </Frame>
+
+                <Button Text="Refresh From API" Style="{StaticResource PrimaryButton}" IsEnabled="False" />
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+
+</ContentPage>

@@ -5,4 +5,5 @@
   <Project Path="BikeMate.Mobile/BikeMate.Mobile.csproj" />
   <Project Path="BikeMate.Web/BikeMate.Web.csproj" />
   <Project Path="BikeMate.WebAdmin/BikeMate.WebAdmin/BikeMate.WebAdmin.csproj" />
+  <Project Path="BIKEMATES_ADMIN/BIKEMATES_ADMIN.csproj" />
 </Solution>

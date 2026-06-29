@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="BIKEMATES_ADMIN.Pages.Account.AccCreate2"
+             BackgroundColor="#F6F6F6">
+
+    <Grid RowDefinitions="Auto,*,Auto">
+        <Border Grid.Row="0" BackgroundColor="#242424" StrokeThickness="0" Padding="20,24,20,18">
+            <VerticalStackLayout Spacing="2">
+                <Label Text="Create an Account" FontSize="22" FontAttributes="Bold" TextColor="White" />
+                <Label Text="Step 3 of 5 - Address and valid ID" FontSize="13" TextColor="#E6E6E6" />
+            </VerticalStackLayout>
+        </Border>
+
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="20,22" Spacing="14">
+                <Border BackgroundColor="White" Stroke="#E6E6E6" Padding="16">
+                    <Border.StrokeShape><RoundRectangle CornerRadius="8" /></Border.StrokeShape>
+                    <VerticalStackLayout Spacing="13">
+                        <Label Text="Address and verification" FontSize="18" FontAttributes="Bold" TextColor="#242424" />
+                        <Label Text="Your valid ID helps confirm the first shop admin account." FontSize="13" TextColor="#6E6E6E" />
+
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                            <VerticalStackLayout Spacing="5">
+                                <Label Text="Province *" FontSize="11" FontAttributes="Bold" TextColor="#242424" />
+                                <Border Stroke="#DCDCDC" BackgroundColor="#FAFAFA" Padding="12,2">
+                                    <Border.StrokeShape><RoundRectangle CornerRadius="8" /></Border.StrokeShape>
+                                    <Entry x:Name="ProvinceEntry" Placeholder="Province" />
+                                </Border>
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Column="1" Spacing="5">
+                                <Label Text="City *" FontSize="11" FontAttributes="Bold" TextColor="#242424" />
+                                <Border Stroke="#DCDCDC" BackgroundColor="#FAFAFA" Padding="12,2">
+                                    <Border.StrokeShape><RoundRectangle CornerRadius="8" /></Border.StrokeShape>
+                                    <Entry x:Name="CityEntry" Placeholder="City" />
+                                </Border>
+                            </VerticalStackLayout>
+                        </Grid>
+
+                        <Label Text="Barangay *" FontSize="11" FontAttributes="Bold" TextColor="#242424" />
+                        <Border Stroke="#DCDCDC" BackgroundColor="#FAFAFA" Padding="12,2">
+                            <Border.StrokeShape><RoundRectangle CornerRadius="8" /></Border.StrokeShape>
+                            <Entry x:Name="BarangayEntry" Placeholder="Barangay" />
+                        </Border>
+
+                        <Label Text="Address *" FontSize="11" FontAttributes="Bold" TextColor="#242424" />
+                        <Border Stroke="#DCDCDC" BackgroundColor="#FAFAFA" Padding="12,2">
+                            <Border.StrokeShape><RoundRectangle CornerRadius="8" /></Border.StrokeShape>
+                            <Entry x:Name="AddressEntry" Placeholder="Street, building, or landmark" />
+                        </Border>
+
+                        <Label Text="Zip code *" FontSize="11" FontAttributes="Bold" TextColor="#242424" />
+                        <Border Stroke="#DCDCDC" BackgroundColor="#FAFAFA" Padding="12,2">
+                            <Border.StrokeShape><RoundRectangle CornerRadius="8" /></Border.StrokeShape>
+                            <Entry x:Name="ZipCodeEntry" Placeholder="Zip code" Keyboard="Numeric" />
+                        </Border>
+
+                        <Label Text="Valid ID *" FontSize="11" FontAttributes="Bold" TextColor="#242424" />
+                        <Border Stroke="#DCDCDC" BackgroundColor="#FAFAFA" Padding="12,8">
+                            <Border.StrokeShape><RoundRectangle CornerRadius="8" /></Border.StrokeShape>
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                <Label x:Name="ValidIdLabel" Text="No file selected" VerticalOptions="Center" TextColor="#6E6E6E" />
+                                <Button Grid.Column="1" Text="Upload" BackgroundColor="#FF6B2C" TextColor="White" CornerRadius="8" Clicked="OnPickValidIdClicked" />
+                            </Grid>
+                        </Border>
+                    </VerticalStackLayout>
+                </Border>
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <Button Grid.Row="2" Text="Continue" BackgroundColor="#FF6B2C" TextColor="White"
+                FontAttributes="Bold" CornerRadius="8" HeightRequest="50" Margin="20,10,20,24"
+                Clicked="OnContinueClicked" />
+    </Grid>
+</ContentPage>

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="BIKEMATES_ADMIN.Pages.Intro.AppIntro5"
+             BackgroundColor="#F6F6F6">
+
+    <Grid Padding="20,34,20,28" RowDefinitions="*,Auto">
+        <VerticalStackLayout Grid.Row="0" Spacing="10" VerticalOptions="Center">
+            <Image Source="bikemate_logo.png" HeightRequest="96" HorizontalOptions="Center" />
+            <Label Text="Welcome to BikeMate"
+                   FontFamily="OpenSansSemibold"
+                   FontSize="22"
+                   FontAttributes="Bold"
+                   TextColor="#242424"
+                   HorizontalTextAlignment="Center" />
+            <Label Text="Register your bike shop first, then create the owner admin account using the generated code."
+                   FontSize="14"
+                   TextColor="#6E6E6E"
+                   HorizontalTextAlignment="Center" />
+        </VerticalStackLayout>
+
+        <VerticalStackLayout Grid.Row="1" Spacing="10">
+            <Button Text="Get Started"
+                    BackgroundColor="#FF6B2C"
+                    TextColor="White"
+                    FontAttributes="Bold"
+                    CornerRadius="8"
+                    HeightRequest="50"
+                    Clicked="OnGetStartedClicked" />
+            <Button Text="Log In"
+                    BackgroundColor="White"
+                    TextColor="#242424"
+                    BorderColor="#DADCE0"
+                    BorderWidth="1"
+                    FontAttributes="Bold"
+                    CornerRadius="8"
+                    HeightRequest="50"
+                    Clicked="OnLoginClicked" />
+            <Button Text="Create an Account"
+                    BackgroundColor="White"
+                    TextColor="#242424"
+                    BorderColor="#DADCE0"
+                    BorderWidth="1"
+                    FontAttributes="Bold"
+                    CornerRadius="8"
+                    HeightRequest="50"
+                    Clicked="OnCreateAccountClicked" />
+            <Button Text="Register Your Bikeshop"
+                    BackgroundColor="#FFF3EA"
+                    TextColor="#FF6B2C"
+                    BorderColor="#FFB37A"
+                    BorderWidth="1"
+                    FontAttributes="Bold"
+                    CornerRadius="8"
+                    HeightRequest="50"
+                    Clicked="OnRegisterShopClicked" />
+        </VerticalStackLayout>
+    </Grid>
+</ContentPage>

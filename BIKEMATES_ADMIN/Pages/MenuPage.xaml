@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="BIKEMATES_ADMIN.Pages.MenuPage"
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="{StaticResource PageBg}">
+
+    <Grid RowDefinitions="Auto,*">
+        <VerticalStackLayout BackgroundColor="{StaticResource Navy}" Padding="18,16,18,18" Spacing="12">
+            <Grid ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="12">
+                <Frame WidthRequest="48" HeightRequest="48" CornerRadius="16" Padding="0" BackgroundColor="{StaticResource Orange}" HasShadow="False">
+                    <Label x:Name="InitialsLabel" Text="AD" TextColor="White" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center" />
+                </Frame>
+                <VerticalStackLayout Grid.Column="1">
+                    <Label x:Name="AdminNameLabel" Text="Admin" Style="{StaticResource HeaderTitle}" />
+                    <Label x:Name="AdminShopLabel" Text="No assigned bike shop yet" Style="{StaticResource HeaderSubtitle}" />
+                </VerticalStackLayout>
+                <Button Grid.Column="2" Text="Home" Style="{StaticResource MiniButton}" Clicked="Home_Clicked" />
+                <Button Grid.Column="3" Text="Exit" Style="{StaticResource MiniButton}" Clicked="SignOut_Clicked" />
+            </Grid>
+            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
+                <Frame Style="{StaticResource SmallCardFrame}" BackgroundColor="{StaticResource NavySoft}" BorderColor="{StaticResource NavySoft}">
+                    <VerticalStackLayout>
+                        <Label Text="0" Style="{StaticResource StatNumber}" TextColor="{StaticResource Orange}" />
+                        <Label Text="ORDERS" Style="{StaticResource TinyMuted}" />
+                    </VerticalStackLayout>
+                </Frame>
+                <Frame Grid.Column="1" Style="{StaticResource SmallCardFrame}" BackgroundColor="{StaticResource NavySoft}" BorderColor="{StaticResource NavySoft}">
+                    <VerticalStackLayout>
+                        <Label Text="0" Style="{StaticResource StatNumber}" TextColor="{StaticResource Orange}" />
+                        <Label Text="DISPATCH" Style="{StaticResource TinyMuted}" />
+                    </VerticalStackLayout>
+                </Frame>
+                <Frame Grid.Column="2" Style="{StaticResource SmallCardFrame}" BackgroundColor="{StaticResource NavySoft}" BorderColor="{StaticResource NavySoft}">
+                    <VerticalStackLayout>
+                        <Label Text="PHP 0" Style="{StaticResource StatNumber}" TextColor="{StaticResource Green}" />
+                        <Label Text="TODAY" Style="{StaticResource TinyMuted}" />
+                    </VerticalStackLayout>
+                </Frame>
+            </Grid>
+        </VerticalStackLayout>
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="14,10,14,30" Spacing="4">
+                <Label Text="SHOP MANAGEMENT" Style="{StaticResource SectionLabel}" />
+                <Button Text="Home - Dashboard and daily summary" Style="{StaticResource OutlineButton}" Clicked="Home_Clicked" />
+                <Button Text="Shop Profile - Customize public page" Style="{StaticResource OutlineButton}" Clicked="ShopProfile_Clicked" />
+                <Button Text="Products - GridView, stock, images" Style="{StaticResource OutlineButton}" Clicked="Products_Clicked" />
+                <Button Text="Logistics - Sales, orders, revenue" Style="{StaticResource OutlineButton}" Clicked="Logistics_Clicked" />
+                <Label Text="OPERATIONS" Style="{StaticResource SectionLabel}" />
+                <Button Text="Calendar - bookings and schedules" Style="{StaticResource OutlineButton}" Clicked="Calendar_Clicked" />
+                <Button Text="Operations - task board" Style="{StaticResource OutlineButton}" Clicked="Operations_Clicked" />
+                <Button Text="Dispatch and Request - mechanic status" Style="{StaticResource OutlineButton}" Clicked="Dispatch_Clicked" />
+                <Label Text="ADMIN TOOLS" Style="{StaticResource SectionLabel}" />
+                <Button Text="Admins - owner only, generate codes" Style="{StaticResource OutlineButton}" Clicked="Admins_Clicked" />
+                <Button Text="Messages - customer/admin/mechanic" Style="{StaticResource OutlineButton}" Clicked="Messages_Clicked" />
+                <Button Text="Reports - analytics" Style="{StaticResource OutlineButton}" Clicked="Reports_Clicked" />
+                <Label Text="ACCOUNT" Style="{StaticResource SectionLabel}" />
+                <Button Text="Notifications" Style="{StaticResource OutlineButton}" Clicked="Notifications_Clicked" />
+                <Button Text="Settings" Style="{StaticResource OutlineButton}" Clicked="Settings_Clicked" />
+                <Button Text="Help and Support" Style="{StaticResource OutlineButton}" Clicked="Help_Clicked" />
+                <Button Text="Sign Out" Style="{StaticResource DangerButton}" Clicked="SignOut_Clicked" />
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+
+</ContentPage>
+

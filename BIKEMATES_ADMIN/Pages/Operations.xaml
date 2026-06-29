@@ -1,0 +1,34 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="BIKEMATES_ADMIN.Pages.Operations"
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="{StaticResource PageBg}">
+
+    <Grid RowDefinitions="Auto,*">
+        <VerticalStackLayout Grid.Row="0" BackgroundColor="{StaticResource Navy}" Padding="18,16,18,18" Spacing="4">
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                <VerticalStackLayout Spacing="2">
+                    <Label Text="Operations" Style="{StaticResource HeaderTitle}" />
+                    <Label Text="Daily tasks and mechanic workload." Style="{StaticResource HeaderSubtitle}" />
+                </VerticalStackLayout>
+                <Button Grid.Column="1" Text="Exit" Style="{StaticResource MiniButton}" Clicked="Exit_Clicked" VerticalOptions="Center" />
+            </Grid>
+        </VerticalStackLayout>
+
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="14,12,14,30" Spacing="14">
+                <Label Text="Task Board" Style="{StaticResource SectionLabel}" />
+                <Frame Style="{StaticResource CardFrame}">
+                    <Label Text="No operation tasks are shown until the API returns shop tasks or assigned service work." Style="{StaticResource SmallMuted}" />
+                </Frame>
+
+                <Label Text="Mechanic Workload" Style="{StaticResource SectionLabel}" />
+                <Frame Style="{StaticResource CardFrame}">
+                    <Label Text="Mechanic workload will be calculated from real bookings and mechanic availability." Style="{StaticResource SmallMuted}" />
+                </Frame>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+
+</ContentPage>

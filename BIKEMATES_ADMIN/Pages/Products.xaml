@@ -1,0 +1,106 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="BIKEMATES_ADMIN.Pages.Products"
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="{StaticResource PageBg}">
+
+    <Grid RowDefinitions="Auto,*">
+        <VerticalStackLayout Grid.Row="0" BackgroundColor="{StaticResource Navy}" Padding="18,16,18,18" Spacing="4">
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                <VerticalStackLayout Spacing="2">
+                    <Label Text="Products" Style="{StaticResource HeaderTitle}" />
+                    <Label Text="Add, edit, delete, and monitor product stock." Style="{StaticResource HeaderSubtitle}" />
+                </VerticalStackLayout>
+                <Button Grid.Column="1" Text="Exit" Style="{StaticResource MiniButton}" Clicked="Exit_Clicked" VerticalOptions="Center" />
+            </Grid>
+        </VerticalStackLayout>
+
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="14,12,14,30" Spacing="14">
+                <Frame Style="{StaticResource CardFrame}">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="Product Editor" Style="{StaticResource SectionLabel}" />
+                        <Grid ColumnDefinitions="96,*" ColumnSpacing="12">
+                            <Frame WidthRequest="96" HeightRequest="96" CornerRadius="16" Padding="0" HasShadow="False" BorderColor="{StaticResource LineColor}" BackgroundColor="{StaticResource SoftGray}">
+                                <Grid>
+                                    <Image x:Name="ProductPreviewImage" Aspect="AspectFill" />
+                                    <Label x:Name="ProductPreviewLabel" Text="Image" Style="{StaticResource SmallMuted}" HorizontalOptions="Center" VerticalOptions="Center" />
+                                </Grid>
+                            </Frame>
+                            <VerticalStackLayout Grid.Column="1" Spacing="0">
+                                <Entry x:Name="ProductNameEntry" Placeholder="Product name" Style="{StaticResource InputEntry}" />
+                                <Picker x:Name="CategoryPicker" Title="Category" Style="{StaticResource InputPicker}">
+                                    <Picker.ItemsSource>
+                                        <x:Array Type="{x:Type x:String}">
+                                            <x:String>Frames</x:String><x:String>Drivetrain</x:String><x:String>Wheels</x:String><x:String>Brakes</x:String><x:String>Cockpit</x:String><x:String>Accessories</x:String><x:String>Wearables</x:String>
+                                        </x:Array>
+                                    </Picker.ItemsSource>
+                                </Picker>
+                                <Button Text="Choose Product Image" Style="{StaticResource OutlineButton}" Clicked="PickProductImage_Clicked" />
+                            </VerticalStackLayout>
+                        </Grid>
+
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                            <Entry x:Name="PriceEntry" Placeholder="Price e.g. 850" Keyboard="Numeric" Style="{StaticResource InputEntry}" />
+                            <Entry Grid.Column="1" x:Name="StockEntry" Placeholder="Stock e.g. 12" Keyboard="Numeric" Style="{StaticResource InputEntry}" />
+                        </Grid>
+                        <Editor x:Name="DescriptionEditor" Placeholder="Product description" Style="{StaticResource InputEditor}" />
+                        <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
+                            <Button Text="Add" Style="{StaticResource PrimaryButton}" Clicked="AddProduct_Clicked" />
+                            <Button Grid.Column="1" Text="Update" Style="{StaticResource DarkButton}" Clicked="UpdateProduct_Clicked" />
+                            <Button Grid.Column="2" Text="Delete" Style="{StaticResource DangerButton}" Clicked="DeleteProduct_Clicked" />
+                        </Grid>
+                    </VerticalStackLayout>
+                </Frame>
+
+                <Grid ColumnDefinitions="*,Auto">
+                    <VerticalStackLayout>
+                        <Label Text="Product GridView" Style="{StaticResource SectionLabel}" />
+                        <Label Text="This CollectionView uses GridItemsLayout like a mobile GridView." Style="{StaticResource SmallMuted}" />
+                    </VerticalStackLayout>
+                    <Label Grid.Column="1" Text="{Binding ProductItems.Count, StringFormat='{0} items'}" Style="{StaticResource Pill}" VerticalOptions="Center" />
+                </Grid>
+
+                <SearchBar x:Name="ProductSearchBar" Placeholder="Search products" Style="{StaticResource SearchInput}" TextChanged="ProductSearchBar_TextChanged" />
+
+                <CollectionView x:Name="ProductsCollectionView"
+                                ItemsSource="{Binding VisibleProducts}"
+                                SelectionMode="Single"
+                                SelectionChanged="ProductsCollectionView_SelectionChanged">
+                    <CollectionView.EmptyView>
+                        <Frame Style="{StaticResource CardFrame}">
+                            <Label Text="No products returned by the API yet. Add a product above to create it in the shop inventory table." Style="{StaticResource SmallMuted}" />
+                        </Frame>
+                    </CollectionView.EmptyView>
+                    <CollectionView.ItemsLayout>
+                        <GridItemsLayout Orientation="Vertical" Span="2" />
+                    </CollectionView.ItemsLayout>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Frame Margin="4" Style="{StaticResource SmallCardFrame}">
+                                <VerticalStackLayout Spacing="7">
+                                    <Frame HeightRequest="92" CornerRadius="14" Padding="0" HasShadow="False" BackgroundColor="{StaticResource SoftGray}" BorderColor="{StaticResource LineColor}">
+                                        <Grid>
+                                            <Image Source="{Binding ProductImage}" Aspect="AspectFill" />
+                                            <Label Text="IMG" Style="{StaticResource TinyMuted}" HorizontalOptions="Center" VerticalOptions="Center" />
+                                        </Grid>
+                                    </Frame>
+                                    <Label Text="{Binding Name}" Style="{StaticResource ItemTitle}" />
+                                    <Label Text="{Binding Category}" Style="{StaticResource TinyMuted}" />
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <Label Text="{Binding PriceText}" TextColor="{StaticResource Orange}" FontAttributes="Bold" />
+                                        <Label Grid.Column="1" Text="{Binding StockText}" Style="{StaticResource TinyMuted}" />
+                                    </Grid>
+                                    <Label Text="{Binding StockStatus}" BackgroundColor="{Binding StockStatusColor}" TextColor="White" FontSize="10" FontAttributes="Bold" Padding="8,4" HorizontalOptions="Start" />
+                                </VerticalStackLayout>
+                            </Frame>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+
+</ContentPage>
+

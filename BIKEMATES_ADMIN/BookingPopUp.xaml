@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="BIKEMATES_ADMIN.Pages.Popups.BookingPopUp"
+             BackgroundColor="#F6F6F6">
+
+    <Grid RowDefinitions="*,Auto" Padding="20,26">
+        <Border Grid.Row="0" BackgroundColor="White" Stroke="#E6E6E6" Padding="20" VerticalOptions="Center">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="8" />
+            </Border.StrokeShape>
+            <VerticalStackLayout Spacing="16">
+                <Image x:Name="StatusImage" HeightRequest="132" WidthRequest="132" HorizontalOptions="Center" />
+                <Label x:Name="TitleLabel"
+                       FontSize="21"
+                       FontAttributes="Bold"
+                       TextColor="#242424"
+                       HorizontalTextAlignment="Center" />
+                <Label x:Name="MessageLabel"
+                       FontSize="14"
+                       TextColor="#6E6E6E"
+                       HorizontalTextAlignment="Center" />
+
+                <Border x:Name="CodePanel" Stroke="#FFB37A" BackgroundColor="#FFF3EA" StrokeThickness="1" Padding="12" IsVisible="False">
+                    <Border.StrokeShape><RoundRectangle CornerRadius="8" /></Border.StrokeShape>
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                        <Entry x:Name="AccessCodeEntry" IsReadOnly="True" TextColor="#242424" BackgroundColor="Transparent" FontAttributes="Bold" />
+                        <Button Grid.Column="1" Text="Copy" BackgroundColor="Transparent" TextColor="#FF6B2C" Clicked="OnCopyClicked" />
+                    </Grid>
+                </Border>
+
+                <Button x:Name="SendEmailButton"
+                        Text="SEND TO EMAIL"
+                        BackgroundColor="Transparent"
+                        TextColor="#FF6B2C"
+                        FontAttributes="Bold"
+                        IsVisible="False"
+                        Clicked="OnSendEmailClicked" />
+            </VerticalStackLayout>
+        </Border>
+
+        <Button Grid.Row="1"
+                Text="Return"
+                BackgroundColor="Transparent"
+                TextColor="#FF6B2C"
+                FontAttributes="Bold"
+                Clicked="OnReturnClicked" />
+    </Grid>
+</ContentPage>

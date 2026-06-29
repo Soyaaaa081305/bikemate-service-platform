@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="BIKEMATES_ADMIN.Pages.DispatchDetails"
+             Shell.NavBarIsVisible="False"
+             BackgroundColor="{StaticResource PageBg}">
+
+    <Grid RowDefinitions="Auto,*">
+        <VerticalStackLayout Grid.Row="0" BackgroundColor="{StaticResource Navy}" Padding="18,16,18,18" Spacing="4">
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                <VerticalStackLayout Spacing="2">
+                    <Label Text="Dispatch Details" Style="{StaticResource HeaderTitle}" />
+                    <Label Text="Mechanic location, destination, and customer request details." Style="{StaticResource HeaderSubtitle}" />
+                </VerticalStackLayout>
+                <Button Grid.Column="1" Text="Exit" Style="{StaticResource MiniButton}" Clicked="Exit_Clicked" VerticalOptions="Center" />
+            </Grid>
+        </VerticalStackLayout>
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="14,12,14,30" Spacing="14">
+                <Frame HeightRequest="230" CornerRadius="18" Padding="0" BackgroundColor="#DDE8F7" HasShadow="False" BorderColor="{StaticResource LineColor}">
+                    <Grid>
+                        <Label Text="MAP / GPS LOCATION PREVIEW" FontAttributes="Bold" TextColor="{StaticResource Navy}" HorizontalOptions="Center" VerticalOptions="Center" />
+                        <Label x:Name="CoordinateLabel" Text="No coordinates loaded" Style="{StaticResource TinyMuted}" HorizontalOptions="Center" VerticalOptions="Center" TranslationY="28" />
+                    </Grid>
+                </Frame>
+                <Frame Style="{StaticResource CardFrame}">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="Mechanic Information" Style="{StaticResource SectionLabel}" />
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="12">
+                            <Frame WidthRequest="54" HeightRequest="54" CornerRadius="18" BackgroundColor="{StaticResource StatusDispatched}" Padding="0" HasShadow="False">
+                                <Label x:Name="MechanicInitialsLabel" Text="M" TextColor="White" FontAttributes="Bold" HorizontalOptions="Center" VerticalOptions="Center" />
+                            </Frame>
+                            <VerticalStackLayout Grid.Column="1">
+                                <Label x:Name="MechanicNameLabel" Text="No mechanic selected" Style="{StaticResource ItemTitle}" />
+                                <Label x:Name="MechanicStatusLabel" Text="Status: waiting for assignment" TextColor="{StaticResource Orange}" FontAttributes="Bold" />
+                                <Label Text="Location is supplied by mechanic live location updates." Style="{StaticResource SmallMuted}" />
+                            </VerticalStackLayout>
+                        </Grid>
+                    </VerticalStackLayout>
+                </Frame>
+                <Frame Style="{StaticResource CardFrame}">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="Customer Request Details" Style="{StaticResource SectionLabel}" />
+                        <Label x:Name="CustomerLabel" Text="Customer: not selected" Style="{StaticResource BodyText}" />
+                        <Label x:Name="RequestLabel" Text="Request: not selected" Style="{StaticResource BodyText}" />
+                        <Label x:Name="AddressLabel" Text="Address: not loaded" Style="{StaticResource BodyText}" />
+                        <Label x:Name="ProblemLabel" Text="Problem details will appear after selecting a request." Style="{StaticResource SmallMuted}" />
+                    </VerticalStackLayout>
+                </Frame>
+                <Frame Style="{StaticResource CardFrame}">
+                    <VerticalStackLayout Spacing="8">
+                        <Label Text="Dispatch Timeline" Style="{StaticResource SectionLabel}" />
+                        <Label x:Name="CreatedAtLabel" Text="Created: not loaded" Style="{StaticResource BodyText}" />
+                        <Label x:Name="ScheduledAtLabel" Text="Scheduled: not loaded" Style="{StaticResource BodyText}" />
+                        <Label x:Name="CurrentStatusLabel" Text="Current status: not loaded" Style="{StaticResource BodyText}" />
+                    </VerticalStackLayout>
+                </Frame>
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                    <Button Text="Call Mechanic" Style="{StaticResource OutlineButton}" Clicked="CallMechanic_Clicked" />
+                    <Button Grid.Column="1" Text="Mark Complete" Style="{StaticResource PrimaryButton}" Clicked="MarkComplete_Clicked" />
+                </Grid>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+
+</ContentPage>
+

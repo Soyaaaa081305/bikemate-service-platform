@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="BIKEMATES_ADMIN.Pages.Intro.AppIntro3"
+             BackgroundColor="#F6F6F6">
+
+    <Grid Padding="20,34,20,28" RowDefinitions="*,Auto">
+        <Border BackgroundColor="White" Stroke="#E6E6E6" Padding="22" VerticalOptions="Center">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="8" />
+            </Border.StrokeShape>
+            <VerticalStackLayout Spacing="16">
+                <Image Source="mechanic_door.png" HeightRequest="122" HorizontalOptions="Center" />
+                <Label Text="Send mechanics where they are needed"
+                       FontFamily="OpenSansSemibold"
+                       FontSize="22"
+                       FontAttributes="Bold"
+                       TextColor="#242424"
+                       HorizontalTextAlignment="Center" />
+                <Label Text="Assign requests to your team and follow every job from dispatch to completion."
+                       FontSize="14"
+                       TextColor="#6E6E6E"
+                       HorizontalTextAlignment="Center" />
+            </VerticalStackLayout>
+        </Border>
+
+        <Button Grid.Row="1"
+                Text="Continue"
+                BackgroundColor="#FF6B2C"
+                TextColor="White"
+                FontAttributes="Bold"
+                CornerRadius="8"
+                HeightRequest="50"
+                Clicked="OnContinueClicked" />
+    </Grid>
+</ContentPage>

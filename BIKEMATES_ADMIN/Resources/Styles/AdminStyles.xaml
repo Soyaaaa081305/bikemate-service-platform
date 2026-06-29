@@ -1,0 +1,145 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ResourceDictionary xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml">
+
+    <Style x:Key="CardFrame" TargetType="Frame">
+        <Setter Property="BackgroundColor" Value="{StaticResource CardBg}" />
+        <Setter Property="BorderColor" Value="{StaticResource LineColor}" />
+        <Setter Property="CornerRadius" Value="12" />
+        <Setter Property="Padding" Value="14" />
+        <Setter Property="HasShadow" Value="False" />
+    </Style>
+
+    <Style x:Key="SmallCardFrame" TargetType="Frame" BasedOn="{StaticResource CardFrame}">
+        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="Padding" Value="12" />
+    </Style>
+
+    <Style x:Key="DarkCardFrame" TargetType="Frame" BasedOn="{StaticResource CardFrame}">
+        <Setter Property="BackgroundColor" Value="{StaticResource NavySoft}" />
+        <Setter Property="BorderColor" Value="{StaticResource NavySoft}" />
+    </Style>
+
+    <Style x:Key="PrimaryButton" TargetType="Button">
+        <Setter Property="BackgroundColor" Value="{StaticResource Orange}" />
+        <Setter Property="TextColor" Value="White" />
+        <Setter Property="CornerRadius" Value="14" />
+        <Setter Property="HeightRequest" Value="46" />
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="FontFamily" Value="OpenSansSemibold" />
+    </Style>
+
+    <Style x:Key="DarkButton" TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
+        <Setter Property="BackgroundColor" Value="{StaticResource Navy}" />
+    </Style>
+
+    <Style x:Key="DangerButton" TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
+        <Setter Property="BackgroundColor" Value="{StaticResource Red}" />
+    </Style>
+
+    <Style x:Key="OutlineButton" TargetType="Button">
+        <Setter Property="BackgroundColor" Value="White" />
+        <Setter Property="TextColor" Value="{StaticResource Navy}" />
+        <Setter Property="BorderColor" Value="#D1D5DB" />
+        <Setter Property="BorderWidth" Value="1" />
+        <Setter Property="CornerRadius" Value="14" />
+        <Setter Property="HeightRequest" Value="44" />
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FontFamily" Value="OpenSansSemibold" />
+    </Style>
+
+    <Style x:Key="MiniButton" TargetType="Button">
+        <Setter Property="BackgroundColor" Value="{StaticResource SoftOrange}" />
+        <Setter Property="TextColor" Value="{StaticResource OrangeDark}" />
+        <Setter Property="BorderColor" Value="{StaticResource Orange}" />
+        <Setter Property="BorderWidth" Value="0" />
+        <Setter Property="CornerRadius" Value="12" />
+        <Setter Property="HeightRequest" Value="38" />
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontFamily" Value="OpenSansSemibold" />
+        <Setter Property="Padding" Value="10,0" />
+    </Style>
+
+    <Style x:Key="InputEntry" TargetType="Entry">
+        <Setter Property="BackgroundColor" Value="#F9FAFB" />
+        <Setter Property="TextColor" Value="{StaticResource TextDark}" />
+        <Setter Property="PlaceholderColor" Value="#9CA3AF" />
+        <Setter Property="HeightRequest" Value="44" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FontFamily" Value="OpenSansRegular" />
+        <Setter Property="Margin" Value="0,4,0,8" />
+    </Style>
+
+    <Style x:Key="InputEditor" TargetType="Editor">
+        <Setter Property="BackgroundColor" Value="#F9FAFB" />
+        <Setter Property="TextColor" Value="{StaticResource TextDark}" />
+        <Setter Property="PlaceholderColor" Value="#9CA3AF" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FontFamily" Value="OpenSansRegular" />
+        <Setter Property="AutoSize" Value="TextChanges" />
+        <Setter Property="MinimumHeightRequest" Value="90" />
+    </Style>
+
+    <Style x:Key="InputPicker" TargetType="Picker">
+        <Setter Property="BackgroundColor" Value="#F9FAFB" />
+        <Setter Property="TextColor" Value="{StaticResource TextDark}" />
+        <Setter Property="TitleColor" Value="#9CA3AF" />
+        <Setter Property="HeightRequest" Value="44" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FontFamily" Value="OpenSansRegular" />
+        <Setter Property="Margin" Value="0,4,0,8" />
+    </Style>
+
+    <Style x:Key="SearchInput" TargetType="SearchBar">
+        <Setter Property="BackgroundColor" Value="White" />
+        <Setter Property="TextColor" Value="{StaticResource TextDark}" />
+        <Setter Property="PlaceholderColor" Value="{StaticResource MutedText}" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FontFamily" Value="OpenSansRegular" />
+    </Style>
+
+    <Style x:Key="Pill" TargetType="Label">
+        <Setter Property="TextColor" Value="White" />
+        <Setter Property="BackgroundColor" Value="{StaticResource Orange}" />
+        <Setter Property="FontSize" Value="10" />
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="FontFamily" Value="OpenSansSemibold" />
+        <Setter Property="Padding" Value="8,4" />
+    </Style>
+
+    <Style x:Key="DataGridHeader" TargetType="Label">
+        <Setter Property="TextColor" Value="White" />
+        <Setter Property="FontSize" Value="9" />
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="TextTransform" Value="Uppercase" />
+    </Style>
+
+    <Style x:Key="MessengerTab" TargetType="Button">
+        <Setter Property="BackgroundColor" Value="White" />
+        <Setter Property="TextColor" Value="{StaticResource Navy}" />
+        <Setter Property="BorderColor" Value="{StaticResource LineColor}" />
+        <Setter Property="BorderWidth" Value="1" />
+        <Setter Property="CornerRadius" Value="18" />
+        <Setter Property="HeightRequest" Value="38" />
+        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontFamily" Value="OpenSansSemibold" />
+    </Style>
+
+    <Style x:Key="ChatBubbleOther" TargetType="Label">
+        <Setter Property="BackgroundColor" Value="#F3F4F6" />
+        <Setter Property="TextColor" Value="{StaticResource TextDark}" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Padding" Value="10,8" />
+    </Style>
+
+    <Style x:Key="ChatBubbleMe" TargetType="Label" BasedOn="{StaticResource ChatBubbleOther}">
+        <Setter Property="BackgroundColor" Value="{StaticResource Blue}" />
+        <Setter Property="TextColor" Value="White" />
+    </Style>
+
+</ResourceDictionary>
+
