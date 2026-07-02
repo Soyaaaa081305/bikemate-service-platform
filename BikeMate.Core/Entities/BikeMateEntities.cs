@@ -148,6 +148,15 @@ public sealed class Mechanic
 {
     public int MechanicId { get; set; }
     public int UserId { get; set; }
+    public string? MiddleName { get; set; }
+    public string? Sex { get; set; }
+    public DateTime? Birthdate { get; set; }
+    public string? ValidIdImageUrl { get; set; }
+    public string? AddressLine { get; set; }
+    public string? Barangay { get; set; }
+    public string? City { get; set; }
+    public string? Province { get; set; }
+    public string? ZipCode { get; set; }
     public string? Bio { get; set; }
     public int? YearsExperience { get; set; }
     public string? CertificationImageUrl { get; set; }
@@ -193,6 +202,16 @@ public sealed class Shop
     public decimal? Longitude { get; set; }
     public string? BusinessPermitUrl { get; set; }
     public string? ShopImageUrl { get; set; }
+    public string? ShopLogoUrl { get; set; }
+    public string? OwnerValidIdUrl { get; set; }
+    public string? OwnerMiddleName { get; set; }
+    public string? OwnerSex { get; set; }
+    public DateTime? OwnerBirthdate { get; set; }
+    public string? OwnerAddressLine { get; set; }
+    public string? OwnerBarangay { get; set; }
+    public string? OwnerCity { get; set; }
+    public string? OwnerProvince { get; set; }
+    public string? OwnerZipCode { get; set; }
     public string? ContactNumber { get; set; }
     public string ShopStatus { get; set; } = "pending";
     public DateTime CreatedAt { get; set; }

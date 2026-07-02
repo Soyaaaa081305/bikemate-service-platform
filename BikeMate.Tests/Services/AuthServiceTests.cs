@@ -10,6 +10,9 @@ namespace BikeMate.Tests.Services;
 
 public sealed class AuthServiceTests : IDisposable
 {
+    private static DateTime AdultBirthdate => DateTime.Today.AddYears(-21);
+    private static DateTime UnderageBirthdate => DateTime.Today.AddYears(-17);
+
     private readonly BikeMateDbContext _db;
     private readonly AuthService _sut;
     private readonly Mock<IEmailService> _emailService = new();
@@ -48,7 +51,7 @@ public sealed class AuthServiceTests : IDisposable
     [Fact]
     public async Task RegisterAsync_CreatesUserWithCorrectData()
     {
-        var dto = new RegisterRequestDto("Jane", "Smith", "jane@test.com", "Pass1234!", "Pass1234!", "09171234567", "Customer");
+        var dto = new RegisterRequestDto("Jane", "Smith", "jane@test.com", "Pass1234!", "Pass1234!", "09171234567", "Customer", AdultBirthdate);
 
         var result = await _sut.RegisterAsync(dto, CancellationToken.None);
 
@@ -62,7 +65,7 @@ public sealed class AuthServiceTests : IDisposable
     [Fact]
     public async Task RegisterAsync_ThrowsWhenPasswordsDoNotMatch()
     {
-        var dto = new RegisterRequestDto("Jane", "Smith", "jane@test.com", "Pass1234!", "DifferentPass!", null, "Customer");
+        var dto = new RegisterRequestDto("Jane", "Smith", "jane@test.com", "Pass1234!", "DifferentPass!", null, "Customer", AdultBirthdate);
 
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(
             () => _sut.RegisterAsync(dto, CancellationToken.None));
@@ -80,9 +83,29 @@ public sealed class AuthServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task RegisterAsync_ThrowsWhenCustomerIsUnderage()
+    {
+        var dto = new RegisterRequestDto("Jane", "Smith", "underage@test.com", "Pass1234!", "Pass1234!", null, "Customer", UnderageBirthdate);
+
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => _sut.RegisterAsync(dto, CancellationToken.None));
+        Assert.Contains("at least 18", ex.Message);
+    }
+
+    [Fact]
+    public async Task RegisterAsync_ThrowsWhenMechanicIsUnderage()
+    {
+        var dto = new RegisterRequestDto("Mike", "Mech", "underage-mechanic@test.com", "Pass1234!", "Pass1234!", null, "Mechanic", UnderageBirthdate);
+
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => _sut.RegisterAsync(dto, CancellationToken.None));
+        Assert.Contains("at least 18", ex.Message);
+    }
+
+    [Fact]
     public async Task RegisterAsync_ThrowsWhenEmailAlreadyRegistered()
     {
-        var dto = new RegisterRequestDto("Jane", "Smith", "dupe@test.com", "Pass1234!", "Pass1234!", null, "Customer");
+        var dto = new RegisterRequestDto("Jane", "Smith", "dupe@test.com", "Pass1234!", "Pass1234!", null, "Customer", AdultBirthdate);
         await _sut.RegisterAsync(dto, CancellationToken.None);
 
         var ex = await Assert.ThrowsAsync<InvalidOperationException>(
@@ -93,7 +116,7 @@ public sealed class AuthServiceTests : IDisposable
     [Fact]
     public async Task RegisterAsync_NormalizesEmail()
     {
-        var dto = new RegisterRequestDto("Jane", "Smith", " UPPER@TEST.COM  ", "Pass1234!", "Pass1234!", null, "Customer");
+        var dto = new RegisterRequestDto("Jane", "Smith", " UPPER@TEST.COM  ", "Pass1234!", "Pass1234!", null, "Customer", AdultBirthdate);
 
         var result = await _sut.RegisterAsync(dto, CancellationToken.None);
 
@@ -103,18 +126,19 @@ public sealed class AuthServiceTests : IDisposable
     [Fact]
     public async Task RegisterAsync_CreatesClientProfileForCustomerRole()
     {
-        var dto = new RegisterRequestDto("Jane", "Smith", "customer@test.com", "Pass1234!", "Pass1234!", null, "Customer");
+        var dto = new RegisterRequestDto("Jane", "Smith", "customer@test.com", "Pass1234!", "Pass1234!", null, "Customer", AdultBirthdate);
 
         await _sut.RegisterAsync(dto, CancellationToken.None);
 
         var user = await _db.Users.Include(u => u.Client).SingleAsync(u => u.Email == "customer@test.com");
         Assert.NotNull(user.Client);
+        Assert.Equal(AdultBirthdate, user.Client.Birthdate);
     }
 
     [Fact]
     public async Task RegisterAsync_CreatesMechanicProfileForMechanicRole()
     {
-        var dto = new RegisterRequestDto("Mike", "Mech", "mechanic@test.com", "Pass1234!", "Pass1234!", null, "Mechanic");
+        var dto = new RegisterRequestDto("Mike", "Mech", "mechanic@test.com", "Pass1234!", "Pass1234!", null, "Mechanic", AdultBirthdate);
 
         await _sut.RegisterAsync(dto, CancellationToken.None);
 
@@ -126,8 +150,12 @@ public sealed class AuthServiceTests : IDisposable
     [Fact]
     public async Task LoginAsync_ReturnsTokenForValidCredentials()
     {
-        var registerDto = new RegisterRequestDto("Jane", "Smith", "login@test.com", "Pass1234!", "Pass1234!", null, "Customer");
+        var registerDto = new RegisterRequestDto("Jane", "Smith", "login@test.com", "Pass1234!", "Pass1234!", null, "Customer", AdultBirthdate);
         await _sut.RegisterAsync(registerDto, CancellationToken.None);
+        var user = await _db.Users.SingleAsync(u => u.Email == "login@test.com");
+        user.AccountStatus = "active";
+        user.EmailVerified = true;
+        await _db.SaveChangesAsync();
 
         var loginDto = new LoginRequestDto("login@test.com", "Pass1234!");
         var result = await _sut.LoginAsync(loginDto, CancellationToken.None);
@@ -137,9 +165,22 @@ public sealed class AuthServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task LoginAsync_ThrowsForPendingCustomerApproval()
+    {
+        var registerDto = new RegisterRequestDto("Jane", "Smith", "pending-login@test.com", "Pass1234!", "Pass1234!", null, "Customer", AdultBirthdate);
+        await _sut.RegisterAsync(registerDto, CancellationToken.None);
+
+        var loginDto = new LoginRequestDto("pending-login@test.com", "Pass1234!");
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(
+            () => _sut.LoginAsync(loginDto, CancellationToken.None));
+
+        Assert.Contains("pending BikeMate admin approval", ex.Message);
+    }
+
+    [Fact]
     public async Task LoginAsync_ThrowsForInvalidPassword()
     {
-        var registerDto = new RegisterRequestDto("Jane", "Smith", "login2@test.com", "Pass1234!", "Pass1234!", null, "Customer");
+        var registerDto = new RegisterRequestDto("Jane", "Smith", "login2@test.com", "Pass1234!", "Pass1234!", null, "Customer", AdultBirthdate);
         await _sut.RegisterAsync(registerDto, CancellationToken.None);
 
         var loginDto = new LoginRequestDto("login2@test.com", "WrongPassword!");
@@ -161,7 +202,7 @@ public sealed class AuthServiceTests : IDisposable
     [Fact]
     public async Task LoginAsync_ThrowsForSuspendedAccount()
     {
-        var registerDto = new RegisterRequestDto("Jane", "Smith", "suspended@test.com", "Pass1234!", "Pass1234!", null, "Customer");
+        var registerDto = new RegisterRequestDto("Jane", "Smith", "suspended@test.com", "Pass1234!", "Pass1234!", null, "Customer", AdultBirthdate);
         await _sut.RegisterAsync(registerDto, CancellationToken.None);
 
         var user = await _db.Users.SingleAsync(u => u.Email == "suspended@test.com");
@@ -177,7 +218,7 @@ public sealed class AuthServiceTests : IDisposable
     [Fact]
     public async Task GetMeAsync_ReturnsUserProfile()
     {
-        var registerDto = new RegisterRequestDto("Get", "Me", "getme@test.com", "Pass1234!", "Pass1234!", null, "Customer");
+        var registerDto = new RegisterRequestDto("Get", "Me", "getme@test.com", "Pass1234!", "Pass1234!", null, "Customer", AdultBirthdate);
         await _sut.RegisterAsync(registerDto, CancellationToken.None);
         var user = await _db.Users.SingleAsync(u => u.Email == "getme@test.com");
 
@@ -191,7 +232,7 @@ public sealed class AuthServiceTests : IDisposable
     [Fact]
     public async Task RegisterAsync_SendsOtpEmail()
     {
-        var dto = new RegisterRequestDto("Jane", "Smith", "otp@test.com", "Pass1234!", "Pass1234!", null, "Customer");
+        var dto = new RegisterRequestDto("Jane", "Smith", "otp@test.com", "Pass1234!", "Pass1234!", null, "Customer", AdultBirthdate);
 
         await _sut.RegisterAsync(dto, CancellationToken.None);
 
@@ -234,7 +275,8 @@ public sealed class AuthServiceTests : IDisposable
                 "Password123!",
                 "Password123!",
                 "09171234567",
-                AppRoles.Customer),
+                AppRoles.Customer,
+                AdultBirthdate),
             CancellationToken.None);
 
         var users = await _db.Users

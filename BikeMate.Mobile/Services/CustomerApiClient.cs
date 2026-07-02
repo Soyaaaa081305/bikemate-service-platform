@@ -11,35 +11,6 @@ namespace BikeMate.Services;
 
 internal static class CustomerApiClient
 {
-    public static async Task<bool> TryLoginDemoAccountAsync(string email, string role, CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            using var http = ApiConfig.CreateHttpClient();
-            using var response = await http.PostAsJsonAsync("auth/login", new LoginRequestDto(email, "Password123!"), cancellationToken);
-            if (!response.IsSuccessStatusCode)
-            {
-                return false;
-            }
-
-            var auth = await response.Content.ReadFromJsonAsync<AuthResponseDto>(cancellationToken);
-            if (auth is null)
-            {
-                return false;
-            }
-
-            await SecureStorage.Default.SetAsync("access_token", auth.AccessToken);
-            await SecureStorage.Default.SetAsync("primary_role", role);
-            await SecureStorage.Default.SetAsync("user_id", auth.User.UserId.ToString());
-            return true;
-        }
-        catch (Exception ex)
-        {
-            Debug.WriteLine($"Demo account login failed for {email}: {ex}");
-            return false;
-        }
-    }
-
     public static async Task<CustomerMeDto> GetCustomerAsync(CancellationToken cancellationToken = default)
     {
         using var http = await ApiConfig.CreateAuthorizedHttpClientAsync();
@@ -232,6 +203,12 @@ internal static class CustomerApiClient
         return await GetAsync<IReadOnlyList<ShopServiceDto>>(http, $"services/shops/{shopId}/services", cancellationToken);
     }
 
+    public static async Task<IReadOnlyList<ProductDto>> GetShopProductsAsync(int shopId, CancellationToken cancellationToken = default)
+    {
+        using var http = ApiConfig.CreateHttpClient();
+        return await GetAsync<IReadOnlyList<ProductDto>>(http, $"products/shop/{shopId}", cancellationToken);
+    }
+
     public static async Task<IReadOnlyList<ShopServiceDto>> SearchServicesAsync(CancellationToken cancellationToken = default)
     {
         using var http = ApiConfig.CreateHttpClient();
@@ -257,14 +234,6 @@ internal static class CustomerApiClient
         using var http = await ApiConfig.CreateAuthorizedHttpClientAsync();
         using var response = await http.PostAsJsonAsync($"service-requests/{requestId}/media", dto, cancellationToken);
         await ReadAsync<object>(response, cancellationToken);
-    }
-
-    public static async Task<string> CreatePlaceholderFileAsync(UploadMediaDto dto, CancellationToken cancellationToken = default)
-    {
-        using var http = await ApiConfig.CreateAuthorizedHttpClientAsync();
-        using var response = await http.PostAsJsonAsync("files/placeholder", dto, cancellationToken);
-        var payload = await ReadAsync<PlaceholderFileDto>(response, cancellationToken);
-        return payload.Url;
     }
 
     public static async Task<LiveLocationDto?> GetLatestRequestLocationAsync(int requestId, CancellationToken cancellationToken = default)
@@ -318,6 +287,17 @@ internal static class CustomerApiClient
             cancellationToken);
     }
 
+    public static async Task<IReadOnlyList<PhilippineBarangayDto>> GetPhilippineBarangaysAsync(
+        string localityCode,
+        CancellationToken cancellationToken = default)
+    {
+        using var http = ApiConfig.CreateHttpClient();
+        return await GetAsync<IReadOnlyList<PhilippineBarangayDto>>(
+            http,
+            $"geography/localities/{Uri.EscapeDataString(localityCode)}/barangays",
+            cancellationToken);
+    }
+
     public static async Task<PhilippineLocationMatchDto?> ResolvePhilippineLocationAsync(
         string query,
         CancellationToken cancellationToken = default)
@@ -348,18 +328,9 @@ internal static class CustomerApiClient
         return ApiClientHelper.GetAsync<T>(http, endpoint, cancellationToken);
     }
 
-    private static async Task<T> ReadAsync<T>(HttpResponseMessage response, CancellationToken cancellationToken)
+    private static Task<T> ReadAsync<T>(HttpResponseMessage response, CancellationToken cancellationToken)
     {
-        if (!response.IsSuccessStatusCode)
-        {
-            var error = await response.Content.ReadAsStringAsync(cancellationToken);
-            throw new InvalidOperationException(string.IsNullOrWhiteSpace(error)
-                ? $"API request failed with {(int)response.StatusCode}."
-                : error);
-        }
-
-        return await response.Content.ReadFromJsonAsync<T>(cancellationToken)
-            ?? throw new InvalidOperationException("The API returned an empty response.");
+        return ApiClientHelper.ReadAsync<T>(response, cancellationToken);
     }
 
     private static string ContentTypeFor(FileResult file)
@@ -372,63 +343,3 @@ internal static class CustomerApiClient
         return ContentTypeHelper.GuessFromExtension(Path.GetExtension(file.FileName));
     }
 }
-
-internal sealed record CustomerMeDto(
-    int ClientId,
-    int UserId,
-    string FirstName,
-    string? MiddleName,
-    string LastName,
-    string Email,
-    string? PhoneNumber,
-    string? ProfileImageUrl,
-    bool EmailVerified,
-    bool PhoneVerified,
-    string AccountStatus,
-    DateTime CreatedAt,
-    DateTime? UpdatedAt,
-    string? Sex,
-    DateTime? Birthdate,
-    string? ValidIdImageUrl,
-    IReadOnlyList<CustomerAddressDto> Addresses,
-    IReadOnlyList<MotorcycleDto> Motorcycles);
-
-internal sealed record PlaceholderFileDto(string Url);
-internal sealed record PhilippineRegionDto(string Code, string Name);
-internal sealed record PhilippineLocalityDto(string Code, string Name, string Type, string RegionCode, string? Province);
-internal sealed record PhilippineLocationMatchDto(PhilippineRegionDto Region, PhilippineLocalityDto Locality);
-internal sealed record ShopReputationDto(
-    int ShopId,
-    decimal AverageRating,
-    int ReviewCount,
-    int CompletedJobs,
-    IReadOnlyList<ShopTechnicianSummaryDto> TopTechnicians,
-    IReadOnlyList<ShopCustomerReviewDto> RecentReviews);
-internal sealed record ShopTechnicianSummaryDto(
-    int MechanicId,
-    string FullName,
-    string? ProfileImageUrl,
-    decimal AverageRating,
-    int ReviewCount,
-    int CompletedJobs,
-    int? YearsExperience,
-    string AvailabilityStatus,
-    bool IsVerified);
-internal sealed record ShopCustomerReviewDto(
-    int ReviewId,
-    int Rating,
-    string? Comment,
-    string CustomerName,
-    string TechnicianName,
-    string? ServiceName,
-    DateTime CreatedAt);
-
-internal sealed record NotificationDto(
-    int NotificationId,
-    int UserId,
-    string? NotificationType,
-    string Title,
-    string Message,
-    string? DataJson,
-    bool IsRead,
-    DateTime CreatedAt);

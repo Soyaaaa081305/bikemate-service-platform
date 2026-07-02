@@ -2,12 +2,12 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="BIKEMATES_ADMIN.Pages.Account.AccCreate1"
-             BackgroundColor="#F6F6F6">
+             BackgroundColor="White">
 
     <Grid RowDefinitions="Auto,*,Auto">
         <Border Grid.Row="0" BackgroundColor="#242424" StrokeThickness="0" Padding="20,24,20,18">
             <VerticalStackLayout Spacing="2">
-                <Label Text="Create an Account" FontSize="22" FontAttributes="Bold" TextColor="White" />
+                <Label Text="Create an Account" FontSize="18" FontAttributes="Bold" TextColor="White" />
                 <Label Text="Step 2 of 5 - Personal information" FontSize="13" TextColor="#E6E6E6" />
             </VerticalStackLayout>
         </Border>

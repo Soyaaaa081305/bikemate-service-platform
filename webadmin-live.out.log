@@ -1,0 +1,685 @@
+  Determining projects to restore...
+  All projects are up-to-date for restore.
+  BikeMate.Core -> C:\Users\Admin\Documents\PROJECTSSS\BikeMate\BikeMate.Core\bin\Debug\net10.0\BikeMate.Core.dll
+  BikeMate.Infrastructure -> C:\Users\Admin\Documents\PROJECTSSS\BikeMate\BikeMate.Infrastructure\bin\Debug\net10.0\BikeMate.Infrastructure.dll
+  BikeMate.WebAdmin -> C:\Users\Admin\Documents\PROJECTSSS\BikeMate\BikeMate.WebAdmin\BikeMate.WebAdmin\bin\Debug\net10.0\BikeMate.WebAdmin.dll
+
+Build succeeded.
+    0 Warning(s)
+    0 Error(s)
+
+Time Elapsed 00:00:01.70
+Using launch settings from C:\Users\Admin\Documents\PROJECTSSS\BikeMate\BikeMate.WebAdmin\BikeMate.WebAdmin\Properties\launchSettings.json...
+info: Microsoft.Hosting.Lifetime[14]
+      Now listening on: http://localhost:5266
+info: Microsoft.Hosting.Lifetime[0]
+      Application started. Press Ctrl+C to shut down.
+info: Microsoft.Hosting.Lifetime[0]
+      Hosting environment: Development
+info: Microsoft.Hosting.Lifetime[0]
+      Content root path: C:\Users\Admin\Documents\PROJECTSSS\BikeMate\BikeMate.WebAdmin\BikeMate.WebAdmin
+warn: Microsoft.AspNetCore.HttpsPolicy.HttpsRedirectionMiddleware[3]
+      Failed to determine the https port for redirect.
+warn: Microsoft.EntityFrameworkCore.Query[20504]
+      Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (104ms) [Parameters=[@id='?' (DbType = Int32)], CommandType='Text', CommandTimeout='300']
+      SELECT [s5].[ShopId], [s5].[AddressLine], [s5].[BusinessPermitUrl], [s5].[City], [s5].[ContactNumber], [s5].[CreatedAt], [s5].[Latitude], [s5].[Longitude], [s5].[OwnerAddressLine], [s5].[OwnerBarangay], [s5].[OwnerBirthdate], [s5].[OwnerCity], [s5].[OwnerMiddleName], [s5].[OwnerProvince], [s5].[OwnerSex], [s5].[OwnerUserId], [s5].[OwnerValidIdUrl], [s5].[OwnerZipCode], [s5].[Province], [s5].[ShopDescription], [s5].[ShopImageUrl], [s5].[ShopLogoUrl], [s5].[ShopName], [s5].[ShopStatus], [s5].[UpdatedAt], [s5].[UserId], [s5].[AccountStatus], [s5].[CreatedAt0], [s5].[Email], [s5].[EmailVerified], [s5].[FirstName], [s5].[LastName], [s5].[PasswordHash], [s5].[PhoneNumber], [s5].[PhoneVerified], [s5].[ProfileImageUrl], [s5].[UpdatedAt0], [s0].[OperatingHourId], [s0].[ClosingTime], [s0].[DayOfWeek], [s0].[IsClosed], [s0].[OpeningTime], [s0].[ShopId], [s6].[ShopServiceId], [s6].[BasePrice], [s6].[CategoryId], [s6].[CreatedAt], [s6].[EstimatedMinutes], [s6].[IsActive], [s6].[ServiceDescription], [s6].[ServiceName], [s6].[ShopId], [s6].[CategoryId0], [s6].[CategoryName], [s6].[Description], [s6].[IconUrl], [s6].[IsActive0], [s6].[ServiceImageId], [s6].[CreatedAt0], [s6].[ImageUrl], [s6].[ShopServiceId0], [s7].[ProductId], [s7].[CreatedAt], [s7].[IsActive], [s7].[Price], [s7].[ProductDescription], [s7].[ProductName], [s7].[ShopId], [s7].[StockQuantity], [s7].[UpdatedAt], [s7].[ProductImageId], [s7].[CreatedAt0], [s7].[ImageUrl], [s7].[ProductId0], [s8].[ShopId], [s8].[MechanicId], [s8].[AssignedAt], [s8].[IsActive], [s8].[MechanicId0], [s8].[AddressLine], [s8].[AvailabilityStatus], [s8].[AverageRating], [s8].[Barangay], [s8].[Bio], [s8].[Birthdate], [s8].[CertificationImageUrl], [s8].[City], [s8].[CreatedAt], [s8].[CurrentLatitude], [s8].[CurrentLongitude], [s8].[IsVerified], [s8].[MiddleName], [s8].[Province], [s8].[Sex], [s8].[TotalCompletedJobs], [s8].[UpdatedAt], [s8].[UserId], [s8].[ValidIdImageUrl], [s8].[YearsExperience], [s8].[ZipCode], [s8].[UserId0], [s8].[AccountStatus], [s8].[CreatedAt0], [s8].[Email], [s8].[EmailVerified], [s8].[FirstName], [s8].[LastName], [s8].[PasswordHash], [s8].[PhoneNumber], [s8].[PhoneVerified], [s8].[ProfileImageUrl], [s8].[UpdatedAt0]
+      FROM (
+          SELECT TOP(1) [s].[ShopId], [s].[AddressLine], [s].[BusinessPermitUrl], [s].[City], [s].[ContactNumber], [s].[CreatedAt], [s].[Latitude], [s].[Longitude], [s].[OwnerAddressLine], [s].[OwnerBarangay], [s].[OwnerBirthdate], [s].[OwnerCity], [s].[OwnerMiddleName], [s].[OwnerProvince], [s].[OwnerSex], [s].[OwnerUserId], [s].[OwnerValidIdUrl], [s].[OwnerZipCode], [s].[Province], [s].[ShopDescription], [s].[ShopImageUrl], [s].[ShopLogoUrl], [s].[ShopName], [s].[ShopStatus], [s].[UpdatedAt], [u].[UserId], [u].[AccountStatus], [u].[CreatedAt] AS [CreatedAt0], [u].[Email], [u].[EmailVerified], [u].[FirstName], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[PhoneVerified], [u].[ProfileImageUrl], [u].[UpdatedAt] AS [UpdatedAt0]
+          FROM [dbo].[shops] AS [s]
+          INNER JOIN [dbo].[users] AS [u] ON [s].[OwnerUserId] = [u].[UserId]
+          WHERE [s].[ShopId] = @id
+      ) AS [s5]
+      LEFT JOIN [dbo].[shop_operating_hours] AS [s0] ON [s5].[ShopId] = [s0].[ShopId]
+      LEFT JOIN (
+          SELECT [s1].[ShopServiceId], [s1].[BasePrice], [s1].[CategoryId], [s1].[CreatedAt], [s1].[EstimatedMinutes], [s1].[IsActive], [s1].[ServiceDescription], [s1].[ServiceName], [s1].[ShopId], [s2].[CategoryId] AS [CategoryId0], [s2].[CategoryName], [s2].[Description], [s2].[IconUrl], [s2].[IsActive] AS [IsActive0], [s3].[ServiceImageId], [s3].[CreatedAt] AS [CreatedAt0], [s3].[ImageUrl], [s3].[ShopServiceId] AS [ShopServiceId0]
+          FROM [dbo].[shop_services] AS [s1]
+          INNER JOIN [dbo].[service_categories] AS [s2] ON [s1].[CategoryId] = [s2].[CategoryId]
+          LEFT JOIN [dbo].[service_images] AS [s3] ON [s1].[ShopServiceId] = [s3].[ShopServiceId]
+      ) AS [s6] ON [s5].[ShopId] = [s6].[ShopId]
+      LEFT JOIN (
+          SELECT [p].[ProductId], [p].[CreatedAt], [p].[IsActive], [p].[Price], [p].[ProductDescription], [p].[ProductName], [p].[ShopId], [p].[StockQuantity], [p].[UpdatedAt], [p0].[ProductImageId], [p0].[CreatedAt] AS [CreatedAt0], [p0].[ImageUrl], [p0].[ProductId] AS [ProductId0]
+          FROM [dbo].[products] AS [p]
+          LEFT JOIN [dbo].[product_images] AS [p0] ON [p].[ProductId] = [p0].[ProductId]
+      ) AS [s7] ON [s5].[ShopId] = [s7].[ShopId]
+      LEFT JOIN (
+          SELECT [s4].[ShopId], [s4].[MechanicId], [s4].[AssignedAt], [s4].[IsActive], [m].[MechanicId] AS [MechanicId0], [m].[AddressLine], [m].[AvailabilityStatus], [m].[AverageRating], [m].[Barangay], [m].[Bio], [m].[Birthdate], [m].[CertificationImageUrl], [m].[City], [m].[CreatedAt], [m].[CurrentLatitude], [m].[CurrentLongitude], [m].[IsVerified], [m].[MiddleName], [m].[Province], [m].[Sex], [m].[TotalCompletedJobs], [m].[UpdatedAt], [m].[UserId], [m].[ValidIdImageUrl], [m].[YearsExperience], [m].[ZipCode], [u0].[UserId] AS [UserId0], [u0].[AccountStatus], [u0].[CreatedAt] AS [CreatedAt0], [u0].[Email], [u0].[EmailVerified], [u0].[FirstName], [u0].[LastName], [u0].[PasswordHash], [u0].[PhoneNumber], [u0].[PhoneVerified], [u0].[ProfileImageUrl], [u0].[UpdatedAt] AS [UpdatedAt0]
+          FROM [dbo].[shop_mechanics] AS [s4]
+          INNER JOIN [dbo].[mechanics] AS [m] ON [s4].[MechanicId] = [m].[MechanicId]
+          INNER JOIN [dbo].[users] AS [u0] ON [m].[UserId] = [u0].[UserId]
+      ) AS [s8] ON [s5].[ShopId] = [s8].[ShopId]
+      ORDER BY [s5].[ShopId], [s5].[UserId], [s0].[OperatingHourId], [s6].[ShopServiceId], [s6].[CategoryId0], [s6].[ServiceImageId], [s7].[ProductId], [s7].[ProductImageId], [s8].[ShopId], [s8].[MechanicId], [s8].[MechanicId0]
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@id='?' (DbType = Int32)], CommandType='Text', CommandTimeout='300']
+      SELECT [s5].[ShopId], [s5].[AddressLine], [s5].[BusinessPermitUrl], [s5].[City], [s5].[ContactNumber], [s5].[CreatedAt], [s5].[Latitude], [s5].[Longitude], [s5].[OwnerAddressLine], [s5].[OwnerBarangay], [s5].[OwnerBirthdate], [s5].[OwnerCity], [s5].[OwnerMiddleName], [s5].[OwnerProvince], [s5].[OwnerSex], [s5].[OwnerUserId], [s5].[OwnerValidIdUrl], [s5].[OwnerZipCode], [s5].[Province], [s5].[ShopDescription], [s5].[ShopImageUrl], [s5].[ShopLogoUrl], [s5].[ShopName], [s5].[ShopStatus], [s5].[UpdatedAt], [s5].[UserId], [s5].[AccountStatus], [s5].[CreatedAt0], [s5].[Email], [s5].[EmailVerified], [s5].[FirstName], [s5].[LastName], [s5].[PasswordHash], [s5].[PhoneNumber], [s5].[PhoneVerified], [s5].[ProfileImageUrl], [s5].[UpdatedAt0], [s0].[OperatingHourId], [s0].[ClosingTime], [s0].[DayOfWeek], [s0].[IsClosed], [s0].[OpeningTime], [s0].[ShopId], [s6].[ShopServiceId], [s6].[BasePrice], [s6].[CategoryId], [s6].[CreatedAt], [s6].[EstimatedMinutes], [s6].[IsActive], [s6].[ServiceDescription], [s6].[ServiceName], [s6].[ShopId], [s6].[CategoryId0], [s6].[CategoryName], [s6].[Description], [s6].[IconUrl], [s6].[IsActive0], [s6].[ServiceImageId], [s6].[CreatedAt0], [s6].[ImageUrl], [s6].[ShopServiceId0], [s7].[ProductId], [s7].[CreatedAt], [s7].[IsActive], [s7].[Price], [s7].[ProductDescription], [s7].[ProductName], [s7].[ShopId], [s7].[StockQuantity], [s7].[UpdatedAt], [s7].[ProductImageId], [s7].[CreatedAt0], [s7].[ImageUrl], [s7].[ProductId0], [s8].[ShopId], [s8].[MechanicId], [s8].[AssignedAt], [s8].[IsActive], [s8].[MechanicId0], [s8].[AddressLine], [s8].[AvailabilityStatus], [s8].[AverageRating], [s8].[Barangay], [s8].[Bio], [s8].[Birthdate], [s8].[CertificationImageUrl], [s8].[City], [s8].[CreatedAt], [s8].[CurrentLatitude], [s8].[CurrentLongitude], [s8].[IsVerified], [s8].[MiddleName], [s8].[Province], [s8].[Sex], [s8].[TotalCompletedJobs], [s8].[UpdatedAt], [s8].[UserId], [s8].[ValidIdImageUrl], [s8].[YearsExperience], [s8].[ZipCode], [s8].[UserId0], [s8].[AccountStatus], [s8].[CreatedAt0], [s8].[Email], [s8].[EmailVerified], [s8].[FirstName], [s8].[LastName], [s8].[PasswordHash], [s8].[PhoneNumber], [s8].[PhoneVerified], [s8].[ProfileImageUrl], [s8].[UpdatedAt0]
+      FROM (
+          SELECT TOP(1) [s].[ShopId], [s].[AddressLine], [s].[BusinessPermitUrl], [s].[City], [s].[ContactNumber], [s].[CreatedAt], [s].[Latitude], [s].[Longitude], [s].[OwnerAddressLine], [s].[OwnerBarangay], [s].[OwnerBirthdate], [s].[OwnerCity], [s].[OwnerMiddleName], [s].[OwnerProvince], [s].[OwnerSex], [s].[OwnerUserId], [s].[OwnerValidIdUrl], [s].[OwnerZipCode], [s].[Province], [s].[ShopDescription], [s].[ShopImageUrl], [s].[ShopLogoUrl], [s].[ShopName], [s].[ShopStatus], [s].[UpdatedAt], [u].[UserId], [u].[AccountStatus], [u].[CreatedAt] AS [CreatedAt0], [u].[Email], [u].[EmailVerified], [u].[FirstName], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[PhoneVerified], [u].[ProfileImageUrl], [u].[UpdatedAt] AS [UpdatedAt0]
+          FROM [dbo].[shops] AS [s]
+          INNER JOIN [dbo].[users] AS [u] ON [s].[OwnerUserId] = [u].[UserId]
+          WHERE [s].[ShopId] = @id
+      ) AS [s5]
+      LEFT JOIN [dbo].[shop_operating_hours] AS [s0] ON [s5].[ShopId] = [s0].[ShopId]
+      LEFT JOIN (
+          SELECT [s1].[ShopServiceId], [s1].[BasePrice], [s1].[CategoryId], [s1].[CreatedAt], [s1].[EstimatedMinutes], [s1].[IsActive], [s1].[ServiceDescription], [s1].[ServiceName], [s1].[ShopId], [s2].[CategoryId] AS [CategoryId0], [s2].[CategoryName], [s2].[Description], [s2].[IconUrl], [s2].[IsActive] AS [IsActive0], [s3].[ServiceImageId], [s3].[CreatedAt] AS [CreatedAt0], [s3].[ImageUrl], [s3].[ShopServiceId] AS [ShopServiceId0]
+          FROM [dbo].[shop_services] AS [s1]
+          INNER JOIN [dbo].[service_categories] AS [s2] ON [s1].[CategoryId] = [s2].[CategoryId]
+          LEFT JOIN [dbo].[service_images] AS [s3] ON [s1].[ShopServiceId] = [s3].[ShopServiceId]
+      ) AS [s6] ON [s5].[ShopId] = [s6].[ShopId]
+      LEFT JOIN (
+          SELECT [p].[ProductId], [p].[CreatedAt], [p].[IsActive], [p].[Price], [p].[ProductDescription], [p].[ProductName], [p].[ShopId], [p].[StockQuantity], [p].[UpdatedAt], [p0].[ProductImageId], [p0].[CreatedAt] AS [CreatedAt0], [p0].[ImageUrl], [p0].[ProductId] AS [ProductId0]
+          FROM [dbo].[products] AS [p]
+          LEFT JOIN [dbo].[product_images] AS [p0] ON [p].[ProductId] = [p0].[ProductId]
+      ) AS [s7] ON [s5].[ShopId] = [s7].[ShopId]
+      LEFT JOIN (
+          SELECT [s4].[ShopId], [s4].[MechanicId], [s4].[AssignedAt], [s4].[IsActive], [m].[MechanicId] AS [MechanicId0], [m].[AddressLine], [m].[AvailabilityStatus], [m].[AverageRating], [m].[Barangay], [m].[Bio], [m].[Birthdate], [m].[CertificationImageUrl], [m].[City], [m].[CreatedAt], [m].[CurrentLatitude], [m].[CurrentLongitude], [m].[IsVerified], [m].[MiddleName], [m].[Province], [m].[Sex], [m].[TotalCompletedJobs], [m].[UpdatedAt], [m].[UserId], [m].[ValidIdImageUrl], [m].[YearsExperience], [m].[ZipCode], [u0].[UserId] AS [UserId0], [u0].[AccountStatus], [u0].[CreatedAt] AS [CreatedAt0], [u0].[Email], [u0].[EmailVerified], [u0].[FirstName], [u0].[LastName], [u0].[PasswordHash], [u0].[PhoneNumber], [u0].[PhoneVerified], [u0].[ProfileImageUrl], [u0].[UpdatedAt] AS [UpdatedAt0]
+          FROM [dbo].[shop_mechanics] AS [s4]
+          INNER JOIN [dbo].[mechanics] AS [m] ON [s4].[MechanicId] = [m].[MechanicId]
+          INNER JOIN [dbo].[users] AS [u0] ON [m].[UserId] = [u0].[UserId]
+      ) AS [s8] ON [s5].[ShopId] = [s8].[ShopId]
+      ORDER BY [s5].[ShopId], [s5].[UserId], [s0].[OperatingHourId], [s6].[ShopServiceId], [s6].[CategoryId0], [s6].[ServiceImageId], [s7].[ProductId], [s7].[ProductImageId], [s8].[ShopId], [s8].[MechanicId], [s8].[MechanicId0]
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (25ms) [Parameters=[@id='?' (DbType = Int32)], CommandType='Text', CommandTimeout='300']
+      SELECT [s5].[ShopId], [s5].[AddressLine], [s5].[BusinessPermitUrl], [s5].[City], [s5].[ContactNumber], [s5].[CreatedAt], [s5].[Latitude], [s5].[Longitude], [s5].[OwnerAddressLine], [s5].[OwnerBarangay], [s5].[OwnerBirthdate], [s5].[OwnerCity], [s5].[OwnerMiddleName], [s5].[OwnerProvince], [s5].[OwnerSex], [s5].[OwnerUserId], [s5].[OwnerValidIdUrl], [s5].[OwnerZipCode], [s5].[Province], [s5].[ShopDescription], [s5].[ShopImageUrl], [s5].[ShopLogoUrl], [s5].[ShopName], [s5].[ShopStatus], [s5].[UpdatedAt], [s5].[UserId], [s5].[AccountStatus], [s5].[CreatedAt0], [s5].[Email], [s5].[EmailVerified], [s5].[FirstName], [s5].[LastName], [s5].[PasswordHash], [s5].[PhoneNumber], [s5].[PhoneVerified], [s5].[ProfileImageUrl], [s5].[UpdatedAt0], [s0].[OperatingHourId], [s0].[ClosingTime], [s0].[DayOfWeek], [s0].[IsClosed], [s0].[OpeningTime], [s0].[ShopId], [s6].[ShopServiceId], [s6].[BasePrice], [s6].[CategoryId], [s6].[CreatedAt], [s6].[EstimatedMinutes], [s6].[IsActive], [s6].[ServiceDescription], [s6].[ServiceName], [s6].[ShopId], [s6].[CategoryId0], [s6].[CategoryName], [s6].[Description], [s6].[IconUrl], [s6].[IsActive0], [s6].[ServiceImageId], [s6].[CreatedAt0], [s6].[ImageUrl], [s6].[ShopServiceId0], [s7].[ProductId], [s7].[CreatedAt], [s7].[IsActive], [s7].[Price], [s7].[ProductDescription], [s7].[ProductName], [s7].[ShopId], [s7].[StockQuantity], [s7].[UpdatedAt], [s7].[ProductImageId], [s7].[CreatedAt0], [s7].[ImageUrl], [s7].[ProductId0], [s8].[ShopId], [s8].[MechanicId], [s8].[AssignedAt], [s8].[IsActive], [s8].[MechanicId0], [s8].[AddressLine], [s8].[AvailabilityStatus], [s8].[AverageRating], [s8].[Barangay], [s8].[Bio], [s8].[Birthdate], [s8].[CertificationImageUrl], [s8].[City], [s8].[CreatedAt], [s8].[CurrentLatitude], [s8].[CurrentLongitude], [s8].[IsVerified], [s8].[MiddleName], [s8].[Province], [s8].[Sex], [s8].[TotalCompletedJobs], [s8].[UpdatedAt], [s8].[UserId], [s8].[ValidIdImageUrl], [s8].[YearsExperience], [s8].[ZipCode], [s8].[UserId0], [s8].[AccountStatus], [s8].[CreatedAt0], [s8].[Email], [s8].[EmailVerified], [s8].[FirstName], [s8].[LastName], [s8].[PasswordHash], [s8].[PhoneNumber], [s8].[PhoneVerified], [s8].[ProfileImageUrl], [s8].[UpdatedAt0]
+      FROM (
+          SELECT TOP(1) [s].[ShopId], [s].[AddressLine], [s].[BusinessPermitUrl], [s].[City], [s].[ContactNumber], [s].[CreatedAt], [s].[Latitude], [s].[Longitude], [s].[OwnerAddressLine], [s].[OwnerBarangay], [s].[OwnerBirthdate], [s].[OwnerCity], [s].[OwnerMiddleName], [s].[OwnerProvince], [s].[OwnerSex], [s].[OwnerUserId], [s].[OwnerValidIdUrl], [s].[OwnerZipCode], [s].[Province], [s].[ShopDescription], [s].[ShopImageUrl], [s].[ShopLogoUrl], [s].[ShopName], [s].[ShopStatus], [s].[UpdatedAt], [u].[UserId], [u].[AccountStatus], [u].[CreatedAt] AS [CreatedAt0], [u].[Email], [u].[EmailVerified], [u].[FirstName], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[PhoneVerified], [u].[ProfileImageUrl], [u].[UpdatedAt] AS [UpdatedAt0]
+          FROM [dbo].[shops] AS [s]
+          INNER JOIN [dbo].[users] AS [u] ON [s].[OwnerUserId] = [u].[UserId]
+          WHERE [s].[ShopId] = @id
+      ) AS [s5]
+      LEFT JOIN [dbo].[shop_operating_hours] AS [s0] ON [s5].[ShopId] = [s0].[ShopId]
+      LEFT JOIN (
+          SELECT [s1].[ShopServiceId], [s1].[BasePrice], [s1].[CategoryId], [s1].[CreatedAt], [s1].[EstimatedMinutes], [s1].[IsActive], [s1].[ServiceDescription], [s1].[ServiceName], [s1].[ShopId], [s2].[CategoryId] AS [CategoryId0], [s2].[CategoryName], [s2].[Description], [s2].[IconUrl], [s2].[IsActive] AS [IsActive0], [s3].[ServiceImageId], [s3].[CreatedAt] AS [CreatedAt0], [s3].[ImageUrl], [s3].[ShopServiceId] AS [ShopServiceId0]
+          FROM [dbo].[shop_services] AS [s1]
+          INNER JOIN [dbo].[service_categories] AS [s2] ON [s1].[CategoryId] = [s2].[CategoryId]
+          LEFT JOIN [dbo].[service_images] AS [s3] ON [s1].[ShopServiceId] = [s3].[ShopServiceId]
+      ) AS [s6] ON [s5].[ShopId] = [s6].[ShopId]
+      LEFT JOIN (
+          SELECT [p].[ProductId], [p].[CreatedAt], [p].[IsActive], [p].[Price], [p].[ProductDescription], [p].[ProductName], [p].[ShopId], [p].[StockQuantity], [p].[UpdatedAt], [p0].[ProductImageId], [p0].[CreatedAt] AS [CreatedAt0], [p0].[ImageUrl], [p0].[ProductId] AS [ProductId0]
+          FROM [dbo].[products] AS [p]
+          LEFT JOIN [dbo].[product_images] AS [p0] ON [p].[ProductId] = [p0].[ProductId]
+      ) AS [s7] ON [s5].[ShopId] = [s7].[ShopId]
+      LEFT JOIN (
+          SELECT [s4].[ShopId], [s4].[MechanicId], [s4].[AssignedAt], [s4].[IsActive], [m].[MechanicId] AS [MechanicId0], [m].[AddressLine], [m].[AvailabilityStatus], [m].[AverageRating], [m].[Barangay], [m].[Bio], [m].[Birthdate], [m].[CertificationImageUrl], [m].[City], [m].[CreatedAt], [m].[CurrentLatitude], [m].[CurrentLongitude], [m].[IsVerified], [m].[MiddleName], [m].[Province], [m].[Sex], [m].[TotalCompletedJobs], [m].[UpdatedAt], [m].[UserId], [m].[ValidIdImageUrl], [m].[YearsExperience], [m].[ZipCode], [u0].[UserId] AS [UserId0], [u0].[AccountStatus], [u0].[CreatedAt] AS [CreatedAt0], [u0].[Email], [u0].[EmailVerified], [u0].[FirstName], [u0].[LastName], [u0].[PasswordHash], [u0].[PhoneNumber], [u0].[PhoneVerified], [u0].[ProfileImageUrl], [u0].[UpdatedAt] AS [UpdatedAt0]
+          FROM [dbo].[shop_mechanics] AS [s4]
+          INNER JOIN [dbo].[mechanics] AS [m] ON [s4].[MechanicId] = [m].[MechanicId]
+          INNER JOIN [dbo].[users] AS [u0] ON [m].[UserId] = [u0].[UserId]
+      ) AS [s8] ON [s5].[ShopId] = [s8].[ShopId]
+      ORDER BY [s5].[ShopId], [s5].[UserId], [s0].[OperatingHourId], [s6].[ShopServiceId], [s6].[CategoryId0], [s6].[ServiceImageId], [s7].[ProductId], [s7].[ProductImageId], [s8].[ShopId], [s8].[MechanicId], [s8].[MechanicId0]
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (29ms) [Parameters=[@id='?' (DbType = Int32)], CommandType='Text', CommandTimeout='300']
+      SELECT [s5].[ShopId], [s5].[AddressLine], [s5].[BusinessPermitUrl], [s5].[City], [s5].[ContactNumber], [s5].[CreatedAt], [s5].[Latitude], [s5].[Longitude], [s5].[OwnerAddressLine], [s5].[OwnerBarangay], [s5].[OwnerBirthdate], [s5].[OwnerCity], [s5].[OwnerMiddleName], [s5].[OwnerProvince], [s5].[OwnerSex], [s5].[OwnerUserId], [s5].[OwnerValidIdUrl], [s5].[OwnerZipCode], [s5].[Province], [s5].[ShopDescription], [s5].[ShopImageUrl], [s5].[ShopLogoUrl], [s5].[ShopName], [s5].[ShopStatus], [s5].[UpdatedAt], [s5].[UserId], [s5].[AccountStatus], [s5].[CreatedAt0], [s5].[Email], [s5].[EmailVerified], [s5].[FirstName], [s5].[LastName], [s5].[PasswordHash], [s5].[PhoneNumber], [s5].[PhoneVerified], [s5].[ProfileImageUrl], [s5].[UpdatedAt0], [s0].[OperatingHourId], [s0].[ClosingTime], [s0].[DayOfWeek], [s0].[IsClosed], [s0].[OpeningTime], [s0].[ShopId], [s6].[ShopServiceId], [s6].[BasePrice], [s6].[CategoryId], [s6].[CreatedAt], [s6].[EstimatedMinutes], [s6].[IsActive], [s6].[ServiceDescription], [s6].[ServiceName], [s6].[ShopId], [s6].[CategoryId0], [s6].[CategoryName], [s6].[Description], [s6].[IconUrl], [s6].[IsActive0], [s6].[ServiceImageId], [s6].[CreatedAt0], [s6].[ImageUrl], [s6].[ShopServiceId0], [s7].[ProductId], [s7].[CreatedAt], [s7].[IsActive], [s7].[Price], [s7].[ProductDescription], [s7].[ProductName], [s7].[ShopId], [s7].[StockQuantity], [s7].[UpdatedAt], [s7].[ProductImageId], [s7].[CreatedAt0], [s7].[ImageUrl], [s7].[ProductId0], [s8].[ShopId], [s8].[MechanicId], [s8].[AssignedAt], [s8].[IsActive], [s8].[MechanicId0], [s8].[AddressLine], [s8].[AvailabilityStatus], [s8].[AverageRating], [s8].[Barangay], [s8].[Bio], [s8].[Birthdate], [s8].[CertificationImageUrl], [s8].[City], [s8].[CreatedAt], [s8].[CurrentLatitude], [s8].[CurrentLongitude], [s8].[IsVerified], [s8].[MiddleName], [s8].[Province], [s8].[Sex], [s8].[TotalCompletedJobs], [s8].[UpdatedAt], [s8].[UserId], [s8].[ValidIdImageUrl], [s8].[YearsExperience], [s8].[ZipCode], [s8].[UserId0], [s8].[AccountStatus], [s8].[CreatedAt0], [s8].[Email], [s8].[EmailVerified], [s8].[FirstName], [s8].[LastName], [s8].[PasswordHash], [s8].[PhoneNumber], [s8].[PhoneVerified], [s8].[ProfileImageUrl], [s8].[UpdatedAt0]
+      FROM (
+          SELECT TOP(1) [s].[ShopId], [s].[AddressLine], [s].[BusinessPermitUrl], [s].[City], [s].[ContactNumber], [s].[CreatedAt], [s].[Latitude], [s].[Longitude], [s].[OwnerAddressLine], [s].[OwnerBarangay], [s].[OwnerBirthdate], [s].[OwnerCity], [s].[OwnerMiddleName], [s].[OwnerProvince], [s].[OwnerSex], [s].[OwnerUserId], [s].[OwnerValidIdUrl], [s].[OwnerZipCode], [s].[Province], [s].[ShopDescription], [s].[ShopImageUrl], [s].[ShopLogoUrl], [s].[ShopName], [s].[ShopStatus], [s].[UpdatedAt], [u].[UserId], [u].[AccountStatus], [u].[CreatedAt] AS [CreatedAt0], [u].[Email], [u].[EmailVerified], [u].[FirstName], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[PhoneVerified], [u].[ProfileImageUrl], [u].[UpdatedAt] AS [UpdatedAt0]
+          FROM [dbo].[shops] AS [s]
+          INNER JOIN [dbo].[users] AS [u] ON [s].[OwnerUserId] = [u].[UserId]
+          WHERE [s].[ShopId] = @id
+      ) AS [s5]
+      LEFT JOIN [dbo].[shop_operating_hours] AS [s0] ON [s5].[ShopId] = [s0].[ShopId]
+      LEFT JOIN (
+          SELECT [s1].[ShopServiceId], [s1].[BasePrice], [s1].[CategoryId], [s1].[CreatedAt], [s1].[EstimatedMinutes], [s1].[IsActive], [s1].[ServiceDescription], [s1].[ServiceName], [s1].[ShopId], [s2].[CategoryId] AS [CategoryId0], [s2].[CategoryName], [s2].[Description], [s2].[IconUrl], [s2].[IsActive] AS [IsActive0], [s3].[ServiceImageId], [s3].[CreatedAt] AS [CreatedAt0], [s3].[ImageUrl], [s3].[ShopServiceId] AS [ShopServiceId0]
+          FROM [dbo].[shop_services] AS [s1]
+          INNER JOIN [dbo].[service_categories] AS [s2] ON [s1].[CategoryId] = [s2].[CategoryId]
+          LEFT JOIN [dbo].[service_images] AS [s3] ON [s1].[ShopServiceId] = [s3].[ShopServiceId]
+      ) AS [s6] ON [s5].[ShopId] = [s6].[ShopId]
+      LEFT JOIN (
+          SELECT [p].[ProductId], [p].[CreatedAt], [p].[IsActive], [p].[Price], [p].[ProductDescription], [p].[ProductName], [p].[ShopId], [p].[StockQuantity], [p].[UpdatedAt], [p0].[ProductImageId], [p0].[CreatedAt] AS [CreatedAt0], [p0].[ImageUrl], [p0].[ProductId] AS [ProductId0]
+          FROM [dbo].[products] AS [p]
+          LEFT JOIN [dbo].[product_images] AS [p0] ON [p].[ProductId] = [p0].[ProductId]
+      ) AS [s7] ON [s5].[ShopId] = [s7].[ShopId]
+      LEFT JOIN (
+          SELECT [s4].[ShopId], [s4].[MechanicId], [s4].[AssignedAt], [s4].[IsActive], [m].[MechanicId] AS [MechanicId0], [m].[AddressLine], [m].[AvailabilityStatus], [m].[AverageRating], [m].[Barangay], [m].[Bio], [m].[Birthdate], [m].[CertificationImageUrl], [m].[City], [m].[CreatedAt], [m].[CurrentLatitude], [m].[CurrentLongitude], [m].[IsVerified], [m].[MiddleName], [m].[Province], [m].[Sex], [m].[TotalCompletedJobs], [m].[UpdatedAt], [m].[UserId], [m].[ValidIdImageUrl], [m].[YearsExperience], [m].[ZipCode], [u0].[UserId] AS [UserId0], [u0].[AccountStatus], [u0].[CreatedAt] AS [CreatedAt0], [u0].[Email], [u0].[EmailVerified], [u0].[FirstName], [u0].[LastName], [u0].[PasswordHash], [u0].[PhoneNumber], [u0].[PhoneVerified], [u0].[ProfileImageUrl], [u0].[UpdatedAt] AS [UpdatedAt0]
+          FROM [dbo].[shop_mechanics] AS [s4]
+          INNER JOIN [dbo].[mechanics] AS [m] ON [s4].[MechanicId] = [m].[MechanicId]
+          INNER JOIN [dbo].[users] AS [u0] ON [m].[UserId] = [u0].[UserId]
+      ) AS [s8] ON [s5].[ShopId] = [s8].[ShopId]
+      ORDER BY [s5].[ShopId], [s5].[UserId], [s0].[OperatingHourId], [s6].[ShopServiceId], [s6].[CategoryId0], [s6].[ServiceImageId], [s7].[ProductId], [s7].[ProductImageId], [s8].[ShopId], [s8].[MechanicId], [s8].[MechanicId0]
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (17ms) [Parameters=[], CommandType='Text', CommandTimeout='300']
+      SELECT [u].[UserId], [u].[FirstName], [u].[LastName], [u].[Email], [u].[PhoneNumber], [u].[AccountStatus], [u].[EmailVerified], [s].[RoleName], [s].[UserId], [s].[RoleId], [s].[RoleId0]
+      FROM [dbo].[users] AS [u]
+      LEFT JOIN (
+          SELECT [r0].[RoleName], [u1].[UserId], [u1].[RoleId], [r0].[RoleId] AS [RoleId0]
+          FROM [dbo].[user_roles] AS [u1]
+          INNER JOIN [dbo].[roles] AS [r0] ON [u1].[RoleId] = [r0].[RoleId]
+      ) AS [s] ON [u].[UserId] = [s].[UserId]
+      WHERE [u].[AccountStatus] <> N'deleted' AND EXISTS (
+          SELECT 1
+          FROM [dbo].[user_roles] AS [u0]
+          INNER JOIN [dbo].[roles] AS [r] ON [u0].[RoleId] = [r].[RoleId]
+          WHERE [u].[UserId] = [u0].[UserId] AND [r].[RoleName] = N'Customer')
+      ORDER BY [u].[UserId], [s].[UserId], [s].[RoleId]
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (6ms) [Parameters=[], CommandType='Text', CommandTimeout='300']
+      SELECT [s].[ShopId], [s].[AddressLine], [s].[BusinessPermitUrl], [s].[City], [s].[ContactNumber], [s].[CreatedAt], [s].[Latitude], [s].[Longitude], [s].[OwnerAddressLine], [s].[OwnerBarangay], [s].[OwnerBirthdate], [s].[OwnerCity], [s].[OwnerMiddleName], [s].[OwnerProvince], [s].[OwnerSex], [s].[OwnerUserId], [s].[OwnerValidIdUrl], [s].[OwnerZipCode], [s].[Province], [s].[ShopDescription], [s].[ShopImageUrl], [s].[ShopLogoUrl], [s].[ShopName], [s].[ShopStatus], [s].[UpdatedAt], [u].[UserId], [u].[AccountStatus], [u].[CreatedAt], [u].[Email], [u].[EmailVerified], [u].[FirstName], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[PhoneVerified], [u].[ProfileImageUrl], [u].[UpdatedAt]
+      FROM [dbo].[shops] AS [s]
+      INNER JOIN [dbo].[users] AS [u] ON [s].[OwnerUserId] = [u].[UserId]
+      WHERE LTRIM(RTRIM(LOWER([s].[ShopStatus]))) <> N'deleted'
+      ORDER BY [s].[CreatedAt] DESC
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (5ms) [Parameters=[], CommandType='Text', CommandTimeout='300']
+      SELECT [s].[ShopId], [s].[AddressLine], [s].[BusinessPermitUrl], [s].[City], [s].[ContactNumber], [s].[CreatedAt], [s].[Latitude], [s].[Longitude], [s].[OwnerAddressLine], [s].[OwnerBarangay], [s].[OwnerBirthdate], [s].[OwnerCity], [s].[OwnerMiddleName], [s].[OwnerProvince], [s].[OwnerSex], [s].[OwnerUserId], [s].[OwnerValidIdUrl], [s].[OwnerZipCode], [s].[Province], [s].[ShopDescription], [s].[ShopImageUrl], [s].[ShopLogoUrl], [s].[ShopName], [s].[ShopStatus], [s].[UpdatedAt], [u].[UserId], [u].[AccountStatus], [u].[CreatedAt], [u].[Email], [u].[EmailVerified], [u].[FirstName], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[PhoneVerified], [u].[ProfileImageUrl], [u].[UpdatedAt]
+      FROM [dbo].[shops] AS [s]
+      INNER JOIN [dbo].[users] AS [u] ON [s].[OwnerUserId] = [u].[UserId]
+      WHERE LTRIM(RTRIM(LOWER([s].[ShopStatus]))) = N'pending'
+      ORDER BY [s].[CreatedAt] DESC
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (5ms) [Parameters=[], CommandType='Text', CommandTimeout='300']
+      SELECT [c].[ClientId], [c].[Birthdate], [c].[CreatedAt], [c].[MiddleName], [c].[Sex], [c].[UserId], [c].[ValidIdImageUrl], [u].[UserId], [u].[AccountStatus], [u].[CreatedAt], [u].[Email], [u].[EmailVerified], [u].[FirstName], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[PhoneVerified], [u].[ProfileImageUrl], [u].[UpdatedAt], [c0].[AddressId], [c0].[AddressLine], [c0].[Barangay], [c0].[City], [c0].[ClientId], [c0].[CreatedAt], [c0].[IsDefault], [c0].[Label], [c0].[Latitude], [c0].[Longitude], [c0].[PostalCode], [c0].[Province]
+      FROM [dbo].[clients] AS [c]
+      INNER JOIN [dbo].[users] AS [u] ON [c].[UserId] = [u].[UserId]
+      LEFT JOIN [dbo].[client_addresses] AS [c0] ON [c].[ClientId] = [c0].[ClientId]
+      WHERE LTRIM(RTRIM(LOWER([u].[AccountStatus]))) = N'pending'
+      ORDER BY [c].[CreatedAt] DESC, [c].[ClientId], [u].[UserId]
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (23ms) [Parameters=[], CommandType='Text', CommandTimeout='300']
+      SELECT [m].[MechanicId], [m].[AddressLine], [m].[AvailabilityStatus], [m].[AverageRating], [m].[Barangay], [m].[Bio], [m].[Birthdate], [m].[CertificationImageUrl], [m].[City], [m].[CreatedAt], [m].[CurrentLatitude], [m].[CurrentLongitude], [m].[IsVerified], [m].[MiddleName], [m].[Province], [m].[Sex], [m].[TotalCompletedJobs], [m].[UpdatedAt], [m].[UserId], [m].[ValidIdImageUrl], [m].[YearsExperience], [m].[ZipCode], [u].[UserId], [u].[AccountStatus], [u].[CreatedAt], [u].[Email], [u].[EmailVerified], [u].[FirstName], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[PhoneVerified], [u].[ProfileImageUrl], [u].[UpdatedAt], [s1].[ShopId], [s1].[MechanicId], [s1].[AssignedAt], [s1].[IsActive], [s1].[ShopId0], [s1].[AddressLine], [s1].[BusinessPermitUrl], [s1].[City], [s1].[ContactNumber], [s1].[CreatedAt], [s1].[Latitude], [s1].[Longitude], [s1].[OwnerAddressLine], [s1].[OwnerBarangay], [s1].[OwnerBirthdate], [s1].[OwnerCity], [s1].[OwnerMiddleName], [s1].[OwnerProvince], [s1].[OwnerSex], [s1].[OwnerUserId], [s1].[OwnerValidIdUrl], [s1].[OwnerZipCode], [s1].[Province], [s1].[ShopDescription], [s1].[ShopImageUrl], [s1].[ShopLogoUrl], [s1].[ShopName], [s1].[ShopStatus], [s1].[UpdatedAt]
+      FROM [dbo].[mechanics] AS [m]
+      INNER JOIN [dbo].[users] AS [u] ON [m].[UserId] = [u].[UserId]
+      LEFT JOIN (
+          SELECT [s].[ShopId], [s].[MechanicId], [s].[AssignedAt], [s].[IsActive], [s0].[ShopId] AS [ShopId0], [s0].[AddressLine], [s0].[BusinessPermitUrl], [s0].[City], [s0].[ContactNumber], [s0].[CreatedAt], [s0].[Latitude], [s0].[Longitude], [s0].[OwnerAddressLine], [s0].[OwnerBarangay], [s0].[OwnerBirthdate], [s0].[OwnerCity], [s0].[OwnerMiddleName], [s0].[OwnerProvince], [s0].[OwnerSex], [s0].[OwnerUserId], [s0].[OwnerValidIdUrl], [s0].[OwnerZipCode], [s0].[Province], [s0].[ShopDescription], [s0].[ShopImageUrl], [s0].[ShopLogoUrl], [s0].[ShopName], [s0].[ShopStatus], [s0].[UpdatedAt]
+          FROM [dbo].[shop_mechanics] AS [s]
+          INNER JOIN [dbo].[shops] AS [s0] ON [s].[ShopId] = [s0].[ShopId]
+      ) AS [s1] ON [m].[MechanicId] = [s1].[MechanicId]
+      WHERE [u].[EmailVerified] = CAST(1 AS bit) AND LTRIM(RTRIM(LOWER([u].[AccountStatus]))) <> N'deleted' AND LTRIM(RTRIM(LOWER([u].[AccountStatus]))) <> N'rejected' AND ([m].[IsVerified] = CAST(0 AS bit) OR LTRIM(RTRIM(LOWER([u].[AccountStatus]))) = N'pending')
+      ORDER BY [m].[CreatedAt] DESC, [m].[MechanicId], [u].[UserId], [s1].[ShopId], [s1].[MechanicId]
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (6ms) [Parameters=[], CommandType='Text', CommandTimeout='300']
+      SELECT [s].[ShopId], [s].[AddressLine], [s].[BusinessPermitUrl], [s].[City], [s].[ContactNumber], [s].[CreatedAt], [s].[Latitude], [s].[Longitude], [s].[OwnerAddressLine], [s].[OwnerBarangay], [s].[OwnerBirthdate], [s].[OwnerCity], [s].[OwnerMiddleName], [s].[OwnerProvince], [s].[OwnerSex], [s].[OwnerUserId], [s].[OwnerValidIdUrl], [s].[OwnerZipCode], [s].[Province], [s].[ShopDescription], [s].[ShopImageUrl], [s].[ShopLogoUrl], [s].[ShopName], [s].[ShopStatus], [s].[UpdatedAt], [u].[UserId], [u].[AccountStatus], [u].[CreatedAt], [u].[Email], [u].[EmailVerified], [u].[FirstName], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[PhoneVerified], [u].[ProfileImageUrl], [u].[UpdatedAt]
+      FROM [dbo].[shops] AS [s]
+      INNER JOIN [dbo].[users] AS [u] ON [s].[OwnerUserId] = [u].[UserId]
+      WHERE LTRIM(RTRIM(LOWER([s].[ShopStatus]))) <> N'deleted'
+      ORDER BY [s].[CreatedAt] DESC
+warn: Microsoft.EntityFrameworkCore.Query[20504]
+      Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (20ms) [Parameters=[@id='?' (DbType = Int32)], CommandType='Text', CommandTimeout='300']
+      SELECT [s2].[ShopId], [s2].[AddressLine], [s2].[BusinessPermitUrl], [s2].[City], [s2].[ContactNumber], [s2].[CreatedAt], [s2].[Latitude], [s2].[Longitude], [s2].[OwnerAddressLine], [s2].[OwnerBarangay], [s2].[OwnerBirthdate], [s2].[OwnerCity], [s2].[OwnerMiddleName], [s2].[OwnerProvince], [s2].[OwnerSex], [s2].[OwnerUserId], [s2].[OwnerValidIdUrl], [s2].[OwnerZipCode], [s2].[Province], [s2].[ShopDescription], [s2].[ShopImageUrl], [s2].[ShopLogoUrl], [s2].[ShopName], [s2].[ShopStatus], [s2].[UpdatedAt], [s2].[UserId], [s0].[ShopServiceId], [s0].[BasePrice], [s0].[CategoryId], [s0].[CreatedAt], [s0].[EstimatedMinutes], [s0].[IsActive], [s0].[ServiceDescription], [s0].[ServiceName], [s0].[ShopId], [p].[ProductId], [p].[CreatedAt], [p].[IsActive], [p].[Price], [p].[ProductDescription], [p].[ProductName], [p].[ShopId], [p].[StockQuantity], [p].[UpdatedAt], [s1].[ShopId], [s1].[MechanicId], [s1].[AssignedAt], [s1].[IsActive], [s2].[AccountStatus], [s2].[CreatedAt0], [s2].[Email], [s2].[EmailVerified], [s2].[FirstName], [s2].[LastName], [s2].[PasswordHash], [s2].[PhoneNumber], [s2].[PhoneVerified], [s2].[ProfileImageUrl], [s2].[UpdatedAt0], [s3].[UserId], [s3].[RoleId], [s3].[AssignedAt], [s3].[RoleId0], [s3].[RoleName], [u1].[AuthProviderId], [u1].[CreatedAt], [u1].[ProviderEmail], [u1].[ProviderName], [u1].[ProviderSubject], [u1].[UserId], [u2].[DeviceTokenId], [u2].[CreatedAt], [u2].[DeviceToken], [u2].[IsActive], [u2].[Platform], [u2].[UpdatedAt], [u2].[UserId]
+      FROM (
+          SELECT TOP(1) [s].[ShopId], [s].[AddressLine], [s].[BusinessPermitUrl], [s].[City], [s].[ContactNumber], [s].[CreatedAt], [s].[Latitude], [s].[Longitude], [s].[OwnerAddressLine], [s].[OwnerBarangay], [s].[OwnerBirthdate], [s].[OwnerCity], [s].[OwnerMiddleName], [s].[OwnerProvince], [s].[OwnerSex], [s].[OwnerUserId], [s].[OwnerValidIdUrl], [s].[OwnerZipCode], [s].[Province], [s].[ShopDescription], [s].[ShopImageUrl], [s].[ShopLogoUrl], [s].[ShopName], [s].[ShopStatus], [s].[UpdatedAt], [u].[UserId], [u].[AccountStatus], [u].[CreatedAt] AS [CreatedAt0], [u].[Email], [u].[EmailVerified], [u].[FirstName], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[PhoneVerified], [u].[ProfileImageUrl], [u].[UpdatedAt] AS [UpdatedAt0]
+          FROM [dbo].[shops] AS [s]
+          INNER JOIN [dbo].[users] AS [u] ON [s].[OwnerUserId] = [u].[UserId]
+          WHERE [s].[ShopId] = @id
+      ) AS [s2]
+      LEFT JOIN [dbo].[shop_services] AS [s0] ON [s2].[ShopId] = [s0].[ShopId]
+      LEFT JOIN [dbo].[products] AS [p] ON [s2].[ShopId] = [p].[ShopId]
+      LEFT JOIN [dbo].[shop_mechanics] AS [s1] ON [s2].[ShopId] = [s1].[ShopId]
+      LEFT JOIN (
+          SELECT [u0].[UserId], [u0].[RoleId], [u0].[AssignedAt], [r].[RoleId] AS [RoleId0], [r].[RoleName]
+          FROM [dbo].[user_roles] AS [u0]
+          INNER JOIN [dbo].[roles] AS [r] ON [u0].[RoleId] = [r].[RoleId]
+      ) AS [s3] ON [s2].[UserId] = [s3].[UserId]
+      LEFT JOIN [dbo].[user_auth_providers] AS [u1] ON [s2].[UserId] = [u1].[UserId]
+      LEFT JOIN [dbo].[user_device_tokens] AS [u2] ON [s2].[UserId] = [u2].[UserId]
+      ORDER BY [s2].[ShopId], [s2].[UserId], [s0].[ShopServiceId], [p].[ProductId], [s1].[ShopId], [s1].[MechanicId], [s3].[UserId], [s3].[RoleId], [s3].[RoleId0], [u1].[AuthProviderId]
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[@shop_ShopId='?' (DbType = Int32), @shop_OwnerUserId='?' (DbType = Int32)], CommandType='Text', CommandTimeout='300']
+      SELECT CASE
+          WHEN EXISTS (
+              SELECT 1
+              FROM [dbo].[shops] AS [s]
+              WHERE [s].[ShopId] <> @shop_ShopId AND [s].[OwnerUserId] = @shop_OwnerUserId AND LTRIM(RTRIM(LOWER([s].[ShopStatus]))) <> N'deleted') THEN CAST(1 AS bit)
+          ELSE CAST(0 AS bit)
+      END
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (14ms) [Parameters=[@p2='?' (DbType = Int32), @p0='?' (DbType = Boolean), @p1='?' (DbType = DateTime2), @p4='?' (DbType = Int32), @p3='?' (DbType = Boolean), @p6='?' (DbType = Int32), @p5='?' (DbType = Boolean), @p26='?' (DbType = Int32), @p7='?' (Size = 500), @p8='?' (Size = 500), @p9='?' (Size = 100), @p10='?' (Size = 50), @p11='?' (Size = 500), @p12='?' (Size = 100), @p13='?' (DbType = DateTime2), @p14='?' (Size = 100), @p15='?' (Size = 100), @p16='?' (Size = 100), @p17='?' (Size = 30), @p18='?' (Size = 500), @p19='?' (Size = 10), @p20='?' (Size = 100), @p21='?' (Size = 4000), @p22='?' (Size = 500), @p23='?' (Size = 255), @p24='?' (Size = 30), @p25='?' (DbType = DateTime2), @p35='?' (DbType = Int32), @p27='?' (Size = 30), @p28='?' (Size = 255), @p29='?' (DbType = Boolean), @p30='?' (Size = 100), @p31='?' (Size = 100), @p32='?' (Size = 500), @p33='?' (Size = 50), @p34='?' (DbType = DateTime2)], CommandType='Text', CommandTimeout='300']
+      SET NOCOUNT ON;
+      UPDATE [dbo].[products] SET [IsActive] = @p0, [UpdatedAt] = @p1
+      OUTPUT 1
+      WHERE [ProductId] = @p2;
+      UPDATE [dbo].[shop_services] SET [IsActive] = @p3
+      OUTPUT 1
+      WHERE [ShopServiceId] = @p4;
+      UPDATE [dbo].[shop_services] SET [IsActive] = @p5
+      OUTPUT 1
+      WHERE [ShopServiceId] = @p6;
+      UPDATE [dbo].[shops] SET [AddressLine] = @p7, [BusinessPermitUrl] = @p8, [City] = @p9, [ContactNumber] = @p10, [OwnerAddressLine] = @p11, [OwnerBarangay] = @p12, [OwnerBirthdate] = @p13, [OwnerCity] = @p14, [OwnerMiddleName] = @p15, [OwnerProvince] = @p16, [OwnerSex] = @p17, [OwnerValidIdUrl] = @p18, [OwnerZipCode] = @p19, [Province] = @p20, [ShopDescription] = @p21, [ShopImageUrl] = @p22, [ShopName] = @p23, [ShopStatus] = @p24, [UpdatedAt] = @p25
+      OUTPUT 1
+      WHERE [ShopId] = @p26;
+      UPDATE [dbo].[users] SET [AccountStatus] = @p27, [Email] = @p28, [EmailVerified] = @p29, [FirstName] = @p30, [LastName] = @p31, [PasswordHash] = @p32, [PhoneNumber] = @p33, [UpdatedAt] = @p34
+      OUTPUT 1
+      WHERE [UserId] = @p35;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (4ms) [Parameters=[], CommandType='Text', CommandTimeout='300']
+      SELECT [s].[ShopId], [s].[AddressLine], [s].[BusinessPermitUrl], [s].[City], [s].[ContactNumber], [s].[CreatedAt], [s].[Latitude], [s].[Longitude], [s].[OwnerAddressLine], [s].[OwnerBarangay], [s].[OwnerBirthdate], [s].[OwnerCity], [s].[OwnerMiddleName], [s].[OwnerProvince], [s].[OwnerSex], [s].[OwnerUserId], [s].[OwnerValidIdUrl], [s].[OwnerZipCode], [s].[Province], [s].[ShopDescription], [s].[ShopImageUrl], [s].[ShopLogoUrl], [s].[ShopName], [s].[ShopStatus], [s].[UpdatedAt], [u].[UserId], [u].[AccountStatus], [u].[CreatedAt], [u].[Email], [u].[EmailVerified], [u].[FirstName], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[PhoneVerified], [u].[ProfileImageUrl], [u].[UpdatedAt]
+      FROM [dbo].[shops] AS [s]
+      INNER JOIN [dbo].[users] AS [u] ON [s].[OwnerUserId] = [u].[UserId]
+      WHERE LTRIM(RTRIM(LOWER([s].[ShopStatus]))) <> N'deleted'
+      ORDER BY [s].[CreatedAt] DESC
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (8ms) [Parameters=[], CommandType='Text', CommandTimeout='300']
+      SELECT [s].[ShopId], [s].[AddressLine], [s].[BusinessPermitUrl], [s].[City], [s].[ContactNumber], [s].[CreatedAt], [s].[Latitude], [s].[Longitude], [s].[OwnerAddressLine], [s].[OwnerBarangay], [s].[OwnerBirthdate], [s].[OwnerCity], [s].[OwnerMiddleName], [s].[OwnerProvince], [s].[OwnerSex], [s].[OwnerUserId], [s].[OwnerValidIdUrl], [s].[OwnerZipCode], [s].[Province], [s].[ShopDescription], [s].[ShopImageUrl], [s].[ShopLogoUrl], [s].[ShopName], [s].[ShopStatus], [s].[UpdatedAt], [u].[UserId], [u].[AccountStatus], [u].[CreatedAt], [u].[Email], [u].[EmailVerified], [u].[FirstName], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[PhoneVerified], [u].[ProfileImageUrl], [u].[UpdatedAt]
+      FROM [dbo].[shops] AS [s]
+      INNER JOIN [dbo].[users] AS [u] ON [s].[OwnerUserId] = [u].[UserId]
+      WHERE LTRIM(RTRIM(LOWER([s].[ShopStatus]))) = N'pending'
+      ORDER BY [s].[CreatedAt] DESC
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (6ms) [Parameters=[], CommandType='Text', CommandTimeout='300']
+      SELECT [c].[ClientId], [c].[Birthdate], [c].[CreatedAt], [c].[MiddleName], [c].[Sex], [c].[UserId], [c].[ValidIdImageUrl], [u].[UserId], [u].[AccountStatus], [u].[CreatedAt], [u].[Email], [u].[EmailVerified], [u].[FirstName], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[PhoneVerified], [u].[ProfileImageUrl], [u].[UpdatedAt], [c0].[AddressId], [c0].[AddressLine], [c0].[Barangay], [c0].[City], [c0].[ClientId], [c0].[CreatedAt], [c0].[IsDefault], [c0].[Label], [c0].[Latitude], [c0].[Longitude], [c0].[PostalCode], [c0].[Province]
+      FROM [dbo].[clients] AS [c]
+      INNER JOIN [dbo].[users] AS [u] ON [c].[UserId] = [u].[UserId]
+      LEFT JOIN [dbo].[client_addresses] AS [c0] ON [c].[ClientId] = [c0].[ClientId]
+      WHERE LTRIM(RTRIM(LOWER([u].[AccountStatus]))) = N'pending'
+      ORDER BY [c].[CreatedAt] DESC, [c].[ClientId], [u].[UserId]
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (16ms) [Parameters=[], CommandType='Text', CommandTimeout='300']
+      SELECT [m].[MechanicId], [m].[AddressLine], [m].[AvailabilityStatus], [m].[AverageRating], [m].[Barangay], [m].[Bio], [m].[Birthdate], [m].[CertificationImageUrl], [m].[City], [m].[CreatedAt], [m].[CurrentLatitude], [m].[CurrentLongitude], [m].[IsVerified], [m].[MiddleName], [m].[Province], [m].[Sex], [m].[TotalCompletedJobs], [m].[UpdatedAt], [m].[UserId], [m].[ValidIdImageUrl], [m].[YearsExperience], [m].[ZipCode], [u].[UserId], [u].[AccountStatus], [u].[CreatedAt], [u].[Email], [u].[EmailVerified], [u].[FirstName], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[PhoneVerified], [u].[ProfileImageUrl], [u].[UpdatedAt], [s1].[ShopId], [s1].[MechanicId], [s1].[AssignedAt], [s1].[IsActive], [s1].[ShopId0], [s1].[AddressLine], [s1].[BusinessPermitUrl], [s1].[City], [s1].[ContactNumber], [s1].[CreatedAt], [s1].[Latitude], [s1].[Longitude], [s1].[OwnerAddressLine], [s1].[OwnerBarangay], [s1].[OwnerBirthdate], [s1].[OwnerCity], [s1].[OwnerMiddleName], [s1].[OwnerProvince], [s1].[OwnerSex], [s1].[OwnerUserId], [s1].[OwnerValidIdUrl], [s1].[OwnerZipCode], [s1].[Province], [s1].[ShopDescription], [s1].[ShopImageUrl], [s1].[ShopLogoUrl], [s1].[ShopName], [s1].[ShopStatus], [s1].[UpdatedAt]
+      FROM [dbo].[mechanics] AS [m]
+      INNER JOIN [dbo].[users] AS [u] ON [m].[UserId] = [u].[UserId]
+      LEFT JOIN (
+          SELECT [s].[ShopId], [s].[MechanicId], [s].[AssignedAt], [s].[IsActive], [s0].[ShopId] AS [ShopId0], [s0].[AddressLine], [s0].[BusinessPermitUrl], [s0].[City], [s0].[ContactNumber], [s0].[CreatedAt], [s0].[Latitude], [s0].[Longitude], [s0].[OwnerAddressLine], [s0].[OwnerBarangay], [s0].[OwnerBirthdate], [s0].[OwnerCity], [s0].[OwnerMiddleName], [s0].[OwnerProvince], [s0].[OwnerSex], [s0].[OwnerUserId], [s0].[OwnerValidIdUrl], [s0].[OwnerZipCode], [s0].[Province], [s0].[ShopDescription], [s0].[ShopImageUrl], [s0].[ShopLogoUrl], [s0].[ShopName], [s0].[ShopStatus], [s0].[UpdatedAt]
+          FROM [dbo].[shop_mechanics] AS [s]
+          INNER JOIN [dbo].[shops] AS [s0] ON [s].[ShopId] = [s0].[ShopId]
+      ) AS [s1] ON [m].[MechanicId] = [s1].[MechanicId]
+      WHERE [u].[EmailVerified] = CAST(1 AS bit) AND LTRIM(RTRIM(LOWER([u].[AccountStatus]))) <> N'deleted' AND LTRIM(RTRIM(LOWER([u].[AccountStatus]))) <> N'rejected' AND ([m].[IsVerified] = CAST(0 AS bit) OR LTRIM(RTRIM(LOWER([u].[AccountStatus]))) = N'pending')
+      ORDER BY [m].[CreatedAt] DESC, [m].[MechanicId], [u].[UserId], [s1].[ShopId], [s1].[MechanicId]
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='300']
+      SELECT [s].[ShopId], [s].[AddressLine], [s].[BusinessPermitUrl], [s].[City], [s].[ContactNumber], [s].[CreatedAt], [s].[Latitude], [s].[Longitude], [s].[OwnerAddressLine], [s].[OwnerBarangay], [s].[OwnerBirthdate], [s].[OwnerCity], [s].[OwnerMiddleName], [s].[OwnerProvince], [s].[OwnerSex], [s].[OwnerUserId], [s].[OwnerValidIdUrl], [s].[OwnerZipCode], [s].[Province], [s].[ShopDescription], [s].[ShopImageUrl], [s].[ShopLogoUrl], [s].[ShopName], [s].[ShopStatus], [s].[UpdatedAt], [u].[UserId], [u].[AccountStatus], [u].[CreatedAt], [u].[Email], [u].[EmailVerified], [u].[FirstName], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[PhoneVerified], [u].[ProfileImageUrl], [u].[UpdatedAt]
+      FROM [dbo].[shops] AS [s]
+      INNER JOIN [dbo].[users] AS [u] ON [s].[OwnerUserId] = [u].[UserId]
+      WHERE LTRIM(RTRIM(LOWER([s].[ShopStatus]))) = N'pending'
+      ORDER BY [s].[CreatedAt] DESC
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='300']
+      SELECT [c].[ClientId], [c].[Birthdate], [c].[CreatedAt], [c].[MiddleName], [c].[Sex], [c].[UserId], [c].[ValidIdImageUrl], [u].[UserId], [u].[AccountStatus], [u].[CreatedAt], [u].[Email], [u].[EmailVerified], [u].[FirstName], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[PhoneVerified], [u].[ProfileImageUrl], [u].[UpdatedAt], [c0].[AddressId], [c0].[AddressLine], [c0].[Barangay], [c0].[City], [c0].[ClientId], [c0].[CreatedAt], [c0].[IsDefault], [c0].[Label], [c0].[Latitude], [c0].[Longitude], [c0].[PostalCode], [c0].[Province]
+      FROM [dbo].[clients] AS [c]
+      INNER JOIN [dbo].[users] AS [u] ON [c].[UserId] = [u].[UserId]
+      LEFT JOIN [dbo].[client_addresses] AS [c0] ON [c].[ClientId] = [c0].[ClientId]
+      WHERE LTRIM(RTRIM(LOWER([u].[AccountStatus]))) = N'pending'
+      ORDER BY [c].[CreatedAt] DESC, [c].[ClientId], [u].[UserId]
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='300']
+      SELECT [m].[MechanicId], [m].[AddressLine], [m].[AvailabilityStatus], [m].[AverageRating], [m].[Barangay], [m].[Bio], [m].[Birthdate], [m].[CertificationImageUrl], [m].[City], [m].[CreatedAt], [m].[CurrentLatitude], [m].[CurrentLongitude], [m].[IsVerified], [m].[MiddleName], [m].[Province], [m].[Sex], [m].[TotalCompletedJobs], [m].[UpdatedAt], [m].[UserId], [m].[ValidIdImageUrl], [m].[YearsExperience], [m].[ZipCode], [u].[UserId], [u].[AccountStatus], [u].[CreatedAt], [u].[Email], [u].[EmailVerified], [u].[FirstName], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[PhoneVerified], [u].[ProfileImageUrl], [u].[UpdatedAt], [s1].[ShopId], [s1].[MechanicId], [s1].[AssignedAt], [s1].[IsActive], [s1].[ShopId0], [s1].[AddressLine], [s1].[BusinessPermitUrl], [s1].[City], [s1].[ContactNumber], [s1].[CreatedAt], [s1].[Latitude], [s1].[Longitude], [s1].[OwnerAddressLine], [s1].[OwnerBarangay], [s1].[OwnerBirthdate], [s1].[OwnerCity], [s1].[OwnerMiddleName], [s1].[OwnerProvince], [s1].[OwnerSex], [s1].[OwnerUserId], [s1].[OwnerValidIdUrl], [s1].[OwnerZipCode], [s1].[Province], [s1].[ShopDescription], [s1].[ShopImageUrl], [s1].[ShopLogoUrl], [s1].[ShopName], [s1].[ShopStatus], [s1].[UpdatedAt]
+      FROM [dbo].[mechanics] AS [m]
+      INNER JOIN [dbo].[users] AS [u] ON [m].[UserId] = [u].[UserId]
+      LEFT JOIN (
+          SELECT [s].[ShopId], [s].[MechanicId], [s].[AssignedAt], [s].[IsActive], [s0].[ShopId] AS [ShopId0], [s0].[AddressLine], [s0].[BusinessPermitUrl], [s0].[City], [s0].[ContactNumber], [s0].[CreatedAt], [s0].[Latitude], [s0].[Longitude], [s0].[OwnerAddressLine], [s0].[OwnerBarangay], [s0].[OwnerBirthdate], [s0].[OwnerCity], [s0].[OwnerMiddleName], [s0].[OwnerProvince], [s0].[OwnerSex], [s0].[OwnerUserId], [s0].[OwnerValidIdUrl], [s0].[OwnerZipCode], [s0].[Province], [s0].[ShopDescription], [s0].[ShopImageUrl], [s0].[ShopLogoUrl], [s0].[ShopName], [s0].[ShopStatus], [s0].[UpdatedAt]
+          FROM [dbo].[shop_mechanics] AS [s]
+          INNER JOIN [dbo].[shops] AS [s0] ON [s].[ShopId] = [s0].[ShopId]
+      ) AS [s1] ON [m].[MechanicId] = [s1].[MechanicId]
+      WHERE [u].[EmailVerified] = CAST(1 AS bit) AND LTRIM(RTRIM(LOWER([u].[AccountStatus]))) <> N'deleted' AND LTRIM(RTRIM(LOWER([u].[AccountStatus]))) <> N'rejected' AND ([m].[IsVerified] = CAST(0 AS bit) OR LTRIM(RTRIM(LOWER([u].[AccountStatus]))) = N'pending')
+      ORDER BY [m].[CreatedAt] DESC, [m].[MechanicId], [u].[UserId], [s1].[ShopId], [s1].[MechanicId]
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[@id='?' (DbType = Int32)], CommandType='Text', CommandTimeout='300']
+      SELECT TOP(1) [s].[ShopId], [s].[AddressLine], [s].[BusinessPermitUrl], [s].[City], [s].[ContactNumber], [s].[CreatedAt], [s].[Latitude], [s].[Longitude], [s].[OwnerAddressLine], [s].[OwnerBarangay], [s].[OwnerBirthdate], [s].[OwnerCity], [s].[OwnerMiddleName], [s].[OwnerProvince], [s].[OwnerSex], [s].[OwnerUserId], [s].[OwnerValidIdUrl], [s].[OwnerZipCode], [s].[Province], [s].[ShopDescription], [s].[ShopImageUrl], [s].[ShopLogoUrl], [s].[ShopName], [s].[ShopStatus], [s].[UpdatedAt], [u].[UserId], [u].[AccountStatus], [u].[CreatedAt], [u].[Email], [u].[EmailVerified], [u].[FirstName], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[PhoneVerified], [u].[ProfileImageUrl], [u].[UpdatedAt]
+      FROM [dbo].[shops] AS [s]
+      INNER JOIN [dbo].[users] AS [u] ON [s].[OwnerUserId] = [u].[UserId]
+      WHERE [s].[ShopId] = @id
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (4ms) [Parameters=[@p2='?' (DbType = Int32), @p0='?' (Size = 30), @p1='?' (DbType = DateTime2), @p5='?' (DbType = Int32), @p3='?' (Size = 30), @p4='?' (DbType = DateTime2)], CommandType='Text', CommandTimeout='300']
+      SET NOCOUNT ON;
+      UPDATE [dbo].[shops] SET [ShopStatus] = @p0, [UpdatedAt] = @p1
+      OUTPUT 1
+      WHERE [ShopId] = @p2;
+      UPDATE [dbo].[users] SET [AccountStatus] = @p3, [UpdatedAt] = @p4
+      OUTPUT 1
+      WHERE [UserId] = @p5;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='300']
+      SELECT [s].[ShopId], [s].[AddressLine], [s].[BusinessPermitUrl], [s].[City], [s].[ContactNumber], [s].[CreatedAt], [s].[Latitude], [s].[Longitude], [s].[OwnerAddressLine], [s].[OwnerBarangay], [s].[OwnerBirthdate], [s].[OwnerCity], [s].[OwnerMiddleName], [s].[OwnerProvince], [s].[OwnerSex], [s].[OwnerUserId], [s].[OwnerValidIdUrl], [s].[OwnerZipCode], [s].[Province], [s].[ShopDescription], [s].[ShopImageUrl], [s].[ShopLogoUrl], [s].[ShopName], [s].[ShopStatus], [s].[UpdatedAt], [u].[UserId], [u].[AccountStatus], [u].[CreatedAt], [u].[Email], [u].[EmailVerified], [u].[FirstName], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[PhoneVerified], [u].[ProfileImageUrl], [u].[UpdatedAt]
+      FROM [dbo].[shops] AS [s]
+      INNER JOIN [dbo].[users] AS [u] ON [s].[OwnerUserId] = [u].[UserId]
+      WHERE LTRIM(RTRIM(LOWER([s].[ShopStatus]))) = N'pending'
+      ORDER BY [s].[CreatedAt] DESC
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='300']
+      SELECT [c].[ClientId], [c].[Birthdate], [c].[CreatedAt], [c].[MiddleName], [c].[Sex], [c].[UserId], [c].[ValidIdImageUrl], [u].[UserId], [u].[AccountStatus], [u].[CreatedAt], [u].[Email], [u].[EmailVerified], [u].[FirstName], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[PhoneVerified], [u].[ProfileImageUrl], [u].[UpdatedAt], [c0].[AddressId], [c0].[AddressLine], [c0].[Barangay], [c0].[City], [c0].[ClientId], [c0].[CreatedAt], [c0].[IsDefault], [c0].[Label], [c0].[Latitude], [c0].[Longitude], [c0].[PostalCode], [c0].[Province]
+      FROM [dbo].[clients] AS [c]
+      INNER JOIN [dbo].[users] AS [u] ON [c].[UserId] = [u].[UserId]
+      LEFT JOIN [dbo].[client_addresses] AS [c0] ON [c].[ClientId] = [c0].[ClientId]
+      WHERE LTRIM(RTRIM(LOWER([u].[AccountStatus]))) = N'pending'
+      ORDER BY [c].[CreatedAt] DESC, [c].[ClientId], [u].[UserId]
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='300']
+      SELECT [m].[MechanicId], [m].[AddressLine], [m].[AvailabilityStatus], [m].[AverageRating], [m].[Barangay], [m].[Bio], [m].[Birthdate], [m].[CertificationImageUrl], [m].[City], [m].[CreatedAt], [m].[CurrentLatitude], [m].[CurrentLongitude], [m].[IsVerified], [m].[MiddleName], [m].[Province], [m].[Sex], [m].[TotalCompletedJobs], [m].[UpdatedAt], [m].[UserId], [m].[ValidIdImageUrl], [m].[YearsExperience], [m].[ZipCode], [u].[UserId], [u].[AccountStatus], [u].[CreatedAt], [u].[Email], [u].[EmailVerified], [u].[FirstName], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[PhoneVerified], [u].[ProfileImageUrl], [u].[UpdatedAt], [s1].[ShopId], [s1].[MechanicId], [s1].[AssignedAt], [s1].[IsActive], [s1].[ShopId0], [s1].[AddressLine], [s1].[BusinessPermitUrl], [s1].[City], [s1].[ContactNumber], [s1].[CreatedAt], [s1].[Latitude], [s1].[Longitude], [s1].[OwnerAddressLine], [s1].[OwnerBarangay], [s1].[OwnerBirthdate], [s1].[OwnerCity], [s1].[OwnerMiddleName], [s1].[OwnerProvince], [s1].[OwnerSex], [s1].[OwnerUserId], [s1].[OwnerValidIdUrl], [s1].[OwnerZipCode], [s1].[Province], [s1].[ShopDescription], [s1].[ShopImageUrl], [s1].[ShopLogoUrl], [s1].[ShopName], [s1].[ShopStatus], [s1].[UpdatedAt]
+      FROM [dbo].[mechanics] AS [m]
+      INNER JOIN [dbo].[users] AS [u] ON [m].[UserId] = [u].[UserId]
+      LEFT JOIN (
+          SELECT [s].[ShopId], [s].[MechanicId], [s].[AssignedAt], [s].[IsActive], [s0].[ShopId] AS [ShopId0], [s0].[AddressLine], [s0].[BusinessPermitUrl], [s0].[City], [s0].[ContactNumber], [s0].[CreatedAt], [s0].[Latitude], [s0].[Longitude], [s0].[OwnerAddressLine], [s0].[OwnerBarangay], [s0].[OwnerBirthdate], [s0].[OwnerCity], [s0].[OwnerMiddleName], [s0].[OwnerProvince], [s0].[OwnerSex], [s0].[OwnerUserId], [s0].[OwnerValidIdUrl], [s0].[OwnerZipCode], [s0].[Province], [s0].[ShopDescription], [s0].[ShopImageUrl], [s0].[ShopLogoUrl], [s0].[ShopName], [s0].[ShopStatus], [s0].[UpdatedAt]
+          FROM [dbo].[shop_mechanics] AS [s]
+          INNER JOIN [dbo].[shops] AS [s0] ON [s].[ShopId] = [s0].[ShopId]
+      ) AS [s1] ON [m].[MechanicId] = [s1].[MechanicId]
+      WHERE [u].[EmailVerified] = CAST(1 AS bit) AND LTRIM(RTRIM(LOWER([u].[AccountStatus]))) <> N'deleted' AND LTRIM(RTRIM(LOWER([u].[AccountStatus]))) <> N'rejected' AND ([m].[IsVerified] = CAST(0 AS bit) OR LTRIM(RTRIM(LOWER([u].[AccountStatus]))) = N'pending')
+      ORDER BY [m].[CreatedAt] DESC, [m].[MechanicId], [u].[UserId], [s1].[ShopId], [s1].[MechanicId]
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (4ms) [Parameters=[], CommandType='Text', CommandTimeout='300']
+      SELECT [s].[ShopId], [s].[AddressLine], [s].[BusinessPermitUrl], [s].[City], [s].[ContactNumber], [s].[CreatedAt], [s].[Latitude], [s].[Longitude], [s].[OwnerAddressLine], [s].[OwnerBarangay], [s].[OwnerBirthdate], [s].[OwnerCity], [s].[OwnerMiddleName], [s].[OwnerProvince], [s].[OwnerSex], [s].[OwnerUserId], [s].[OwnerValidIdUrl], [s].[OwnerZipCode], [s].[Province], [s].[ShopDescription], [s].[ShopImageUrl], [s].[ShopLogoUrl], [s].[ShopName], [s].[ShopStatus], [s].[UpdatedAt], [u].[UserId], [u].[AccountStatus], [u].[CreatedAt], [u].[Email], [u].[EmailVerified], [u].[FirstName], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[PhoneVerified], [u].[ProfileImageUrl], [u].[UpdatedAt]
+      FROM [dbo].[shops] AS [s]
+      INNER JOIN [dbo].[users] AS [u] ON [s].[OwnerUserId] = [u].[UserId]
+      WHERE LTRIM(RTRIM(LOWER([s].[ShopStatus]))) = N'pending'
+      ORDER BY [s].[CreatedAt] DESC
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (6ms) [Parameters=[], CommandType='Text', CommandTimeout='300']
+      SELECT [c].[ClientId], [c].[Birthdate], [c].[CreatedAt], [c].[MiddleName], [c].[Sex], [c].[UserId], [c].[ValidIdImageUrl], [u].[UserId], [u].[AccountStatus], [u].[CreatedAt], [u].[Email], [u].[EmailVerified], [u].[FirstName], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[PhoneVerified], [u].[ProfileImageUrl], [u].[UpdatedAt], [c0].[AddressId], [c0].[AddressLine], [c0].[Barangay], [c0].[City], [c0].[ClientId], [c0].[CreatedAt], [c0].[IsDefault], [c0].[Label], [c0].[Latitude], [c0].[Longitude], [c0].[PostalCode], [c0].[Province]
+      FROM [dbo].[clients] AS [c]
+      INNER JOIN [dbo].[users] AS [u] ON [c].[UserId] = [u].[UserId]
+      LEFT JOIN [dbo].[client_addresses] AS [c0] ON [c].[ClientId] = [c0].[ClientId]
+      WHERE LTRIM(RTRIM(LOWER([u].[AccountStatus]))) = N'pending'
+      ORDER BY [c].[CreatedAt] DESC, [c].[ClientId], [u].[UserId]
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (13ms) [Parameters=[], CommandType='Text', CommandTimeout='300']
+      SELECT [m].[MechanicId], [m].[AddressLine], [m].[AvailabilityStatus], [m].[AverageRating], [m].[Barangay], [m].[Bio], [m].[Birthdate], [m].[CertificationImageUrl], [m].[City], [m].[CreatedAt], [m].[CurrentLatitude], [m].[CurrentLongitude], [m].[IsVerified], [m].[MiddleName], [m].[Province], [m].[Sex], [m].[TotalCompletedJobs], [m].[UpdatedAt], [m].[UserId], [m].[ValidIdImageUrl], [m].[YearsExperience], [m].[ZipCode], [u].[UserId], [u].[AccountStatus], [u].[CreatedAt], [u].[Email], [u].[EmailVerified], [u].[FirstName], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[PhoneVerified], [u].[ProfileImageUrl], [u].[UpdatedAt], [s1].[ShopId], [s1].[MechanicId], [s1].[AssignedAt], [s1].[IsActive], [s1].[ShopId0], [s1].[AddressLine], [s1].[BusinessPermitUrl], [s1].[City], [s1].[ContactNumber], [s1].[CreatedAt], [s1].[Latitude], [s1].[Longitude], [s1].[OwnerAddressLine], [s1].[OwnerBarangay], [s1].[OwnerBirthdate], [s1].[OwnerCity], [s1].[OwnerMiddleName], [s1].[OwnerProvince], [s1].[OwnerSex], [s1].[OwnerUserId], [s1].[OwnerValidIdUrl], [s1].[OwnerZipCode], [s1].[Province], [s1].[ShopDescription], [s1].[ShopImageUrl], [s1].[ShopLogoUrl], [s1].[ShopName], [s1].[ShopStatus], [s1].[UpdatedAt]
+      FROM [dbo].[mechanics] AS [m]
+      INNER JOIN [dbo].[users] AS [u] ON [m].[UserId] = [u].[UserId]
+      LEFT JOIN (
+          SELECT [s].[ShopId], [s].[MechanicId], [s].[AssignedAt], [s].[IsActive], [s0].[ShopId] AS [ShopId0], [s0].[AddressLine], [s0].[BusinessPermitUrl], [s0].[City], [s0].[ContactNumber], [s0].[CreatedAt], [s0].[Latitude], [s0].[Longitude], [s0].[OwnerAddressLine], [s0].[OwnerBarangay], [s0].[OwnerBirthdate], [s0].[OwnerCity], [s0].[OwnerMiddleName], [s0].[OwnerProvince], [s0].[OwnerSex], [s0].[OwnerUserId], [s0].[OwnerValidIdUrl], [s0].[OwnerZipCode], [s0].[Province], [s0].[ShopDescription], [s0].[ShopImageUrl], [s0].[ShopLogoUrl], [s0].[ShopName], [s0].[ShopStatus], [s0].[UpdatedAt]
+          FROM [dbo].[shop_mechanics] AS [s]
+          INNER JOIN [dbo].[shops] AS [s0] ON [s].[ShopId] = [s0].[ShopId]
+      ) AS [s1] ON [m].[MechanicId] = [s1].[MechanicId]
+      WHERE [u].[EmailVerified] = CAST(1 AS bit) AND LTRIM(RTRIM(LOWER([u].[AccountStatus]))) <> N'deleted' AND LTRIM(RTRIM(LOWER([u].[AccountStatus]))) <> N'rejected' AND ([m].[IsVerified] = CAST(0 AS bit) OR LTRIM(RTRIM(LOWER([u].[AccountStatus]))) = N'pending')
+      ORDER BY [m].[CreatedAt] DESC, [m].[MechanicId], [u].[UserId], [s1].[ShopId], [s1].[MechanicId]
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='300']
+      SELECT [s].[ShopId], [s].[AddressLine], [s].[BusinessPermitUrl], [s].[City], [s].[ContactNumber], [s].[CreatedAt], [s].[Latitude], [s].[Longitude], [s].[OwnerAddressLine], [s].[OwnerBarangay], [s].[OwnerBirthdate], [s].[OwnerCity], [s].[OwnerMiddleName], [s].[OwnerProvince], [s].[OwnerSex], [s].[OwnerUserId], [s].[OwnerValidIdUrl], [s].[OwnerZipCode], [s].[Province], [s].[ShopDescription], [s].[ShopImageUrl], [s].[ShopLogoUrl], [s].[ShopName], [s].[ShopStatus], [s].[UpdatedAt], [u].[UserId], [u].[AccountStatus], [u].[CreatedAt], [u].[Email], [u].[EmailVerified], [u].[FirstName], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[PhoneVerified], [u].[ProfileImageUrl], [u].[UpdatedAt]
+      FROM [dbo].[shops] AS [s]
+      INNER JOIN [dbo].[users] AS [u] ON [s].[OwnerUserId] = [u].[UserId]
+      WHERE LTRIM(RTRIM(LOWER([s].[ShopStatus]))) = N'pending'
+      ORDER BY [s].[CreatedAt] DESC
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='300']
+      SELECT [c].[ClientId], [c].[Birthdate], [c].[CreatedAt], [c].[MiddleName], [c].[Sex], [c].[UserId], [c].[ValidIdImageUrl], [u].[UserId], [u].[AccountStatus], [u].[CreatedAt], [u].[Email], [u].[EmailVerified], [u].[FirstName], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[PhoneVerified], [u].[ProfileImageUrl], [u].[UpdatedAt], [c0].[AddressId], [c0].[AddressLine], [c0].[Barangay], [c0].[City], [c0].[ClientId], [c0].[CreatedAt], [c0].[IsDefault], [c0].[Label], [c0].[Latitude], [c0].[Longitude], [c0].[PostalCode], [c0].[Province]
+      FROM [dbo].[clients] AS [c]
+      INNER JOIN [dbo].[users] AS [u] ON [c].[UserId] = [u].[UserId]
+      LEFT JOIN [dbo].[client_addresses] AS [c0] ON [c].[ClientId] = [c0].[ClientId]
+      WHERE LTRIM(RTRIM(LOWER([u].[AccountStatus]))) = N'pending'
+      ORDER BY [c].[CreatedAt] DESC, [c].[ClientId], [u].[UserId]
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='300']
+      SELECT [m].[MechanicId], [m].[AddressLine], [m].[AvailabilityStatus], [m].[AverageRating], [m].[Barangay], [m].[Bio], [m].[Birthdate], [m].[CertificationImageUrl], [m].[City], [m].[CreatedAt], [m].[CurrentLatitude], [m].[CurrentLongitude], [m].[IsVerified], [m].[MiddleName], [m].[Province], [m].[Sex], [m].[TotalCompletedJobs], [m].[UpdatedAt], [m].[UserId], [m].[ValidIdImageUrl], [m].[YearsExperience], [m].[ZipCode], [u].[UserId], [u].[AccountStatus], [u].[CreatedAt], [u].[Email], [u].[EmailVerified], [u].[FirstName], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[PhoneVerified], [u].[ProfileImageUrl], [u].[UpdatedAt], [s1].[ShopId], [s1].[MechanicId], [s1].[AssignedAt], [s1].[IsActive], [s1].[ShopId0], [s1].[AddressLine], [s1].[BusinessPermitUrl], [s1].[City], [s1].[ContactNumber], [s1].[CreatedAt], [s1].[Latitude], [s1].[Longitude], [s1].[OwnerAddressLine], [s1].[OwnerBarangay], [s1].[OwnerBirthdate], [s1].[OwnerCity], [s1].[OwnerMiddleName], [s1].[OwnerProvince], [s1].[OwnerSex], [s1].[OwnerUserId], [s1].[OwnerValidIdUrl], [s1].[OwnerZipCode], [s1].[Province], [s1].[ShopDescription], [s1].[ShopImageUrl], [s1].[ShopLogoUrl], [s1].[ShopName], [s1].[ShopStatus], [s1].[UpdatedAt]
+      FROM [dbo].[mechanics] AS [m]
+      INNER JOIN [dbo].[users] AS [u] ON [m].[UserId] = [u].[UserId]
+      LEFT JOIN (
+          SELECT [s].[ShopId], [s].[MechanicId], [s].[AssignedAt], [s].[IsActive], [s0].[ShopId] AS [ShopId0], [s0].[AddressLine], [s0].[BusinessPermitUrl], [s0].[City], [s0].[ContactNumber], [s0].[CreatedAt], [s0].[Latitude], [s0].[Longitude], [s0].[OwnerAddressLine], [s0].[OwnerBarangay], [s0].[OwnerBirthdate], [s0].[OwnerCity], [s0].[OwnerMiddleName], [s0].[OwnerProvince], [s0].[OwnerSex], [s0].[OwnerUserId], [s0].[OwnerValidIdUrl], [s0].[OwnerZipCode], [s0].[Province], [s0].[ShopDescription], [s0].[ShopImageUrl], [s0].[ShopLogoUrl], [s0].[ShopName], [s0].[ShopStatus], [s0].[UpdatedAt]
+          FROM [dbo].[shop_mechanics] AS [s]
+          INNER JOIN [dbo].[shops] AS [s0] ON [s].[ShopId] = [s0].[ShopId]
+      ) AS [s1] ON [m].[MechanicId] = [s1].[MechanicId]
+      WHERE [u].[EmailVerified] = CAST(1 AS bit) AND LTRIM(RTRIM(LOWER([u].[AccountStatus]))) <> N'deleted' AND LTRIM(RTRIM(LOWER([u].[AccountStatus]))) <> N'rejected' AND ([m].[IsVerified] = CAST(0 AS bit) OR LTRIM(RTRIM(LOWER([u].[AccountStatus]))) = N'pending')
+      ORDER BY [m].[CreatedAt] DESC, [m].[MechanicId], [u].[UserId], [s1].[ShopId], [s1].[MechanicId]
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (9ms) [Parameters=[@mechanicId='?' (DbType = Int32)], CommandType='Text', CommandTimeout='300']
+      SELECT [s0].[MechanicId], [s0].[AddressLine], [s0].[AvailabilityStatus], [s0].[AverageRating], [s0].[Barangay], [s0].[Bio], [s0].[Birthdate], [s0].[CertificationImageUrl], [s0].[City], [s0].[CreatedAt], [s0].[CurrentLatitude], [s0].[CurrentLongitude], [s0].[IsVerified], [s0].[MiddleName], [s0].[Province], [s0].[Sex], [s0].[TotalCompletedJobs], [s0].[UpdatedAt], [s0].[UserId], [s0].[ValidIdImageUrl], [s0].[YearsExperience], [s0].[ZipCode], [s0].[UserId0], [s0].[AccountStatus], [s0].[CreatedAt0], [s0].[Email], [s0].[EmailVerified], [s0].[FirstName], [s0].[LastName], [s0].[PasswordHash], [s0].[PhoneNumber], [s0].[PhoneVerified], [s0].[ProfileImageUrl], [s0].[UpdatedAt0], [s].[ShopId], [s].[MechanicId], [s].[AssignedAt], [s].[IsActive]
+      FROM (
+          SELECT TOP(1) [m].[MechanicId], [m].[AddressLine], [m].[AvailabilityStatus], [m].[AverageRating], [m].[Barangay], [m].[Bio], [m].[Birthdate], [m].[CertificationImageUrl], [m].[City], [m].[CreatedAt], [m].[CurrentLatitude], [m].[CurrentLongitude], [m].[IsVerified], [m].[MiddleName], [m].[Province], [m].[Sex], [m].[TotalCompletedJobs], [m].[UpdatedAt], [m].[UserId], [m].[ValidIdImageUrl], [m].[YearsExperience], [m].[ZipCode], [u].[UserId] AS [UserId0], [u].[AccountStatus], [u].[CreatedAt] AS [CreatedAt0], [u].[Email], [u].[EmailVerified], [u].[FirstName], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[PhoneVerified], [u].[ProfileImageUrl], [u].[UpdatedAt] AS [UpdatedAt0]
+          FROM [dbo].[mechanics] AS [m]
+          INNER JOIN [dbo].[users] AS [u] ON [m].[UserId] = [u].[UserId]
+          WHERE [m].[MechanicId] = @mechanicId
+      ) AS [s0]
+      LEFT JOIN [dbo].[shop_mechanics] AS [s] ON [s0].[MechanicId] = [s].[MechanicId]
+      ORDER BY [s0].[MechanicId], [s0].[UserId0], [s].[ShopId]
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (5ms) [Parameters=[@p2='?' (DbType = Int32), @p0='?' (DbType = Boolean), @p1='?' (DbType = DateTime2), @p4='?' (DbType = Int32), @p5='?' (DbType = Int32), @p3='?' (DbType = Boolean), @p8='?' (DbType = Int32), @p6='?' (Size = 30), @p7='?' (DbType = DateTime2)], CommandType='Text', CommandTimeout='300']
+      SET NOCOUNT ON;
+      UPDATE [dbo].[mechanics] SET [IsVerified] = @p0, [UpdatedAt] = @p1
+      OUTPUT 1
+      WHERE [MechanicId] = @p2;
+      UPDATE [dbo].[shop_mechanics] SET [IsActive] = @p3
+      OUTPUT 1
+      WHERE [MechanicId] = @p4 AND [ShopId] = @p5;
+      UPDATE [dbo].[users] SET [AccountStatus] = @p6, [UpdatedAt] = @p7
+      OUTPUT 1
+      WHERE [UserId] = @p8;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (4ms) [Parameters=[], CommandType='Text', CommandTimeout='300']
+      SELECT [s].[ShopId], [s].[AddressLine], [s].[BusinessPermitUrl], [s].[City], [s].[ContactNumber], [s].[CreatedAt], [s].[Latitude], [s].[Longitude], [s].[OwnerAddressLine], [s].[OwnerBarangay], [s].[OwnerBirthdate], [s].[OwnerCity], [s].[OwnerMiddleName], [s].[OwnerProvince], [s].[OwnerSex], [s].[OwnerUserId], [s].[OwnerValidIdUrl], [s].[OwnerZipCode], [s].[Province], [s].[ShopDescription], [s].[ShopImageUrl], [s].[ShopLogoUrl], [s].[ShopName], [s].[ShopStatus], [s].[UpdatedAt], [u].[UserId], [u].[AccountStatus], [u].[CreatedAt], [u].[Email], [u].[EmailVerified], [u].[FirstName], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[PhoneVerified], [u].[ProfileImageUrl], [u].[UpdatedAt]
+      FROM [dbo].[shops] AS [s]
+      INNER JOIN [dbo].[users] AS [u] ON [s].[OwnerUserId] = [u].[UserId]
+      WHERE LTRIM(RTRIM(LOWER([s].[ShopStatus]))) = N'pending'
+      ORDER BY [s].[CreatedAt] DESC
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (5ms) [Parameters=[], CommandType='Text', CommandTimeout='300']
+      SELECT [c].[ClientId], [c].[Birthdate], [c].[CreatedAt], [c].[MiddleName], [c].[Sex], [c].[UserId], [c].[ValidIdImageUrl], [u].[UserId], [u].[AccountStatus], [u].[CreatedAt], [u].[Email], [u].[EmailVerified], [u].[FirstName], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[PhoneVerified], [u].[ProfileImageUrl], [u].[UpdatedAt], [c0].[AddressId], [c0].[AddressLine], [c0].[Barangay], [c0].[City], [c0].[ClientId], [c0].[CreatedAt], [c0].[IsDefault], [c0].[Label], [c0].[Latitude], [c0].[Longitude], [c0].[PostalCode], [c0].[Province]
+      FROM [dbo].[clients] AS [c]
+      INNER JOIN [dbo].[users] AS [u] ON [c].[UserId] = [u].[UserId]
+      LEFT JOIN [dbo].[client_addresses] AS [c0] ON [c].[ClientId] = [c0].[ClientId]
+      WHERE LTRIM(RTRIM(LOWER([u].[AccountStatus]))) = N'pending'
+      ORDER BY [c].[CreatedAt] DESC, [c].[ClientId], [u].[UserId]
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (13ms) [Parameters=[], CommandType='Text', CommandTimeout='300']
+      SELECT [m].[MechanicId], [m].[AddressLine], [m].[AvailabilityStatus], [m].[AverageRating], [m].[Barangay], [m].[Bio], [m].[Birthdate], [m].[CertificationImageUrl], [m].[City], [m].[CreatedAt], [m].[CurrentLatitude], [m].[CurrentLongitude], [m].[IsVerified], [m].[MiddleName], [m].[Province], [m].[Sex], [m].[TotalCompletedJobs], [m].[UpdatedAt], [m].[UserId], [m].[ValidIdImageUrl], [m].[YearsExperience], [m].[ZipCode], [u].[UserId], [u].[AccountStatus], [u].[CreatedAt], [u].[Email], [u].[EmailVerified], [u].[FirstName], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[PhoneVerified], [u].[ProfileImageUrl], [u].[UpdatedAt], [s1].[ShopId], [s1].[MechanicId], [s1].[AssignedAt], [s1].[IsActive], [s1].[ShopId0], [s1].[AddressLine], [s1].[BusinessPermitUrl], [s1].[City], [s1].[ContactNumber], [s1].[CreatedAt], [s1].[Latitude], [s1].[Longitude], [s1].[OwnerAddressLine], [s1].[OwnerBarangay], [s1].[OwnerBirthdate], [s1].[OwnerCity], [s1].[OwnerMiddleName], [s1].[OwnerProvince], [s1].[OwnerSex], [s1].[OwnerUserId], [s1].[OwnerValidIdUrl], [s1].[OwnerZipCode], [s1].[Province], [s1].[ShopDescription], [s1].[ShopImageUrl], [s1].[ShopLogoUrl], [s1].[ShopName], [s1].[ShopStatus], [s1].[UpdatedAt]
+      FROM [dbo].[mechanics] AS [m]
+      INNER JOIN [dbo].[users] AS [u] ON [m].[UserId] = [u].[UserId]
+      LEFT JOIN (
+          SELECT [s].[ShopId], [s].[MechanicId], [s].[AssignedAt], [s].[IsActive], [s0].[ShopId] AS [ShopId0], [s0].[AddressLine], [s0].[BusinessPermitUrl], [s0].[City], [s0].[ContactNumber], [s0].[CreatedAt], [s0].[Latitude], [s0].[Longitude], [s0].[OwnerAddressLine], [s0].[OwnerBarangay], [s0].[OwnerBirthdate], [s0].[OwnerCity], [s0].[OwnerMiddleName], [s0].[OwnerProvince], [s0].[OwnerSex], [s0].[OwnerUserId], [s0].[OwnerValidIdUrl], [s0].[OwnerZipCode], [s0].[Province], [s0].[ShopDescription], [s0].[ShopImageUrl], [s0].[ShopLogoUrl], [s0].[ShopName], [s0].[ShopStatus], [s0].[UpdatedAt]
+          FROM [dbo].[shop_mechanics] AS [s]
+          INNER JOIN [dbo].[shops] AS [s0] ON [s].[ShopId] = [s0].[ShopId]
+      ) AS [s1] ON [m].[MechanicId] = [s1].[MechanicId]
+      WHERE [u].[EmailVerified] = CAST(1 AS bit) AND LTRIM(RTRIM(LOWER([u].[AccountStatus]))) <> N'deleted' AND LTRIM(RTRIM(LOWER([u].[AccountStatus]))) <> N'rejected' AND ([m].[IsVerified] = CAST(0 AS bit) OR LTRIM(RTRIM(LOWER([u].[AccountStatus]))) = N'pending')
+      ORDER BY [m].[CreatedAt] DESC, [m].[MechanicId], [u].[UserId], [s1].[ShopId], [s1].[MechanicId]
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (5ms) [Parameters=[], CommandType='Text', CommandTimeout='300']
+      SELECT [s].[ShopId], [s].[AddressLine], [s].[BusinessPermitUrl], [s].[City], [s].[ContactNumber], [s].[CreatedAt], [s].[Latitude], [s].[Longitude], [s].[OwnerAddressLine], [s].[OwnerBarangay], [s].[OwnerBirthdate], [s].[OwnerCity], [s].[OwnerMiddleName], [s].[OwnerProvince], [s].[OwnerSex], [s].[OwnerUserId], [s].[OwnerValidIdUrl], [s].[OwnerZipCode], [s].[Province], [s].[ShopDescription], [s].[ShopImageUrl], [s].[ShopLogoUrl], [s].[ShopName], [s].[ShopStatus], [s].[UpdatedAt], [u].[UserId], [u].[AccountStatus], [u].[CreatedAt], [u].[Email], [u].[EmailVerified], [u].[FirstName], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[PhoneVerified], [u].[ProfileImageUrl], [u].[UpdatedAt]
+      FROM [dbo].[shops] AS [s]
+      INNER JOIN [dbo].[users] AS [u] ON [s].[OwnerUserId] = [u].[UserId]
+      WHERE LTRIM(RTRIM(LOWER([s].[ShopStatus]))) <> N'deleted'
+      ORDER BY [s].[CreatedAt] DESC
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (11ms) [Parameters=[], CommandType='Text', CommandTimeout='300']
+      SELECT [m].[MechanicId] AS [Id], [u].[FirstName] + N' ' + [u].[LastName] AS [Name], [u].[Email], [m].[AverageRating] AS [Rating], [m].[AvailabilityStatus] AS [Status], [u].[AccountStatus], COALESCE((
+          SELECT TOP(1) [s0].[ShopName]
+          FROM [dbo].[shop_mechanics] AS [s]
+          INNER JOIN [dbo].[shops] AS [s0] ON [s].[ShopId] = [s0].[ShopId]
+          WHERE [m].[MechanicId] = [s].[MechanicId] AND [s].[IsActive] = CAST(1 AS bit)), N'') AS [ShopName], [m].[TotalCompletedJobs] AS [TotalJobs]
+      FROM [dbo].[mechanics] AS [m]
+      INNER JOIN [dbo].[users] AS [u] ON [m].[UserId] = [u].[UserId]
+      WHERE LTRIM(RTRIM(LOWER([u].[AccountStatus]))) <> N'deleted'
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (8ms) [Parameters=[], CommandType='Text', CommandTimeout='300']
+      SELECT [s].[ShopId], [s].[AddressLine], [s].[BusinessPermitUrl], [s].[City], [s].[ContactNumber], [s].[CreatedAt], [s].[Latitude], [s].[Longitude], [s].[OwnerAddressLine], [s].[OwnerBarangay], [s].[OwnerBirthdate], [s].[OwnerCity], [s].[OwnerMiddleName], [s].[OwnerProvince], [s].[OwnerSex], [s].[OwnerUserId], [s].[OwnerValidIdUrl], [s].[OwnerZipCode], [s].[Province], [s].[ShopDescription], [s].[ShopImageUrl], [s].[ShopLogoUrl], [s].[ShopName], [s].[ShopStatus], [s].[UpdatedAt], [u].[UserId], [u].[AccountStatus], [u].[CreatedAt], [u].[Email], [u].[EmailVerified], [u].[FirstName], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[PhoneVerified], [u].[ProfileImageUrl], [u].[UpdatedAt]
+      FROM [dbo].[shops] AS [s]
+      INNER JOIN [dbo].[users] AS [u] ON [s].[OwnerUserId] = [u].[UserId]
+      WHERE LTRIM(RTRIM(LOWER([s].[ShopStatus]))) = N'pending'
+      ORDER BY [s].[CreatedAt] DESC
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (5ms) [Parameters=[], CommandType='Text', CommandTimeout='300']
+      SELECT [c].[ClientId], [c].[Birthdate], [c].[CreatedAt], [c].[MiddleName], [c].[Sex], [c].[UserId], [c].[ValidIdImageUrl], [u].[UserId], [u].[AccountStatus], [u].[CreatedAt], [u].[Email], [u].[EmailVerified], [u].[FirstName], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[PhoneVerified], [u].[ProfileImageUrl], [u].[UpdatedAt], [c0].[AddressId], [c0].[AddressLine], [c0].[Barangay], [c0].[City], [c0].[ClientId], [c0].[CreatedAt], [c0].[IsDefault], [c0].[Label], [c0].[Latitude], [c0].[Longitude], [c0].[PostalCode], [c0].[Province]
+      FROM [dbo].[clients] AS [c]
+      INNER JOIN [dbo].[users] AS [u] ON [c].[UserId] = [u].[UserId]
+      LEFT JOIN [dbo].[client_addresses] AS [c0] ON [c].[ClientId] = [c0].[ClientId]
+      WHERE LTRIM(RTRIM(LOWER([u].[AccountStatus]))) = N'pending'
+      ORDER BY [c].[CreatedAt] DESC, [c].[ClientId], [u].[UserId]
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (14ms) [Parameters=[], CommandType='Text', CommandTimeout='300']
+      SELECT [m].[MechanicId], [m].[AddressLine], [m].[AvailabilityStatus], [m].[AverageRating], [m].[Barangay], [m].[Bio], [m].[Birthdate], [m].[CertificationImageUrl], [m].[City], [m].[CreatedAt], [m].[CurrentLatitude], [m].[CurrentLongitude], [m].[IsVerified], [m].[MiddleName], [m].[Province], [m].[Sex], [m].[TotalCompletedJobs], [m].[UpdatedAt], [m].[UserId], [m].[ValidIdImageUrl], [m].[YearsExperience], [m].[ZipCode], [u].[UserId], [u].[AccountStatus], [u].[CreatedAt], [u].[Email], [u].[EmailVerified], [u].[FirstName], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[PhoneVerified], [u].[ProfileImageUrl], [u].[UpdatedAt], [s1].[ShopId], [s1].[MechanicId], [s1].[AssignedAt], [s1].[IsActive], [s1].[ShopId0], [s1].[AddressLine], [s1].[BusinessPermitUrl], [s1].[City], [s1].[ContactNumber], [s1].[CreatedAt], [s1].[Latitude], [s1].[Longitude], [s1].[OwnerAddressLine], [s1].[OwnerBarangay], [s1].[OwnerBirthdate], [s1].[OwnerCity], [s1].[OwnerMiddleName], [s1].[OwnerProvince], [s1].[OwnerSex], [s1].[OwnerUserId], [s1].[OwnerValidIdUrl], [s1].[OwnerZipCode], [s1].[Province], [s1].[ShopDescription], [s1].[ShopImageUrl], [s1].[ShopLogoUrl], [s1].[ShopName], [s1].[ShopStatus], [s1].[UpdatedAt]
+      FROM [dbo].[mechanics] AS [m]
+      INNER JOIN [dbo].[users] AS [u] ON [m].[UserId] = [u].[UserId]
+      LEFT JOIN (
+          SELECT [s].[ShopId], [s].[MechanicId], [s].[AssignedAt], [s].[IsActive], [s0].[ShopId] AS [ShopId0], [s0].[AddressLine], [s0].[BusinessPermitUrl], [s0].[City], [s0].[ContactNumber], [s0].[CreatedAt], [s0].[Latitude], [s0].[Longitude], [s0].[OwnerAddressLine], [s0].[OwnerBarangay], [s0].[OwnerBirthdate], [s0].[OwnerCity], [s0].[OwnerMiddleName], [s0].[OwnerProvince], [s0].[OwnerSex], [s0].[OwnerUserId], [s0].[OwnerValidIdUrl], [s0].[OwnerZipCode], [s0].[Province], [s0].[ShopDescription], [s0].[ShopImageUrl], [s0].[ShopLogoUrl], [s0].[ShopName], [s0].[ShopStatus], [s0].[UpdatedAt]
+          FROM [dbo].[shop_mechanics] AS [s]
+          INNER JOIN [dbo].[shops] AS [s0] ON [s].[ShopId] = [s0].[ShopId]
+      ) AS [s1] ON [m].[MechanicId] = [s1].[MechanicId]
+      WHERE [u].[EmailVerified] = CAST(1 AS bit) AND LTRIM(RTRIM(LOWER([u].[AccountStatus]))) <> N'deleted' AND LTRIM(RTRIM(LOWER([u].[AccountStatus]))) <> N'rejected' AND ([m].[IsVerified] = CAST(0 AS bit) OR LTRIM(RTRIM(LOWER([u].[AccountStatus]))) = N'pending')
+      ORDER BY [m].[CreatedAt] DESC, [m].[MechanicId], [u].[UserId], [s1].[ShopId], [s1].[MechanicId]
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='300']
+      SELECT [m].[MechanicId] AS [Id], [u].[FirstName] + N' ' + [u].[LastName] AS [Name], [u].[Email], [m].[AverageRating] AS [Rating], [m].[AvailabilityStatus] AS [Status], [u].[AccountStatus], COALESCE((
+          SELECT TOP(1) [s0].[ShopName]
+          FROM [dbo].[shop_mechanics] AS [s]
+          INNER JOIN [dbo].[shops] AS [s0] ON [s].[ShopId] = [s0].[ShopId]
+          WHERE [m].[MechanicId] = [s].[MechanicId] AND [s].[IsActive] = CAST(1 AS bit)), N'') AS [ShopName], [m].[TotalCompletedJobs] AS [TotalJobs]
+      FROM [dbo].[mechanics] AS [m]
+      INNER JOIN [dbo].[users] AS [u] ON [m].[UserId] = [u].[UserId]
+      WHERE LTRIM(RTRIM(LOWER([u].[AccountStatus]))) <> N'deleted'
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='300']
+      SELECT [s].[ShopId], [s].[AddressLine], [s].[BusinessPermitUrl], [s].[City], [s].[ContactNumber], [s].[CreatedAt], [s].[Latitude], [s].[Longitude], [s].[OwnerAddressLine], [s].[OwnerBarangay], [s].[OwnerBirthdate], [s].[OwnerCity], [s].[OwnerMiddleName], [s].[OwnerProvince], [s].[OwnerSex], [s].[OwnerUserId], [s].[OwnerValidIdUrl], [s].[OwnerZipCode], [s].[Province], [s].[ShopDescription], [s].[ShopImageUrl], [s].[ShopLogoUrl], [s].[ShopName], [s].[ShopStatus], [s].[UpdatedAt], [u].[UserId], [u].[AccountStatus], [u].[CreatedAt], [u].[Email], [u].[EmailVerified], [u].[FirstName], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[PhoneVerified], [u].[ProfileImageUrl], [u].[UpdatedAt]
+      FROM [dbo].[shops] AS [s]
+      INNER JOIN [dbo].[users] AS [u] ON [s].[OwnerUserId] = [u].[UserId]
+      WHERE LTRIM(RTRIM(LOWER([s].[ShopStatus]))) <> N'deleted'
+      ORDER BY [s].[CreatedAt] DESC
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='300']
+      SELECT [s].[ShopId], [s].[AddressLine], [s].[BusinessPermitUrl], [s].[City], [s].[ContactNumber], [s].[CreatedAt], [s].[Latitude], [s].[Longitude], [s].[OwnerAddressLine], [s].[OwnerBarangay], [s].[OwnerBirthdate], [s].[OwnerCity], [s].[OwnerMiddleName], [s].[OwnerProvince], [s].[OwnerSex], [s].[OwnerUserId], [s].[OwnerValidIdUrl], [s].[OwnerZipCode], [s].[Province], [s].[ShopDescription], [s].[ShopImageUrl], [s].[ShopLogoUrl], [s].[ShopName], [s].[ShopStatus], [s].[UpdatedAt], [u].[UserId], [u].[AccountStatus], [u].[CreatedAt], [u].[Email], [u].[EmailVerified], [u].[FirstName], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[PhoneVerified], [u].[ProfileImageUrl], [u].[UpdatedAt]
+      FROM [dbo].[shops] AS [s]
+      INNER JOIN [dbo].[users] AS [u] ON [s].[OwnerUserId] = [u].[UserId]
+      WHERE LTRIM(RTRIM(LOWER([s].[ShopStatus]))) = N'pending'
+      ORDER BY [s].[CreatedAt] DESC
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (4ms) [Parameters=[], CommandType='Text', CommandTimeout='300']
+      SELECT [c].[ClientId], [c].[Birthdate], [c].[CreatedAt], [c].[MiddleName], [c].[Sex], [c].[UserId], [c].[ValidIdImageUrl], [u].[UserId], [u].[AccountStatus], [u].[CreatedAt], [u].[Email], [u].[EmailVerified], [u].[FirstName], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[PhoneVerified], [u].[ProfileImageUrl], [u].[UpdatedAt], [c0].[AddressId], [c0].[AddressLine], [c0].[Barangay], [c0].[City], [c0].[ClientId], [c0].[CreatedAt], [c0].[IsDefault], [c0].[Label], [c0].[Latitude], [c0].[Longitude], [c0].[PostalCode], [c0].[Province]
+      FROM [dbo].[clients] AS [c]
+      INNER JOIN [dbo].[users] AS [u] ON [c].[UserId] = [u].[UserId]
+      LEFT JOIN [dbo].[client_addresses] AS [c0] ON [c].[ClientId] = [c0].[ClientId]
+      WHERE LTRIM(RTRIM(LOWER([u].[AccountStatus]))) = N'pending'
+      ORDER BY [c].[CreatedAt] DESC, [c].[ClientId], [u].[UserId]
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='300']
+      SELECT [m].[MechanicId], [m].[AddressLine], [m].[AvailabilityStatus], [m].[AverageRating], [m].[Barangay], [m].[Bio], [m].[Birthdate], [m].[CertificationImageUrl], [m].[City], [m].[CreatedAt], [m].[CurrentLatitude], [m].[CurrentLongitude], [m].[IsVerified], [m].[MiddleName], [m].[Province], [m].[Sex], [m].[TotalCompletedJobs], [m].[UpdatedAt], [m].[UserId], [m].[ValidIdImageUrl], [m].[YearsExperience], [m].[ZipCode], [u].[UserId], [u].[AccountStatus], [u].[CreatedAt], [u].[Email], [u].[EmailVerified], [u].[FirstName], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[PhoneVerified], [u].[ProfileImageUrl], [u].[UpdatedAt], [s1].[ShopId], [s1].[MechanicId], [s1].[AssignedAt], [s1].[IsActive], [s1].[ShopId0], [s1].[AddressLine], [s1].[BusinessPermitUrl], [s1].[City], [s1].[ContactNumber], [s1].[CreatedAt], [s1].[Latitude], [s1].[Longitude], [s1].[OwnerAddressLine], [s1].[OwnerBarangay], [s1].[OwnerBirthdate], [s1].[OwnerCity], [s1].[OwnerMiddleName], [s1].[OwnerProvince], [s1].[OwnerSex], [s1].[OwnerUserId], [s1].[OwnerValidIdUrl], [s1].[OwnerZipCode], [s1].[Province], [s1].[ShopDescription], [s1].[ShopImageUrl], [s1].[ShopLogoUrl], [s1].[ShopName], [s1].[ShopStatus], [s1].[UpdatedAt]
+      FROM [dbo].[mechanics] AS [m]
+      INNER JOIN [dbo].[users] AS [u] ON [m].[UserId] = [u].[UserId]
+      LEFT JOIN (
+          SELECT [s].[ShopId], [s].[MechanicId], [s].[AssignedAt], [s].[IsActive], [s0].[ShopId] AS [ShopId0], [s0].[AddressLine], [s0].[BusinessPermitUrl], [s0].[City], [s0].[ContactNumber], [s0].[CreatedAt], [s0].[Latitude], [s0].[Longitude], [s0].[OwnerAddressLine], [s0].[OwnerBarangay], [s0].[OwnerBirthdate], [s0].[OwnerCity], [s0].[OwnerMiddleName], [s0].[OwnerProvince], [s0].[OwnerSex], [s0].[OwnerUserId], [s0].[OwnerValidIdUrl], [s0].[OwnerZipCode], [s0].[Province], [s0].[ShopDescription], [s0].[ShopImageUrl], [s0].[ShopLogoUrl], [s0].[ShopName], [s0].[ShopStatus], [s0].[UpdatedAt]
+          FROM [dbo].[shop_mechanics] AS [s]
+          INNER JOIN [dbo].[shops] AS [s0] ON [s].[ShopId] = [s0].[ShopId]
+      ) AS [s1] ON [m].[MechanicId] = [s1].[MechanicId]
+      WHERE [u].[EmailVerified] = CAST(1 AS bit) AND LTRIM(RTRIM(LOWER([u].[AccountStatus]))) <> N'deleted' AND LTRIM(RTRIM(LOWER([u].[AccountStatus]))) <> N'rejected' AND ([m].[IsVerified] = CAST(0 AS bit) OR LTRIM(RTRIM(LOWER([u].[AccountStatus]))) = N'pending')
+      ORDER BY [m].[CreatedAt] DESC, [m].[MechanicId], [u].[UserId], [s1].[ShopId], [s1].[MechanicId]
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (7ms) [Parameters=[@clientId='?' (DbType = Int32)], CommandType='Text', CommandTimeout='300']
+      SELECT TOP(1) [c].[ClientId], [c].[Birthdate], [c].[CreatedAt], [c].[MiddleName], [c].[Sex], [c].[UserId], [c].[ValidIdImageUrl], [u].[UserId], [u].[AccountStatus], [u].[CreatedAt], [u].[Email], [u].[EmailVerified], [u].[FirstName], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[PhoneVerified], [u].[ProfileImageUrl], [u].[UpdatedAt]
+      FROM [dbo].[clients] AS [c]
+      INNER JOIN [dbo].[users] AS [u] ON [c].[UserId] = [u].[UserId]
+      WHERE [c].[ClientId] = @clientId
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@p2='?' (DbType = Int32), @p0='?' (Size = 30), @p1='?' (DbType = DateTime2)], CommandType='Text', CommandTimeout='300']
+      SET IMPLICIT_TRANSACTIONS OFF;
+      SET NOCOUNT ON;
+      UPDATE [dbo].[users] SET [AccountStatus] = @p0, [UpdatedAt] = @p1
+      OUTPUT 1
+      WHERE [UserId] = @p2;
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='300']
+      SELECT [s].[ShopId], [s].[AddressLine], [s].[BusinessPermitUrl], [s].[City], [s].[ContactNumber], [s].[CreatedAt], [s].[Latitude], [s].[Longitude], [s].[OwnerAddressLine], [s].[OwnerBarangay], [s].[OwnerBirthdate], [s].[OwnerCity], [s].[OwnerMiddleName], [s].[OwnerProvince], [s].[OwnerSex], [s].[OwnerUserId], [s].[OwnerValidIdUrl], [s].[OwnerZipCode], [s].[Province], [s].[ShopDescription], [s].[ShopImageUrl], [s].[ShopLogoUrl], [s].[ShopName], [s].[ShopStatus], [s].[UpdatedAt], [u].[UserId], [u].[AccountStatus], [u].[CreatedAt], [u].[Email], [u].[EmailVerified], [u].[FirstName], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[PhoneVerified], [u].[ProfileImageUrl], [u].[UpdatedAt]
+      FROM [dbo].[shops] AS [s]
+      INNER JOIN [dbo].[users] AS [u] ON [s].[OwnerUserId] = [u].[UserId]
+      WHERE LTRIM(RTRIM(LOWER([s].[ShopStatus]))) = N'pending'
+      ORDER BY [s].[CreatedAt] DESC
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (0ms) [Parameters=[], CommandType='Text', CommandTimeout='300']
+      SELECT [c].[ClientId], [c].[Birthdate], [c].[CreatedAt], [c].[MiddleName], [c].[Sex], [c].[UserId], [c].[ValidIdImageUrl], [u].[UserId], [u].[AccountStatus], [u].[CreatedAt], [u].[Email], [u].[EmailVerified], [u].[FirstName], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[PhoneVerified], [u].[ProfileImageUrl], [u].[UpdatedAt], [c0].[AddressId], [c0].[AddressLine], [c0].[Barangay], [c0].[City], [c0].[ClientId], [c0].[CreatedAt], [c0].[IsDefault], [c0].[Label], [c0].[Latitude], [c0].[Longitude], [c0].[PostalCode], [c0].[Province]
+      FROM [dbo].[clients] AS [c]
+      INNER JOIN [dbo].[users] AS [u] ON [c].[UserId] = [u].[UserId]
+      LEFT JOIN [dbo].[client_addresses] AS [c0] ON [c].[ClientId] = [c0].[ClientId]
+      WHERE LTRIM(RTRIM(LOWER([u].[AccountStatus]))) = N'pending'
+      ORDER BY [c].[CreatedAt] DESC, [c].[ClientId], [u].[UserId]
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='300']
+      SELECT [m].[MechanicId], [m].[AddressLine], [m].[AvailabilityStatus], [m].[AverageRating], [m].[Barangay], [m].[Bio], [m].[Birthdate], [m].[CertificationImageUrl], [m].[City], [m].[CreatedAt], [m].[CurrentLatitude], [m].[CurrentLongitude], [m].[IsVerified], [m].[MiddleName], [m].[Province], [m].[Sex], [m].[TotalCompletedJobs], [m].[UpdatedAt], [m].[UserId], [m].[ValidIdImageUrl], [m].[YearsExperience], [m].[ZipCode], [u].[UserId], [u].[AccountStatus], [u].[CreatedAt], [u].[Email], [u].[EmailVerified], [u].[FirstName], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[PhoneVerified], [u].[ProfileImageUrl], [u].[UpdatedAt], [s1].[ShopId], [s1].[MechanicId], [s1].[AssignedAt], [s1].[IsActive], [s1].[ShopId0], [s1].[AddressLine], [s1].[BusinessPermitUrl], [s1].[City], [s1].[ContactNumber], [s1].[CreatedAt], [s1].[Latitude], [s1].[Longitude], [s1].[OwnerAddressLine], [s1].[OwnerBarangay], [s1].[OwnerBirthdate], [s1].[OwnerCity], [s1].[OwnerMiddleName], [s1].[OwnerProvince], [s1].[OwnerSex], [s1].[OwnerUserId], [s1].[OwnerValidIdUrl], [s1].[OwnerZipCode], [s1].[Province], [s1].[ShopDescription], [s1].[ShopImageUrl], [s1].[ShopLogoUrl], [s1].[ShopName], [s1].[ShopStatus], [s1].[UpdatedAt]
+      FROM [dbo].[mechanics] AS [m]
+      INNER JOIN [dbo].[users] AS [u] ON [m].[UserId] = [u].[UserId]
+      LEFT JOIN (
+          SELECT [s].[ShopId], [s].[MechanicId], [s].[AssignedAt], [s].[IsActive], [s0].[ShopId] AS [ShopId0], [s0].[AddressLine], [s0].[BusinessPermitUrl], [s0].[City], [s0].[ContactNumber], [s0].[CreatedAt], [s0].[Latitude], [s0].[Longitude], [s0].[OwnerAddressLine], [s0].[OwnerBarangay], [s0].[OwnerBirthdate], [s0].[OwnerCity], [s0].[OwnerMiddleName], [s0].[OwnerProvince], [s0].[OwnerSex], [s0].[OwnerUserId], [s0].[OwnerValidIdUrl], [s0].[OwnerZipCode], [s0].[Province], [s0].[ShopDescription], [s0].[ShopImageUrl], [s0].[ShopLogoUrl], [s0].[ShopName], [s0].[ShopStatus], [s0].[UpdatedAt]
+          FROM [dbo].[shop_mechanics] AS [s]
+          INNER JOIN [dbo].[shops] AS [s0] ON [s].[ShopId] = [s0].[ShopId]
+      ) AS [s1] ON [m].[MechanicId] = [s1].[MechanicId]
+      WHERE [u].[EmailVerified] = CAST(1 AS bit) AND LTRIM(RTRIM(LOWER([u].[AccountStatus]))) <> N'deleted' AND LTRIM(RTRIM(LOWER([u].[AccountStatus]))) <> N'rejected' AND ([m].[IsVerified] = CAST(0 AS bit) OR LTRIM(RTRIM(LOWER([u].[AccountStatus]))) = N'pending')
+      ORDER BY [m].[CreatedAt] DESC, [m].[MechanicId], [u].[UserId], [s1].[ShopId], [s1].[MechanicId]
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (27ms) [Parameters=[], CommandType='Text', CommandTimeout='300']
+      SELECT [s].[RequestId] AS [Id], [u].[FirstName] + N' ' + [u].[LastName] AS [ClientName], CASE
+          WHEN [s0].[ShopServiceId] IS NOT NULL THEN [s0].[ServiceName]
+          ELSE N'Emergency Service'
+      END AS [ServiceName], [r].[StatusName] AS [Status], [s].[EstimatedTotal] AS [TotalAmount]
+      FROM [dbo].[service_requests] AS [s]
+      INNER JOIN [dbo].[request_statuses] AS [r] ON [s].[CurrentStatusId] = [r].[StatusId]
+      LEFT JOIN [dbo].[shop_services] AS [s0] ON [s].[ShopServiceId] = [s0].[ShopServiceId]
+      INNER JOIN [dbo].[clients] AS [c] ON [s].[ClientId] = [c].[ClientId]
+      INNER JOIN [dbo].[users] AS [u] ON [c].[UserId] = [u].[UserId]
+      WHERE [r].[StatusName] NOT IN (N'completed', N'cancelled') AND ([r].[StatusName] LIKE N'%emergency%' OR [r].[StatusName] LIKE N'%urgent%' OR [s].[IssueDescription] LIKE N'%emergency%' OR [s].[IssueDescription] LIKE N'%urgent%' OR [s].[IssueDescription] LIKE N'%accident%' OR [s].[IssueDescription] LIKE N'%breakdown%' OR [s].[IssueDescription] LIKE N'%stranded%' OR [s].[IssueDescription] LIKE N'%flat tire%' OR [s].[IssueDescription] LIKE N'%no start%' OR [s].[IssueDescription] LIKE N'%won''t start%' OR [s].[IssueDescription] LIKE N'%wont start%' OR ([s0].[ShopServiceId] IS NOT NULL AND ([s0].[ServiceName] LIKE N'%emergency%' OR [s0].[ServiceName] LIKE N'%urgent%' OR [s0].[ServiceName] LIKE N'%accident%' OR [s0].[ServiceName] LIKE N'%breakdown%' OR [s0].[ServiceName] LIKE N'%stranded%' OR [s0].[ServiceName] LIKE N'%flat tire%' OR [s0].[ServiceName] LIKE N'%no start%' OR [s0].[ServiceName] LIKE N'%won''t start%' OR [s0].[ServiceName] LIKE N'%wont start%')))
+      ORDER BY [s].[CreatedAt] DESC
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[@sevenDaysAgo='?' (DbType = DateTime2)], CommandType='Text', CommandTimeout='300']
+      SELECT [c].[CreatedAt]
+      FROM [dbo].[clients] AS [c]
+      WHERE [c].[CreatedAt] >= @sevenDaysAgo
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (5ms) [Parameters=[@p='?' (DbType = Int32)], CommandType='Text', CommandTimeout='300']
+      SELECT [s1].[RequestId], CASE
+          WHEN [s0].[ShopServiceId] IS NOT NULL THEN [s0].[ServiceName]
+          ELSE N'General Help'
+      END AS [ServiceName], [s1].[StatusName] AS [Status], N'Recently' AS [TimeAgo]
+      FROM (
+          SELECT TOP(@p) [s].[RequestId], [s].[CreatedAt], [s].[ShopServiceId], [r].[StatusName]
+          FROM [dbo].[service_requests] AS [s]
+          INNER JOIN [dbo].[request_statuses] AS [r] ON [s].[CurrentStatusId] = [r].[StatusId]
+          WHERE [r].[StatusName] NOT IN (N'completed', N'cancelled')
+          ORDER BY [s].[CreatedAt] DESC
+      ) AS [s1]
+      LEFT JOIN [dbo].[shop_services] AS [s0] ON [s1].[ShopServiceId] = [s0].[ShopServiceId]
+      ORDER BY [s1].[CreatedAt] DESC
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='300']
+      SELECT COUNT(*)
+      FROM [dbo].[clients] AS [c]
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (3ms) [Parameters=[], CommandType='Text', CommandTimeout='300']
+      SELECT COUNT(*)
+      FROM [dbo].[mechanics] AS [m]
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='300']
+      SELECT COUNT(*)
+      FROM [dbo].[shops] AS [s]
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (5ms) [Parameters=[], CommandType='Text', CommandTimeout='300']
+      SELECT COUNT(*)
+      FROM [dbo].[service_requests] AS [s]
+      INNER JOIN [dbo].[request_statuses] AS [r] ON [s].[CurrentStatusId] = [r].[StatusId]
+      WHERE [r].[StatusName] NOT IN (N'completed', N'cancelled')
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='300']
+      SELECT COUNT(*)
+      FROM [dbo].[mechanics] AS [m]
+      WHERE [m].[AvailabilityStatus] = N'online'
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='300']
+      SELECT COUNT(*)
+      FROM [dbo].[shops] AS [s]
+      WHERE [s].[ShopStatus] = N'verified'
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (10ms) [Parameters=[], CommandType='Text', CommandTimeout='300']
+      SELECT [s].[RequestId] AS [Id], [u].[FirstName] + N' ' + [u].[LastName] AS [ClientName], CASE
+          WHEN [s0].[ShopServiceId] IS NOT NULL THEN [s0].[ServiceName]
+          ELSE N'Emergency Service'
+      END AS [ServiceName], [r].[StatusName] AS [Status], [s].[EstimatedTotal] AS [TotalAmount]
+      FROM [dbo].[service_requests] AS [s]
+      INNER JOIN [dbo].[request_statuses] AS [r] ON [s].[CurrentStatusId] = [r].[StatusId]
+      LEFT JOIN [dbo].[shop_services] AS [s0] ON [s].[ShopServiceId] = [s0].[ShopServiceId]
+      INNER JOIN [dbo].[clients] AS [c] ON [s].[ClientId] = [c].[ClientId]
+      INNER JOIN [dbo].[users] AS [u] ON [c].[UserId] = [u].[UserId]
+      WHERE [r].[StatusName] NOT IN (N'completed', N'cancelled') AND ([r].[StatusName] LIKE N'%emergency%' OR [r].[StatusName] LIKE N'%urgent%' OR [s].[IssueDescription] LIKE N'%emergency%' OR [s].[IssueDescription] LIKE N'%urgent%' OR [s].[IssueDescription] LIKE N'%accident%' OR [s].[IssueDescription] LIKE N'%breakdown%' OR [s].[IssueDescription] LIKE N'%stranded%' OR [s].[IssueDescription] LIKE N'%flat tire%' OR [s].[IssueDescription] LIKE N'%no start%' OR [s].[IssueDescription] LIKE N'%won''t start%' OR [s].[IssueDescription] LIKE N'%wont start%' OR ([s0].[ShopServiceId] IS NOT NULL AND ([s0].[ServiceName] LIKE N'%emergency%' OR [s0].[ServiceName] LIKE N'%urgent%' OR [s0].[ServiceName] LIKE N'%accident%' OR [s0].[ServiceName] LIKE N'%breakdown%' OR [s0].[ServiceName] LIKE N'%stranded%' OR [s0].[ServiceName] LIKE N'%flat tire%' OR [s0].[ServiceName] LIKE N'%no start%' OR [s0].[ServiceName] LIKE N'%won''t start%' OR [s0].[ServiceName] LIKE N'%wont start%')))
+      ORDER BY [s].[CreatedAt] DESC
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (8ms) [Parameters=[], CommandType='Text', CommandTimeout='300']
+      SELECT [s].[ShopId], [s].[AddressLine], [s].[BusinessPermitUrl], [s].[City], [s].[ContactNumber], [s].[CreatedAt], [s].[Latitude], [s].[Longitude], [s].[OwnerAddressLine], [s].[OwnerBarangay], [s].[OwnerBirthdate], [s].[OwnerCity], [s].[OwnerMiddleName], [s].[OwnerProvince], [s].[OwnerSex], [s].[OwnerUserId], [s].[OwnerValidIdUrl], [s].[OwnerZipCode], [s].[Province], [s].[ShopDescription], [s].[ShopImageUrl], [s].[ShopLogoUrl], [s].[ShopName], [s].[ShopStatus], [s].[UpdatedAt], [u].[UserId], [u].[AccountStatus], [u].[CreatedAt], [u].[Email], [u].[EmailVerified], [u].[FirstName], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[PhoneVerified], [u].[ProfileImageUrl], [u].[UpdatedAt]
+      FROM [dbo].[shops] AS [s]
+      INNER JOIN [dbo].[users] AS [u] ON [s].[OwnerUserId] = [u].[UserId]
+      WHERE LTRIM(RTRIM(LOWER([s].[ShopStatus]))) <> N'deleted'
+      ORDER BY [s].[CreatedAt] DESC
+info: Microsoft.EntityFrameworkCore.Database.Command[20101]
+      Executed DbCommand (29ms) [Parameters=[@id='?' (DbType = Int32)], CommandType='Text', CommandTimeout='300']
+      SELECT [s5].[ShopId], [s5].[AddressLine], [s5].[BusinessPermitUrl], [s5].[City], [s5].[ContactNumber], [s5].[CreatedAt], [s5].[Latitude], [s5].[Longitude], [s5].[OwnerAddressLine], [s5].[OwnerBarangay], [s5].[OwnerBirthdate], [s5].[OwnerCity], [s5].[OwnerMiddleName], [s5].[OwnerProvince], [s5].[OwnerSex], [s5].[OwnerUserId], [s5].[OwnerValidIdUrl], [s5].[OwnerZipCode], [s5].[Province], [s5].[ShopDescription], [s5].[ShopImageUrl], [s5].[ShopLogoUrl], [s5].[ShopName], [s5].[ShopStatus], [s5].[UpdatedAt], [s5].[UserId], [s5].[AccountStatus], [s5].[CreatedAt0], [s5].[Email], [s5].[EmailVerified], [s5].[FirstName], [s5].[LastName], [s5].[PasswordHash], [s5].[PhoneNumber], [s5].[PhoneVerified], [s5].[ProfileImageUrl], [s5].[UpdatedAt0], [s0].[OperatingHourId], [s0].[ClosingTime], [s0].[DayOfWeek], [s0].[IsClosed], [s0].[OpeningTime], [s0].[ShopId], [s6].[ShopServiceId], [s6].[BasePrice], [s6].[CategoryId], [s6].[CreatedAt], [s6].[EstimatedMinutes], [s6].[IsActive], [s6].[ServiceDescription], [s6].[ServiceName], [s6].[ShopId], [s6].[CategoryId0], [s6].[CategoryName], [s6].[Description], [s6].[IconUrl], [s6].[IsActive0], [s6].[ServiceImageId], [s6].[CreatedAt0], [s6].[ImageUrl], [s6].[ShopServiceId0], [s7].[ProductId], [s7].[CreatedAt], [s7].[IsActive], [s7].[Price], [s7].[ProductDescription], [s7].[ProductName], [s7].[ShopId], [s7].[StockQuantity], [s7].[UpdatedAt], [s7].[ProductImageId], [s7].[CreatedAt0], [s7].[ImageUrl], [s7].[ProductId0], [s8].[ShopId], [s8].[MechanicId], [s8].[AssignedAt], [s8].[IsActive], [s8].[MechanicId0], [s8].[AddressLine], [s8].[AvailabilityStatus], [s8].[AverageRating], [s8].[Barangay], [s8].[Bio], [s8].[Birthdate], [s8].[CertificationImageUrl], [s8].[City], [s8].[CreatedAt], [s8].[CurrentLatitude], [s8].[CurrentLongitude], [s8].[IsVerified], [s8].[MiddleName], [s8].[Province], [s8].[Sex], [s8].[TotalCompletedJobs], [s8].[UpdatedAt], [s8].[UserId], [s8].[ValidIdImageUrl], [s8].[YearsExperience], [s8].[ZipCode], [s8].[UserId0], [s8].[AccountStatus], [s8].[CreatedAt0], [s8].[Email], [s8].[EmailVerified], [s8].[FirstName], [s8].[LastName], [s8].[PasswordHash], [s8].[PhoneNumber], [s8].[PhoneVerified], [s8].[ProfileImageUrl], [s8].[UpdatedAt0]
+      FROM (
+          SELECT TOP(1) [s].[ShopId], [s].[AddressLine], [s].[BusinessPermitUrl], [s].[City], [s].[ContactNumber], [s].[CreatedAt], [s].[Latitude], [s].[Longitude], [s].[OwnerAddressLine], [s].[OwnerBarangay], [s].[OwnerBirthdate], [s].[OwnerCity], [s].[OwnerMiddleName], [s].[OwnerProvince], [s].[OwnerSex], [s].[OwnerUserId], [s].[OwnerValidIdUrl], [s].[OwnerZipCode], [s].[Province], [s].[ShopDescription], [s].[ShopImageUrl], [s].[ShopLogoUrl], [s].[ShopName], [s].[ShopStatus], [s].[UpdatedAt], [u].[UserId], [u].[AccountStatus], [u].[CreatedAt] AS [CreatedAt0], [u].[Email], [u].[EmailVerified], [u].[FirstName], [u].[LastName], [u].[PasswordHash], [u].[PhoneNumber], [u].[PhoneVerified], [u].[ProfileImageUrl], [u].[UpdatedAt] AS [UpdatedAt0]
+          FROM [dbo].[shops] AS [s]
+          INNER JOIN [dbo].[users] AS [u] ON [s].[OwnerUserId] = [u].[UserId]
+          WHERE [s].[ShopId] = @id
+      ) AS [s5]
+      LEFT JOIN [dbo].[shop_operating_hours] AS [s0] ON [s5].[ShopId] = [s0].[ShopId]
+      LEFT JOIN (
+          SELECT [s1].[ShopServiceId], [s1].[BasePrice], [s1].[CategoryId], [s1].[CreatedAt], [s1].[EstimatedMinutes], [s1].[IsActive], [s1].[ServiceDescription], [s1].[ServiceName], [s1].[ShopId], [s2].[CategoryId] AS [CategoryId0], [s2].[CategoryName], [s2].[Description], [s2].[IconUrl], [s2].[IsActive] AS [IsActive0], [s3].[ServiceImageId], [s3].[CreatedAt] AS [CreatedAt0], [s3].[ImageUrl], [s3].[ShopServiceId] AS [ShopServiceId0]
+          FROM [dbo].[shop_services] AS [s1]
+          INNER JOIN [dbo].[service_categories] AS [s2] ON [s1].[CategoryId] = [s2].[CategoryId]
+          LEFT JOIN [dbo].[service_images] AS [s3] ON [s1].[ShopServiceId] = [s3].[ShopServiceId]
+      ) AS [s6] ON [s5].[ShopId] = [s6].[ShopId]
+      LEFT JOIN (
+          SELECT [p].[ProductId], [p].[CreatedAt], [p].[IsActive], [p].[Price], [p].[ProductDescription], [p].[ProductName], [p].[ShopId], [p].[StockQuantity], [p].[UpdatedAt], [p0].[ProductImageId], [p0].[CreatedAt] AS [CreatedAt0], [p0].[ImageUrl], [p0].[ProductId] AS [ProductId0]
+          FROM [dbo].[products] AS [p]
+          LEFT JOIN [dbo].[product_images] AS [p0] ON [p].[ProductId] = [p0].[ProductId]
+      ) AS [s7] ON [s5].[ShopId] = [s7].[ShopId]
+      LEFT JOIN (
+          SELECT [s4].[ShopId], [s4].[MechanicId], [s4].[AssignedAt], [s4].[IsActive], [m].[MechanicId] AS [MechanicId0], [m].[AddressLine], [m].[AvailabilityStatus], [m].[AverageRating], [m].[Barangay], [m].[Bio], [m].[Birthdate], [m].[CertificationImageUrl], [m].[City], [m].[CreatedAt], [m].[CurrentLatitude], [m].[CurrentLongitude], [m].[IsVerified], [m].[MiddleName], [m].[Province], [m].[Sex], [m].[TotalCompletedJobs], [m].[UpdatedAt], [m].[UserId], [m].[ValidIdImageUrl], [m].[YearsExperience], [m].[ZipCode], [u0].[UserId] AS [UserId0], [u0].[AccountStatus], [u0].[CreatedAt] AS [CreatedAt0], [u0].[Email], [u0].[EmailVerified], [u0].[FirstName], [u0].[LastName], [u0].[PasswordHash], [u0].[PhoneNumber], [u0].[PhoneVerified], [u0].[ProfileImageUrl], [u0].[UpdatedAt] AS [UpdatedAt0]
+          FROM [dbo].[shop_mechanics] AS [s4]
+          INNER JOIN [dbo].[mechanics] AS [m] ON [s4].[MechanicId] = [m].[MechanicId]
+          INNER JOIN [dbo].[users] AS [u0] ON [m].[UserId] = [u0].[UserId]
+      ) AS [s8] ON [s5].[ShopId] = [s8].[ShopId]
+      ORDER BY [s5].[ShopId], [s5].[UserId], [s0].[OperatingHourId], [s6].[ShopServiceId], [s6].[CategoryId0], [s6].[ServiceImageId], [s7].[ProductId], [s7].[ProductImageId], [s8].[ShopId], [s8].[MechanicId], [s8].[MechanicId0]

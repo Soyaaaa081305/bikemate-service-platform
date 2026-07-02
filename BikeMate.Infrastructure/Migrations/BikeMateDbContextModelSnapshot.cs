@@ -103,14 +103,6 @@ namespace BikeMate.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("clients", "dbo");
-
-                    b.HasData(
-                        new
-                        {
-                            ClientId = 1,
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            UserId = 1
-                        });
                 });
 
             modelBuilder.Entity("BikeMate.Core.Entities.ClientAddress", b =>
@@ -170,22 +162,6 @@ namespace BikeMate.Infrastructure.Migrations
                     b.HasIndex("ClientId");
 
                     b.ToTable("client_addresses", "dbo");
-
-                    b.HasData(
-                        new
-                        {
-                            AddressId = 1,
-                            AddressLine = "Sample customer address, Manila",
-                            City = "Manila",
-                            ClientId = 1,
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsDefault = true,
-                            Label = "Home",
-                            Latitude = 14.599512m,
-                            Longitude = 120.984222m,
-                            PostalCode = "1000",
-                            Province = "Metro Manila"
-                        });
                 });
 
             modelBuilder.Entity("BikeMate.Core.Entities.Conversation", b =>
@@ -219,16 +195,6 @@ namespace BikeMate.Infrastructure.Migrations
                     b.HasIndex("RequestId");
 
                     b.ToTable("conversations", "dbo");
-
-                    b.HasData(
-                        new
-                        {
-                            ConversationId = 1,
-                            ConversationType = "service_request",
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            LastMessageAt = new DateTime(2026, 6, 8, 0, 20, 0, 0, DateTimeKind.Utc),
-                            RequestId = 1
-                        });
                 });
 
             modelBuilder.Entity("BikeMate.Core.Entities.ConversationParticipant", b =>
@@ -252,20 +218,6 @@ namespace BikeMate.Infrastructure.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("conversation_participants", "dbo");
-
-                    b.HasData(
-                        new
-                        {
-                            ConversationId = 1,
-                            UserId = 1,
-                            JoinedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            ConversationId = 1,
-                            UserId = 2,
-                            JoinedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc)
-                        });
                 });
 
             modelBuilder.Entity("BikeMate.Core.Entities.LiveLocation", b =>
@@ -306,18 +258,6 @@ namespace BikeMate.Infrastructure.Migrations
                     b.HasIndex("RequestId");
 
                     b.ToTable("live_locations", "dbo");
-
-                    b.HasData(
-                        new
-                        {
-                            LiveLocationId = 1,
-                            AccuracyMeters = 8m,
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 25, 0, 0, DateTimeKind.Utc),
-                            Latitude = 14.6010m,
-                            Longitude = 120.9830m,
-                            MechanicId = 1,
-                            RequestId = 1
-                        });
                 });
 
             modelBuilder.Entity("BikeMate.Core.Entities.Mechanic", b =>
@@ -339,12 +279,27 @@ namespace BikeMate.Infrastructure.Migrations
                         .HasPrecision(3, 2)
                         .HasColumnType("decimal(3,2)");
 
+                    b.Property<string>("AddressLine")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Barangay")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("Birthdate")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Bio")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("CertificationImageUrl")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("City")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
@@ -362,6 +317,18 @@ namespace BikeMate.Infrastructure.Migrations
                     b.Property<bool>("IsVerified")
                         .HasColumnType("bit");
 
+                    b.Property<string>("MiddleName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Province")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Sex")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
                     b.Property<int>("TotalCompletedJobs")
                         .HasColumnType("int");
 
@@ -371,8 +338,16 @@ namespace BikeMate.Infrastructure.Migrations
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
+                    b.Property<string>("ValidIdImageUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<int?>("YearsExperience")
                         .HasColumnType("int");
+
+                    b.Property<string>("ZipCode")
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
                     b.HasKey("MechanicId");
 
@@ -380,134 +355,6 @@ namespace BikeMate.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("mechanics", "dbo");
-
-                    b.HasData(
-                        new
-                        {
-                            MechanicId = 1,
-                            AvailabilityStatus = "online",
-                            AverageRating = 4.80m,
-                            Bio = "Certified roadside motorcycle technician.",
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            CurrentLatitude = 14.599512m,
-                            CurrentLongitude = 120.984222m,
-                            IsVerified = true,
-                            TotalCompletedJobs = 12,
-                            UserId = 2,
-                            YearsExperience = 5
-                        },
-                        new
-                        {
-                            MechanicId = 101,
-                            AvailabilityStatus = "online",
-                            AverageRating = 4.90m,
-                            Bio = "Drivetrain and transmission specialist.",
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            CurrentLatitude = 14.3591m,
-                            CurrentLongitude = 121.0579m,
-                            IsVerified = true,
-                            TotalCompletedJobs = 184,
-                            UserId = 111,
-                            YearsExperience = 8
-                        },
-                        new
-                        {
-                            MechanicId = 102,
-                            AvailabilityStatus = "online",
-                            AverageRating = 4.80m,
-                            Bio = "Chain, brake, and preventive maintenance technician.",
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            CurrentLatitude = 14.3587m,
-                            CurrentLongitude = 121.0572m,
-                            IsVerified = true,
-                            TotalCompletedJobs = 139,
-                            UserId = 112,
-                            YearsExperience = 6
-                        },
-                        new
-                        {
-                            MechanicId = 103,
-                            AvailabilityStatus = "online",
-                            AverageRating = 4.90m,
-                            Bio = "Motorcycle electrical and accessory installation specialist.",
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            CurrentLatitude = 14.4239m,
-                            CurrentLongitude = 121.0310m,
-                            IsVerified = true,
-                            TotalCompletedJobs = 171,
-                            UserId = 113,
-                            YearsExperience = 7
-                        },
-                        new
-                        {
-                            MechanicId = 104,
-                            AvailabilityStatus = "online",
-                            AverageRating = 4.70m,
-                            Bio = "Gearbox, brake, and roadworthiness technician.",
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            CurrentLatitude = 14.4234m,
-                            CurrentLongitude = 121.0304m,
-                            IsVerified = true,
-                            TotalCompletedJobs = 206,
-                            UserId = 114,
-                            YearsExperience = 9
-                        },
-                        new
-                        {
-                            MechanicId = 105,
-                            AvailabilityStatus = "online",
-                            AverageRating = 4.90m,
-                            Bio = "Tire, wheel, and roadside repair specialist.",
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            CurrentLatitude = 14.4455m,
-                            CurrentLongitude = 120.9833m,
-                            IsVerified = true,
-                            TotalCompletedJobs = 128,
-                            UserId = 115,
-                            YearsExperience = 5
-                        },
-                        new
-                        {
-                            MechanicId = 106,
-                            AvailabilityStatus = "online",
-                            AverageRating = 4.80m,
-                            Bio = "Tune-up, chain, and brake service technician.",
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            CurrentLatitude = 14.4451m,
-                            CurrentLongitude = 120.9827m,
-                            IsVerified = true,
-                            TotalCompletedJobs = 163,
-                            UserId = 116,
-                            YearsExperience = 7
-                        },
-                        new
-                        {
-                            MechanicId = 107,
-                            AvailabilityStatus = "online",
-                            AverageRating = 4.90m,
-                            Bio = "Engine, drivetrain, and periodic maintenance specialist.",
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            CurrentLatitude = 14.3335m,
-                            CurrentLongitude = 121.0832m,
-                            IsVerified = true,
-                            TotalCompletedJobs = 244,
-                            UserId = 117,
-                            YearsExperience = 10
-                        },
-                        new
-                        {
-                            MechanicId = 108,
-                            AvailabilityStatus = "online",
-                            AverageRating = 4.70m,
-                            Bio = "Electrical accessories, tires, and roadside support technician.",
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            CurrentLatitude = 14.3329m,
-                            CurrentLongitude = 121.0827m,
-                            IsVerified = true,
-                            TotalCompletedJobs = 151,
-                            UserId = 118,
-                            YearsExperience = 6
-                        });
                 });
 
             modelBuilder.Entity("BikeMate.Core.Entities.MechanicAvailability", b =>
@@ -577,16 +424,6 @@ namespace BikeMate.Infrastructure.Migrations
                     b.HasIndex("SenderUserId");
 
                     b.ToTable("messages", "dbo");
-
-                    b.HasData(
-                        new
-                        {
-                            MessageId = 1,
-                            ConversationId = 1,
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 20, 0, 0, DateTimeKind.Utc),
-                            MessageText = "I am on the way to your location.",
-                            SenderUserId = 2
-                        });
                 });
 
             modelBuilder.Entity("BikeMate.Core.Entities.Motorcycle", b =>
@@ -639,20 +476,6 @@ namespace BikeMate.Infrastructure.Migrations
                     b.HasIndex("ClientId");
 
                     b.ToTable("motorcycles", "dbo");
-
-                    b.HasData(
-                        new
-                        {
-                            MotorcycleId = 1,
-                            Brand = "Honda",
-                            ClientId = 1,
-                            Color = "Black",
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            EngineType = "125cc",
-                            Model = "Click 125i",
-                            PlateNumber = "BM-1234",
-                            YearModel = 2022
-                        });
                 });
 
             modelBuilder.Entity("BikeMate.Core.Entities.Notification", b =>
@@ -695,18 +518,6 @@ namespace BikeMate.Infrastructure.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("notifications", "dbo");
-
-                    b.HasData(
-                        new
-                        {
-                            NotificationId = 1,
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsRead = false,
-                            Message = "Rico Mechanic accepted your tire service request.",
-                            NotificationType = "booking",
-                            Title = "Mechanic assigned",
-                            UserId = 1
-                        });
                 });
 
             modelBuilder.Entity("BikeMate.Core.Entities.OtpVerification", b =>
@@ -863,24 +674,6 @@ namespace BikeMate.Infrastructure.Migrations
                     b.HasIndex("RequestId");
 
                     b.ToTable("payments", "dbo");
-
-                    b.HasData(
-                        new
-                        {
-                            PaymentId = 1,
-                            Amount = 350m,
-                            CheckoutUrl = "https://checkout.paymongo.com/test/bikemate-sample",
-                            ClientId = 1,
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Currency = "PHP",
-                            PaidAt = new DateTime(2026, 6, 8, 0, 30, 0, 0, DateTimeKind.Utc),
-                            PaymentMethodId = 1,
-                            PaymentStatusId = 3,
-                            ProviderName = "paymongo",
-                            ProviderReferenceNumber = "BM-PAID-0001",
-                            RequestId = 1,
-                            UpdatedAt = new DateTime(2026, 6, 8, 0, 30, 0, 0, DateTimeKind.Utc)
-                        });
                 });
 
             modelBuilder.Entity("BikeMate.Core.Entities.PaymentEvent", b =>
@@ -1067,30 +860,6 @@ namespace BikeMate.Infrastructure.Migrations
                     b.HasIndex("ShopId");
 
                     b.ToTable("products", "dbo");
-
-                    b.HasData(
-                        new
-                        {
-                            ProductId = 1,
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            Price = 280m,
-                            ProductDescription = "Sample 10W-40 motorcycle oil.",
-                            ProductName = "Engine Oil 1L",
-                            ShopId = 1,
-                            StockQuantity = 20
-                        },
-                        new
-                        {
-                            ProductId = 2,
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true,
-                            Price = 120m,
-                            ProductDescription = "Patch kit for tubeless motorcycle tires.",
-                            ProductName = "Tubeless Tire Patch",
-                            ShopId = 1,
-                            StockQuantity = 50
-                        });
                 });
 
             modelBuilder.Entity("BikeMate.Core.Entities.ProductImage", b =>
@@ -1220,6 +989,36 @@ namespace BikeMate.Infrastructure.Migrations
                         {
                             StatusId = 8,
                             StatusName = "cancelled"
+                        },
+                        new
+                        {
+                            StatusId = 9,
+                            StatusName = "emergency_pending"
+                        },
+                        new
+                        {
+                            StatusId = 10,
+                            StatusName = "call_connecting"
+                        },
+                        new
+                        {
+                            StatusId = 11,
+                            StatusName = "searching_responder"
+                        },
+                        new
+                        {
+                            StatusId = 12,
+                            StatusName = "payment_pending"
+                        },
+                        new
+                        {
+                            StatusId = 13,
+                            StatusName = "paid"
+                        },
+                        new
+                        {
+                            StatusId = 14,
+                            StatusName = "call_connected"
                         });
                 });
 
@@ -1572,44 +1371,6 @@ namespace BikeMate.Infrastructure.Migrations
                         });
 
                     b.HasAnnotation("SqlServer:UseSqlOutputClause", false);
-
-                    b.HasData(
-                        new
-                        {
-                            RequestId = 1,
-                            AcceptedAt = new DateTime(2026, 6, 8, 0, 10, 0, 0, DateTimeKind.Utc),
-                            ClientId = 1,
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            CurrentStatusId = 6,
-                            EstimatedTotal = 350m,
-                            FinalTotal = 350m,
-                            IssueDescription = "Rear tire is flat near home.",
-                            MechanicId = 1,
-                            MotorcycleId = 1,
-                            ScheduledAt = new DateTime(2026, 6, 8, 10, 0, 0, 0, DateTimeKind.Utc),
-                            ServiceLatitude = 14.599512m,
-                            ServiceLocationAddress = "Sample customer address, Manila",
-                            ServiceLongitude = 120.984222m,
-                            ShopId = 1,
-                            ShopServiceId = 1
-                        },
-                        new
-                        {
-                            RequestId = 2,
-                            ClientId = 1,
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            CurrentStatusId = 1,
-                            EstimatedTotal = 500m,
-                            FinalTotal = 0m,
-                            IssueDescription = "Schedule oil change for next week.",
-                            MotorcycleId = 1,
-                            ScheduledAt = new DateTime(2026, 6, 15, 0, 0, 0, 0, DateTimeKind.Utc),
-                            ServiceLatitude = 14.599512m,
-                            ServiceLocationAddress = "Sample customer address, Manila",
-                            ServiceLongitude = 120.984222m,
-                            ShopId = 1,
-                            ShopServiceId = 2
-                        });
                 });
 
             modelBuilder.Entity("BikeMate.Core.Entities.Shop", b =>
@@ -1649,8 +1410,43 @@ namespace BikeMate.Infrastructure.Migrations
                         .HasPrecision(11, 8)
                         .HasColumnType("decimal(11,8)");
 
+                    b.Property<string>("OwnerAddressLine")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("OwnerBarangay")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("OwnerBirthdate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("OwnerCity")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("OwnerMiddleName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("OwnerProvince")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("OwnerSex")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
                     b.Property<int>("OwnerUserId")
                         .HasColumnType("int");
+
+                    b.Property<string>("OwnerValidIdUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("OwnerZipCode")
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
                     b.Property<string>("Province")
                         .HasMaxLength(100)
@@ -1660,6 +1456,10 @@ namespace BikeMate.Infrastructure.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ShopImageUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("ShopLogoUrl")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
@@ -1683,83 +1483,6 @@ namespace BikeMate.Infrastructure.Migrations
                     b.HasIndex("OwnerUserId");
 
                     b.ToTable("shops", "dbo");
-
-                    b.HasData(
-                        new
-                        {
-                            ShopId = 1,
-                            AddressLine = "Sample shop address, Manila",
-                            City = "Manila",
-                            ContactNumber = "+639171234567",
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Latitude = 14.6042m,
-                            Longitude = 120.9822m,
-                            OwnerUserId = 3,
-                            Province = "Metro Manila",
-                            ShopDescription = "Sample verified repair shop for local testing.",
-                            ShopName = "BikeMate Partner Shop",
-                            ShopStatus = "verified"
-                        },
-                        new
-                        {
-                            ShopId = 101,
-                            AddressLine = "National Highway, Barangay Nueva",
-                            City = "San Pedro",
-                            ContactNumber = "+639181100101",
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Latitude = 14.3589m,
-                            Longitude = 121.0575m,
-                            OwnerUserId = 101,
-                            Province = "Laguna",
-                            ShopDescription = "Full-service motorcycle repair with dedicated drivetrain, chain, brake, tire, and tune-up bays.",
-                            ShopName = "Southside MotoCare San Pedro",
-                            ShopStatus = "verified"
-                        },
-                        new
-                        {
-                            ShopId = 102,
-                            AddressLine = "Montillano Street, Alabang",
-                            City = "Muntinlupa",
-                            ContactNumber = "+639181100102",
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Latitude = 14.4237m,
-                            Longitude = 121.0307m,
-                            OwnerUserId = 102,
-                            Province = "Metro Manila",
-                            ShopDescription = "Verified workshop specializing in gear diagnostics, brakes, electrical accessories, batteries, and scheduled maintenance.",
-                            ShopName = "Alabang CycleWorks",
-                            ShopStatus = "verified"
-                        },
-                        new
-                        {
-                            ShopId = 103,
-                            AddressLine = "Alabang-Zapote Road, Pamplona",
-                            City = "Las Pinas",
-                            ContactNumber = "+639181100103",
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Latitude = 14.4453m,
-                            Longitude = 120.9830m,
-                            OwnerUserId = 103,
-                            Province = "Metro Manila",
-                            ShopDescription = "Roadside-ready repair center for tires, brakes, chains, tune-ups, and emergency assistance.",
-                            ShopName = "Las Pinas MotoLab",
-                            ShopStatus = "verified"
-                        },
-                        new
-                        {
-                            ShopId = 104,
-                            AddressLine = "Manila South Road, Barangay San Antonio",
-                            City = "Binan",
-                            ContactNumber = "+639181100104",
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Latitude = 14.3332m,
-                            Longitude = 121.0830m,
-                            OwnerUserId = 104,
-                            Province = "Laguna",
-                            ShopDescription = "Experienced engine and drivetrain team with chain, tire, oil, and accessory installation services.",
-                            ShopName = "RoadReady Garage Binan",
-                            ShopStatus = "verified"
-                        });
                 });
 
             modelBuilder.Entity("BikeMate.Core.Entities.ShopMechanic", b =>
@@ -1783,71 +1506,6 @@ namespace BikeMate.Infrastructure.Migrations
                     b.HasIndex("MechanicId");
 
                     b.ToTable("shop_mechanics", "dbo");
-
-                    b.HasData(
-                        new
-                        {
-                            ShopId = 1,
-                            MechanicId = 1,
-                            AssignedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true
-                        },
-                        new
-                        {
-                            ShopId = 101,
-                            MechanicId = 101,
-                            AssignedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true
-                        },
-                        new
-                        {
-                            ShopId = 101,
-                            MechanicId = 102,
-                            AssignedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true
-                        },
-                        new
-                        {
-                            ShopId = 102,
-                            MechanicId = 103,
-                            AssignedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true
-                        },
-                        new
-                        {
-                            ShopId = 102,
-                            MechanicId = 104,
-                            AssignedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true
-                        },
-                        new
-                        {
-                            ShopId = 103,
-                            MechanicId = 105,
-                            AssignedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true
-                        },
-                        new
-                        {
-                            ShopId = 103,
-                            MechanicId = 106,
-                            AssignedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true
-                        },
-                        new
-                        {
-                            ShopId = 104,
-                            MechanicId = 107,
-                            AssignedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true
-                        },
-                        new
-                        {
-                            ShopId = 104,
-                            MechanicId = 108,
-                            AssignedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IsActive = true
-                        });
                 });
 
             modelBuilder.Entity("BikeMate.Core.Entities.ShopOperatingHour", b =>
@@ -1924,296 +1582,6 @@ namespace BikeMate.Infrastructure.Migrations
                     b.HasIndex("ShopId");
 
                     b.ToTable("shop_services", "dbo");
-
-                    b.HasData(
-                        new
-                        {
-                            ShopServiceId = 1,
-                            BasePrice = 350m,
-                            CategoryId = 2,
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            EstimatedMinutes = 45,
-                            IsActive = true,
-                            ServiceDescription = "On-site tire patching and tire check.",
-                            ServiceName = "Flat Tire Rescue",
-                            ShopId = 1
-                        },
-                        new
-                        {
-                            ShopServiceId = 2,
-                            BasePrice = 500m,
-                            CategoryId = 4,
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            EstimatedMinutes = 60,
-                            IsActive = true,
-                            ServiceDescription = "Oil replacement and quick fluid inspection.",
-                            ServiceName = "Basic Oil Change",
-                            ShopId = 1
-                        },
-                        new
-                        {
-                            ShopServiceId = 3,
-                            BasePrice = 700m,
-                            CategoryId = 6,
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            EstimatedMinutes = 40,
-                            IsActive = true,
-                            ServiceDescription = "Urgent assistance for breakdowns.",
-                            ServiceName = "Emergency Roadside Help",
-                            ShopId = 1
-                        },
-                        new
-                        {
-                            ShopServiceId = 101,
-                            BasePrice = 650m,
-                            CategoryId = 7,
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            EstimatedMinutes = 75,
-                            IsActive = true,
-                            ServiceDescription = "Diagnoses hard shifting, false neutrals, cable play, and drivetrain alignment.",
-                            ServiceName = "Precision Gear Tuning",
-                            ShopId = 101
-                        },
-                        new
-                        {
-                            ShopServiceId = 102,
-                            BasePrice = 450m,
-                            CategoryId = 8,
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            EstimatedMinutes = 55,
-                            IsActive = true,
-                            ServiceDescription = "Cleans, lubricates, aligns, and adjusts the drive chain and inspects both sprockets.",
-                            ServiceName = "Chain Cleaning and Tensioning",
-                            ShopId = 101
-                        },
-                        new
-                        {
-                            ShopServiceId = 103,
-                            BasePrice = 950m,
-                            CategoryId = 10,
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            EstimatedMinutes = 120,
-                            IsActive = true,
-                            ServiceDescription = "Full preventive inspection with adjustment of controls, fluids, ignition, and roadworthiness items.",
-                            ServiceName = "Complete Motorcycle Tune-up",
-                            ShopId = 101
-                        },
-                        new
-                        {
-                            ShopServiceId = 104,
-                            BasePrice = 400m,
-                            CategoryId = 2,
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            EstimatedMinutes = 45,
-                            IsActive = true,
-                            ServiceDescription = "Puncture assessment, professional patching, pressure correction, and wheel safety check.",
-                            ServiceName = "Tubeless Tire and Puncture Repair",
-                            ShopId = 101
-                        },
-                        new
-                        {
-                            ShopServiceId = 105,
-                            BasePrice = 550m,
-                            CategoryId = 5,
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            EstimatedMinutes = 60,
-                            IsActive = true,
-                            ServiceDescription = "Front and rear brake inspection, cleaning, adjustment, and wear report.",
-                            ServiceName = "Brake Cleaning and Adjustment",
-                            ShopId = 101
-                        },
-                        new
-                        {
-                            ShopServiceId = 106,
-                            BasePrice = 800m,
-                            CategoryId = 7,
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            EstimatedMinutes = 90,
-                            IsActive = true,
-                            ServiceDescription = "Systematic inspection of shifting controls, clutch adjustment, transmission behavior, and drivetrain noise.",
-                            ServiceName = "Gearbox and Shifting Diagnostics",
-                            ShopId = 102
-                        },
-                        new
-                        {
-                            ShopServiceId = 107,
-                            BasePrice = 650m,
-                            CategoryId = 5,
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            EstimatedMinutes = 75,
-                            IsActive = true,
-                            ServiceDescription = "Brake adjustment, pad inspection, cleaning, and hydraulic safety check where applicable.",
-                            ServiceName = "Brake System Service",
-                            ShopId = 102
-                        },
-                        new
-                        {
-                            ShopServiceId = 108,
-                            BasePrice = 700m,
-                            CategoryId = 9,
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            EstimatedMinutes = 90,
-                            IsActive = true,
-                            ServiceDescription = "Safe fused installation of lights, horns, chargers, cameras, and approved accessories.",
-                            ServiceName = "Electrical Accessory Installation",
-                            ShopId = 102
-                        },
-                        new
-                        {
-                            ShopServiceId = 109,
-                            BasePrice = 450m,
-                            CategoryId = 3,
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            EstimatedMinutes = 45,
-                            IsActive = true,
-                            ServiceDescription = "Battery load test, charging-system test, terminal service, and replacement assessment.",
-                            ServiceName = "Battery Health and Charging Check",
-                            ShopId = 102
-                        },
-                        new
-                        {
-                            ShopServiceId = 110,
-                            BasePrice = 1100m,
-                            CategoryId = 10,
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            EstimatedMinutes = 135,
-                            IsActive = true,
-                            ServiceDescription = "Periodic maintenance inspection based on mileage and manufacturer service points.",
-                            ServiceName = "Scheduled Preventive Maintenance",
-                            ShopId = 102
-                        },
-                        new
-                        {
-                            ShopServiceId = 111,
-                            BasePrice = 380m,
-                            CategoryId = 2,
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            EstimatedMinutes = 50,
-                            IsActive = true,
-                            ServiceDescription = "Flat tire repair, valve inspection, tire replacement, pressure setting, and wheel check.",
-                            ServiceName = "Tire Repair and Replacement",
-                            ShopId = 103
-                        },
-                        new
-                        {
-                            ShopServiceId = 112,
-                            BasePrice = 500m,
-                            CategoryId = 5,
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            EstimatedMinutes = 60,
-                            IsActive = true,
-                            ServiceDescription = "Brake response diagnosis, adjustment, cleaning, and component wear inspection.",
-                            ServiceName = "Brake Adjustment and Safety Check",
-                            ShopId = 103
-                        },
-                        new
-                        {
-                            ShopServiceId = 113,
-                            BasePrice = 480m,
-                            CategoryId = 8,
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            EstimatedMinutes = 60,
-                            IsActive = true,
-                            ServiceDescription = "Chain cleaning, lubrication, slack correction, alignment, and sprocket wear assessment.",
-                            ServiceName = "Chain and Sprocket Care",
-                            ShopId = 103
-                        },
-                        new
-                        {
-                            ShopServiceId = 114,
-                            BasePrice = 900m,
-                            CategoryId = 10,
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            EstimatedMinutes = 120,
-                            IsActive = true,
-                            ServiceDescription = "Complete tune-up covering controls, fluids, fasteners, tires, brakes, and running condition.",
-                            ServiceName = "General Tune-up and Inspection",
-                            ShopId = 103
-                        },
-                        new
-                        {
-                            ShopServiceId = 115,
-                            BasePrice = 750m,
-                            CategoryId = 6,
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            EstimatedMinutes = 45,
-                            IsActive = true,
-                            ServiceDescription = "Dispatch support for breakdowns, no-start conditions, and minor roadside repairs.",
-                            ServiceName = "24/7 Roadside Motorcycle Assistance",
-                            ShopId = 103
-                        },
-                        new
-                        {
-                            ShopServiceId = 116,
-                            BasePrice = 850m,
-                            CategoryId = 1,
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            EstimatedMinutes = 90,
-                            IsActive = true,
-                            ServiceDescription = "Troubleshooting for difficult starting, poor idle, power loss, smoke, and unusual engine noise.",
-                            ServiceName = "Engine Performance Diagnosis",
-                            ShopId = 104
-                        },
-                        new
-                        {
-                            ShopServiceId = 117,
-                            BasePrice = 500m,
-                            CategoryId = 8,
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            EstimatedMinutes = 65,
-                            IsActive = true,
-                            ServiceDescription = "Complete chain maintenance with tension, alignment, lubrication, and replacement advice.",
-                            ServiceName = "Drive Chain and Sprocket Service",
-                            ShopId = 104
-                        },
-                        new
-                        {
-                            ShopServiceId = 118,
-                            BasePrice = 750m,
-                            CategoryId = 9,
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            EstimatedMinutes = 95,
-                            IsActive = true,
-                            ServiceDescription = "Professional installation and wiring of utility, safety, and touring accessories.",
-                            ServiceName = "Motorcycle Accessory Fitment",
-                            ShopId = 104
-                        },
-                        new
-                        {
-                            ShopServiceId = 119,
-                            BasePrice = 600m,
-                            CategoryId = 4,
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            EstimatedMinutes = 60,
-                            IsActive = true,
-                            ServiceDescription = "Engine oil replacement plus leak, level, and fluid-condition inspection.",
-                            ServiceName = "Oil and Fluid Maintenance",
-                            ShopId = 104
-                        },
-                        new
-                        {
-                            ShopServiceId = 120,
-                            BasePrice = 900m,
-                            CategoryId = 7,
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            EstimatedMinutes = 105,
-                            IsActive = true,
-                            ServiceDescription = "Diagnosis and repair planning for shifting faults, clutch issues, gear noise, and drivetrain vibration.",
-                            ServiceName = "Drivetrain and Gear Repair",
-                            ShopId = 104
-                        },
-                        new
-                        {
-                            ShopServiceId = 121,
-                            BasePrice = 450m,
-                            CategoryId = 2,
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            EstimatedMinutes = 50,
-                            IsActive = true,
-                            ServiceDescription = "Mobile puncture repair, inflation, valve check, and tire condition assessment.",
-                            ServiceName = "Roadside Flat Tire Service",
-                            ShopId = 104
-                        });
                 });
 
             modelBuilder.Entity("BikeMate.Core.Entities.User", b =>
@@ -2278,216 +1646,6 @@ namespace BikeMate.Infrastructure.Migrations
                         .IsUnique();
 
                     b.ToTable("users", "dbo");
-
-                    b.HasData(
-                        new
-                        {
-                            UserId = 1,
-                            AccountStatus = "active",
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "customer@bikemate.test",
-                            EmailVerified = true,
-                            FirstName = "Juan",
-                            LastName = "Customer",
-                            PasswordHash = "sha256:a109e36947ad56de1dca1cc49f0ef8ac9ad9a7b1aa0df41fb3c4cb73c1ff01ea",
-                            PhoneNumber = "+639171234567",
-                            PhoneVerified = true
-                        },
-                        new
-                        {
-                            UserId = 2,
-                            AccountStatus = "active",
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "mechanic@bikemate.test",
-                            EmailVerified = true,
-                            FirstName = "Rico",
-                            LastName = "Mechanic",
-                            PasswordHash = "sha256:a109e36947ad56de1dca1cc49f0ef8ac9ad9a7b1aa0df41fb3c4cb73c1ff01ea",
-                            PhoneNumber = "+639171234567",
-                            PhoneVerified = true
-                        },
-                        new
-                        {
-                            UserId = 3,
-                            AccountStatus = "active",
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "shop@bikemate.test",
-                            EmailVerified = true,
-                            FirstName = "Maya",
-                            LastName = "ShopAdmin",
-                            PasswordHash = "sha256:a109e36947ad56de1dca1cc49f0ef8ac9ad9a7b1aa0df41fb3c4cb73c1ff01ea",
-                            PhoneNumber = "+639171234567",
-                            PhoneVerified = true
-                        },
-                        new
-                        {
-                            UserId = 4,
-                            AccountStatus = "active",
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "admin@bikemate.test",
-                            EmailVerified = true,
-                            FirstName = "Ana",
-                            LastName = "Admin",
-                            PasswordHash = "sha256:a109e36947ad56de1dca1cc49f0ef8ac9ad9a7b1aa0df41fb3c4cb73c1ff01ea",
-                            PhoneNumber = "+639171234567",
-                            PhoneVerified = true
-                        },
-                        new
-                        {
-                            UserId = 101,
-                            AccountStatus = "active",
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "southside.owner@bikemate.test",
-                            EmailVerified = true,
-                            FirstName = "Sofia",
-                            LastName = "Mendoza",
-                            PasswordHash = "sha256:a109e36947ad56de1dca1cc49f0ef8ac9ad9a7b1aa0df41fb3c4cb73c1ff01ea",
-                            PhoneNumber = "+639181010101",
-                            PhoneVerified = true
-                        },
-                        new
-                        {
-                            UserId = 102,
-                            AccountStatus = "active",
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "alabang.owner@bikemate.test",
-                            EmailVerified = true,
-                            FirstName = "Marco",
-                            LastName = "Reyes",
-                            PasswordHash = "sha256:a109e36947ad56de1dca1cc49f0ef8ac9ad9a7b1aa0df41fb3c4cb73c1ff01ea",
-                            PhoneNumber = "+639181010102",
-                            PhoneVerified = true
-                        },
-                        new
-                        {
-                            UserId = 103,
-                            AccountStatus = "active",
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "laspinas.owner@bikemate.test",
-                            EmailVerified = true,
-                            FirstName = "Lea",
-                            LastName = "Santos",
-                            PasswordHash = "sha256:a109e36947ad56de1dca1cc49f0ef8ac9ad9a7b1aa0df41fb3c4cb73c1ff01ea",
-                            PhoneNumber = "+639181010103",
-                            PhoneVerified = true
-                        },
-                        new
-                        {
-                            UserId = 104,
-                            AccountStatus = "active",
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "binan.owner@bikemate.test",
-                            EmailVerified = true,
-                            FirstName = "Paolo",
-                            LastName = "Cruz",
-                            PasswordHash = "sha256:a109e36947ad56de1dca1cc49f0ef8ac9ad9a7b1aa0df41fb3c4cb73c1ff01ea",
-                            PhoneNumber = "+639181010104",
-                            PhoneVerified = true
-                        },
-                        new
-                        {
-                            UserId = 111,
-                            AccountStatus = "active",
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "daniel.ramos@bikemate.test",
-                            EmailVerified = true,
-                            FirstName = "Daniel",
-                            LastName = "Ramos",
-                            PasswordHash = "sha256:a109e36947ad56de1dca1cc49f0ef8ac9ad9a7b1aa0df41fb3c4cb73c1ff01ea",
-                            PhoneNumber = "+639181010111",
-                            PhoneVerified = true
-                        },
-                        new
-                        {
-                            UserId = 112,
-                            AccountStatus = "active",
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "ken.bautista@bikemate.test",
-                            EmailVerified = true,
-                            FirstName = "Ken",
-                            LastName = "Bautista",
-                            PasswordHash = "sha256:a109e36947ad56de1dca1cc49f0ef8ac9ad9a7b1aa0df41fb3c4cb73c1ff01ea",
-                            PhoneNumber = "+639181010112",
-                            PhoneVerified = true
-                        },
-                        new
-                        {
-                            UserId = 113,
-                            AccountStatus = "active",
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "miguel.flores@bikemate.test",
-                            EmailVerified = true,
-                            FirstName = "Miguel",
-                            LastName = "Flores",
-                            PasswordHash = "sha256:a109e36947ad56de1dca1cc49f0ef8ac9ad9a7b1aa0df41fb3c4cb73c1ff01ea",
-                            PhoneNumber = "+639181010113",
-                            PhoneVerified = true
-                        },
-                        new
-                        {
-                            UserId = 114,
-                            AccountStatus = "active",
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "carlo.navarro@bikemate.test",
-                            EmailVerified = true,
-                            FirstName = "Carlo",
-                            LastName = "Navarro",
-                            PasswordHash = "sha256:a109e36947ad56de1dca1cc49f0ef8ac9ad9a7b1aa0df41fb3c4cb73c1ff01ea",
-                            PhoneNumber = "+639181010114",
-                            PhoneVerified = true
-                        },
-                        new
-                        {
-                            UserId = 115,
-                            AccountStatus = "active",
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "nina.garcia@bikemate.test",
-                            EmailVerified = true,
-                            FirstName = "Nina",
-                            LastName = "Garcia",
-                            PasswordHash = "sha256:a109e36947ad56de1dca1cc49f0ef8ac9ad9a7b1aa0df41fb3c4cb73c1ff01ea",
-                            PhoneNumber = "+639181010115",
-                            PhoneVerified = true
-                        },
-                        new
-                        {
-                            UserId = 116,
-                            AccountStatus = "active",
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "jomar.villanueva@bikemate.test",
-                            EmailVerified = true,
-                            FirstName = "Jomar",
-                            LastName = "Villanueva",
-                            PasswordHash = "sha256:a109e36947ad56de1dca1cc49f0ef8ac9ad9a7b1aa0df41fb3c4cb73c1ff01ea",
-                            PhoneNumber = "+639181010116",
-                            PhoneVerified = true
-                        },
-                        new
-                        {
-                            UserId = 117,
-                            AccountStatus = "active",
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "ella.torres@bikemate.test",
-                            EmailVerified = true,
-                            FirstName = "Ella",
-                            LastName = "Torres",
-                            PasswordHash = "sha256:a109e36947ad56de1dca1cc49f0ef8ac9ad9a7b1aa0df41fb3c4cb73c1ff01ea",
-                            PhoneNumber = "+639181010117",
-                            PhoneVerified = true
-                        },
-                        new
-                        {
-                            UserId = 118,
-                            AccountStatus = "active",
-                            CreatedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "anton.lim@bikemate.test",
-                            EmailVerified = true,
-                            FirstName = "Anton",
-                            LastName = "Lim",
-                            PasswordHash = "sha256:a109e36947ad56de1dca1cc49f0ef8ac9ad9a7b1aa0df41fb3c4cb73c1ff01ea",
-                            PhoneNumber = "+639181010118",
-                            PhoneVerified = true
-                        });
                 });
 
             modelBuilder.Entity("BikeMate.Core.Entities.UserAuthProvider", b =>
@@ -2589,104 +1747,6 @@ namespace BikeMate.Infrastructure.Migrations
                     b.HasIndex("RoleId");
 
                     b.ToTable("user_roles", "dbo");
-
-                    b.HasData(
-                        new
-                        {
-                            UserId = 1,
-                            RoleId = 1,
-                            AssignedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            UserId = 2,
-                            RoleId = 2,
-                            AssignedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            UserId = 3,
-                            RoleId = 3,
-                            AssignedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            UserId = 4,
-                            RoleId = 4,
-                            AssignedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            UserId = 101,
-                            RoleId = 3,
-                            AssignedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            UserId = 102,
-                            RoleId = 3,
-                            AssignedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            UserId = 103,
-                            RoleId = 3,
-                            AssignedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            UserId = 104,
-                            RoleId = 3,
-                            AssignedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            UserId = 111,
-                            RoleId = 2,
-                            AssignedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            UserId = 112,
-                            RoleId = 2,
-                            AssignedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            UserId = 113,
-                            RoleId = 2,
-                            AssignedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            UserId = 114,
-                            RoleId = 2,
-                            AssignedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            UserId = 115,
-                            RoleId = 2,
-                            AssignedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            UserId = 116,
-                            RoleId = 2,
-                            AssignedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            UserId = 117,
-                            RoleId = 2,
-                            AssignedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc)
-                        },
-                        new
-                        {
-                            UserId = 118,
-                            RoleId = 2,
-                            AssignedAt = new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc)
-                        });
                 });
 
             modelBuilder.Entity("BikeMate.Core.Entities.AuditLog", b =>

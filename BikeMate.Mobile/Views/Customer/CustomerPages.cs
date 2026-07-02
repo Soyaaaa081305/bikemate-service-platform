@@ -611,7 +611,7 @@ public sealed class CustomerHomePage : CustomerPageBase
             Content = new Label
             {
                 Text = text,
-                FontSize = 10,
+                FontSize = AppTypography.CaptionSize,
                 FontAttributes = FontAttributes.Bold,
                 FontFamily = CustomerUi.FontDisplay,
                 TextColor = textColor,
@@ -785,7 +785,6 @@ public sealed class CustomerProfilePage : CustomerPageBase
     private Entry? _phoneEntry;
     private Picker? _sexPicker;
     private DatePicker? _birthdayPicker;
-    private Microsoft.Maui.Controls.Switch? _birthdaySwitch;
     private Entry? _provinceEntry;
     private Entry? _cityEntry;
     private Entry? _barangayEntry;
@@ -877,7 +876,9 @@ public sealed class CustomerProfilePage : CustomerPageBase
         _middleNameEntry = Field(customer?.MiddleName, "Middle name");
         _lastNameEntry = Field(customer?.LastName, "Last name");
         _emailEntry = Field(customer?.Email, "Email address", Keyboard.Email);
+        _emailEntry.IsReadOnly = true;
         _phoneEntry = Field(customer?.PhoneNumber, "+63 mobile number", Keyboard.Telephone);
+        _phoneEntry.IsReadOnly = true;
         _phoneEntry.MaxLength = 13;
 
         _sexPicker = new Picker
@@ -897,12 +898,11 @@ public sealed class CustomerProfilePage : CustomerPageBase
             _sexPicker.SelectedIndex = index >= 0 ? index : -1;
         }
 
-        _birthdaySwitch = new Microsoft.Maui.Controls.Switch { IsToggled = customer?.Birthdate is not null, OnColor = CustomerUi.Orange };
         _birthdayPicker = new DatePicker
         {
             Date = customer?.Birthdate?.Date ?? DateTime.Today.AddYears(-18),
             MinimumDate = DateTime.Today.AddYears(-100),
-            MaximumDate = DateTime.Today.AddYears(-16),
+            MaximumDate = DateTime.Today.AddYears(-18),
             TextColor = CustomerUi.Dark,
             FontSize = CustomerUi.BodySize,
             FontFamily = CustomerUi.FontBody
@@ -945,9 +945,7 @@ public sealed class CustomerProfilePage : CustomerPageBase
 
         var actions = new Grid { ColumnSpacing = 8 };
         actions.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));
-        actions.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));
         actions.Add(GhostButton("Change photo", new Command(async () => await ChangeProfilePhotoAsync())), 0, 0);
-        actions.Add(GhostButton(customer?.ValidIdImageUrl is null ? "Upload ID" : "Replace ID", new Command(async () => await ReplaceValidIdAsync())), 1, 0);
         details.Add(actions);
 
         grid.Add(details, 1, 0);
@@ -960,33 +958,13 @@ public sealed class CustomerProfilePage : CustomerPageBase
         stack.Add(TwoColumnInputs(("First name", _firstNameEntry!), ("Last name", _lastNameEntry!)));
         stack.Add(InputBlock("Middle name", _middleNameEntry!));
         stack.Add(InputBlock("Sex", _sexPicker!));
-        var birthday = new Grid
-        {
-            ColumnDefinitions =
-            {
-                new ColumnDefinition(GridLength.Star),
-                new ColumnDefinition(GridLength.Auto)
-            },
-            ColumnSpacing = 10
-        };
-        birthday.Add(InputBlock("Birthdate", _birthdayPicker!), 0, 0);
-        birthday.Add(new VerticalStackLayout
-        {
-            Spacing = 4,
-            VerticalOptions = LayoutOptions.End,
-            Children =
-            {
-                Label("Include birthdate", 11, CustomerUi.Muted),
-                _birthdaySwitch!
-            }
-        }, 1, 0);
-        stack.Add(birthday);
+        stack.Add(InputBlock("Birthdate", _birthdayPicker!));
         return Card(stack, Colors.White, 8, new Thickness(14));
     }
 
     private View ContactDetailsCard(CustomerMeDto? customer)
     {
-        var stack = Section("Contact details", "Keep this current so support and repair partners can reach you.");
+        var stack = Section("Contact details", "Email and mobile number changes require BikeMate admin support or OTP verification.");
         stack.Add(InputBlock("Email address", _emailEntry!));
         stack.Add(BadgeRow("Email status", customer?.EmailVerified == true ? "Verified" : "Verification pending"));
         stack.Add(InputBlock("Mobile number", _phoneEntry!));
@@ -1026,7 +1004,7 @@ public sealed class CustomerProfilePage : CustomerPageBase
     {
         var stack = Section(
             "Identity verification",
-            "Your valid ID is used for account verification and can be replaced from this page.");
+            "Your valid ID is used for account verification. Contact BikeMate admin if a submitted ID needs correction.");
         if (string.IsNullOrWhiteSpace(customer?.ValidIdImageUrl))
         {
             stack.Add(Label("No valid ID uploaded yet.", 11, CustomerUi.Muted));
@@ -1049,9 +1027,10 @@ public sealed class CustomerProfilePage : CustomerPageBase
             stack.Add(BadgeRow("Document status", "Uploaded"));
         }
 
-        stack.Add(GhostButton(
-            string.IsNullOrWhiteSpace(customer?.ValidIdImageUrl) ? "Upload valid ID" : "Replace valid ID",
-            new Command(async () => await ReplaceValidIdAsync())));
+        if (string.IsNullOrWhiteSpace(customer?.ValidIdImageUrl))
+        {
+            stack.Add(GhostButton("Upload valid ID", new Command(async () => await ReplaceValidIdAsync())));
+        }
         return Card(stack, Colors.White, 8, new Thickness(14));
     }
 
@@ -1084,10 +1063,10 @@ public sealed class CustomerProfilePage : CustomerPageBase
         var firstName = Clean(_firstNameEntry?.Text);
         var middleName = Clean(_middleNameEntry?.Text);
         var lastName = Clean(_lastNameEntry?.Text);
-        var email = Clean(_emailEntry?.Text);
-        var phoneNumber = Clean(_phoneEntry?.Text);
+        var email = _customer.Email;
+        var phoneNumber = _customer.PhoneNumber;
         var sex = _sexPicker?.SelectedItem?.ToString();
-        var birthdate = _birthdaySwitch?.IsToggled == true ? _birthdayPicker?.Date?.Date : null;
+        var birthdate = _birthdayPicker?.Date?.Date;
         var province = Clean(_provinceEntry?.Text);
         var city = Clean(_cityEntry?.Text);
         var barangay = Clean(_barangayEntry?.Text);
@@ -1099,9 +1078,9 @@ public sealed class CustomerProfilePage : CustomerPageBase
         var bikeEngine = Clean(_bikeEngineEntry?.Text);
         var bikeColor = Clean(_bikeColorEntry?.Text);
 
-        if (firstName is null || lastName is null || email is null)
+        if (firstName is null || lastName is null)
         {
-            await DisplayAlertAsync("Missing details", "First name, last name, and email are required.", "OK");
+            await DisplayAlertAsync("Missing details", "First name and last name are required.", "OK");
             return;
         }
 
@@ -4389,7 +4368,7 @@ public sealed class TrackMechanicPage : CustomerPageBase, IQueryAttributable
             {
                 Text = done ? "\u2713" : "",
                 TextColor = Colors.White,
-                FontSize = 10,
+                FontSize = AppTypography.CaptionSize,
                 HorizontalTextAlignment = TextAlignment.Center,
                 VerticalTextAlignment = TextAlignment.Center
             }
@@ -4413,7 +4392,7 @@ public sealed class TrackMechanicPage : CustomerPageBase, IQueryAttributable
             Content = new Label
             {
                 Text = text,
-                FontSize = 10,
+                FontSize = AppTypography.CaptionSize,
                 FontAttributes = FontAttributes.Bold,
                 TextColor = textColor,
                 HorizontalTextAlignment = TextAlignment.Center,

@@ -1,16 +1,20 @@
 .admin-shell {
     min-height: 100vh;
     display: grid;
-    grid-template-columns: 166px minmax(0, 1fr);
+    grid-template-columns: 224px minmax(0, 1fr);
     grid-template-areas: "sidebar main";
-    background: #f4f6f8;
+    background: var(--bm-page-bg);
+    transition: grid-template-columns .18s ease;
+}
+
+.admin-shell.sidebar-collapsed {
+    grid-template-columns: 72px minmax(0, 1fr);
 }
 
 .admin-sidebar {
     grid-area: sidebar;
-    width: 166px;
-    flex: 0 0 166px;
-    background: #101218;
+    width: 224px;
+    background: var(--bm-nav-bg);
     color: #fff;
     box-shadow: 8px 0 22px rgba(17, 19, 24, .12);
     position: sticky;
@@ -18,11 +22,16 @@
     height: 100vh;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
+    transition: width .18s ease;
+}
+
+.sidebar-collapsed .admin-sidebar {
+    width: 72px;
 }
 
 .admin-main {
     grid-area: main;
-    flex: 1;
     min-width: 0;
     display: flex;
     flex-direction: column;
@@ -30,10 +39,10 @@
 }
 
 .admin-topbar {
-    min-height: 56px;
-    background: rgba(255, 255, 255, .94);
+    min-height: 58px;
+    background: rgba(255, 255, 255, .95);
     backdrop-filter: blur(10px);
-    border-bottom: 1px solid var(--bikemate-border);
+    border-bottom: 1px solid var(--bm-border);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -44,156 +53,66 @@
     z-index: 20;
 }
 
-.admin-topbar-title {
-    display: flex;
-    flex-direction: column;
-    line-height: 1.05;
-}
-
-.admin-eyebrow {
-    color: var(--bikemate-slate);
-    font-size: .64rem;
-    font-weight: 800;
-    text-transform: uppercase;
-}
-
+.admin-topbar-start,
 .admin-topbar-actions {
     display: flex;
     align-items: center;
     gap: .75rem;
 }
 
+.admin-topbar-title {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.1;
+}
+
+.admin-topbar-title strong {
+    color: var(--bm-text);
+    font-family: var(--bm-font-display);
+    font-size: var(--bm-text-title);
+}
+
+.admin-eyebrow {
+    color: var(--bm-muted);
+    font-family: var(--bm-font-caption);
+    font-size: var(--bm-text-caption);
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
 .admin-name {
-    color: #4d5965;
-    font-size: .82rem;
+    color: var(--bm-muted);
+    font-size: var(--bm-text-body);
     max-width: 260px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
+.admin-sidebar-toggle {
+    color: var(--bm-text);
+}
+
 .admin-content {
-    padding: 1rem 1.35rem 1.5rem;
+    padding: 1.1rem 1.35rem 1.5rem;
 }
 
 .admin-auth-shell {
     min-height: 100vh;
 }
 
-::deep .sidebar-brand {
-    padding: .8rem .8rem .65rem;
-    border-bottom: 1px solid rgba(255, 255, 255, .08);
-}
-
-::deep .sidebar-brand-link {
-    display: flex;
-    align-items: center;
-    gap: .55rem;
-    text-decoration: none;
-}
-
-::deep .sidebar-brand-logo {
-    width: 28px;
-    height: 28px;
-    object-fit: contain;
-}
-
-::deep .sidebar-brand-text {
-    color: #fff;
-    font-size: .9rem;
-    font-weight: 800;
-    letter-spacing: .02em;
-}
-
-::deep .sidebar-nav {
-    padding: .75rem 0 1rem;
-    overflow-y: auto;
-    flex: 1;
-}
-
-::deep .sidebar-group {
-    color: #6d727d;
-    font-size: .64rem;
-    font-weight: 800;
-    margin: .9rem .75rem .3rem;
-    text-transform: uppercase;
-}
-
-::deep .sidebar-link {
-    align-items: center;
-    color: #c3c7ce;
-    display: flex;
-    gap: .6rem;
-    border-radius: 8px;
-    margin: 4px .55rem;
-    min-height: 34px;
-    padding: .48rem .65rem;
-    text-decoration: none;
-    transition: background-color .18s ease, color .18s ease;
-    position: relative;
-    font-size: .9rem;
-    line-height: 1;
-}
-
-::deep .sidebar-link:hover,
-::deep .sidebar-link.active {
-    background-color: #262a31;
-    color: var(--bikemate-orange);
-}
-
-::deep .sidebar-link.active::before {
-    content: "";
-    position: absolute;
-    left: -8px;
-    top: 20%;
-    bottom: 20%;
-    width: 3px;
-    border-radius: 999px;
-    background: var(--bikemate-orange);
-}
-
-::deep .sidebar-link i {
-    width: .95rem;
-    text-align: center;
-    font-size: .92rem;
-}
-
-::deep .sidebar-link-danger {
-    color: #fecaca;
-}
-
-::deep .sidebar-link-danger:hover,
-::deep .sidebar-link-danger.active {
-    background-color: rgba(220, 38, 38, .16);
-    color: #fff;
-}
-
-::deep .sidebar-footer {
-    border-top: 1px solid rgba(255, 255, 255, .08);
-    margin-top: .7rem;
-    padding-top: .65rem;
-}
-
-::deep .sidebar-link-logout {
-    color: #fca5a5;
-}
-
-::deep .sidebar-link-logout:hover {
-    background-color: rgba(220, 38, 38, .12);
-    color: #fecaca;
-}
-
-@media (max-width: 640.98px) {
-    .admin-shell {
+@media (max-width: 720px) {
+    .admin-shell,
+    .admin-shell.sidebar-collapsed {
         grid-template-columns: 1fr;
         grid-template-areas:
             "sidebar"
             "main";
     }
 
-    .admin-sidebar {
+    .admin-sidebar,
+    .sidebar-collapsed .admin-sidebar {
         width: 100%;
-        flex-basis: auto;
         height: auto;
         position: relative;
     }

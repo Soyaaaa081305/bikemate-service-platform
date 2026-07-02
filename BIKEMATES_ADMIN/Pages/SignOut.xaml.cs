@@ -14,12 +14,12 @@ public partial class SignOut : ContentPage
         AppSession.CurrentUser = null;
         AppSession.AccessToken = null;
         await DisplayAlert("Signed Out", "You have been signed out.", "OK");
-        Application.Current!.MainPage = new NavigationPage(new Intro.AppIntro());
+        BIKEMATES_ADMIN.App.SetRootPage(new NavigationPage(new Account.Login()));
     }
 
     private async void Cancel_Clicked(object sender, EventArgs e)
     {
-        await Shell.Current.GoToAsync("//Home");
+        await Shell.Current.GoToAsync("//AdminTabs/Home");
     }
 }
 

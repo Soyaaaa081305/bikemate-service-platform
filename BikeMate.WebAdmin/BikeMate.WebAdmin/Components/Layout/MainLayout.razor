@@ -2,16 +2,26 @@
 
 <AuthorizeView>
     <Authorized Context="auth">
-        <div class="admin-shell">
+        <div class="admin-shell @(sidebarCollapsed ? "sidebar-collapsed" : null)">
             <aside class="admin-sidebar">
-                <NavMenu />
+                <NavMenu Collapsed="@sidebarCollapsed" />
             </aside>
 
             <main class="admin-main">
                 <header class="admin-topbar">
-                    <div class="admin-topbar-title">
-                        <span class="admin-eyebrow">BikeMate Admin</span>
-                        <strong>Operations Console</strong>
+                    <div class="admin-topbar-start">
+                        <button class="btn btn-icon admin-sidebar-toggle"
+                                type="button"
+                                title="@SidebarToggleLabel"
+                                aria-label="@SidebarToggleLabel"
+                                aria-expanded="@(!sidebarCollapsed)"
+                                @onclick="ToggleSidebar">
+                            <i class="bi @(sidebarCollapsed ? "bi-layout-sidebar-inset" : "bi-layout-sidebar-inset-reverse")"></i>
+                        </button>
+                        <div class="admin-topbar-title">
+                            <span class="admin-eyebrow">BikeMate Admin</span>
+                            <strong>Operations Console</strong>
+                        </div>
                     </div>
 
                     <div class="admin-topbar-actions">
@@ -55,10 +65,17 @@
 
 @code {
     private ErrorBoundary? errorBoundary;
+    private bool sidebarCollapsed;
+    private string SidebarToggleLabel => sidebarCollapsed ? "Expand navigation" : "Collapse navigation";
 
     protected override void OnParametersSet()
     {
         errorBoundary?.Recover();
+    }
+
+    private void ToggleSidebar()
+    {
+        sidebarCollapsed = !sidebarCollapsed;
     }
 
     private void RecoverPage()

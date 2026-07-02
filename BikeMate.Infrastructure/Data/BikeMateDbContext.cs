@@ -5,9 +5,6 @@ namespace BikeMate.Infrastructure.Data;
 
 public sealed class BikeMateDbContext(DbContextOptions<BikeMateDbContext> options) : DbContext(options)
 {
-    private static readonly DateTime SeedDate = new(2026, 6, 8, 0, 0, 0, DateTimeKind.Utc);
-    private const string SeedPasswordHash = "sha256:a109e36947ad56de1dca1cc49f0ef8ac9ad9a7b1aa0df41fb3c4cb73c1ff01ea";
-
     public DbSet<Role> Roles => Set<Role>();
     public DbSet<User> Users => Set<User>();
     public DbSet<UserRole> UserRoles => Set<UserRole>();
@@ -188,6 +185,14 @@ public sealed class BikeMateDbContext(DbContextOptions<BikeMateDbContext> option
             entity.ToTable("mechanics");
             entity.HasKey(x => x.MechanicId);
             entity.HasIndex(x => x.UserId).IsUnique();
+            entity.Property(x => x.MiddleName).HasMaxLength(100);
+            entity.Property(x => x.Sex).HasMaxLength(30);
+            entity.Property(x => x.ValidIdImageUrl).HasMaxLength(500);
+            entity.Property(x => x.AddressLine).HasMaxLength(500);
+            entity.Property(x => x.Barangay).HasMaxLength(100);
+            entity.Property(x => x.City).HasMaxLength(100);
+            entity.Property(x => x.Province).HasMaxLength(100);
+            entity.Property(x => x.ZipCode).HasMaxLength(10);
             entity.Property(x => x.CertificationImageUrl).HasMaxLength(500);
             entity.Property(x => x.AvailabilityStatus).HasMaxLength(30).HasDefaultValue("offline");
             entity.Property(x => x.CurrentLatitude).HasPrecision(10, 8);
@@ -219,6 +224,15 @@ public sealed class BikeMateDbContext(DbContextOptions<BikeMateDbContext> option
             entity.Property(x => x.Longitude).HasPrecision(11, 8);
             entity.Property(x => x.BusinessPermitUrl).HasMaxLength(500);
             entity.Property(x => x.ShopImageUrl).HasMaxLength(500);
+            entity.Property(x => x.ShopLogoUrl).HasMaxLength(500);
+            entity.Property(x => x.OwnerValidIdUrl).HasMaxLength(500);
+            entity.Property(x => x.OwnerMiddleName).HasMaxLength(100);
+            entity.Property(x => x.OwnerSex).HasMaxLength(30);
+            entity.Property(x => x.OwnerAddressLine).HasMaxLength(500);
+            entity.Property(x => x.OwnerBarangay).HasMaxLength(100);
+            entity.Property(x => x.OwnerCity).HasMaxLength(100);
+            entity.Property(x => x.OwnerProvince).HasMaxLength(100);
+            entity.Property(x => x.OwnerZipCode).HasMaxLength(10);
             entity.Property(x => x.ContactNumber).HasMaxLength(50);
             entity.Property(x => x.ShopStatus).HasMaxLength(30).HasDefaultValue("pending");
             entity.Property(x => x.CreatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
@@ -488,7 +502,13 @@ public sealed class BikeMateDbContext(DbContextOptions<BikeMateDbContext> option
             new RequestStatus { StatusId = 5, StatusName = "arrived" },
             new RequestStatus { StatusId = 6, StatusName = "in_progress" },
             new RequestStatus { StatusId = 7, StatusName = "completed" },
-            new RequestStatus { StatusId = 8, StatusName = "cancelled" });
+            new RequestStatus { StatusId = 8, StatusName = "cancelled" },
+            new RequestStatus { StatusId = 9, StatusName = "emergency_pending" },
+            new RequestStatus { StatusId = 10, StatusName = "call_connecting" },
+            new RequestStatus { StatusId = 11, StatusName = "searching_responder" },
+            new RequestStatus { StatusId = 12, StatusName = "payment_pending" },
+            new RequestStatus { StatusId = 13, StatusName = "paid" },
+            new RequestStatus { StatusId = 14, StatusName = "call_connected" });
 
         modelBuilder.Entity<PaymentStatus>().HasData(
             new PaymentStatus { PaymentStatusId = 1, StatusName = "unpaid" },
@@ -518,318 +538,5 @@ public sealed class BikeMateDbContext(DbContextOptions<BikeMateDbContext> option
             new ServiceCategory { CategoryId = 9, CategoryName = "Accessories & Electrical Installation", Description = "Safe installation of approved motorcycle accessories and electrical upgrades", IsActive = true },
             new ServiceCategory { CategoryId = 10, CategoryName = "Preventive Maintenance & Tune-up", Description = "Periodic inspection, adjustment, and complete motorcycle tune-up", IsActive = true });
 
-        modelBuilder.Entity<User>().HasData(
-            SeedUser(1, "Juan", "Customer", "customer@bikemate.test"),
-            SeedUser(2, "Rico", "Mechanic", "mechanic@bikemate.test"),
-            SeedUser(3, "Maya", "ShopAdmin", "shop@bikemate.test"),
-            SeedUser(4, "Ana", "Admin", "admin@bikemate.test"),
-            SeedUser(101, "Sofia", "Mendoza", "southside.owner@bikemate.test", "+639181010101"),
-            SeedUser(102, "Marco", "Reyes", "alabang.owner@bikemate.test", "+639181010102"),
-            SeedUser(103, "Lea", "Santos", "laspinas.owner@bikemate.test", "+639181010103"),
-            SeedUser(104, "Paolo", "Cruz", "binan.owner@bikemate.test", "+639181010104"),
-            SeedUser(111, "Daniel", "Ramos", "daniel.ramos@bikemate.test", "+639181010111"),
-            SeedUser(112, "Ken", "Bautista", "ken.bautista@bikemate.test", "+639181010112"),
-            SeedUser(113, "Miguel", "Flores", "miguel.flores@bikemate.test", "+639181010113"),
-            SeedUser(114, "Carlo", "Navarro", "carlo.navarro@bikemate.test", "+639181010114"),
-            SeedUser(115, "Nina", "Garcia", "nina.garcia@bikemate.test", "+639181010115"),
-            SeedUser(116, "Jomar", "Villanueva", "jomar.villanueva@bikemate.test", "+639181010116"),
-            SeedUser(117, "Ella", "Torres", "ella.torres@bikemate.test", "+639181010117"),
-            SeedUser(118, "Anton", "Lim", "anton.lim@bikemate.test", "+639181010118"));
-
-        modelBuilder.Entity<UserRole>().HasData(
-            new UserRole { UserId = 1, RoleId = 1, AssignedAt = SeedDate },
-            new UserRole { UserId = 2, RoleId = 2, AssignedAt = SeedDate },
-            new UserRole { UserId = 3, RoleId = 3, AssignedAt = SeedDate },
-            new UserRole { UserId = 4, RoleId = 4, AssignedAt = SeedDate },
-            new UserRole { UserId = 101, RoleId = 3, AssignedAt = SeedDate },
-            new UserRole { UserId = 102, RoleId = 3, AssignedAt = SeedDate },
-            new UserRole { UserId = 103, RoleId = 3, AssignedAt = SeedDate },
-            new UserRole { UserId = 104, RoleId = 3, AssignedAt = SeedDate },
-            new UserRole { UserId = 111, RoleId = 2, AssignedAt = SeedDate },
-            new UserRole { UserId = 112, RoleId = 2, AssignedAt = SeedDate },
-            new UserRole { UserId = 113, RoleId = 2, AssignedAt = SeedDate },
-            new UserRole { UserId = 114, RoleId = 2, AssignedAt = SeedDate },
-            new UserRole { UserId = 115, RoleId = 2, AssignedAt = SeedDate },
-            new UserRole { UserId = 116, RoleId = 2, AssignedAt = SeedDate },
-            new UserRole { UserId = 117, RoleId = 2, AssignedAt = SeedDate },
-            new UserRole { UserId = 118, RoleId = 2, AssignedAt = SeedDate });
-
-        modelBuilder.Entity<Client>().HasData(new Client { ClientId = 1, UserId = 1, CreatedAt = SeedDate });
-        modelBuilder.Entity<Mechanic>().HasData(
-            new Mechanic
-            {
-                MechanicId = 1,
-                UserId = 2,
-                Bio = "Certified roadside motorcycle technician.",
-                YearsExperience = 5,
-                IsVerified = true,
-                AvailabilityStatus = "online",
-                CurrentLatitude = 14.599512m,
-                CurrentLongitude = 120.984222m,
-                AverageRating = 4.80m,
-                TotalCompletedJobs = 12,
-                CreatedAt = SeedDate
-            },
-            SeedMechanic(101, 111, "Drivetrain and transmission specialist.", 8, 14.3591m, 121.0579m, 4.90m, 184),
-            SeedMechanic(102, 112, "Chain, brake, and preventive maintenance technician.", 6, 14.3587m, 121.0572m, 4.80m, 139),
-            SeedMechanic(103, 113, "Motorcycle electrical and accessory installation specialist.", 7, 14.4239m, 121.0310m, 4.90m, 171),
-            SeedMechanic(104, 114, "Gearbox, brake, and roadworthiness technician.", 9, 14.4234m, 121.0304m, 4.70m, 206),
-            SeedMechanic(105, 115, "Tire, wheel, and roadside repair specialist.", 5, 14.4455m, 120.9833m, 4.90m, 128),
-            SeedMechanic(106, 116, "Tune-up, chain, and brake service technician.", 7, 14.4451m, 120.9827m, 4.80m, 163),
-            SeedMechanic(107, 117, "Engine, drivetrain, and periodic maintenance specialist.", 10, 14.3335m, 121.0832m, 4.90m, 244),
-            SeedMechanic(108, 118, "Electrical accessories, tires, and roadside support technician.", 6, 14.3329m, 121.0827m, 4.70m, 151));
-
-        modelBuilder.Entity<ClientAddress>().HasData(new ClientAddress
-        {
-            AddressId = 1,
-            ClientId = 1,
-            Label = "Home",
-            AddressLine = "Sample customer address, Manila",
-            City = "Manila",
-            Province = "Metro Manila",
-            PostalCode = "1000",
-            Latitude = 14.599512m,
-            Longitude = 120.984222m,
-            IsDefault = true,
-            CreatedAt = SeedDate
-        });
-
-        modelBuilder.Entity<Motorcycle>().HasData(new Motorcycle
-        {
-            MotorcycleId = 1,
-            ClientId = 1,
-            Brand = "Honda",
-            Model = "Click 125i",
-            YearModel = 2022,
-            PlateNumber = "BM-1234",
-            EngineType = "125cc",
-            Color = "Black",
-            CreatedAt = SeedDate
-        });
-
-        modelBuilder.Entity<Shop>().HasData(
-            new Shop
-            {
-                ShopId = 1,
-                OwnerUserId = 3,
-                ShopName = "BikeMate Partner Shop",
-                ShopDescription = "Sample verified repair shop for local testing.",
-                AddressLine = "Sample shop address, Manila",
-                City = "Manila",
-                Province = "Metro Manila",
-                Latitude = 14.6042m,
-                Longitude = 120.9822m,
-                ContactNumber = "+639171234567",
-                ShopStatus = "verified",
-                CreatedAt = SeedDate
-            },
-            SeedShop(101, 101, "Southside MotoCare San Pedro", "Full-service motorcycle repair with dedicated drivetrain, chain, brake, tire, and tune-up bays.", "National Highway, Barangay Nueva", "San Pedro", "Laguna", 14.3589m, 121.0575m, "+639181100101"),
-            SeedShop(102, 102, "Alabang CycleWorks", "Verified workshop specializing in gear diagnostics, brakes, electrical accessories, batteries, and scheduled maintenance.", "Montillano Street, Alabang", "Muntinlupa", "Metro Manila", 14.4237m, 121.0307m, "+639181100102"),
-            SeedShop(103, 103, "Las Pinas MotoLab", "Roadside-ready repair center for tires, brakes, chains, tune-ups, and emergency assistance.", "Alabang-Zapote Road, Pamplona", "Las Pinas", "Metro Manila", 14.4453m, 120.9830m, "+639181100103"),
-            SeedShop(104, 104, "RoadReady Garage Binan", "Experienced engine and drivetrain team with chain, tire, oil, and accessory installation services.", "Manila South Road, Barangay San Antonio", "Binan", "Laguna", 14.3332m, 121.0830m, "+639181100104"));
-
-        modelBuilder.Entity<ShopMechanic>().HasData(
-            new ShopMechanic { ShopId = 1, MechanicId = 1, AssignedAt = SeedDate, IsActive = true },
-            new ShopMechanic { ShopId = 101, MechanicId = 101, AssignedAt = SeedDate, IsActive = true },
-            new ShopMechanic { ShopId = 101, MechanicId = 102, AssignedAt = SeedDate, IsActive = true },
-            new ShopMechanic { ShopId = 102, MechanicId = 103, AssignedAt = SeedDate, IsActive = true },
-            new ShopMechanic { ShopId = 102, MechanicId = 104, AssignedAt = SeedDate, IsActive = true },
-            new ShopMechanic { ShopId = 103, MechanicId = 105, AssignedAt = SeedDate, IsActive = true },
-            new ShopMechanic { ShopId = 103, MechanicId = 106, AssignedAt = SeedDate, IsActive = true },
-            new ShopMechanic { ShopId = 104, MechanicId = 107, AssignedAt = SeedDate, IsActive = true },
-            new ShopMechanic { ShopId = 104, MechanicId = 108, AssignedAt = SeedDate, IsActive = true });
-
-        modelBuilder.Entity<ShopService>().HasData(
-            new ShopService { ShopServiceId = 1, ShopId = 1, CategoryId = 2, ServiceName = "Flat Tire Rescue", ServiceDescription = "On-site tire patching and tire check.", BasePrice = 350m, EstimatedMinutes = 45, IsActive = true, CreatedAt = SeedDate },
-            new ShopService { ShopServiceId = 2, ShopId = 1, CategoryId = 4, ServiceName = "Basic Oil Change", ServiceDescription = "Oil replacement and quick fluid inspection.", BasePrice = 500m, EstimatedMinutes = 60, IsActive = true, CreatedAt = SeedDate },
-            new ShopService { ShopServiceId = 3, ShopId = 1, CategoryId = 6, ServiceName = "Emergency Roadside Help", ServiceDescription = "Urgent assistance for breakdowns.", BasePrice = 700m, EstimatedMinutes = 40, IsActive = true, CreatedAt = SeedDate },
-            SeedShopService(101, 101, 7, "Precision Gear Tuning", "Diagnoses hard shifting, false neutrals, cable play, and drivetrain alignment.", 650m, 75),
-            SeedShopService(102, 101, 8, "Chain Cleaning and Tensioning", "Cleans, lubricates, aligns, and adjusts the drive chain and inspects both sprockets.", 450m, 55),
-            SeedShopService(103, 101, 10, "Complete Motorcycle Tune-up", "Full preventive inspection with adjustment of controls, fluids, ignition, and roadworthiness items.", 950m, 120),
-            SeedShopService(104, 101, 2, "Tubeless Tire and Puncture Repair", "Puncture assessment, professional patching, pressure correction, and wheel safety check.", 400m, 45),
-            SeedShopService(105, 101, 5, "Brake Cleaning and Adjustment", "Front and rear brake inspection, cleaning, adjustment, and wear report.", 550m, 60),
-            SeedShopService(106, 102, 7, "Gearbox and Shifting Diagnostics", "Systematic inspection of shifting controls, clutch adjustment, transmission behavior, and drivetrain noise.", 800m, 90),
-            SeedShopService(107, 102, 5, "Brake System Service", "Brake adjustment, pad inspection, cleaning, and hydraulic safety check where applicable.", 650m, 75),
-            SeedShopService(108, 102, 9, "Electrical Accessory Installation", "Safe fused installation of lights, horns, chargers, cameras, and approved accessories.", 700m, 90),
-            SeedShopService(109, 102, 3, "Battery Health and Charging Check", "Battery load test, charging-system test, terminal service, and replacement assessment.", 450m, 45),
-            SeedShopService(110, 102, 10, "Scheduled Preventive Maintenance", "Periodic maintenance inspection based on mileage and manufacturer service points.", 1100m, 135),
-            SeedShopService(111, 103, 2, "Tire Repair and Replacement", "Flat tire repair, valve inspection, tire replacement, pressure setting, and wheel check.", 380m, 50),
-            SeedShopService(112, 103, 5, "Brake Adjustment and Safety Check", "Brake response diagnosis, adjustment, cleaning, and component wear inspection.", 500m, 60),
-            SeedShopService(113, 103, 8, "Chain and Sprocket Care", "Chain cleaning, lubrication, slack correction, alignment, and sprocket wear assessment.", 480m, 60),
-            SeedShopService(114, 103, 10, "General Tune-up and Inspection", "Complete tune-up covering controls, fluids, fasteners, tires, brakes, and running condition.", 900m, 120),
-            SeedShopService(115, 103, 6, "24/7 Roadside Motorcycle Assistance", "Dispatch support for breakdowns, no-start conditions, and minor roadside repairs.", 750m, 45),
-            SeedShopService(116, 104, 1, "Engine Performance Diagnosis", "Troubleshooting for difficult starting, poor idle, power loss, smoke, and unusual engine noise.", 850m, 90),
-            SeedShopService(117, 104, 8, "Drive Chain and Sprocket Service", "Complete chain maintenance with tension, alignment, lubrication, and replacement advice.", 500m, 65),
-            SeedShopService(118, 104, 9, "Motorcycle Accessory Fitment", "Professional installation and wiring of utility, safety, and touring accessories.", 750m, 95),
-            SeedShopService(119, 104, 4, "Oil and Fluid Maintenance", "Engine oil replacement plus leak, level, and fluid-condition inspection.", 600m, 60),
-            SeedShopService(120, 104, 7, "Drivetrain and Gear Repair", "Diagnosis and repair planning for shifting faults, clutch issues, gear noise, and drivetrain vibration.", 900m, 105),
-            SeedShopService(121, 104, 2, "Roadside Flat Tire Service", "Mobile puncture repair, inflation, valve check, and tire condition assessment.", 450m, 50));
-
-        modelBuilder.Entity<Product>().HasData(
-            new Product { ProductId = 1, ShopId = 1, ProductName = "Engine Oil 1L", ProductDescription = "Sample 10W-40 motorcycle oil.", Price = 280m, StockQuantity = 20, IsActive = true, CreatedAt = SeedDate },
-            new Product { ProductId = 2, ShopId = 1, ProductName = "Tubeless Tire Patch", ProductDescription = "Patch kit for tubeless motorcycle tires.", Price = 120m, StockQuantity = 50, IsActive = true, CreatedAt = SeedDate });
-
-        modelBuilder.Entity<ServiceRequest>().HasData(
-            new ServiceRequest
-            {
-                RequestId = 1,
-                ClientId = 1,
-                ShopId = 1,
-                ShopServiceId = 1,
-                MechanicId = 1,
-                CurrentStatusId = 6,
-                MotorcycleId = 1,
-                IssueDescription = "Rear tire is flat near home.",
-                ServiceLocationAddress = "Sample customer address, Manila",
-                ServiceLatitude = 14.599512m,
-                ServiceLongitude = 120.984222m,
-                ScheduledAt = SeedDate.AddHours(10),
-                CreatedAt = SeedDate,
-                AcceptedAt = SeedDate.AddMinutes(10),
-                EstimatedTotal = 350m,
-                FinalTotal = 350m
-            },
-            new ServiceRequest
-            {
-                RequestId = 2,
-                ClientId = 1,
-                ShopId = 1,
-                ShopServiceId = 2,
-                CurrentStatusId = 1,
-                MotorcycleId = 1,
-                IssueDescription = "Schedule oil change for next week.",
-                ServiceLocationAddress = "Sample customer address, Manila",
-                ServiceLatitude = 14.599512m,
-                ServiceLongitude = 120.984222m,
-                ScheduledAt = SeedDate.AddDays(7),
-                CreatedAt = SeedDate,
-                EstimatedTotal = 500m,
-                FinalTotal = 0m
-            });
-
-        modelBuilder.Entity<Payment>().HasData(new Payment
-        {
-            PaymentId = 1,
-            RequestId = 1,
-            ClientId = 1,
-            PaymentStatusId = 3,
-            PaymentMethodId = 1,
-            Amount = 350m,
-            Currency = "PHP",
-            ProviderName = "paymongo",
-            ProviderReferenceNumber = "BM-PAID-0001",
-            CheckoutUrl = "https://checkout.paymongo.com/test/bikemate-sample",
-            PaidAt = SeedDate.AddMinutes(30),
-            CreatedAt = SeedDate,
-            UpdatedAt = SeedDate.AddMinutes(30)
-        });
-
-        modelBuilder.Entity<Conversation>().HasData(new Conversation { ConversationId = 1, RequestId = 1, ConversationType = "service_request", CreatedAt = SeedDate, LastMessageAt = SeedDate.AddMinutes(20) });
-        modelBuilder.Entity<ConversationParticipant>().HasData(
-            new ConversationParticipant { ConversationId = 1, UserId = 1, JoinedAt = SeedDate },
-            new ConversationParticipant { ConversationId = 1, UserId = 2, JoinedAt = SeedDate });
-        modelBuilder.Entity<Message>().HasData(new Message { MessageId = 1, ConversationId = 1, SenderUserId = 2, MessageText = "I am on the way to your location.", CreatedAt = SeedDate.AddMinutes(20) });
-        modelBuilder.Entity<LiveLocation>().HasData(new LiveLocation { LiveLocationId = 1, RequestId = 1, MechanicId = 1, Latitude = 14.6010m, Longitude = 120.9830m, AccuracyMeters = 8m, CreatedAt = SeedDate.AddMinutes(25) });
-        modelBuilder.Entity<Notification>().HasData(new Notification { NotificationId = 1, UserId = 1, NotificationType = "booking", Title = "Mechanic assigned", Message = "Rico Mechanic accepted your tire service request.", IsRead = false, CreatedAt = SeedDate });
-    }
-
-    private static User SeedUser(
-        int userId,
-        string firstName,
-        string lastName,
-        string email,
-        string phoneNumber = "+639171234567")
-    {
-        return new User
-        {
-            UserId = userId,
-            FirstName = firstName,
-            LastName = lastName,
-            Email = email,
-            PhoneNumber = phoneNumber,
-            PasswordHash = SeedPasswordHash,
-            EmailVerified = true,
-            PhoneVerified = true,
-            AccountStatus = "active",
-            CreatedAt = SeedDate
-        };
-    }
-
-    private static Mechanic SeedMechanic(
-        int mechanicId,
-        int userId,
-        string bio,
-        int yearsExperience,
-        decimal latitude,
-        decimal longitude,
-        decimal averageRating,
-        int completedJobs)
-    {
-        return new Mechanic
-        {
-            MechanicId = mechanicId,
-            UserId = userId,
-            Bio = bio,
-            YearsExperience = yearsExperience,
-            IsVerified = true,
-            AvailabilityStatus = "online",
-            CurrentLatitude = latitude,
-            CurrentLongitude = longitude,
-            AverageRating = averageRating,
-            TotalCompletedJobs = completedJobs,
-            CreatedAt = SeedDate
-        };
-    }
-
-    private static Shop SeedShop(
-        int shopId,
-        int ownerUserId,
-        string name,
-        string description,
-        string address,
-        string city,
-        string province,
-        decimal latitude,
-        decimal longitude,
-        string contactNumber)
-    {
-        return new Shop
-        {
-            ShopId = shopId,
-            OwnerUserId = ownerUserId,
-            ShopName = name,
-            ShopDescription = description,
-            AddressLine = address,
-            City = city,
-            Province = province,
-            Latitude = latitude,
-            Longitude = longitude,
-            ContactNumber = contactNumber,
-            ShopStatus = "verified",
-            CreatedAt = SeedDate
-        };
-    }
-
-    private static ShopService SeedShopService(
-        int shopServiceId,
-        int shopId,
-        int categoryId,
-        string name,
-        string description,
-        decimal basePrice,
-        int estimatedMinutes)
-    {
-        return new ShopService
-        {
-            ShopServiceId = shopServiceId,
-            ShopId = shopId,
-            CategoryId = categoryId,
-            ServiceName = name,
-            ServiceDescription = description,
-            BasePrice = basePrice,
-            EstimatedMinutes = estimatedMinutes,
-            IsActive = true,
-            CreatedAt = SeedDate
-        };
     }
 }

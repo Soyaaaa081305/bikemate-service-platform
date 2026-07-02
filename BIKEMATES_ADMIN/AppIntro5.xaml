@@ -2,19 +2,19 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="BIKEMATES_ADMIN.Pages.Intro.AppIntro5"
-             BackgroundColor="#F6F6F6">
+             BackgroundColor="White">
 
     <Grid Padding="20,34,20,28" RowDefinitions="*,Auto">
         <VerticalStackLayout Grid.Row="0" Spacing="10" VerticalOptions="Center">
             <Image Source="bikemate_logo.png" HeightRequest="96" HorizontalOptions="Center" />
             <Label Text="Welcome to BikeMate"
-                   FontFamily="OpenSansSemibold"
-                   FontSize="22"
+                   FontFamily="Inter"
+                   FontSize="18"
                    FontAttributes="Bold"
                    TextColor="#242424"
                    HorizontalTextAlignment="Center" />
-            <Label Text="Register your bike shop first, then create the owner admin account using the generated code."
-                   FontSize="14"
+            <Label Text="Submit your shop and owner details here. BikeMate web admin reviews the application before shop features open."
+                   FontSize="13"
                    TextColor="#6E6E6E"
                    HorizontalTextAlignment="Center" />
         </VerticalStackLayout>
@@ -45,7 +45,7 @@
                     CornerRadius="8"
                     HeightRequest="50"
                     Clicked="OnCreateAccountClicked" />
-            <Button Text="Register Your Bikeshop"
+            <Button Text="How approval works"
                     BackgroundColor="#FFF3EA"
                     TextColor="#FF6B2C"
                     BorderColor="#FFB37A"

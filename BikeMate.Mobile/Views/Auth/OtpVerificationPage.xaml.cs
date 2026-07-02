@@ -201,7 +201,7 @@ public partial class OtpVerificationPage : ContentPage
             using var response = await http.PostAsJsonAsync(route, dto);
             if (!response.IsSuccessStatusCode)
             {
-                await DisplayAlertAsync("OTP failed", await response.Content.ReadAsStringAsync(), "OK");
+                await DisplayAlertAsync("OTP failed", await ApiClientHelper.ReadErrorMessageAsync(response), "OK");
                 return;
             }
 
@@ -212,8 +212,14 @@ public partial class OtpVerificationPage : ContentPage
                 return;
             }
 
-            await DisplayAlertAsync("Account Successfully Verified", "Your BikeMate customer account is ready.", "Go to Dashboard");
-            await Shell.Current.GoToAsync("//CustomerHomePage");
+            SecureStorage.Default.Remove("access_token");
+            SecureStorage.Default.Remove("primary_role");
+            SecureStorage.Default.Remove("user_id");
+            await DisplayAlertAsync(
+                "Email Verified",
+                "Your email is verified. BikeMate admin will review your ID and account details before booking is activated.",
+                "Back to Login");
+            await Shell.Current.GoToAsync($"//{nameof(MainPage)}");
         }
         catch (Exception ex)
         {

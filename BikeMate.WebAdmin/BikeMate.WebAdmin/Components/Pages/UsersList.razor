@@ -7,81 +7,97 @@
 
 <PageTitle>Admin - Users Directory</PageTitle>
 
-<div class="d-flex justify-content-between align-items-center mb-4 mt-3">
-    <h2 class="fw-bold text-dark">User Directory</h2>
-
-    <div class="d-flex gap-3 align-items-center" style="max-width: 400px; width: 100%;">
-        <div class="input-group shadow-sm">
-            <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
-            <input type="text" class="form-control border-start-0" placeholder="Search..." @bind="searchTerm" @bind:event="oninput" />
+<div class="admin-page">
+    <div class="admin-page-header">
+        <div>
+            <h1 class="admin-page-title">User Directory</h1>
+            <p class="admin-page-description">Review customer accounts and control access when an account needs moderation.</p>
         </div>
-        <a href="/dashboard" class="btn btn-outline-secondary shadow-sm text-nowrap">
-            <i class="bi bi-arrow-left"></i> Back
-        </a>
-    </div>
-</div>
 
-<div class="card shadow-sm border-0">
-    <div class="card-body p-0">
-        @if (allUsers == null)
-        {
-            <div class="p-5 text-center">
-                <div class="spinner-border text-primary" role="status"></div>
-                <p class="mt-2 text-muted">Loading directory...</p>
+        <div class="admin-page-actions">
+            <a href="/users/create" class="btn btn-primary shadow-sm">
+                <i class="bi bi-plus-circle me-1"></i> Create user
+            </a>
+            <div class="input-group admin-search shadow-sm">
+                <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                <input type="text" class="form-control border-start-0" placeholder="Search users" @bind="searchTerm" @bind:event="oninput" />
             </div>
-        }
-        else
-        {
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light text-muted small text-uppercase">
-                        <tr>
-                            <th class="ps-4">ID</th>
-                            <th>Full Name</th>
-                            <th>Account Status</th>
-                            <th class="text-end pe-4">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var user in FilteredUsers)
-                        {
+        </div>
+    </div>
+
+    <div class="card admin-table-card">
+        <div class="card-body p-0">
+            @if (allUsers == null)
+            {
+                <div class="empty-state">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="mt-2 mb-0">Loading directory...</p>
+                </div>
+            }
+            else if (!FilteredUsers.Any())
+            {
+                <div class="empty-state">No users found in the system.</div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light text-muted text-uppercase">
                             <tr>
-                                <td class="ps-4 fw-bold text-muted">#@user.UserId</td>
-                                <td class="fw-semibold">@user.FirstName @user.LastName</td>
-                                <td>
-                                    @if (user.AccountStatus.ToLower() == "active")
-                                    {
-                                        <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill">Active</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 rounded-pill text-dark">@user.AccountStatus</span>
-                                    }
-                                </td>
-                                <td class="text-end pe-4">
-                                    <a href="/users/edit/@user.UserId" class="btn btn-sm btn-primary">Edit</a>
-
-                                    @if (user.AccountStatus.ToLower() == "suspended")
-                                    {
-                                        <button class="btn btn-sm btn-outline-success ms-1" @onclick="() => HandleSuspendToggle(user.UserId, false)">Unsuspend</button>
-                                    }
-                                    else
-                                    {
-                                        <button class="btn btn-sm btn-outline-danger" @onclick="() => SuspendUser(user.UserId)">
-                                            Suspend
-                                        </button>
-                                    }
-                                </td>
+                                <th class="ps-4">ID</th>
+                                <th>Full name</th>
+                                <th>Account status</th>
+                                <th class="text-end pe-4">Actions</th>
                             </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        }
-    </div>
-</div>
+                        </thead>
+                        <tbody>
+                            @foreach (var user in FilteredUsers)
+                            {
+                                <tr>
+                                    <td class="ps-4 fw-bold text-muted">#@user.UserId</td>
+                                    <td>
+                                        <div class="fw-semibold">@user.FirstName @user.LastName</div>
+                                        <div class="text-muted small">@user.Email</div>
+                                    </td>
+                                    <td>
+                                        @if (user.AccountStatus.ToLower() == "active")
+                                        {
+                                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25">Active</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 text-dark">@user.AccountStatus</span>
+                                        }
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        <a href="/users/edit/@user.UserId" class="btn btn-sm btn-primary">Edit</a>
 
-<ActionMessage Message="@statusMessage" AlertType="@statusType" OnMessageCleared="() => statusMessage = null" />
+                                        @if (user.AccountStatus.ToLower() == "suspended")
+                                        {
+                                            <button class="btn btn-sm btn-outline-success ms-1" @onclick="() => HandleSuspendToggle(user.UserId, false)">Unsuspend</button>
+                                        }
+                                        else
+                                        {
+                                            <button class="btn btn-sm btn-outline-warning ms-1" @onclick="() => SuspendUser(user.UserId)">
+                                                Suspend
+                                            </button>
+                                        }
+
+                                        <button class="btn btn-sm btn-outline-danger ms-1" @onclick="() => DeleteUser(user)">
+                                            Delete
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+
+    <ActionMessage Message="@statusMessage" AlertType="@statusType" OnMessageCleared="() => statusMessage = null" />
+</div>
 
 @code {
     private UserDto[]? allUsers;
@@ -89,11 +105,11 @@
     private string statusType = "danger";
     private string searchTerm = "";
 
-    // Searches both First and Last names!
     private IEnumerable<UserDto> FilteredUsers => string.IsNullOrWhiteSpace(searchTerm)
         ? allUsers ?? Array.Empty<UserDto>()
         : allUsers!.Where(u => u.FirstName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
-                               u.LastName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+                               u.LastName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                               u.Email.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
 
     protected override async Task OnInitializedAsync()
     {
@@ -109,8 +125,8 @@
                 ?? Array.Empty<UserDto>();
 
             allUsers = allUsers
-                .Where(u => !u.LastName.Contains("Mechanic") && !u.LastName.Contains("Admin"))
                 .OrderByDescending(u => u.AccountStatus.ToLower() == "active")
+                .ThenBy(u => u.LastName)
                 .ToArray();
 
             if (!string.IsNullOrWhiteSpace(AdminApi.LastError))
@@ -154,12 +170,11 @@
         {
             statusMessage = null;
 
-            // If isSuspending is true, set to "suspended". If false, set back to "active"
             string newStatus = isSuspending ? "suspended" : "active";
 
             await AdminApi.UpdateUserStatusAsync(userId, newStatus);
 
-            await LoadUsers(); // Reload to see the button change colors!
+            await LoadUsers();
 
             statusType = "success";
             string actionText = isSuspending ? "suspended" : "reactivated";
@@ -169,6 +184,31 @@
         {
             statusType = "danger";
             statusMessage = $"Failed to update user status: {ex.Message}";
+        }
+    }
+
+    private async Task DeleteUser(UserDto user)
+    {
+        var confirmed = await JS.InvokeAsync<bool>(
+            "confirm",
+            $"Delete {user.FirstName} {user.LastName}'s account?\n\nThis will anonymize the account, remove login access, clear email/phone/profile login data, and release the email for future registration. Existing bookings/payments stay for records.");
+
+        if (!confirmed)
+        {
+            return;
+        }
+
+        try
+        {
+            await AdminApi.DeleteUserAsync(user.UserId);
+            statusType = "success";
+            statusMessage = $"User #{user.UserId} has been deleted.";
+            await LoadUsers();
+        }
+        catch (Exception ex)
+        {
+            statusType = "danger";
+            statusMessage = $"Failed to delete user: {ex.Message}";
         }
     }
 }

@@ -9,10 +9,6 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace BikeMate.Api.Controllers;
 
-public sealed record PhilippineRegionDto(string Code, string Name);
-public sealed record PhilippineLocalityDto(string Code, string Name, string Type, string RegionCode, string? Province);
-public sealed record PhilippineLocationMatchDto(PhilippineRegionDto Region, PhilippineLocalityDto Locality);
-
 [ApiController]
 [Route("api/geography")]
 [AllowAnonymous]
@@ -35,10 +31,7 @@ public sealed class GeographyController(
         catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or JsonException)
         {
             logger.LogWarning(ex, "The Philippine geography provider could not return regions.");
-            return StatusCode(StatusCodes.Status503ServiceUnavailable, new
-            {
-                error = "Philippine location data is temporarily unavailable. Please try again."
-            });
+            return Ok(FallbackRegions);
         }
     }
 
@@ -62,6 +55,30 @@ public sealed class GeographyController(
             return StatusCode(StatusCodes.Status503ServiceUnavailable, new
             {
                 error = "Cities and municipalities are temporarily unavailable. Please try again."
+            });
+        }
+    }
+
+    [HttpGet("localities/{localityCode}/barangays")]
+    public async Task<ActionResult<IReadOnlyList<PhilippineBarangayDto>>> Barangays(
+        string localityCode,
+        CancellationToken cancellationToken)
+    {
+        if (!IsPsgcCode(localityCode))
+        {
+            return BadRequest(new { error = "A valid 10-digit PSGC city or municipality code is required." });
+        }
+
+        try
+        {
+            return Ok(await GetBarangaysAsync(localityCode, cancellationToken));
+        }
+        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or JsonException)
+        {
+            logger.LogWarning(ex, "The Philippine geography provider could not return barangays for {LocalityCode}.", localityCode);
+            return StatusCode(StatusCodes.Status503ServiceUnavailable, new
+            {
+                error = "Barangays are temporarily unavailable. Please try again."
             });
         }
     }
@@ -174,6 +191,31 @@ public sealed class GeographyController(
         }) ?? [];
     }
 
+    private async Task<IReadOnlyList<PhilippineBarangayDto>> GetBarangaysAsync(
+        string localityCode,
+        CancellationToken cancellationToken)
+    {
+        return await cache.GetOrCreateAsync($"psgc-barangays-{localityCode}", async entry =>
+        {
+            entry.AbsoluteExpirationRelativeToNow = CacheDuration;
+            var rows = await GetProviderAsync<IReadOnlyList<PsgcBarangayRow>>(
+                $"barangay?id={Uri.EscapeDataString(localityCode)}",
+                cancellationToken);
+            return (IReadOnlyList<PhilippineBarangayDto>)rows
+                .Where(row =>
+                    IsPsgcCode(row.Code) &&
+                    string.Equals(row.Type, "Bgy", StringComparison.OrdinalIgnoreCase) &&
+                    !string.IsNullOrWhiteSpace(row.Name))
+                .Select(row => new PhilippineBarangayDto(
+                    row.Code,
+                    RepairEncoding(row.Name).Trim(),
+                    localityCode))
+                .DistinctBy(row => row.Code)
+                .OrderBy(row => row.Name)
+                .ToArray();
+        }) ?? [];
+    }
+
     private async Task<T> GetProviderAsync<T>(string endpoint, CancellationToken cancellationToken)
     {
         var baseUrl = configuration["PhilippineGeography:BaseUrl"] ?? "https://psgc.rootscratch.com/";
@@ -246,11 +288,37 @@ public sealed class GeographyController(
         return value is { Length: 10 } && value.All(char.IsDigit);
     }
 
+    private static readonly PhilippineRegionDto[] FallbackRegions =
+    [
+        new("0100000000", "Region I (Ilocos Region)"),
+        new("0200000000", "Region II (Cagayan Valley)"),
+        new("0300000000", "Region III (Central Luzon)"),
+        new("0400000000", "Region IV-A (CALABARZON)"),
+        new("1700000000", "MIMAROPA Region"),
+        new("0500000000", "Region V (Bicol Region)"),
+        new("0600000000", "Region VI (Western Visayas)"),
+        new("0700000000", "Region VII (Central Visayas)"),
+        new("0800000000", "Region VIII (Eastern Visayas)"),
+        new("0900000000", "Region IX (Zamboanga Peninsula)"),
+        new("1000000000", "Region X (Northern Mindanao)"),
+        new("1100000000", "Region XI (Davao Region)"),
+        new("1200000000", "Region XII (SOCCSKSARGEN)"),
+        new("1300000000", "National Capital Region (NCR)"),
+        new("1400000000", "Cordillera Administrative Region (CAR)"),
+        new("1600000000", "Caraga"),
+        new("1900000000", "Bangsamoro Autonomous Region in Muslim Mindanao (BARMM)")
+    ];
+
     private sealed record PsgcRegionRow(
         [property: JsonPropertyName("psgc_id")] string Code,
         [property: JsonPropertyName("name")] string Name);
 
     private sealed record PsgcLocalityRow(
+        [property: JsonPropertyName("psgc_id")] string Code,
+        [property: JsonPropertyName("name")] string Name,
+        [property: JsonPropertyName("geographic_level")] string Type);
+
+    private sealed record PsgcBarangayRow(
         [property: JsonPropertyName("psgc_id")] string Code,
         [property: JsonPropertyName("name")] string Name,
         [property: JsonPropertyName("geographic_level")] string Type);

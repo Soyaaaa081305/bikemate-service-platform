@@ -28,13 +28,18 @@ public sealed class RiderController(
     public async Task<IActionResult> Dashboard(CancellationToken cancellationToken)
     {
         var mechanic = await GetMechanicAsync(cancellationToken);
-        var activeStatuses = new[] { "accepted", "en_route", "arrived", "in_progress" };
+        var activeStatuses = new[] { RequestStatuses.Paid, RequestStatuses.Accepted, RequestStatuses.EnRoute, RequestStatuses.Arrived, RequestStatuses.InProgress };
+        var availableStatuses = new[] { RequestStatuses.Pending, RequestStatuses.Paid, RequestStatuses.PaymentPending };
         var activeJob = await serviceRequestService.Query()
             .Where(x => x.MechanicId == mechanic.MechanicId && activeStatuses.Contains(x.CurrentStatus!.StatusName))
             .OrderByDescending(x => x.CreatedAt)
             .Select(ServiceRequestService.ToDtoExpression())
             .FirstOrDefaultAsync(cancellationToken);
-        var incomingCount = await db.ServiceRequests.CountAsync(x => x.MechanicId == null && x.CurrentStatus!.StatusName == "pending", cancellationToken);
+        var incomingCount = await db.ServiceRequests.CountAsync(x =>
+            x.MechanicId == null &&
+            availableStatuses.Contains(x.CurrentStatus!.StatusName) &&
+            !x.IssueDescription.StartsWith("[EMERGENCY]"),
+            cancellationToken);
         var emergencyCount = await db.ServiceRequests.CountAsync(x => x.MechanicId == null && x.IssueDescription.StartsWith("[EMERGENCY]"), cancellationToken);
         var paidStatusId = await db.PaymentStatuses.Where(x => x.StatusName == "paid").Select(x => x.PaymentStatusId).SingleAsync(cancellationToken);
         var earnings = await db.Payments
@@ -106,7 +111,6 @@ public sealed class RiderController(
                         x.CurrentStatus.StatusName != RequestStatuses.Cancelled &&
                         x.CurrentStatus.StatusName != RequestStatuses.Rejected &&
                         x.CurrentStatus.StatusName != RequestStatuses.Pending &&
-                        x.CurrentStatus.StatusName != RequestStatuses.Paid &&
                         x.CurrentStatus.StatusName != RequestStatuses.PaymentPending)
             .OrderByDescending(x => x.CreatedAt)
             .Select(ServiceRequestService.ToDtoExpression())
@@ -236,6 +240,7 @@ public sealed class RiderController(
         var payments = await db.Payments
             .Include(x => x.Request)
             .Where(x => x.PaymentStatusId == paidStatusId && x.Request!.MechanicId == mechanicId)
+
             .OrderByDescending(x => x.PaidAt ?? x.CreatedAt)
             .Select(x => x.ToDto("paid"))
             .ToArrayAsync(cancellationToken);

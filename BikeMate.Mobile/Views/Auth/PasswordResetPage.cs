@@ -218,13 +218,13 @@ public sealed class PasswordResetPage : CustomerPageBase, IQueryAttributable
             using var response = await http.PostAsJsonAsync("auth/forgot-password", new ForgotPasswordRequestDto(_email.Trim()));
             if (!response.IsSuccessStatusCode)
             {
-                _banner = await response.Content.ReadAsStringAsync();
+                _banner = await ApiClientHelper.ReadErrorMessageAsync(response);
                 return;
             }
 
             _email = _email.Trim();
             _step = 1;
-            _banner = "If that email exists, a six-digit reset code was sent. It expires in 15 minutes.";
+            _banner = "A six-digit reset code was sent. It expires in 15 minutes.";
         }
         catch (Exception ex)
         {
@@ -253,8 +253,8 @@ public sealed class PasswordResetPage : CustomerPageBase, IQueryAttributable
             using var http = ApiConfig.CreateHttpClient();
             using var response = await http.PostAsJsonAsync("auth/resend-password-reset-otp", new ResendPasswordResetOtpRequestDto(_email.Trim()));
             _banner = response.IsSuccessStatusCode
-                ? "A new reset code was sent if that email exists."
-                : await response.Content.ReadAsStringAsync();
+                ? "A new reset code was sent."
+                : await ApiClientHelper.ReadErrorMessageAsync(response);
         }
         catch (Exception ex)
         {
@@ -291,7 +291,7 @@ public sealed class PasswordResetPage : CustomerPageBase, IQueryAttributable
             using var response = await http.PostAsJsonAsync("auth/verify-password-reset-otp", new VerifyPasswordResetOtpRequestDto(_email.Trim(), _code.Trim()));
             if (!response.IsSuccessStatusCode)
             {
-                _banner = await response.Content.ReadAsStringAsync();
+                _banner = await ApiClientHelper.ReadErrorMessageAsync(response);
                 return;
             }
 
@@ -352,7 +352,7 @@ public sealed class PasswordResetPage : CustomerPageBase, IQueryAttributable
 
             if (!response.IsSuccessStatusCode)
             {
-                _banner = await response.Content.ReadAsStringAsync();
+                _banner = await ApiClientHelper.ReadErrorMessageAsync(response);
                 return;
             }
 

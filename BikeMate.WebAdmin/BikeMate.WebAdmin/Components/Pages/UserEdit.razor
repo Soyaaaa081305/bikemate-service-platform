@@ -18,7 +18,7 @@
 
 <ActionMessage Message="@statusMessage" AlertType="@statusType" OnMessageCleared="() => statusMessage = null" />
 
-<div class="card shadow-sm border-0 border-top border-primary border-4" style="max-width: 800px;">
+<div class="card admin-form-card border-top border-primary border-4">
     <div class="card-body p-4">
         @if (userModel == null)
         {
@@ -85,6 +85,31 @@
     </div>
 </div>
 
+@if (userModel is not null)
+{
+    <div class="card admin-form-card border-danger mt-3">
+        <div class="card-body p-4 d-flex flex-column flex-md-row justify-content-between gap-3 align-items-md-center">
+            <div>
+                <h3 class="h6 fw-bold text-danger mb-1">Delete account</h3>
+                <p class="text-muted mb-0">
+                    Anonymizes this account, removes login access, clears contact/login data, and keeps existing booking/payment records intact.
+                </p>
+            </div>
+            <button type="button" class="btn btn-outline-danger px-4" disabled="@isDeleting" @onclick="DeleteCurrentUser">
+                @if (isDeleting)
+                {
+                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    <span>Deleting...</span>
+                }
+                else
+                {
+                    <span>Delete Account</span>
+                }
+            </button>
+        </div>
+    </div>
+}
+
 @code {
     [Parameter]
     public int Id { get; set; }
@@ -93,6 +118,7 @@
     private string? statusMessage;
     private string statusType = "success";
     private bool isSaving = false;
+    private bool isDeleting = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -143,6 +169,40 @@
         finally
         {
             isSaving = false;
+        }
+    }
+
+    private async Task DeleteCurrentUser()
+    {
+        if (userModel == null || isDeleting)
+        {
+            return;
+        }
+
+        var confirmed = await JS.InvokeAsync<bool>(
+            "confirm",
+            $"Delete {userModel.FirstName} {userModel.LastName}'s account?\n\nThis anonymizes the account, removes login access, clears contact/login data, and releases the email for future registration. This cannot be undone.");
+        if (!confirmed)
+        {
+            return;
+        }
+
+        isDeleting = true;
+        statusMessage = null;
+
+        try
+        {
+            await AdminApi.DeleteUserAsync(Id);
+            Navigation.NavigateTo("/users");
+        }
+        catch (Exception ex)
+        {
+            statusType = "danger";
+            statusMessage = $"Failed to delete account: {ex.Message}";
+        }
+        finally
+        {
+            isDeleting = false;
         }
     }
 }

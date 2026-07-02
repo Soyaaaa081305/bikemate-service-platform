@@ -17,7 +17,8 @@ namespace BikeMate
                     fonts.AddFont("Inter.ttf", "Inter");
                     fonts.AddFont("PTSansCaption-Regular.ttf", "PTSansCaption");
                     fonts.AddFont("PTSansCaption-Bold.ttf", "PTSansCaptionBold");
-                });
+                })
+                .ConfigureMauiHandlers(AppTypography.ConfigureHandlers);
 
             builder.Services.AddHttpClient("BikeMateApi", client =>
             {

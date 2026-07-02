@@ -11,6 +11,52 @@ using Microsoft.Maui.Storage;
 
 namespace BikeMate.Views.Auth;
 
+internal static class CustomerRegistrationDraft
+{
+    public static int Step { get; set; } = 1;
+    public static bool AcceptedTerms { get; set; }
+    public static string PhoneNumber { get; set; } = string.Empty;
+    public static string Email { get; set; } = string.Empty;
+    public static string Password { get; set; } = string.Empty;
+    public static string FirstName { get; set; } = string.Empty;
+    public static string MiddleName { get; set; } = string.Empty;
+    public static string LastName { get; set; } = string.Empty;
+    public static string Sex { get; set; } = string.Empty;
+    public static DateTime Birthdate { get; set; } = DateTime.Today.AddYears(-18);
+    public static bool BirthdateSelected { get; set; }
+    public static string RegionCode { get; set; } = string.Empty;
+    public static string LocalityCode { get; set; } = string.Empty;
+    public static string BarangayName { get; set; } = string.Empty;
+    public static string SelectedProvince { get; set; } = string.Empty;
+    public static string ZipCode { get; set; } = string.Empty;
+    public static string Address { get; set; } = string.Empty;
+    public static FileResult? ValidIdFile { get; set; }
+    public static string? ValidIdPreviewPath { get; set; }
+
+    public static void Reset()
+    {
+        Step = 1;
+        AcceptedTerms = false;
+        PhoneNumber = string.Empty;
+        Email = string.Empty;
+        Password = string.Empty;
+        FirstName = string.Empty;
+        MiddleName = string.Empty;
+        LastName = string.Empty;
+        Sex = string.Empty;
+        Birthdate = DateTime.Today.AddYears(-18);
+        BirthdateSelected = false;
+        RegionCode = string.Empty;
+        LocalityCode = string.Empty;
+        BarangayName = string.Empty;
+        SelectedProvince = string.Empty;
+        ZipCode = string.Empty;
+        Address = string.Empty;
+        ValidIdFile = null;
+        ValidIdPreviewPath = null;
+    }
+}
+
 public partial class RegisterPage : ContentPage
 {
     private const string Orange = "#FF6B2C";
@@ -20,6 +66,8 @@ public partial class RegisterPage : ContentPage
 
     private int _step = 1;
     private bool _acceptedTerms;
+    private bool _birthdateSelected;
+    private bool _restoringDraft;
     private FileResult? _validIdFile;
     private string? _validIdPreviewPath;
 
@@ -33,10 +81,11 @@ public partial class RegisterPage : ContentPage
     private readonly Entry _middleNameEntry = Entry("Enter middle name");
     private readonly Entry _lastNameEntry = Entry("Enter last name");
     private readonly Picker _sexPicker = new() { Title = "Select sex", TextColor = Color.FromArgb(Dark), TitleColor = Color.FromArgb(Muted) };
-    private readonly DatePicker _birthdayPicker = new() { TextColor = Color.FromArgb(Dark), MaximumDate = DateTime.Today.AddYears(-16) };
-    private readonly Entry _provinceEntry = Entry("Province");
-    private readonly Entry _cityEntry = Entry("City");
-    private readonly Entry _barangayEntry = Entry("Barangay");
+    private readonly DatePicker _birthdayPicker = new() { TextColor = Color.FromArgb(Dark), MaximumDate = DateTime.Today.AddYears(-18) };
+    private readonly Picker _regionPicker = Picker("Select region");
+    private readonly Picker _localityPicker = Picker("Select city or municipality");
+    private readonly Picker _barangayPicker = Picker("Select barangay");
+    private readonly Entry _zipCodeEntry = Entry("Zip code", Keyboard.Numeric);
     private readonly Editor _addressEditor = new()
     {
         Placeholder = "House number, street, landmark",
@@ -47,15 +96,36 @@ public partial class RegisterPage : ContentPage
         FontSize = 13
     };
     private readonly ActivityIndicator _busy = new() { Color = Color.FromArgb(Orange), IsVisible = false, IsRunning = false };
+    private IReadOnlyList<PhilippineRegionDto> _regions = [];
+    private IReadOnlyList<PhilippineLocalityDto> _localities = [];
+    private IReadOnlyList<PhilippineBarangayDto> _barangays = [];
+    private bool _loadingLocations;
+    private bool _updatingLocationPickers;
+    private string? _selectedProvince;
+    private string? _locationMessage;
 
     public RegisterPage()
     {
         InitializeComponent();
         _phoneEntry.MaxLength = 14;
+        _zipCodeEntry.MaxLength = 4;
         _phoneEntry.TextChanged += PhoneEntry_TextChanged;
         _sexPicker.Items.Add("Female");
         _sexPicker.Items.Add("Male");
         _sexPicker.Items.Add("Prefer not to say");
+        _birthdayPicker.DateSelected += (_, _) =>
+        {
+            if (_restoringDraft)
+            {
+                return;
+            }
+
+            _birthdateSelected = true;
+            CustomerRegistrationDraft.BirthdateSelected = true;
+        };
+        _regionPicker.SelectedIndexChanged += async (_, _) => await RegionChangedAsync();
+        _localityPicker.SelectedIndexChanged += async (_, _) => await LocalityChangedAsync();
+        LoadDraft();
         RenderStep();
     }
 
@@ -63,6 +133,12 @@ public partial class RegisterPage : ContentPage
     {
         _ = GoBackAsync();
         return true;
+    }
+
+    protected override void OnDisappearing()
+    {
+        SaveDraft();
+        base.OnDisappearing();
     }
 
     private void PhoneEntry_TextChanged(object? sender, TextChangedEventArgs e)
@@ -204,16 +280,189 @@ public partial class RegisterPage : ContentPage
 
     private View AddressGrid()
     {
-        return new VerticalStackLayout
+        Detach(_regionPicker);
+        Detach(_localityPicker);
+        Detach(_barangayPicker);
+        Detach(_zipCodeEntry);
+
+        var stack = new VerticalStackLayout { Spacing = 10 };
+        if (!string.IsNullOrWhiteSpace(_locationMessage))
         {
-            Spacing = 10,
-            Children =
-            {
-                LabeledField("Province *", _provinceEntry),
-                LabeledField("City *", _cityEntry),
-                LabeledField("Barangay *", _barangayEntry)
-            }
-        };
+            stack.Add(Footnote(_locationMessage));
+        }
+
+        stack.Add(LabeledField("Region *", _regionPicker));
+        stack.Add(LabeledField("City / Municipality *", _localityPicker));
+        if (!string.IsNullOrWhiteSpace(_selectedProvince))
+        {
+            stack.Add(Footnote($"Province: {_selectedProvince}"));
+        }
+
+        stack.Add(LabeledField("Barangay *", _barangayPicker));
+        stack.Add(LabeledField("Zip code *", _zipCodeEntry));
+        return stack;
+    }
+
+    private async Task EnsureRegionsLoadedAsync()
+    {
+        if (_regions.Count > 0 || _loadingLocations)
+        {
+            return;
+        }
+
+        _loadingLocations = true;
+        _locationMessage = "Loading Philippine regions...";
+        RenderStep();
+        try
+        {
+            _regions = await CustomerApiClient.GetPhilippineRegionsAsync();
+            SetPickerItems(_regionPicker, _regions.Select(region => region.Name));
+            _locationMessage = _regions.Count == 0
+                ? "No regions were returned. Please try again."
+                : null;
+        }
+        catch (Exception ex)
+        {
+            _locationMessage = $"BikeMate could not load Philippine locations. {ex.Message}";
+        }
+        finally
+        {
+            _loadingLocations = false;
+            RenderStep();
+        }
+
+        await RestoreLocationDraftAsync();
+    }
+
+    private async Task RegionChangedAsync()
+    {
+        if (_updatingLocationPickers)
+        {
+            return;
+        }
+
+        var region = SelectedRegion();
+        if (region is null)
+        {
+            return;
+        }
+
+        _loadingLocations = true;
+        _locationMessage = "Loading cities and municipalities...";
+        _localities = [];
+        _barangays = [];
+        _selectedProvince = null;
+        ResetPicker(_localityPicker, "Select city or municipality");
+        ResetPicker(_barangayPicker, "Select barangay");
+        RenderStep();
+
+        try
+        {
+            _localities = await CustomerApiClient.GetPhilippineLocalitiesAsync(region.Code);
+            SetPickerItems(_localityPicker, _localities.Select(LocalityDisplayName));
+            _locationMessage = _localities.Count == 0
+                ? "No cities or municipalities were returned for this region."
+                : null;
+            SaveDraft();
+        }
+        catch (Exception ex)
+        {
+            _locationMessage = $"BikeMate could not load cities or municipalities. {ex.Message}";
+        }
+        finally
+        {
+            _loadingLocations = false;
+            RenderStep();
+        }
+    }
+
+    private async Task LocalityChangedAsync()
+    {
+        if (_updatingLocationPickers)
+        {
+            return;
+        }
+
+        var locality = SelectedLocality();
+        if (locality is null)
+        {
+            return;
+        }
+
+        _selectedProvince = locality.Province;
+        _loadingLocations = true;
+        _locationMessage = "Loading barangays...";
+        _barangays = [];
+        ResetPicker(_barangayPicker, "Select barangay");
+        RenderStep();
+
+        try
+        {
+            _barangays = await CustomerApiClient.GetPhilippineBarangaysAsync(locality.Code);
+            SetPickerItems(_barangayPicker, _barangays.Select(barangay => barangay.Name));
+            _locationMessage = _barangays.Count == 0
+                ? "No barangays were returned for this city or municipality."
+                : null;
+            SaveDraft();
+        }
+        catch (Exception ex)
+        {
+            _locationMessage = $"BikeMate could not load barangays. {ex.Message}";
+        }
+        finally
+        {
+            _loadingLocations = false;
+            RenderStep();
+        }
+    }
+
+    private PhilippineRegionDto? SelectedRegion()
+    {
+        return _regionPicker.SelectedIndex >= 0 && _regionPicker.SelectedIndex < _regions.Count
+            ? _regions[_regionPicker.SelectedIndex]
+            : null;
+    }
+
+    private PhilippineLocalityDto? SelectedLocality()
+    {
+        return _localityPicker.SelectedIndex >= 0 && _localityPicker.SelectedIndex < _localities.Count
+            ? _localities[_localityPicker.SelectedIndex]
+            : null;
+    }
+
+    private PhilippineBarangayDto? SelectedBarangay()
+    {
+        return _barangayPicker.SelectedIndex >= 0 && _barangayPicker.SelectedIndex < _barangays.Count
+            ? _barangays[_barangayPicker.SelectedIndex]
+            : null;
+    }
+
+    private static string LocalityDisplayName(PhilippineLocalityDto locality)
+    {
+        return string.IsNullOrWhiteSpace(locality.Province)
+            ? locality.Name
+            : $"{locality.Name}, {locality.Province}";
+    }
+
+    private void SetPickerItems(Picker picker, IEnumerable<string> items)
+    {
+        _updatingLocationPickers = true;
+        picker.Items.Clear();
+        foreach (var item in items)
+        {
+            picker.Items.Add(item);
+        }
+        picker.SelectedIndex = -1;
+        _updatingLocationPickers = false;
+    }
+
+    private void ResetPicker(Picker picker, string title)
+    {
+        _updatingLocationPickers = true;
+        picker.Items.Clear();
+        picker.Title = title;
+        picker.SelectedIndex = -1;
+        _updatingLocationPickers = false;
     }
 
     private View UploadRow()
@@ -319,6 +568,7 @@ public partial class RegisterPage : ContentPage
 
     private async Task ContinueFromStep1Async()
     {
+        SaveDraft();
         if (string.IsNullOrWhiteSpace(_phoneEntry.Text) ||
             string.IsNullOrWhiteSpace(_emailEntry.Text) ||
             string.IsNullOrWhiteSpace(_passwordEntry.Text) ||
@@ -361,6 +611,7 @@ public partial class RegisterPage : ContentPage
         _emailEntry.Text = normalizedEmail;
         _phoneEntry.Text = normalizedPhone;
         _step = 2;
+        SaveDraft();
         RenderStep();
     }
 
@@ -417,6 +668,7 @@ public partial class RegisterPage : ContentPage
 
     private async Task ContinueFromStep2Async()
     {
+        SaveDraft();
         if (string.IsNullOrWhiteSpace(_firstNameEntry.Text) ||
             string.IsNullOrWhiteSpace(_lastNameEntry.Text) ||
             _sexPicker.SelectedIndex < 0)
@@ -425,23 +677,46 @@ public partial class RegisterPage : ContentPage
             return;
         }
 
+        if (!_birthdateSelected)
+        {
+            await DisplayAlertAsync("Birthdate required", "Please choose your birthdate so BikeMate can confirm you are at least 18 years old.", "OK");
+            return;
+        }
+
+        if (CalculateAge(_birthdayPicker.Date ?? DateTime.Today, DateTime.Today) < 18)
+        {
+            await DisplayAlertAsync("Age requirement", "You must be at least 18 years old to create a BikeMate account.", "OK");
+            return;
+        }
+
         _step = 3;
+        SaveDraft();
         RenderStep();
+        await EnsureRegionsLoadedAsync();
     }
 
     private async Task ContinueFromStep3Async()
     {
-        if (string.IsNullOrWhiteSpace(_provinceEntry.Text) ||
-            string.IsNullOrWhiteSpace(_cityEntry.Text) ||
-            string.IsNullOrWhiteSpace(_barangayEntry.Text) ||
+        SaveDraft();
+        if (SelectedRegion() is null ||
+            SelectedLocality() is null ||
+            SelectedBarangay() is null ||
+            string.IsNullOrWhiteSpace(_zipCodeEntry.Text) ||
             string.IsNullOrWhiteSpace(_addressEditor.Text) ||
             _validIdFile is null)
         {
-            await DisplayAlertAsync("Missing details", "Please complete your address and upload a valid ID.", "OK");
+            await DisplayAlertAsync("Missing details", "Please complete your Philippine address, zip code, and valid ID.", "OK");
+            return;
+        }
+
+        if (!Regex.IsMatch(_zipCodeEntry.Text.Trim(), @"^\d{4}$"))
+        {
+            await DisplayAlertAsync("Invalid zip code", "Enter a 4-digit Philippine zip code.", "OK");
             return;
         }
 
         _step = 4;
+        SaveDraft();
         RenderStep();
     }
 
@@ -462,6 +737,7 @@ public partial class RegisterPage : ContentPage
 
             _validIdFile = result;
             _validIdPreviewPath = await CopyToCacheAsync(result);
+            SaveDraft();
             await DisplayAlertAsync("ID selected", "Review the preview, then continue when the image is clear and readable.", "Done");
             RenderStep();
         }
@@ -480,6 +756,7 @@ public partial class RegisterPage : ContentPage
         }
 
         SetBusy(true);
+        SaveDraft();
         try
         {
             var dto = new RegisterRequestDto(
@@ -489,7 +766,8 @@ public partial class RegisterPage : ContentPage
                 _passwordEntry.Text ?? "",
                 _confirmPasswordEntry.Text ?? "",
                 NormalizePhilippineMobile(_phoneEntry.Text),
-                AppRoles.Customer);
+                AppRoles.Customer,
+                _birthdayPicker.Date?.Date);
 
             using var http = ApiConfig.CreateHttpClient();
             using var response = await http.PostAsJsonAsync("auth/register", dto);
@@ -521,6 +799,7 @@ public partial class RegisterPage : ContentPage
             }
 
             await Shell.Current.GoToAsync($"{nameof(OtpVerificationPage)}?email={Uri.EscapeDataString(dto.Email)}&fromRegister=true");
+            CustomerRegistrationDraft.Reset();
         }
         catch (Exception ex)
         {
@@ -552,10 +831,10 @@ public partial class RegisterPage : ContentPage
         await CustomerApiClient.UpsertAddressAsync(null, new UpsertCustomerAddressDto(
             "Home",
             Clean(_addressEditor.Text) ?? string.Empty,
-            Clean(_barangayEntry.Text),
-            Clean(_cityEntry.Text),
-            Clean(_provinceEntry.Text),
-            null,
+            SelectedBarangay()?.Name,
+            SelectedLocality()?.Name,
+            _selectedProvince ?? SelectedRegion()?.Name,
+            Clean(_zipCodeEntry.Text),
             null,
             null,
             true));
@@ -563,14 +842,110 @@ public partial class RegisterPage : ContentPage
 
     private async Task GoBackAsync()
     {
+        SaveDraft();
         if (_step > 1)
         {
             _step--;
+            SaveDraft();
             RenderStep();
             return;
         }
 
         await Shell.Current.GoToAsync("..");
+    }
+
+    private void LoadDraft()
+    {
+        _step = Math.Clamp(CustomerRegistrationDraft.Step, 1, 4);
+        _acceptedTerms = CustomerRegistrationDraft.AcceptedTerms;
+        _birthdateSelected = CustomerRegistrationDraft.BirthdateSelected;
+        _restoringDraft = true;
+        _phoneEntry.Text = CustomerRegistrationDraft.PhoneNumber;
+        _emailEntry.Text = CustomerRegistrationDraft.Email;
+        _passwordEntry.Text = CustomerRegistrationDraft.Password;
+        _confirmPasswordEntry.Text = CustomerRegistrationDraft.Password;
+        _firstNameEntry.Text = CustomerRegistrationDraft.FirstName;
+        _middleNameEntry.Text = CustomerRegistrationDraft.MiddleName;
+        _lastNameEntry.Text = CustomerRegistrationDraft.LastName;
+        if (!string.IsNullOrWhiteSpace(CustomerRegistrationDraft.Sex))
+        {
+            _sexPicker.SelectedItem = CustomerRegistrationDraft.Sex;
+        }
+
+        _birthdayPicker.Date = CustomerRegistrationDraft.Birthdate.Date > _birthdayPicker.MaximumDate
+            ? _birthdayPicker.MaximumDate
+            : CustomerRegistrationDraft.Birthdate.Date;
+        _restoringDraft = false;
+        _selectedProvince = CustomerRegistrationDraft.SelectedProvince;
+        _zipCodeEntry.Text = CustomerRegistrationDraft.ZipCode;
+        _addressEditor.Text = CustomerRegistrationDraft.Address;
+        _validIdFile = CustomerRegistrationDraft.ValidIdFile;
+        _validIdPreviewPath = CustomerRegistrationDraft.ValidIdPreviewPath;
+    }
+
+    private void SaveDraft()
+    {
+        CustomerRegistrationDraft.Step = _step;
+        CustomerRegistrationDraft.AcceptedTerms = _acceptedTerms;
+        CustomerRegistrationDraft.PhoneNumber = _phoneEntry.Text ?? string.Empty;
+        CustomerRegistrationDraft.Email = _emailEntry.Text ?? string.Empty;
+        CustomerRegistrationDraft.Password = _passwordEntry.Text ?? CustomerRegistrationDraft.Password;
+        CustomerRegistrationDraft.FirstName = _firstNameEntry.Text ?? string.Empty;
+        CustomerRegistrationDraft.MiddleName = _middleNameEntry.Text ?? string.Empty;
+        CustomerRegistrationDraft.LastName = _lastNameEntry.Text ?? string.Empty;
+        CustomerRegistrationDraft.Sex = _sexPicker.SelectedItem?.ToString() ?? string.Empty;
+        CustomerRegistrationDraft.BirthdateSelected = _birthdateSelected;
+        if (_birthdateSelected)
+        {
+            CustomerRegistrationDraft.Birthdate = (_birthdayPicker.Date ?? DateTime.Today).Date;
+        }
+        CustomerRegistrationDraft.RegionCode = SelectedRegion()?.Code ?? CustomerRegistrationDraft.RegionCode;
+        CustomerRegistrationDraft.LocalityCode = SelectedLocality()?.Code ?? CustomerRegistrationDraft.LocalityCode;
+        CustomerRegistrationDraft.BarangayName = SelectedBarangay()?.Name ?? CustomerRegistrationDraft.BarangayName;
+        CustomerRegistrationDraft.SelectedProvince = _selectedProvince ?? string.Empty;
+        CustomerRegistrationDraft.ZipCode = _zipCodeEntry.Text ?? string.Empty;
+        CustomerRegistrationDraft.Address = _addressEditor.Text ?? string.Empty;
+        CustomerRegistrationDraft.ValidIdFile = _validIdFile;
+        CustomerRegistrationDraft.ValidIdPreviewPath = _validIdPreviewPath;
+    }
+
+    private async Task RestoreLocationDraftAsync()
+    {
+        if (_regions.Count == 0 || string.IsNullOrWhiteSpace(CustomerRegistrationDraft.RegionCode))
+        {
+            return;
+        }
+
+        var regionIndex = IndexOf(_regions, region => string.Equals(region.Code, CustomerRegistrationDraft.RegionCode, StringComparison.OrdinalIgnoreCase));
+        if (regionIndex < 0)
+        {
+            return;
+        }
+
+        SelectPickerIndex(_regionPicker, regionIndex);
+        var region = _regions[regionIndex];
+        _localities = await CustomerApiClient.GetPhilippineLocalitiesAsync(region.Code);
+        SetPickerItems(_localityPicker, _localities.Select(LocalityDisplayName));
+
+        var localityIndex = IndexOf(_localities, locality => string.Equals(locality.Code, CustomerRegistrationDraft.LocalityCode, StringComparison.OrdinalIgnoreCase));
+        if (localityIndex < 0)
+        {
+            return;
+        }
+
+        SelectPickerIndex(_localityPicker, localityIndex);
+        var locality = _localities[localityIndex];
+        _selectedProvince = locality.Province;
+        _barangays = await CustomerApiClient.GetPhilippineBarangaysAsync(locality.Code);
+        SetPickerItems(_barangayPicker, _barangays.Select(barangay => barangay.Name));
+
+        var barangayIndex = IndexOf(_barangays, barangay => string.Equals(barangay.Name, CustomerRegistrationDraft.BarangayName, StringComparison.OrdinalIgnoreCase));
+        if (barangayIndex >= 0)
+        {
+            SelectPickerIndex(_barangayPicker, barangayIndex);
+        }
+
+        RenderStep();
     }
 
     private void SetBusy(bool value)
@@ -593,6 +968,19 @@ public partial class RegisterPage : ContentPage
             IsPassword = isPassword,
             TextColor = Color.FromArgb(Dark),
             PlaceholderColor = Color.FromArgb(Muted),
+            FontSize = 13,
+            FontFamily = AppTypography.BodyFont,
+            BackgroundColor = Colors.Transparent
+        };
+    }
+
+    private static Picker Picker(string title)
+    {
+        return new Picker
+        {
+            Title = title,
+            TextColor = Color.FromArgb(Dark),
+            TitleColor = Color.FromArgb(Muted),
             FontSize = 13,
             FontFamily = AppTypography.BodyFont,
             BackgroundColor = Colors.Transparent
@@ -801,6 +1189,17 @@ public partial class RegisterPage : ContentPage
         return $"+63{localNumber}";
     }
 
+    private static int CalculateAge(DateTime birthdate, DateTime today)
+    {
+        var age = today.Year - birthdate.Year;
+        if (birthdate.Date > today.AddYears(-age))
+        {
+            age--;
+        }
+
+        return age;
+    }
+
     private static async Task<string> ReadErrorAsync(HttpResponseMessage response)
     {
         var content = await response.Content.ReadAsStringAsync();
@@ -859,9 +1258,10 @@ public partial class RegisterPage : ContentPage
             _lastNameEntry,
             _sexPicker,
             _birthdayPicker,
-            _provinceEntry,
-            _cityEntry,
-            _barangayEntry,
+            _regionPicker,
+            _localityPicker,
+            _barangayPicker,
+            _zipCodeEntry,
             _addressEditor,
             _busy
         })
@@ -887,5 +1287,25 @@ public partial class RegisterPage : ContentPage
                 scrollView.Content = null;
                 break;
         }
+    }
+
+    private void SelectPickerIndex(Picker picker, int index)
+    {
+        _updatingLocationPickers = true;
+        picker.SelectedIndex = index;
+        _updatingLocationPickers = false;
+    }
+
+    private static int IndexOf<T>(IReadOnlyList<T> values, Func<T, bool> predicate)
+    {
+        for (var index = 0; index < values.Count; index++)
+        {
+            if (predicate(values[index]))
+            {
+                return index;
+            }
+        }
+
+        return -1;
     }
 }

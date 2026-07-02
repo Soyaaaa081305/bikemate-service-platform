@@ -10,34 +10,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BikeMate.Api.Controllers;
 
-public sealed record ShopReputationDto(
-    int ShopId,
-    decimal AverageRating,
-    int ReviewCount,
-    int CompletedJobs,
-    IReadOnlyList<ShopTechnicianSummaryDto> TopTechnicians,
-    IReadOnlyList<ShopCustomerReviewDto> RecentReviews);
-
-public sealed record ShopTechnicianSummaryDto(
-    int MechanicId,
-    string FullName,
-    string? ProfileImageUrl,
-    decimal AverageRating,
-    int ReviewCount,
-    int CompletedJobs,
-    int? YearsExperience,
-    string AvailabilityStatus,
-    bool IsVerified);
-
-public sealed record ShopCustomerReviewDto(
-    int ReviewId,
-    int Rating,
-    string? Comment,
-    string CustomerName,
-    string TechnicianName,
-    string? ServiceName,
-    DateTime CreatedAt);
-
 [ApiController]
 [Route("api/[controller]")]
 public sealed class ShopsController(BikeMateDbContext db) : ControllerBase
@@ -48,7 +20,7 @@ public sealed class ShopsController(BikeMateDbContext db) : ControllerBase
     {
         return Ok(await db.Shops
             .Where(x => x.ShopId == id)
-            .Select(x => new ShopDetailsDto(x.ShopId, x.ShopName, x.ShopDescription, x.AddressLine, x.City, x.Province, x.ContactNumber, x.ShopStatus, x.Latitude, x.Longitude))
+            .Select(x => new ShopDetailsDto(x.ShopId, x.ShopName, x.ShopDescription, x.AddressLine, x.City, x.Province, x.ContactNumber, x.ShopStatus, x.Latitude, x.Longitude, x.ShopImageUrl, x.ShopLogoUrl))
             .SingleAsync(cancellationToken));
     }
 
@@ -142,14 +114,14 @@ public sealed class ShopsController(BikeMateDbContext db) : ControllerBase
         {
             return Ok(await db.Shops
                 .OrderBy(x => x.ShopId)
-                .Select(x => new ShopDetailsDto(x.ShopId, x.ShopName, x.ShopDescription, x.AddressLine, x.City, x.Province, x.ContactNumber, x.ShopStatus, x.Latitude, x.Longitude))
+                .Select(x => new ShopDetailsDto(x.ShopId, x.ShopName, x.ShopDescription, x.AddressLine, x.City, x.Province, x.ContactNumber, x.ShopStatus, x.Latitude, x.Longitude, x.ShopImageUrl, x.ShopLogoUrl))
                 .ToArrayAsync(cancellationToken));
         }
 
         var userId = User.GetUserId();
         return Ok(await db.Shops
             .Where(x => x.OwnerUserId == userId)
-            .Select(x => new ShopDetailsDto(x.ShopId, x.ShopName, x.ShopDescription, x.AddressLine, x.City, x.Province, x.ContactNumber, x.ShopStatus, x.Latitude, x.Longitude))
+            .Select(x => new ShopDetailsDto(x.ShopId, x.ShopName, x.ShopDescription, x.AddressLine, x.City, x.Province, x.ContactNumber, x.ShopStatus, x.Latitude, x.Longitude, x.ShopImageUrl, x.ShopLogoUrl))
             .ToArrayAsync(cancellationToken));
     }
 
@@ -201,7 +173,11 @@ public sealed class ShopsController(BikeMateDbContext db) : ControllerBase
                 shop.ContactNumber,
                 shop.ShopStatus,
                 shop.Latitude,
-                shop.Longitude))
+                shop.Longitude,
+                shop.ShopImageUrl,
+                shop.ShopLogoUrl,
+                shop.Services.Count(service => service.IsActive),
+                shop.Services.Where(service => service.IsActive).Select(service => (decimal?)service.BasePrice).Min()))
             .ToArray());
     }
 
@@ -335,8 +311,20 @@ public sealed class ShopsController(BikeMateDbContext db) : ControllerBase
     {
         await GetOwnedShopAsync(id, cancellationToken);
         return Ok(await db.Products
+            .Include(x => x.Images)
             .Where(x => x.ShopId == id)
-            .Select(x => new ProductDto(x.ProductId, x.ShopId, x.ProductName, x.ProductDescription, x.Price, x.StockQuantity, x.IsActive))
+            .Select(x => new ProductDto(
+                x.ProductId,
+                x.ShopId,
+                x.ProductName,
+                x.ProductDescription,
+                x.Price,
+                x.StockQuantity,
+                x.IsActive,
+                x.Images
+                    .OrderByDescending(image => image.CreatedAt)
+                    .Select(image => image.ImageUrl)
+                    .FirstOrDefault()))
             .ToArrayAsync(cancellationToken));
     }
 
@@ -357,6 +345,8 @@ public sealed class ShopsController(BikeMateDbContext db) : ControllerBase
         };
         db.Products.Add(product);
         await db.SaveChangesAsync(cancellationToken);
+        await ReplaceProductImageAsync(product, dto.ProductImageUrl, cancellationToken);
+        await db.SaveChangesAsync(cancellationToken);
         return Ok(ToProductDto(product));
     }
 
@@ -372,6 +362,7 @@ public sealed class ShopsController(BikeMateDbContext db) : ControllerBase
         product.StockQuantity = dto.StockQuantity;
         product.IsActive = dto.IsActive;
         product.UpdatedAt = DateTime.UtcNow;
+        await ReplaceProductImageAsync(product, dto.ProductImageUrl, cancellationToken);
         await db.SaveChangesAsync(cancellationToken);
         return Ok(ToProductDto(product));
     }
@@ -423,12 +414,49 @@ public sealed class ShopsController(BikeMateDbContext db) : ControllerBase
 
     private static ShopDetailsDto ToDetails(Shop x)
     {
-        return new ShopDetailsDto(x.ShopId, x.ShopName, x.ShopDescription, x.AddressLine, x.City, x.Province, x.ContactNumber, x.ShopStatus, x.Latitude, x.Longitude);
+        return new ShopDetailsDto(x.ShopId, x.ShopName, x.ShopDescription, x.AddressLine, x.City, x.Province, x.ContactNumber, x.ShopStatus, x.Latitude, x.Longitude, x.ShopImageUrl, x.ShopLogoUrl);
     }
 
     private static ProductDto ToProductDto(Product x)
     {
-        return new ProductDto(x.ProductId, x.ShopId, x.ProductName, x.ProductDescription, x.Price, x.StockQuantity, x.IsActive);
+        return new ProductDto(
+            x.ProductId,
+            x.ShopId,
+            x.ProductName,
+            x.ProductDescription,
+            x.Price,
+            x.StockQuantity,
+            x.IsActive,
+            x.Images
+                .OrderByDescending(image => image.CreatedAt)
+                .Select(image => image.ImageUrl)
+                .FirstOrDefault());
+    }
+
+    private async Task ReplaceProductImageAsync(Product product, string? imageUrl, CancellationToken cancellationToken)
+    {
+        imageUrl = string.IsNullOrWhiteSpace(imageUrl) ? null : imageUrl.Trim();
+        var existingImages = await db.ProductImages
+            .Where(image => image.ProductId == product.ProductId)
+            .ToArrayAsync(cancellationToken);
+
+        if (existingImages.Length > 0)
+        {
+            db.ProductImages.RemoveRange(existingImages);
+            product.Images.Clear();
+        }
+
+        if (imageUrl is null)
+        {
+            return;
+        }
+
+        product.Images.Add(new ProductImage
+        {
+            ProductId = product.ProductId,
+            ImageUrl = imageUrl,
+            CreatedAt = DateTime.UtcNow
+        });
     }
 
     private static decimal DistanceKm(decimal latitudeA, decimal longitudeA, decimal latitudeB, decimal longitudeB)

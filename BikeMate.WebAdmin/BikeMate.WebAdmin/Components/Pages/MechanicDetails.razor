@@ -4,6 +4,7 @@
 @using BikeMate.WebAdmin.Services
 @inject AdminApiClient AdminApi
 @inject IJSRuntime JS
+@inject NavigationManager Navigation
 
 <div class="mb-4 mt-3 d-flex justify-content-between align-items-center">
     <h2 class="fw-bold text-dark mb-0">Mechanic Profile</h2>
@@ -11,8 +12,14 @@
     <div class="d-flex gap-2 align-items-center">
         @if (profile != null)
         {
+            <a href="/mechanics/edit/@profile.MechanicId" class="btn btn-outline-primary shadow-sm">
+                <i class="bi bi-pencil-square me-1"></i> Edit
+            </a>
             <button class="btn btn-outline-danger shadow-sm" @onclick="SuspendMechanic" disabled="@isProcessing">
                 <i class="bi bi-slash-circle me-1"></i> Suspend
+            </button>
+            <button class="btn btn-danger shadow-sm" @onclick="DeleteMechanic" disabled="@isProcessing">
+                <i class="bi bi-trash me-1"></i> Delete
             </button>
         }
         <a href="/mechanics" class="btn btn-outline-secondary shadow-sm ms-2">
@@ -49,33 +56,50 @@ else
         <div class="col-md-4">
             <div class="card shadow-sm border-0 text-center pt-4 pb-3 h-100">
                 <div class="card-body">
-                    <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px; font-size: 2rem;">
+                    <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3 profile-avatar">
                         @(string.IsNullOrWhiteSpace(profile.FullName) ? "?" : profile.FullName.Substring(0, 1))
                     </div>
                     <h4 class="fw-bold mb-1">@profile.FullName</h4>
-                    <p class="text-muted mb-2">@profile.CurrentShopName</p>
+                    @if (HasSubmitted(profile.CurrentShopName))
+                    {
+                        <p class="text-muted mb-2">@profile.CurrentShopName</p>
+                    }
 
                     <div class="mb-4">
                         @if (profile.Status.ToLower() == "online")
                         {
-                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-3 py-2">? Online Now</span>
+                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-3 py-2">Online Now</span>
                         }
                         else
                         {
                             <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 rounded-pill px-3 py-2">Offline</span>
                         }
+                        <span class="@AccountStatusBadgeClass(profile.AccountStatus)">@LabelStatus(profile.AccountStatus)</span>
+                        @if (profile.IsVerified)
+                        {
+                            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill px-3 py-2">Approved</span>
+                        }
                     </div>
 
                     <ul class="list-group list-group-flush text-start mb-4">
                         <li class="list-group-item px-0"><i class="bi bi-envelope text-muted me-2"></i> @profile.Email</li>
-                        <li class="list-group-item px-0"><i class="bi bi-telephone text-muted me-2"></i> @profile.Phone</li>
-                        <li class="list-group-item px-0"><i class="bi bi-briefcase text-muted me-2"></i> @profile.YearsExperience Years Exp.</li>
+                        @if (HasSubmitted(profile.Phone))
+                        {
+                            <li class="list-group-item px-0"><i class="bi bi-telephone text-muted me-2"></i> @profile.Phone</li>
+                        }
+                        @if (profile.YearsExperience > 0)
+                        {
+                            <li class="list-group-item px-0"><i class="bi bi-briefcase text-muted me-2"></i> @profile.YearsExperience Years Exp.</li>
+                        }
                     </ul>
 
-                    <div class="bg-light p-3 rounded text-start">
-                        <h6 class="fw-bold text-muted small text-uppercase">Biography</h6>
-                        <p class="small mb-0">@profile.Bio</p>
-                    </div>
+                    @if (HasSubmitted(profile.Bio))
+                    {
+                        <div class="bg-light p-3 rounded text-start">
+                            <h6 class="fw-bold text-muted small text-uppercase">Biography</h6>
+                            <p class="small mb-0">@profile.Bio</p>
+                        </div>
+                    }
                 </div>
             </div>
         </div>
@@ -120,7 +144,13 @@ else
                         {
                             <li class="list-group-item px-4 py-3 d-flex justify-content-between align-items-center">
                                 <div>
-                                    <h6 class="mb-1 fw-semibold">@job.ServiceName <span class="text-muted small fw-normal ms-2">#@job.RequestId</span></h6>
+                                    <h6 class="mb-1 fw-semibold">
+                                        @(HasSubmitted(job.ServiceName) ? job.ServiceName : $"Booking #{job.RequestId}")
+                                        @if (HasSubmitted(job.ServiceName))
+                                        {
+                                            <span class="text-muted small fw-normal ms-2">#@job.RequestId</span>
+                                        }
+                                    </h6>
                                     <small class="text-muted">@job.Date.ToString("MMM dd, yyyy")</small>
                                 </div>
                                 <span class="badge bg-light text-dark border">@job.Status.Replace("_", " ").ToUpper()</span>
@@ -152,8 +182,11 @@ else
                                         }
                                     </span>
                                 </div>
-                                <p class="mb-1 small text-muted">"@review.Comment"</p>
-                                <small class="text-muted" style="font-size: 0.75rem;">@review.Date.ToString("MMM dd, yyyy")</small>
+                                @if (HasSubmitted(review.Comment))
+                                {
+                                    <p class="mb-1 small text-muted">"@review.Comment"</p>
+                                }
+                                <small class="text-muted">@review.Date.ToString("MMM dd, yyyy")</small>
                             </li>
                         }
                     </ul>
@@ -219,5 +252,53 @@ else
         {
             isProcessing = false;
         }
+    }
+
+    private async Task DeleteMechanic()
+    {
+        bool confirmed = await JS.InvokeAsync<bool>("confirm", $"Delete {profile?.FullName}'s mechanic account? Existing service records remain for reporting.");
+        if (!confirmed) return;
+
+        isProcessing = true;
+        try
+        {
+            await AdminApi.DeleteMechanicAsync(Id);
+            Navigation.NavigateTo("/mechanics");
+        }
+        catch (Exception ex)
+        {
+            statusType = "danger";
+            statusMessage = ex.Message;
+        }
+        finally
+        {
+            isProcessing = false;
+        }
+    }
+
+    private static string LabelStatus(string status)
+    {
+        return string.IsNullOrWhiteSpace(status)
+            ? "Unknown"
+            : char.ToUpperInvariant(status[0]) + status[1..].ToLowerInvariant();
+    }
+
+    private static string AccountStatusBadgeClass(string status)
+    {
+        return status.Trim().ToLowerInvariant() switch
+        {
+            "active" => "badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-3 py-2",
+            "pending" => "badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 rounded-pill px-3 py-2 text-dark",
+            "suspended" => "badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 rounded-pill px-3 py-2",
+            _ => "badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 rounded-pill px-3 py-2"
+        };
+    }
+
+    private static bool HasSubmitted(string? value)
+    {
+        return !string.IsNullOrWhiteSpace(value) &&
+            !string.Equals(value.Trim(), "N/A", StringComparison.OrdinalIgnoreCase) &&
+            !string.Equals(value.Trim(), "Not submitted", StringComparison.OrdinalIgnoreCase) &&
+            !string.Equals(value.Trim(), "Not recorded", StringComparison.OrdinalIgnoreCase);
     }
 }

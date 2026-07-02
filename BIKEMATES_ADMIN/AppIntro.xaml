@@ -2,19 +2,19 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="BIKEMATES_ADMIN.Pages.Intro.AppIntro"
-             BackgroundColor="#F6F6F6">
+             BackgroundColor="White">
 
     <Grid Padding="20,34,20,28" RowDefinitions="*,Auto">
         <VerticalStackLayout Grid.Row="0" Spacing="14" VerticalOptions="Center">
             <Image Source="bikemate_logo.png" HeightRequest="116" HorizontalOptions="Center" />
             <Label Text="BIKEMATES ADMIN"
-                   FontFamily="OpenSansSemibold"
-                   FontSize="24"
+                   FontFamily="Inter"
+                   FontSize="18"
                    FontAttributes="Bold"
                    TextColor="#242424"
                    HorizontalTextAlignment="Center" />
             <Label Text="A shop command center for orders, mechanics, products, and customer requests."
-                   FontSize="14"
+                   FontSize="13"
                    TextColor="#6E6E6E"
                    HorizontalTextAlignment="Center" />
         </VerticalStackLayout>

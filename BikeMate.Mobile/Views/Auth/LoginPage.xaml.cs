@@ -26,7 +26,15 @@ public partial class LoginPage : ContentPage
         {
             var auth = await GoogleSignInService.SignInAsync(AppRoles.Customer);
             await GoogleSignInService.StoreAuthAsync(auth);
-            await AppNavigation.NavigateByRoleAsync(GoogleSignInService.PickPrimaryRole(auth.User.Roles));
+            var role = GoogleSignInService.PickPrimaryRole(auth.User.Roles);
+            if (role == AppRoles.Customer &&
+                string.Equals(auth.User.AccountStatus, "pending", StringComparison.OrdinalIgnoreCase))
+            {
+                await Shell.Current.GoToAsync(nameof(GoogleAccountSetupPage));
+                return;
+            }
+
+            await AppNavigation.NavigateByRoleAsync(role);
         }
         catch (TaskCanceledException)
         {
@@ -54,6 +62,53 @@ public partial class LoginPage : ContentPage
         await Shell.Current.GoToAsync($"{nameof(PasswordResetPage)}?email={email}");
     }
 
+    private async void OnConnectionSettingsClicked(object? sender, EventArgs e)
+    {
+        var current = ApiConfig.BaseUrl;
+        var action = await DisplayActionSheet(
+            "BikeMate API connection",
+            "Cancel",
+            null,
+            "Set API URL",
+            "Use packaged default",
+            "Show current URL");
+
+        if (action == "Set API URL")
+        {
+            var entered = await DisplayPromptAsync(
+                "API URL",
+                "Enter the API base URL. Examples: https://your-domain.com/api/ or http://192.168.1.10:5000/api/.",
+                "Save",
+                "Cancel",
+                current);
+
+            if (string.IsNullOrWhiteSpace(entered))
+            {
+                return;
+            }
+
+            try
+            {
+                ApiConfig.SaveBaseUrlOverride(entered);
+                await DisplayAlertAsync("Connection saved", $"BikeMate will use {ApiConfig.BaseUrl}", "OK");
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlertAsync("Invalid API URL", ex.Message, "OK");
+            }
+        }
+        else if (action == "Use packaged default")
+        {
+            ApiConfig.ClearBaseUrlOverride();
+            await DisplayAlertAsync("Connection reset", $"BikeMate will use {ApiConfig.DeviceDefaultBaseUrl}", "OK");
+        }
+        else if (action == "Show current URL")
+        {
+            var mode = ApiConfig.HasBaseUrlOverride ? "Custom override" : "Packaged default";
+            await DisplayAlertAsync("Current API URL", $"{mode}\n{ApiConfig.BaseUrl}", "OK");
+        }
+    }
+
     private async void OnPasswordCompleted(object? sender, EventArgs e)
     {
         await SignInAsync();
@@ -78,19 +133,19 @@ public partial class LoginPage : ContentPage
                     var role = PickPrimaryRole(auth.User.Roles);
                     await SecureStorage.Default.SetAsync("primary_role", role);
                     await SecureStorage.Default.SetAsync("user_id", auth.User.UserId.ToString());
-                    navigatedAway = true;
+                    navigatedAway = role != AppRoles.ShopAdmin;
                     await AppNavigation.NavigateByRoleAsync(role);
                     return;
                 }
             }
 
-            var error = await response.Content.ReadAsStringAsync();
+            var error = await ApiClientHelper.ReadErrorMessageAsync(response);
             await DisplayAlertAsync("Sign in failed", string.IsNullOrWhiteSpace(error) ? "Check your email and password." : error, "OK");
         }
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"Sign in failed: {ex}");
-            await DisplayAlertAsync("Sign in unavailable", "Could not reach the BikeMate API. Start the API and try again.", "OK");
+            await DisplayAlertAsync("Sign in unavailable", $"Could not reach the BikeMate API at {ApiConfig.BaseUrl}. Check connection settings and try again.", "OK");
         }
         finally
         {

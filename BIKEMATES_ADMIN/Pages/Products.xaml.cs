@@ -11,7 +11,10 @@ public partial class Products : ContentPage
     public ObservableCollection<ProductItem> VisibleProducts { get; } = new();
 
     private ProductItem? _selectedProduct;
-    private ImageSource? _selectedImage;
+    private int? _selectedProductId;
+    private string? _selectedImageUrl;
+    private IReadOnlyList<string> _productCategories = [];
+    private bool _updatingCategorySearch;
     private bool _loaded;
 
     public Products()
@@ -40,6 +43,7 @@ public partial class Products : ContentPage
                 ProductItems.Add(ProductItem.FromApi(product));
             }
 
+            ReloadProductCategories();
             RefreshProductGrid();
         }
         catch (Exception ex)
@@ -60,34 +64,35 @@ public partial class Products : ContentPage
             if (photo is null)
                 return;
 
-            Stream stream = await photo.OpenReadAsync();
-            _selectedImage = ImageSource.FromStream(() => stream);
-            ProductPreviewImage.Source = _selectedImage;
-            ProductPreviewLabel.IsVisible = false;
+            ProductEditorStatusLabel.Text = "Uploading product image...";
+            var uploaded = await BikeMateDatabaseService.UploadShopFileAsync(photo, "product-images");
+            _selectedImageUrl = uploaded.Url;
+            ApplyProductPreview(_selectedImageUrl);
+            ProductEditorStatusLabel.Text = "Product image uploaded. Finish the product details to save it.";
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Image", $"Unable to pick image: {ex.Message}", "OK");
+            await DisplayAlert("Image", $"Unable to upload image: {ex.Message}", "OK");
         }
     }
 
     private async void AddProduct_Clicked(object sender, EventArgs e)
     {
-        if (!ValidateProductInputs(out string name, out string category, out decimal price, out int stock, out string? description))
+        if (!ValidateProductInputs(out string name, out string category, out decimal price, out int stock, out string? description, out string imageUrl))
             return;
 
         try
         {
-            var created = await BikeMateDatabaseService.AddProductAsync(new UpsertAdminProduct(
+            await BikeMateDatabaseService.AddProductAsync(new UpsertAdminProduct(
                 name,
                 BuildStoredDescription(category, description),
                 price,
                 stock,
-                true));
+                true,
+                imageUrl));
 
-            ProductItems.Insert(0, ProductItem.FromApi(created, _selectedImage));
+            await LoadProductsAsync();
             ClearEditor();
-            RefreshProductGrid();
             await DisplayAlert("Product Added", "The product was saved to the shop inventory API.", "OK");
         }
         catch (Exception ex)
@@ -98,29 +103,24 @@ public partial class Products : ContentPage
 
     private async void UpdateProduct_Clicked(object sender, EventArgs e)
     {
-        if (_selectedProduct is null)
+        var selected = GetSelectedProduct();
+        if (selected is null)
         {
             await DisplayAlert("Select Product", "Tap a product in the grid first.", "OK");
             return;
         }
 
-        if (!ValidateProductInputs(out string name, out string category, out decimal price, out int stock, out string? description))
+        if (!ValidateProductInputs(out string name, out string category, out decimal price, out int stock, out string? description, out string imageUrl))
             return;
 
         try
         {
-            var updated = await BikeMateDatabaseService.UpdateProductAsync(
-                _selectedProduct.ProductId,
-                new UpsertAdminProduct(name, BuildStoredDescription(category, description), price, stock, _selectedProduct.IsActive));
+            await BikeMateDatabaseService.UpdateProductAsync(
+                selected.ProductId,
+                new UpsertAdminProduct(name, BuildStoredDescription(category, description), price, stock, selected.IsActive, imageUrl));
 
-            int index = ProductItems.IndexOf(_selectedProduct);
-            if (index >= 0)
-            {
-                ProductItems[index] = ProductItem.FromApi(updated, _selectedImage ?? _selectedProduct.ProductImage);
-            }
-
+            await LoadProductsAsync();
             ClearEditor();
-            RefreshProductGrid();
             await DisplayAlert("Product Updated", "The selected product was updated in the API.", "OK");
         }
         catch (Exception ex)
@@ -131,22 +131,22 @@ public partial class Products : ContentPage
 
     private async void DeleteProduct_Clicked(object sender, EventArgs e)
     {
-        if (_selectedProduct is null)
+        var selected = GetSelectedProduct();
+        if (selected is null)
         {
             await DisplayAlert("Select Product", "Tap a product in the grid first.", "OK");
             return;
         }
 
-        bool confirm = await DisplayAlert("Delete Product", $"Delete {_selectedProduct.Name}?", "Delete", "Cancel");
+        bool confirm = await DisplayAlert("Delete Product", $"Delete {selected.Name}?", "Delete", "Cancel");
         if (!confirm)
             return;
 
         try
         {
-            await BikeMateDatabaseService.DeleteProductAsync(_selectedProduct.ProductId);
-            ProductItems.Remove(_selectedProduct);
+            await BikeMateDatabaseService.DeleteProductAsync(selected.ProductId);
+            await LoadProductsAsync();
             ClearEditor();
-            RefreshProductGrid();
         }
         catch (Exception ex)
         {
@@ -156,33 +156,87 @@ public partial class Products : ContentPage
 
     private void ProductsCollectionView_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        _selectedProduct = e.CurrentSelection.FirstOrDefault() as ProductItem;
-        if (_selectedProduct is null)
-            return;
+        SelectProduct(e.CurrentSelection.FirstOrDefault() as ProductItem);
+    }
 
-        ProductNameEntry.Text = _selectedProduct.Name;
-        CategoryPicker.SelectedItem = _selectedProduct.Category;
-        PriceEntry.Text = _selectedProduct.Price.ToString("0.##");
-        StockEntry.Text = _selectedProduct.Stock.ToString();
-        DescriptionEditor.Text = _selectedProduct.Description;
-        _selectedImage = _selectedProduct.ProductImage;
-        ProductPreviewImage.Source = _selectedImage;
-        ProductPreviewLabel.IsVisible = _selectedImage is null;
+    private void SelectProduct(ProductItem? product)
+    {
+        _selectedProduct = product;
+        _selectedProductId = product?.ProductId;
+        if (product is null)
+        {
+            ProductEditorStatusLabel.Text = "Select an item below to update it, or enter new details to add a product.";
+            return;
+        }
+
+        ProductNameEntry.Text = product.Name;
+        SetSelectedCategory(product.Category);
+        PriceEntry.Text = product.Price.ToString("0.##");
+        StockEntry.Text = product.Stock.ToString();
+        DescriptionEditor.Text = product.Description;
+        _selectedImageUrl = product.ProductImageUrl;
+        ApplyProductPreview(_selectedImageUrl);
+        ProductEditorStatusLabel.Text = $"Editing {product.Name}";
     }
 
     private void ProductSearchBar_TextChanged(object sender, TextChangedEventArgs e) => RefreshProductGrid();
 
-    private bool ValidateProductInputs(out string name, out string category, out decimal price, out int stock, out string? description)
+    private void ProductCategorySearchBar_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        if (_updatingCategorySearch)
+        {
+            return;
+        }
+
+        RefreshProductCategoryPicker();
+    }
+
+    private async void AddProductCategory_Clicked(object sender, EventArgs e)
+    {
+        var typed = ProductCategorySearchBar.Text?.Trim() ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(typed))
+        {
+            await DisplayAlert("Product Category", "Type the category name first.", "OK");
+            return;
+        }
+
+        try
+        {
+            var category = ProductCategoryStore.Add(typed);
+            ReloadProductCategories();
+            SetSelectedCategory(category);
+            await DisplayAlert("Product Category", $"{category} is ready to use for products.", "OK");
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlert("Product Category", ex.Message, "OK");
+        }
+    }
+
+    private bool ValidateProductInputs(out string name, out string category, out decimal price, out int stock, out string? description, out string imageUrl)
     {
         name = ProductNameEntry.Text?.Trim() ?? string.Empty;
-        category = CategoryPicker.SelectedItem?.ToString() ?? string.Empty;
+        category = CategoryPicker.SelectedItem?.ToString() ?? ProductCategorySearchBar.Text?.Trim() ?? string.Empty;
         description = DescriptionEditor.Text?.Trim();
+        imageUrl = _selectedImageUrl?.Trim() ?? string.Empty;
         decimal.TryParse(PriceEntry.Text, out price);
         int.TryParse(StockEntry.Text, out stock);
 
-        if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(category) || price <= 0 || stock < 0)
+        if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(category) || price <= 0 || stock < 0 || string.IsNullOrWhiteSpace(imageUrl))
         {
-            _ = DisplayAlert("Missing Details", "Please enter product name, category, price, and stock.", "OK");
+            _ = DisplayAlert("Missing Details", "Please enter product name, category, price, stock, and one product image.", "OK");
+            return false;
+        }
+
+        try
+        {
+            category = ProductCategoryStore.Add(category);
+            ReloadProductCategories();
+            SetSelectedCategory(category);
+        }
+        catch (Exception ex)
+        {
+            _ = DisplayAlert("Product Category", ex.Message, "OK");
             return false;
         }
 
@@ -202,20 +256,56 @@ public partial class Products : ContentPage
         {
             VisibleProducts.Add(product);
         }
+
+        if (_selectedProductId is int selectedId)
+        {
+            var selected = VisibleProducts.FirstOrDefault(product => product.ProductId == selectedId);
+            ProductsCollectionView.SelectedItem = selected;
+            _selectedProduct = selected ?? ProductItems.FirstOrDefault(product => product.ProductId == selectedId);
+        }
     }
 
     private void ClearEditor()
     {
         _selectedProduct = null;
-        _selectedImage = null;
+        _selectedProductId = null;
+        _selectedImageUrl = null;
         ProductNameEntry.Text = string.Empty;
         CategoryPicker.SelectedItem = null;
+        ProductCategorySearchBar.Text = string.Empty;
+        RefreshProductCategoryPicker();
         PriceEntry.Text = string.Empty;
         StockEntry.Text = string.Empty;
         DescriptionEditor.Text = string.Empty;
         ProductPreviewImage.Source = null;
         ProductPreviewLabel.IsVisible = true;
         ProductsCollectionView.SelectedItem = null;
+        ProductEditorStatusLabel.Text = "Select an item below to update it, or enter new details to add a product.";
+    }
+
+    private void ApplyProductPreview(string? imageUrl)
+    {
+        if (Uri.TryCreate(imageUrl, UriKind.Absolute, out var uri))
+        {
+            ProductPreviewImage.Source = ImageSource.FromUri(uri);
+            ProductPreviewLabel.IsVisible = false;
+            return;
+        }
+
+        ProductPreviewImage.Source = null;
+        ProductPreviewLabel.IsVisible = true;
+    }
+
+    private ProductItem? GetSelectedProduct()
+    {
+        if (_selectedProduct is not null)
+        {
+            return _selectedProduct;
+        }
+
+        return _selectedProductId is int id
+            ? ProductItems.FirstOrDefault(product => product.ProductId == id)
+            : null;
     }
 
     private static string BuildStoredDescription(string category, string? description)
@@ -224,11 +314,49 @@ public partial class Products : ContentPage
             ? $"Category: {category}"
             : $"Category: {category}\n{description}";
     }
+
+    private void ReloadProductCategories()
+    {
+        _productCategories = ProductCategoryStore.Load(ProductItems.Select(product => product.Category));
+        RefreshProductCategoryPicker();
+    }
+
+    private void RefreshProductCategoryPicker()
+    {
+        var search = ProductCategorySearchBar?.Text?.Trim() ?? string.Empty;
+        var categories = _productCategories
+            .Where(category => string.IsNullOrWhiteSpace(search) || category.Contains(search, StringComparison.OrdinalIgnoreCase))
+            .ToList();
+        CategoryPicker.ItemsSource = categories;
+        if (categories.Count == 1 && string.Equals(categories[0], search, StringComparison.OrdinalIgnoreCase))
+        {
+            CategoryPicker.SelectedItem = categories[0];
+        }
+        else if (CategoryPicker.SelectedItem is string selected && !categories.Contains(selected, StringComparer.OrdinalIgnoreCase))
+        {
+            CategoryPicker.SelectedItem = null;
+        }
+    }
+
+    private void SetSelectedCategory(string category)
+    {
+        if (!_productCategories.Contains(category, StringComparer.OrdinalIgnoreCase))
+        {
+            ProductCategoryStore.Add(category);
+            ReloadProductCategories();
+        }
+
+        _updatingCategorySearch = true;
+        ProductCategorySearchBar.Text = category;
+        _updatingCategorySearch = false;
+        RefreshProductCategoryPicker();
+        CategoryPicker.SelectedItem = _productCategories.FirstOrDefault(item => string.Equals(item, category, StringComparison.OrdinalIgnoreCase)) ?? category;
+    }
 }
 
 public sealed class ProductItem
 {
-    public ProductItem(int productId, string name, string category, string description, decimal price, int stock, bool isActive, ImageSource? productImage)
+    public ProductItem(int productId, string name, string category, string description, decimal price, int stock, bool isActive, string? productImageUrl)
     {
         ProductId = productId;
         Name = name;
@@ -237,7 +365,7 @@ public sealed class ProductItem
         Price = price;
         Stock = stock;
         IsActive = isActive;
-        ProductImage = productImage;
+        ProductImageUrl = productImageUrl;
     }
 
     public int ProductId { get; }
@@ -247,14 +375,17 @@ public sealed class ProductItem
     public decimal Price { get; }
     public int Stock { get; }
     public bool IsActive { get; }
-    public ImageSource? ProductImage { get; }
+    public string? ProductImageUrl { get; }
+    public ImageSource? ProductImage => Uri.TryCreate(ProductImageUrl, UriKind.Absolute, out var uri)
+        ? ImageSource.FromUri(uri)
+        : null;
 
     public string PriceText => $"PHP {Price:N2}";
     public string StockText => $"Stock: {Stock}";
     public string StockStatus => Stock <= 5 ? "LOW STOCK" : "IN STOCK";
     public Color StockStatusColor => Stock <= 5 ? Color.FromArgb("#DC2626") : Color.FromArgb("#16A34A");
 
-    public static ProductItem FromApi(AdminProduct product, ImageSource? productImage = null)
+    public static ProductItem FromApi(AdminProduct product)
     {
         var (category, description) = SplitStoredDescription(product.ProductDescription);
         return new ProductItem(
@@ -265,7 +396,7 @@ public sealed class ProductItem
             product.Price,
             product.StockQuantity,
             product.IsActive,
-            productImage);
+            product.ProductImageUrl);
     }
 
     private static (string Category, string Description) SplitStoredDescription(string? value)

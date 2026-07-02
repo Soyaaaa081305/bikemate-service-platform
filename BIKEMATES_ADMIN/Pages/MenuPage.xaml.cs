@@ -36,7 +36,6 @@ public partial class MenuPage : ContentPage
     private async void Logistics_Clicked(object sender, EventArgs e) => await Shell.Current.GoToAsync(nameof(Logistics));
     private async void Calendar_Clicked(object sender, EventArgs e) => await Shell.Current.GoToAsync(nameof(Calendar));
     private async void Operations_Clicked(object sender, EventArgs e) => await Shell.Current.GoToAsync(nameof(Operations));
-    private async void Dispatch_Clicked(object sender, EventArgs e) => await Shell.Current.GoToAsync(nameof(DispatchRequest));
     private async void Admins_Clicked(object sender, EventArgs e) => await Shell.Current.GoToAsync(nameof(Admins));
     private async void Messages_Clicked(object sender, EventArgs e) => await GoToTabAsync("MessagesTab");
     private async void Reports_Clicked(object sender, EventArgs e) => await Shell.Current.GoToAsync(nameof(Reports));
@@ -46,7 +45,7 @@ public partial class MenuPage : ContentPage
 
     private static Task GoToTabAsync(string route)
     {
-        return Shell.Current.GoToAsync($"//{route}");
+        return Shell.Current.GoToAsync($"//AdminTabs/{route}");
     }
 
     private static string BuildInitials(string firstName, string lastName)

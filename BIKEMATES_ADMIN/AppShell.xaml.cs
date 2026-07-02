@@ -13,8 +13,6 @@ public partial class AppShell : Shell
         Routing.RegisterRoute(nameof(Pages.Logistics), typeof(Pages.Logistics));
         Routing.RegisterRoute(nameof(Pages.Calendar), typeof(Pages.Calendar));
         Routing.RegisterRoute(nameof(Pages.Operations), typeof(Pages.Operations));
-        Routing.RegisterRoute(nameof(Pages.DispatchRequest), typeof(Pages.DispatchRequest));
-        Routing.RegisterRoute(nameof(Pages.DispatchDetails), typeof(Pages.DispatchDetails));
         Routing.RegisterRoute(nameof(Pages.Admins), typeof(Pages.Admins));
         Routing.RegisterRoute(nameof(Pages.Messages), typeof(Pages.Messages));
         Routing.RegisterRoute(nameof(Pages.Reports), typeof(Pages.Reports));

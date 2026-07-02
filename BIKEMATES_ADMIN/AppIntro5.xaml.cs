@@ -1,5 +1,3 @@
-using Microsoft.Win32;
-
 namespace BIKEMATES_ADMIN.Pages.Intro;
 
 public partial class AppIntro5 : ContentPage
@@ -16,5 +14,8 @@ public partial class AppIntro5 : ContentPage
         => await Navigation.PushAsync(new Account.AccCreate0());
 
     private async void OnRegisterShopClicked(object sender, EventArgs e)
-        => await Navigation.PushAsync(new Register.Register0());
+        => await DisplayAlert(
+            "Shop approval",
+            "Create your shop-admin account in this app, upload the required ID and business documents, then wait for BikeMate web admin approval. You can sign in after approval.",
+            "OK");
 }

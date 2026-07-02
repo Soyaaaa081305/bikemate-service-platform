@@ -63,7 +63,7 @@ public static class GoogleSignInService
         {
             Debug.WriteLine($"Google sign-in failed: {ex}");
             throw new InvalidOperationException(
-                "Google sign-in could not start or complete. Check that the BikeMate API is running, the ngrok Google callback is added to Google Console, and Chrome is enabled on the device.",
+                "Google sign-in could not start or complete. Check that the BikeMate API is running, the Google callback URL is registered in Google Cloud Console, and Chrome is enabled on the device.",
                 ex);
         }
     }

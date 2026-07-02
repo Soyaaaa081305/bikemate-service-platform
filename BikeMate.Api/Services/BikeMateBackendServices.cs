@@ -11,6 +11,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using BikeMate.Api.Helpers;
 using BikeMate.Core.Constants;
 using BikeMate.Core.DTOs;
 using BikeMate.Core.Entities;
@@ -138,13 +139,14 @@ public sealed class EmailService(
 {
     public Task SendOtpAsync(User user, string code, string purpose, CancellationToken cancellationToken)
     {
+        var message = BuildOtpEmail(user, code, purpose);
         return SendAsync(
             user.Email,
-            "Your BikeMate verification code",
-            $"Your BikeMate verification code is {code}. It expires soon. Purpose: {purpose}.",
-            $"<p>Your BikeMate verification code is <strong>{code}</strong>.</p><p>It expires soon. Purpose: {purpose}.</p>",
+            message.Subject,
+            message.PlainText,
+            message.Html,
             cancellationToken,
-            fallbackLog: "Prototype OTP for {Email} ({Purpose}): {OtpCode}",
+            fallbackLog: "Development OTP for {Email} ({Purpose}): {OtpCode}",
             user.Email,
             purpose,
             code);
@@ -152,13 +154,14 @@ public sealed class EmailService(
 
     public Task SendPasswordResetAsync(User user, string token, CancellationToken cancellationToken)
     {
+        var message = BuildPasswordResetEmail(user, token);
         return SendAsync(
             user.Email,
-            "Reset your BikeMate password",
-            $"Your BikeMate password reset code is {token}. It expires in 15 minutes.",
-            $"<p>Your BikeMate password reset code is <strong>{token}</strong>.</p><p>It expires in 15 minutes.</p>",
+            message.Subject,
+            message.PlainText,
+            message.Html,
             cancellationToken,
-            fallbackLog: "Prototype password reset code for {Email}: {ResetToken}",
+            fallbackLog: "Development password reset code for {Email}: {ResetToken}",
             user.Email,
             token);
     }
@@ -209,6 +212,133 @@ public sealed class EmailService(
             throw new InvalidOperationException($"Email delivery failed (HTTP {(int)response.StatusCode}). Check the SendGrid API key and sender identity.");
         }
     }
+
+    private static EmailMessage BuildOtpEmail(User user, string code, string purpose)
+    {
+        var firstName = SafeFirstName(user);
+        var purposeLabel = PurposeLabel(purpose);
+        var subject = purpose == "email_verification"
+            ? "Verify your BikeMate email"
+            : "Your BikeMate security code";
+        var context = purpose == "email_verification"
+            ? "BikeMate is checking that this email address belongs to you before the account or application can move forward."
+            : $"BikeMate received a request that requires a security code for {purposeLabel}.";
+        var nextStep = purpose == "email_verification"
+            ? "After this email is verified, customer accounts still wait for BikeMate admin review before booking is enabled. Shop and mechanic accounts also need BikeMate admin approval of the submitted details and documents."
+            : "Enter this code only inside the BikeMate app or BikeMate admin page that requested it.";
+
+        var plainText = string.Join(
+            Environment.NewLine,
+            [
+                $"Hi {firstName},",
+                string.Empty,
+                context,
+                string.Empty,
+                $"Your verification code is: {code}",
+                string.Empty,
+                "This code expires in 10 minutes. If you asked for a new code, use the latest email only.",
+                nextStep,
+                string.Empty,
+                "For your safety, do not share this code with anyone. BikeMate staff will never ask for your OTP.",
+                "If you did not request this code, you can ignore this email.",
+                string.Empty,
+                "BikeMate"
+            ]);
+
+        var html = BuildHtmlEmail(
+            subject,
+            firstName,
+            context,
+            code,
+            [
+                "This code expires in 10 minutes.",
+                "If you asked for a new code, use the latest email only.",
+                nextStep,
+                "Do not share this code with anyone. BikeMate staff will never ask for your OTP.",
+                "If you did not request this code, you can ignore this email."
+            ]);
+
+        return new EmailMessage(subject, plainText, html);
+    }
+
+    private static EmailMessage BuildPasswordResetEmail(User user, string token)
+    {
+        const string subject = "Reset your BikeMate password";
+        var firstName = SafeFirstName(user);
+        const string context = "BikeMate received a request to reset the password for your account.";
+        var plainText = string.Join(
+            Environment.NewLine,
+            [
+                $"Hi {firstName},",
+                string.Empty,
+                context,
+                string.Empty,
+                $"Your password reset code is: {token}",
+                string.Empty,
+                "This code expires in 15 minutes. If you requested another reset code, use the latest email only.",
+                "Enter this code in the BikeMate password reset screen, then create your new password.",
+                "If you did not request a password reset, do not share this code and leave your password unchanged.",
+                string.Empty,
+                "BikeMate"
+            ]);
+
+        var html = BuildHtmlEmail(
+            subject,
+            firstName,
+            context,
+            token,
+            [
+                "This code expires in 15 minutes.",
+                "If you requested another reset code, use the latest email only.",
+                "Enter this code in the BikeMate password reset screen, then create your new password.",
+                "If you did not request a password reset, do not share this code and leave your password unchanged."
+            ]);
+
+        return new EmailMessage(subject, plainText, html);
+    }
+
+    private static string BuildHtmlEmail(
+        string title,
+        string firstName,
+        string context,
+        string code,
+        IReadOnlyCollection<string> notes)
+    {
+        var body = new StringBuilder();
+        body.Append("<div style=\"font-family:Arial,sans-serif;color:#242424;line-height:1.5;max-width:560px\">");
+        body.Append("<h2 style=\"color:#ff6b2c;margin-bottom:8px\">").Append(WebUtility.HtmlEncode(title)).Append("</h2>");
+        body.Append("<p>Hi ").Append(WebUtility.HtmlEncode(firstName)).Append(",</p>");
+        body.Append("<p>").Append(WebUtility.HtmlEncode(context)).Append("</p>");
+        body.Append("<p style=\"font-size:14px;color:#6e6e6e;margin-bottom:6px\">Your BikeMate code is</p>");
+        body.Append("<div style=\"font-size:30px;font-weight:700;letter-spacing:4px;background:#fff7f2;border:1px solid #ffd1bd;border-radius:8px;padding:14px 18px;display:inline-block;color:#242424\">");
+        body.Append(WebUtility.HtmlEncode(code));
+        body.Append("</div>");
+        body.Append("<ul style=\"padding-left:20px;margin-top:18px\">");
+        foreach (var note in notes)
+        {
+            body.Append("<li>").Append(WebUtility.HtmlEncode(note)).Append("</li>");
+        }
+        body.Append("</ul>");
+        body.Append("<p style=\"color:#6e6e6e;font-size:13px\">BikeMate</p>");
+        body.Append("</div>");
+        return body.ToString();
+    }
+
+    private static string SafeFirstName(User user)
+    {
+        return string.IsNullOrWhiteSpace(user.FirstName)
+            ? "there"
+            : user.FirstName.Trim();
+    }
+
+    private static string PurposeLabel(string purpose)
+    {
+        return string.IsNullOrWhiteSpace(purpose)
+            ? "your account"
+            : purpose.Replace("_", " ", StringComparison.Ordinal).Trim();
+    }
+
+    private sealed record EmailMessage(string Subject, string PlainText, string Html);
 }
 
 public interface IGoogleAuthService
@@ -243,8 +373,8 @@ public sealed class GoogleAuthService(IConfiguration configuration) : IGoogleAut
             var payload = await GoogleJsonWebSignature.ValidateAsync(idToken, new GoogleJsonWebSignature.ValidationSettings
             {
                 Audience = clientIds,
-                IssuedAtClockTolerance = TimeSpan.FromMinutes(5),
-                ExpirationTimeClockTolerance = TimeSpan.FromMinutes(2)
+                IssuedAtClockTolerance = TimeSpan.FromMinutes(15),
+                ExpirationTimeClockTolerance = TimeSpan.FromMinutes(5)
             });
 
             return (payload.Subject, payload.Email, payload.GivenName ?? "Google", payload.FamilyName ?? "User");
@@ -289,6 +419,10 @@ public sealed class AuthService(
             throw new InvalidOperationException("Invalid role.");
         }
 
+        var birthdate = dto.Role == AppRoles.Customer || dto.Role == AppRoles.Mechanic
+            ? AgeRequirement.RequireAdult(dto.Birthdate, dto.Role)
+            : (DateTime?)null;
+
         var normalizedEmail = NormalizeEmail(dto.Email);
         var normalizedPhone = NormalizePhilippineMobile(dto.PhoneNumber);
         await DeletedAccountIdentity.ReleaseConflictsAsync(
@@ -322,7 +456,7 @@ public sealed class AuthService(
 
         user.UserRoles.Add(new UserRole { RoleId = role.RoleId, AssignedAt = DateTime.UtcNow });
         db.Users.Add(user);
-        AddRoleProfile(user, dto.Role);
+        AddRoleProfile(user, dto.Role, birthdate);
         await db.SaveChangesAsync(cancellationToken);
         await CreateAndSendOtpAsync(user, "email_verification", cancellationToken);
 
@@ -345,6 +479,16 @@ public sealed class AuthService(
         if (user.AccountStatus is "suspended" or "deleted" or "rejected")
         {
             throw new InvalidOperationException("This account is not active.");
+        }
+
+        if (user.AccountStatus == "pending")
+        {
+            var pendingRole = user.UserRoles.Select(x => x.Role?.RoleName).FirstOrDefault(role => !string.IsNullOrWhiteSpace(role)) ?? "account";
+            var pendingLabel = pendingRole == AppRoles.ShopAdmin ? "shop application" :
+                pendingRole == AppRoles.Mechanic ? "mechanic application" :
+                pendingRole == AppRoles.Customer ? "customer account" :
+                "account";
+            throw new InvalidOperationException($"Your {pendingLabel} is pending BikeMate admin approval.");
         }
 
         return CreateAuthResponse(user);
@@ -384,7 +528,7 @@ public sealed class AuthService(
                 LastName = googleUser.LastName,
                 Email = normalizedEmail,
                 EmailVerified = true,
-                AccountStatus = "active",
+                AccountStatus = "pending",
                 CreatedAt = DateTime.UtcNow,
                 UserRoles = [new UserRole { RoleId = role.RoleId, AssignedAt = DateTime.UtcNow }],
                 AuthProviders = [new UserAuthProvider { ProviderName = "google", ProviderSubject = googleUser.Subject, ProviderEmail = googleUser.Email, CreatedAt = DateTime.UtcNow }]
@@ -405,10 +549,6 @@ public sealed class AuthService(
                 CreatedAt = DateTime.UtcNow
             });
             user.EmailVerified = true;
-            if (user.AccountStatus == "pending")
-            {
-                user.AccountStatus = "active";
-            }
 
             user.UpdatedAt = DateTime.UtcNow;
             await db.SaveChangesAsync(cancellationToken);
@@ -425,10 +565,13 @@ public sealed class AuthService(
 
     public async Task VerifyOtpAsync(VerifyOtpRequestDto dto, CancellationToken cancellationToken)
     {
-        var user = await db.Users.SingleOrDefaultAsync(x => x.Email == dto.Email.ToLower(), cancellationToken)
+        var email = NormalizeEmail(dto.Email);
+        var purpose = NormalizeOtpPurpose(dto.Purpose);
+        var code = NormalizeOtpCode(dto.OtpCode);
+        var user = await db.Users.SingleOrDefaultAsync(x => x.Email == email, cancellationToken)
             ?? throw new InvalidOperationException("User was not found.");
         var otp = await db.OtpVerifications
-            .Where(x => x.UserId == user.UserId && x.Purpose == dto.Purpose && x.ConsumedAt == null)
+            .Where(x => x.UserId == user.UserId && x.Purpose == purpose && x.ConsumedAt == null)
             .OrderByDescending(x => x.CreatedAt)
             .FirstOrDefaultAsync(cancellationToken)
             ?? throw new InvalidOperationException("OTP was not found.");
@@ -444,17 +587,16 @@ public sealed class AuthService(
         }
 
         otp.Attempts++;
-        if (!otpService.VerifyCode(dto.OtpCode, otp.OtpHash))
+        if (!otpService.VerifyCode(code, otp.OtpHash))
         {
             await db.SaveChangesAsync(cancellationToken);
             throw new InvalidOperationException("Invalid OTP.");
         }
 
         otp.ConsumedAt = DateTime.UtcNow;
-        if (dto.Purpose == "email_verification")
+        if (purpose == "email_verification")
         {
             user.EmailVerified = true;
-            user.AccountStatus = "active";
             user.UpdatedAt = DateTime.UtcNow;
         }
 
@@ -463,17 +605,22 @@ public sealed class AuthService(
 
     public async Task ResendOtpAsync(ResendOtpRequestDto dto, CancellationToken cancellationToken)
     {
-        var user = await db.Users.SingleOrDefaultAsync(x => x.Email == dto.Email.ToLower(), cancellationToken)
+        var email = NormalizeEmail(dto.Email);
+        var purpose = NormalizeOtpPurpose(dto.Purpose);
+        var user = await db.Users.SingleOrDefaultAsync(x => x.Email == email, cancellationToken)
             ?? throw new InvalidOperationException("User was not found.");
-        await CreateAndSendOtpAsync(user, dto.Purpose, cancellationToken);
+        await CreateAndSendOtpAsync(user, purpose, cancellationToken);
     }
 
     public async Task ForgotPasswordAsync(ForgotPasswordRequestDto dto, CancellationToken cancellationToken)
     {
-        var user = await db.Users.SingleOrDefaultAsync(x => x.Email == dto.Email.ToLower(), cancellationToken);
+        var normalizedEmail = dto.Email.Trim().ToLowerInvariant();
+        var user = await db.Users.SingleOrDefaultAsync(
+            x => x.Email == normalizedEmail && x.AccountStatus != "deleted",
+            cancellationToken);
         if (user is null)
         {
-            return;
+            throw new InvalidOperationException("Email does not exist in BikeMate.");
         }
 
         var now = DateTime.UtcNow;
@@ -567,6 +714,24 @@ public sealed class AuthService(
         await emailService.SendOtpAsync(user, code, purpose, cancellationToken);
     }
 
+    private static string NormalizeOtpPurpose(string? purpose)
+    {
+        return string.IsNullOrWhiteSpace(purpose)
+            ? "email_verification"
+            : purpose.Trim().ToLowerInvariant();
+    }
+
+    private static string NormalizeOtpCode(string? code)
+    {
+        var normalized = new string((code ?? string.Empty).Where(char.IsDigit).ToArray());
+        if (string.IsNullOrWhiteSpace(normalized))
+        {
+            throw new InvalidOperationException("OTP code is required.");
+        }
+
+        return normalized;
+    }
+
     public static string NormalizeEmail(string? email)
     {
         var normalized = email?.Trim().ToLowerInvariant() ?? string.Empty;
@@ -652,11 +817,11 @@ public sealed class AuthService(
             user.UserRoles.Select(x => x.Role?.RoleName ?? string.Empty).Where(x => x.Length > 0).ToArray());
     }
 
-    private static void AddRoleProfile(User user, string role)
+    private static void AddRoleProfile(User user, string role, DateTime? birthdate = null)
     {
         if (role == AppRoles.Customer)
         {
-            user.Client = new Client { CreatedAt = DateTime.UtcNow };
+            user.Client = new Client { Birthdate = birthdate?.Date, CreatedAt = DateTime.UtcNow };
         }
         else if (role == AppRoles.Mechanic)
         {
@@ -667,7 +832,6 @@ public sealed class AuthService(
 
 public interface IFileStorageService
 {
-    Task<string> SavePlaceholderAsync(string folder, string fileName, CancellationToken cancellationToken);
     Task<UploadedFileDto> SaveFileAsync(IFormFile file, string folder, CancellationToken cancellationToken);
 }
 
@@ -706,11 +870,6 @@ public sealed class FileStorageService(
         ".mov",
         ".3gp"
     };
-
-    public Task<string> SavePlaceholderAsync(string folder, string fileName, CancellationToken cancellationToken)
-    {
-        return Task.FromResult($"{UploadBaseUrl().TrimEnd('/')}/{SanitizePathSegment(folder)}/{Path.GetFileName(fileName)}");
-    }
 
     public async Task<UploadedFileDto> SaveFileAsync(IFormFile file, string folder, CancellationToken cancellationToken)
     {
@@ -815,7 +974,14 @@ public sealed class ServiceRequestService(BikeMateDbContext db) : IServiceReques
 
     public async Task<ServiceRequestDto> CreateAsync(int userId, CreateServiceRequestDto dto, CancellationToken cancellationToken)
     {
-        var client = await db.Clients.SingleAsync(x => x.UserId == userId, cancellationToken);
+        var client = await db.Clients
+            .Include(x => x.User)
+            .SingleAsync(x => x.UserId == userId, cancellationToken);
+        if (!string.Equals(client.User?.AccountStatus, "active", StringComparison.OrdinalIgnoreCase))
+        {
+            throw new InvalidOperationException("Your customer account is pending BikeMate admin approval. Finish your profile setup and wait for approval before booking a repair.");
+        }
+
         var pendingStatusId = await db.RequestStatuses.Where(x => x.StatusName == "pending").Select(x => x.StatusId).SingleAsync(cancellationToken);
         var selectedService = dto.ShopServiceId is null
             ? null
@@ -826,10 +992,7 @@ public sealed class ServiceRequestService(BikeMateDbContext db) : IServiceReques
             throw new InvalidOperationException("Selected service does not belong to the selected shop.");
         }
 
-        if (dto.ScheduledAt is { } scheduledAt && scheduledAt.ToUniversalTime() <= DateTime.UtcNow)
-        {
-            throw new InvalidOperationException("Choose a future service date and time before booking.");
-        }
+        ValidateScheduledAt(dto.ScheduledAt);
 
         var selectedShopId = dto.ShopId ?? selectedService?.ShopId;
         var estimatedTotal = selectedService?.BasePrice ?? 0m;
@@ -853,6 +1016,74 @@ public sealed class ServiceRequestService(BikeMateDbContext db) : IServiceReques
         db.ServiceRequests.Add(request);
         await db.SaveChangesAsync(cancellationToken);
         return await Query().Where(x => x.RequestId == request.RequestId).Select(ToDtoExpression()).SingleAsync(cancellationToken);
+    }
+
+    private static void ValidateScheduledAt(DateTime? scheduledAt)
+    {
+        if (scheduledAt is null)
+        {
+            return;
+        }
+
+        var scheduledUtc = scheduledAt.Value.ToUniversalTime();
+        var nowUtc = DateTime.UtcNow;
+        if (scheduledUtc <= nowUtc)
+        {
+            throw new InvalidOperationException("Choose a future service date and time before booking.");
+        }
+
+        if (scheduledUtc > nowUtc.AddDays(7))
+        {
+            throw new InvalidOperationException("Bookings are only available up to 7 days in advance.");
+        }
+
+        var localSchedule = ToPhilippineLocalTime(scheduledUtc);
+        var localSlot = new TimeSpan(localSchedule.Hour, localSchedule.Minute, 0);
+        var allowedSlots = new[]
+        {
+            new TimeSpan(8, 0, 0),
+            new TimeSpan(9, 30, 0),
+            new TimeSpan(11, 0, 0),
+            new TimeSpan(12, 30, 0),
+            new TimeSpan(14, 0, 0),
+            new TimeSpan(15, 30, 0),
+            new TimeSpan(17, 0, 0)
+        };
+
+        if (localSchedule.Second != 0 || !allowedSlots.Contains(localSlot))
+        {
+            throw new InvalidOperationException("Choose an available service time from 8:00 AM to 5:00 PM in 1 hour 30 minute intervals.");
+        }
+    }
+
+    private static DateTime ToPhilippineLocalTime(DateTime scheduledUtc)
+    {
+        var utc = scheduledUtc.Kind == DateTimeKind.Utc
+            ? scheduledUtc
+            : DateTime.SpecifyKind(scheduledUtc, DateTimeKind.Utc);
+
+        return TimeZoneInfo.ConvertTimeFromUtc(utc, PhilippineTimeZone);
+    }
+
+    private static readonly TimeZoneInfo PhilippineTimeZone = ResolvePhilippineTimeZone();
+
+    private static TimeZoneInfo ResolvePhilippineTimeZone()
+    {
+        foreach (var id in new[] { "Asia/Manila", "Singapore Standard Time" })
+        {
+            try
+            {
+                return TimeZoneInfo.FindSystemTimeZoneById(id);
+            }
+            catch (TimeZoneNotFoundException)
+            {
+            }
+            catch (InvalidTimeZoneException)
+            {
+            }
+        }
+
+        return TimeZoneInfo.Local;
     }
 
     public async Task<ServiceRequestDto> UpdateStatusAsync(int requestId, string status, int? changedByUserId, string? notes, CancellationToken cancellationToken)
@@ -1104,7 +1335,7 @@ public sealed class BookingConversationService(BikeMateDbContext db) : IBookingC
     {
         var customerUserId = request.Client!.UserId;
         var conversationTime = conversationType == "booking_mechanic"
-            ? request.AcceptedAt ?? request.CreatedAt
+            ? request.AcceptedAt ?? DateTime.UtcNow
             : request.CreatedAt;
         var existing = await db.Conversations
             .Include(x => x.Participants)
@@ -1115,6 +1346,7 @@ public sealed class BookingConversationService(BikeMateDbContext db) : IBookingC
                 cancellationToken);
         if (existing is not null)
         {
+            EnsureParticipants(existing, customerUserId, partnerUserId);
             var onlyMessage = existing.Messages.Count == 1 ? existing.Messages[0] : null;
             if (onlyMessage is not null && IsAutomatedMessage(onlyMessage.MessageText))
             {
@@ -1122,9 +1354,36 @@ public sealed class BookingConversationService(BikeMateDbContext db) : IBookingC
                 onlyMessage.CreatedAt = conversationTime;
                 existing.CreatedAt = conversationTime;
                 existing.LastMessageAt = conversationTime;
-                await db.SaveChangesAsync(cancellationToken);
             }
 
+            await db.SaveChangesAsync(cancellationToken);
+            return;
+        }
+
+        var reusable = await db.Conversations
+            .Include(x => x.Participants)
+            .Include(x => x.Messages)
+            .Where(x =>
+                x.ConversationType == conversationType &&
+                x.Participants.Any(p => p.UserId == customerUserId) &&
+                x.Participants.Any(p => p.UserId == partnerUserId))
+            .OrderByDescending(x => x.LastMessageAt ?? x.CreatedAt)
+            .FirstOrDefaultAsync(cancellationToken);
+        if (reusable is not null)
+        {
+            reusable.RequestId = request.RequestId;
+            reusable.ConversationType = conversationType;
+            EnsureParticipants(reusable, customerUserId, partnerUserId);
+            if (!reusable.Messages.Any(x => x.MessageText.Contains($"BM-{request.RequestId:000000}", StringComparison.Ordinal)))
+            {
+                AddAutomatedMessage(reusable, partnerUserId, automatedMessage, conversationTime);
+            }
+            else if (reusable.LastMessageAt is null || reusable.LastMessageAt < conversationTime)
+            {
+                reusable.LastMessageAt = conversationTime;
+            }
+
+            await db.SaveChangesAsync(cancellationToken);
             return;
         }
 
@@ -1165,6 +1424,20 @@ public sealed class BookingConversationService(BikeMateDbContext db) : IBookingC
         AddAutomatedMessage(conversation, partnerUserId, automatedMessage, conversationTime);
         db.Conversations.Add(conversation);
         await db.SaveChangesAsync(cancellationToken);
+    }
+
+    private static void EnsureParticipants(Conversation conversation, int customerUserId, int partnerUserId)
+    {
+        var now = DateTime.UtcNow;
+        if (conversation.Participants.All(x => x.UserId != customerUserId))
+        {
+            conversation.Participants.Add(new ConversationParticipant { UserId = customerUserId, JoinedAt = now });
+        }
+
+        if (conversation.Participants.All(x => x.UserId != partnerUserId))
+        {
+            conversation.Participants.Add(new ConversationParticipant { UserId = partnerUserId, JoinedAt = now });
+        }
     }
 
     private static void AddAutomatedMessage(

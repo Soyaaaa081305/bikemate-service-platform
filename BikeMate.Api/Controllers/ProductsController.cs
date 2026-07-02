@@ -15,8 +15,21 @@ public sealed class ProductsController(BikeMateDbContext db) : ControllerBase
     public async Task<ActionResult<IReadOnlyCollection<ProductDto>>> GetShopProducts(int shopId, CancellationToken cancellationToken)
     {
         return Ok(await db.Products
-            .Where(x => x.ShopId == shopId && x.IsActive)
-            .Select(x => new ProductDto(x.ProductId, x.ShopId, x.ProductName, x.ProductDescription, x.Price, x.StockQuantity, x.IsActive))
+            .Include(x => x.Shop)
+            .Include(x => x.Images)
+            .Where(x => x.ShopId == shopId && x.IsActive && x.Shop!.ShopStatus == "verified")
+            .Select(x => new ProductDto(
+                x.ProductId,
+                x.ShopId,
+                x.ProductName,
+                x.ProductDescription,
+                x.Price,
+                x.StockQuantity,
+                x.IsActive,
+                x.Images
+                    .OrderByDescending(image => image.CreatedAt)
+                    .Select(image => image.ImageUrl)
+                    .FirstOrDefault()))
             .ToArrayAsync(cancellationToken));
     }
 }

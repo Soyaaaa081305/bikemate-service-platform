@@ -148,7 +148,7 @@ public partial class Messages : ContentPage
                 Text = text,
                 TextColor = textColor,
                 FontSize = 13,
-                FontFamily = "OpenSansRegular"
+                FontFamily = "PublicSans"
             }
         };
 

@@ -15,6 +15,34 @@ public sealed class FilesController(IFileStorageService fileStorageService) : Co
     [RequestSizeLimit(50 * 1024 * 1024)]
     public async Task<ActionResult<UploadedFileDto>> Upload([FromForm] IFormFile? file, [FromForm] string? folder, CancellationToken cancellationToken)
     {
+        return await SaveUploadAsync(file, folder ?? "general", cancellationToken);
+    }
+
+    [HttpPost("onboarding-upload")]
+    [AllowAnonymous]
+    [Consumes("multipart/form-data")]
+    [RequestSizeLimit(50 * 1024 * 1024)]
+    public async Task<ActionResult<UploadedFileDto>> UploadOnboarding([FromForm] IFormFile? file, [FromForm] string? folder, CancellationToken cancellationToken)
+    {
+        var requestedFolder = string.IsNullOrWhiteSpace(folder) ? "shop-applications" : folder.Trim();
+        var allowedFolders = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+        {
+            "shop-applications",
+            "shop-owner-ids",
+            "shop-business-permits",
+            "shop-images"
+        };
+
+        if (!allowedFolders.Contains(requestedFolder))
+        {
+            return BadRequest(new { error = "That upload folder is not allowed for account applications." });
+        }
+
+        return await SaveUploadAsync(file, requestedFolder, cancellationToken);
+    }
+
+    private async Task<ActionResult<UploadedFileDto>> SaveUploadAsync(IFormFile? file, string folder, CancellationToken cancellationToken)
+    {
         if (file is null)
         {
             return BadRequest(new { error = "Select a file before uploading." });
@@ -29,12 +57,5 @@ public sealed class FilesController(IFileStorageService fileStorageService) : Co
         {
             return BadRequest(new { error = ex.Message });
         }
-    }
-
-    [HttpPost("placeholder")]
-    public async Task<IActionResult> CreatePlaceholder(UploadMediaDto dto, CancellationToken cancellationToken)
-    {
-        var url = await fileStorageService.SavePlaceholderAsync(dto.MediaType, Path.GetFileName(dto.MediaUrl), cancellationToken);
-        return Ok(new { url });
     }
 }

@@ -14,12 +14,21 @@ namespace BikeMate.Api.Controllers;
 public sealed class NotificationsController(BikeMateDbContext db) : ControllerBase
 {
     [HttpGet]
-    public async Task<IActionResult> GetMine(CancellationToken cancellationToken)
+    public async Task<ActionResult<IReadOnlyCollection<NotificationDto>>> GetMine(CancellationToken cancellationToken)
     {
         var userId = User.GetUserId();
         return Ok(await db.Notifications
             .Where(x => x.UserId == userId)
             .OrderByDescending(x => x.CreatedAt)
+            .Select(x => new NotificationDto(
+                x.NotificationId,
+                x.UserId,
+                x.NotificationType,
+                x.Title,
+                x.Message,
+                x.DataJson,
+                x.IsRead,
+                x.CreatedAt))
             .ToArrayAsync(cancellationToken));
     }
 

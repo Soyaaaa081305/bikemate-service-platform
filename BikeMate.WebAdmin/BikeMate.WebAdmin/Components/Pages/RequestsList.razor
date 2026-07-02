@@ -6,79 +6,81 @@
 
 <PageTitle>Active Services</PageTitle>
 
-<div class="d-flex justify-content-between align-items-center mb-4 mt-3">
-    <h2 class="fw-bold text-dark">Active Services</h2>
-
-    <div class="d-flex gap-3 align-items-center" style="max-width: 400px; width: 100%;">
-        <div class="input-group shadow-sm">
-            <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
-            <input type="text" class="form-control border-start-0" placeholder="Search by customer or ID..."
-                   @bind="searchTerm" @bind:event="oninput" />
+<div class="admin-page">
+    <div class="admin-page-header">
+        <div>
+            <h1 class="admin-page-title">Active Services</h1>
+            <p class="admin-page-description">Track booked repairs that still need assignment, payment confirmation, or completion.</p>
         </div>
-        <a href="/dashboard" class="btn btn-outline-secondary shadow-sm text-nowrap">
-            <i class="bi bi-arrow-left"></i> Back
-        </a>
-    </div>
-</div>
 
-<div class="card shadow-sm border-0">
-    <div class="card-body p-0">
-        @if (requests == null)
-        {
-            <div class="p-5 text-center">
-                <div class="spinner-border text-warning" role="status"></div>
-                <p class="mt-2 text-muted">Loading active services...</p>
+        <div class="admin-page-actions">
+            <div class="input-group admin-search shadow-sm">
+                <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                <input type="text" class="form-control border-start-0" placeholder="Search services"
+                       @bind="searchTerm" @bind:event="oninput" />
             </div>
-        }
-        else if (requests.Length == 0)
-        {
-            <div class="p-5 text-center text-muted">No active service requests at this time.</div>
-        }
-        else
-        {
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light text-muted small text-uppercase">
-                        <tr>
-                            <th class="ps-4">Req ID</th>
-                            <th>Customer</th>
-                            <th>Service Type</th>
-                            <th>Status</th>
-                            <th>Amount</th>
-                            <th class="text-end pe-4">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var req in FilteredRequests)
-                        {
+        </div>
+    </div>
+
+    <div class="card admin-table-card">
+        <div class="card-body p-0">
+            @if (requests == null)
+            {
+                <div class="empty-state">
+                    <div class="spinner-border text-warning" role="status"></div>
+                    <p class="mt-2 mb-0">Loading active services...</p>
+                </div>
+            }
+            else if (requests.Length == 0)
+            {
+                <div class="empty-state">No active service requests at this time.</div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light text-muted text-uppercase">
                             <tr>
-                                <td class="ps-4 fw-bold text-muted">#@req.Id</td>
-                                <td class="fw-semibold">@req.ClientName</td>
-                                <td>@req.ServiceName</td>
-                                <td>
-                                    @if (req.Status.ToLower() == "in progress")
-                                    {
-                                        <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 rounded-pill px-3 py-1 text-dark">IN PROGRESS</span>
-                                    }
-                                    else if (req.Status.ToLower() == "pending")
-                                    {
-                                        <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 rounded-pill px-3 py-1 text-dark">PENDING</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-light text-dark border rounded-pill px-3 py-1">@req.Status.ToUpper()</span>
-                                    }
-                                </td>
-                                <td class="text-success fw-bold">&#8369;@req.TotalAmount.ToString("N2")</td>
-                                <td class="text-end pe-4">
-                                    <a href="/requests/details/@req.Id" class="btn btn-sm btn-outline-primary shadow-sm">View Details</a>
-                                </td>
+                                <th class="ps-4">Request ID</th>
+                                <th>Customer</th>
+                                <th>Service</th>
+                                <th>Status</th>
+                                <th>Amount</th>
+                                <th class="text-end pe-4">Actions</th>
                             </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        }
+                        </thead>
+                        <tbody>
+                            @foreach (var req in FilteredRequests)
+                            {
+                                <tr>
+                                    <td class="ps-4 fw-bold text-muted">#@req.Id</td>
+                                    <td class="fw-semibold">@req.ClientName</td>
+                                    <td>@req.ServiceName</td>
+                                    <td>
+                                        @if (req.Status.ToLower() == "in progress")
+                                        {
+                                            <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 text-dark">In progress</span>
+                                        }
+                                        else if (req.Status.ToLower() == "pending")
+                                        {
+                                            <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 text-dark">Pending</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-light text-dark border">@req.Status.Replace("_", " ")</span>
+                                        }
+                                    </td>
+                                    <td class="text-success fw-bold">PHP @req.TotalAmount.ToString("N2")</td>
+                                    <td class="text-end pe-4">
+                                        <a href="/requests/details/@req.Id" class="btn btn-sm btn-outline-primary shadow-sm">View details</a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
     </div>
 </div>
 
@@ -86,7 +88,6 @@
     private ServiceRequestDto[]? requests;
     private string searchTerm = "";
 
-    // Live Search Logic
     private IEnumerable<ServiceRequestDto> FilteredRequests => string.IsNullOrWhiteSpace(searchTerm)
         ? requests ?? Array.Empty<ServiceRequestDto>()
         : requests!.Where(r => r.ClientName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||

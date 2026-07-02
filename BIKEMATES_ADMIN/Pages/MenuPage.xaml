@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="BIKEMATES_ADMIN.Pages.MenuPage"
@@ -16,7 +16,7 @@
                     <Label x:Name="AdminShopLabel" Text="No assigned bike shop yet" Style="{StaticResource HeaderSubtitle}" />
                 </VerticalStackLayout>
                 <Button Grid.Column="2" Text="Home" Style="{StaticResource MiniButton}" Clicked="Home_Clicked" />
-                <Button Grid.Column="3" Text="Exit" Style="{StaticResource MiniButton}" Clicked="SignOut_Clicked" />
+                <Button Grid.Column="3" Text="Sign Out" Style="{StaticResource MiniButton}" Clicked="SignOut_Clicked" />
             </Grid>
             <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
                 <Frame Style="{StaticResource SmallCardFrame}" BackgroundColor="{StaticResource NavySoft}" BorderColor="{StaticResource NavySoft}">
@@ -28,7 +28,7 @@
                 <Frame Grid.Column="1" Style="{StaticResource SmallCardFrame}" BackgroundColor="{StaticResource NavySoft}" BorderColor="{StaticResource NavySoft}">
                     <VerticalStackLayout>
                         <Label Text="0" Style="{StaticResource StatNumber}" TextColor="{StaticResource Orange}" />
-                        <Label Text="DISPATCH" Style="{StaticResource TinyMuted}" />
+                        <Label Text="BOOKINGS" Style="{StaticResource TinyMuted}" />
                     </VerticalStackLayout>
                 </Frame>
                 <Frame Grid.Column="2" Style="{StaticResource SmallCardFrame}" BackgroundColor="{StaticResource NavySoft}" BorderColor="{StaticResource NavySoft}">
@@ -48,10 +48,9 @@
                 <Button Text="Logistics - Sales, orders, revenue" Style="{StaticResource OutlineButton}" Clicked="Logistics_Clicked" />
                 <Label Text="OPERATIONS" Style="{StaticResource SectionLabel}" />
                 <Button Text="Calendar - bookings and schedules" Style="{StaticResource OutlineButton}" Clicked="Calendar_Clicked" />
-                <Button Text="Operations - task board" Style="{StaticResource OutlineButton}" Clicked="Operations_Clicked" />
-                <Button Text="Dispatch and Request - mechanic status" Style="{StaticResource OutlineButton}" Clicked="Dispatch_Clicked" />
+                <Button Text="Services - pricing and repair offers" Style="{StaticResource OutlineButton}" Clicked="Operations_Clicked" />
                 <Label Text="ADMIN TOOLS" Style="{StaticResource SectionLabel}" />
-                <Button Text="Admins - owner only, generate codes" Style="{StaticResource OutlineButton}" Clicked="Admins_Clicked" />
+                <Button Text="Mechanic Applications - create technician accounts" Style="{StaticResource OutlineButton}" Clicked="Admins_Clicked" />
                 <Button Text="Messages - customer/admin/mechanic" Style="{StaticResource OutlineButton}" Clicked="Messages_Clicked" />
                 <Button Text="Reports - analytics" Style="{StaticResource OutlineButton}" Clicked="Reports_Clicked" />
                 <Label Text="ACCOUNT" Style="{StaticResource SectionLabel}" />

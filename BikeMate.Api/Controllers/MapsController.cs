@@ -157,9 +157,10 @@ public sealed class MapsController(IHttpClientFactory httpClientFactory, IConfig
     private string ApiKey()
     {
         var apiKey = configuration["GoogleMaps:ApiKey"];
-        if (string.IsNullOrWhiteSpace(apiKey))
+        if (string.IsNullOrWhiteSpace(apiKey) ||
+            apiKey.StartsWith("YOUR_", StringComparison.OrdinalIgnoreCase))
         {
-            throw new InvalidOperationException("GoogleMaps:ApiKey is missing.");
+            throw new InvalidOperationException("Google Maps is not configured. Set GoogleMaps:ApiKey on the API server.");
         }
 
         return apiKey;

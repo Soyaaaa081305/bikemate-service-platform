@@ -2,13 +2,13 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="BIKEMATES_ADMIN.Pages.Account.AccCreate4"
-             BackgroundColor="#F6F6F6">
+             BackgroundColor="White">
 
     <Grid RowDefinitions="Auto,*,Auto">
         <Border Grid.Row="0" BackgroundColor="#242424" StrokeThickness="0" Padding="20,24,20,18">
             <VerticalStackLayout Spacing="2">
-                <Label Text="Create an Account" FontSize="22" FontAttributes="Bold" TextColor="White" />
-                <Label Text="Step 5 of 5 - Admin access code" FontSize="13" TextColor="#E6E6E6" />
+                <Label Text="Create an Account" FontSize="18" FontAttributes="Bold" TextColor="White" />
+                <Label Text="Step 5 of 5 - Business verification" FontSize="13" TextColor="#E6E6E6" />
             </VerticalStackLayout>
         </Border>
 
@@ -17,20 +17,89 @@
                 <Border BackgroundColor="White" Stroke="#E6E6E6" Padding="18">
                     <Border.StrokeShape><RoundRectangle CornerRadius="8" /></Border.StrokeShape>
                     <VerticalStackLayout Spacing="14">
-                        <Label Text="Enter account creation code"
+                        <Label Text="Business requirements"
                                FontSize="18"
                                FontAttributes="Bold"
                                TextColor="#242424" />
-                        <Label Text="Use the code generated when the bike shop was registered."
+                        <Label Text="Upload the documents BikeMate admin will review before activating this account."
                                FontSize="13"
                                TextColor="#6E6E6E" />
-                        <Label Text="Access code *" FontSize="11" FontAttributes="Bold" TextColor="#242424" />
-                        <Border Stroke="#FFB37A" BackgroundColor="#FFF3EA" Padding="12,2">
+
+                        <Label Text="Business permit *" FontSize="11" FontAttributes="Bold" TextColor="#242424" />
+                        <Border Stroke="#DCDCDC" BackgroundColor="#FAFAFA" Padding="12,8">
                             <Border.StrokeShape><RoundRectangle CornerRadius="8" /></Border.StrokeShape>
-                            <Entry x:Name="AccessCodeEntry"
-                                   Placeholder="ABCD-1234"
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                <Label x:Name="BusinessPermitLabel" Text="No file selected" VerticalOptions="Center" TextColor="#6E6E6E" />
+                                <Button Grid.Column="1" Text="Upload" BackgroundColor="#FF6B2C" TextColor="White" CornerRadius="8" Clicked="OnPickPermitClicked" />
+                            </Grid>
+                        </Border>
+
+                        <Label Text="Cover photo / shop image *" FontSize="11" FontAttributes="Bold" TextColor="#242424" />
+                        <Border Stroke="#DCDCDC" BackgroundColor="#FAFAFA" Padding="12,8">
+                            <Border.StrokeShape><RoundRectangle CornerRadius="8" /></Border.StrokeShape>
+                            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                <Label x:Name="ShopImageLabel" Text="No file selected" VerticalOptions="Center" TextColor="#6E6E6E" />
+                                <Button Grid.Column="1" Text="Upload" BackgroundColor="#FF6B2C" TextColor="White" CornerRadius="8" Clicked="OnPickShopImageClicked" />
+                            </Grid>
+                        </Border>
+
+                        <Label Text="DTI registration number *" FontSize="11" FontAttributes="Bold" TextColor="#242424" />
+                        <Border Stroke="#DCDCDC" BackgroundColor="#FAFAFA" Padding="12,2">
+                            <Border.StrokeShape><RoundRectangle CornerRadius="8" /></Border.StrokeShape>
+                            <Entry x:Name="DtiEntry"
+                                   Placeholder="DTI registration number"
                                    TextColor="#242424"
                                    PlaceholderColor="#6E6E6E" />
+                        </Border>
+
+                        <Border BackgroundColor="#FFF7F2" Stroke="#FFD1BD" Padding="14">
+                            <Border.StrokeShape><RoundRectangle CornerRadius="8" /></Border.StrokeShape>
+                            <VerticalStackLayout Spacing="12">
+                                <Label Text="Shop application terms"
+                                       FontSize="18"
+                                       FontAttributes="Bold"
+                                       TextColor="#242424" />
+                                <Label Text="Using BikeMate as a partner shop"
+                                       FontSize="13"
+                                       FontAttributes="Bold"
+                                       TextColor="#242424" />
+                                <Label Text="BikeMate connects your shop with customers, mechanics, bookings, messages, location-supported service requests, and payment records. You agree to use the shop-admin tools only for legitimate shop operations and customer support."
+                                       FontSize="13"
+                                       TextColor="#6E6E6E"
+                                       LineBreakMode="WordWrap" />
+                                <Label Text="Application responsibility"
+                                       FontSize="13"
+                                       FontAttributes="Bold"
+                                       TextColor="#242424" />
+                                <Label Text="You confirm that the shop name, owner identity, business permit, DTI registration number, address, contact details, and uploaded files are accurate, current, readable, and belong to this business."
+                                       FontSize="13"
+                                       TextColor="#6E6E6E"
+                                       LineBreakMode="WordWrap" />
+                                <Label Text="Review and account activation"
+                                       FontSize="13"
+                                       FontAttributes="Bold"
+                                       TextColor="#242424" />
+                                <Label Text="After submission, BikeMate will send an OTP to the registered email. The application cannot be approved until that email is verified. BikeMate may reject, suspend, or request resubmission if documents are expired, mismatched, fraudulent, unreadable, or incomplete."
+                                       FontSize="13"
+                                       TextColor="#6E6E6E"
+                                       LineBreakMode="WordWrap" />
+                                <Label Text="Privacy and submitted documents"
+                                       FontSize="13"
+                                       FontAttributes="Bold"
+                                       TextColor="#242424" />
+                                <Label Text="BikeMate stores and uses shop details, owner contact details, business documents, valid ID, and review records only to verify the shop, protect customers, operate the platform, and maintain audit history. Submitted details are locked during review and can only be changed through resubmission or BikeMate admin approval."
+                                       FontSize="13"
+                                       TextColor="#6E6E6E"
+                                       LineBreakMode="WordWrap" />
+                                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                    <CheckBox x:Name="TermsCheckBox" CheckedChanged="OnTermsChanged" />
+                                    <Label Grid.Column="1"
+                                           Text="I have read and accept the shop application terms."
+                                           FontSize="13"
+                                           TextColor="#242424"
+                                           VerticalOptions="Center" />
+                                </Grid>
+                            </VerticalStackLayout>
                         </Border>
                     </VerticalStackLayout>
                 </Border>
@@ -39,7 +108,7 @@
 
         <Button x:Name="CreateAccountButton"
                 Grid.Row="2"
-                Text="Create Account"
+                Text="Submit for Approval"
                 BackgroundColor="#FF6B2C"
                 TextColor="White"
                 FontAttributes="Bold"

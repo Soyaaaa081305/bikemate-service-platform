@@ -2,20 +2,20 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="BIKEMATES_ADMIN.Pages.Account.AccCreateShopNotFound"
-             BackgroundColor="#F6F6F6">
+             BackgroundColor="White">
 
     <Grid RowDefinitions="*,Auto" Padding="20,26">
         <Border Grid.Row="0" BackgroundColor="White" Stroke="#E6E6E6" Padding="20" VerticalOptions="Center">
             <Border.StrokeShape><RoundRectangle CornerRadius="8" /></Border.StrokeShape>
             <VerticalStackLayout Spacing="16">
                 <Image Source="shop_not_found.png" HeightRequest="148" WidthRequest="148" HorizontalOptions="Center" />
-                <Label Text="Sorry, Bike Shop Not Found"
-                       FontSize="21"
+                <Label Text="Approved Shop Not Found"
+                       FontSize="18"
                        FontAttributes="Bold"
                        TextColor="#242424"
                        HorizontalTextAlignment="Center" />
-                <Label Text="Please verify the information entered or contact BIKEMATES support."
-                       FontSize="14"
+                <Label Text="This shop is not approved yet, or the details do not match the web admin record. Submit the complete shop application and wait for BikeMate web-admin approval."
+                       FontSize="13"
                        TextColor="#6E6E6E"
                        HorizontalTextAlignment="Center" />
             </VerticalStackLayout>

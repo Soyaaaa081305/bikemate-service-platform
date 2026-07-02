@@ -4,61 +4,40 @@ namespace BIKEMATES_ADMIN.Pages.Popups;
 
 public partial class BookingPopUp : ContentPage
 {
-    private readonly string _accessCode;
-
-    private BookingPopUp(string title, string message, string imageSource, string accessCode = "")
+    private BookingPopUp(string title, string message, string imageSource, bool showReviewPanel = false)
     {
         InitializeComponent();
 
-        _accessCode = accessCode;
         TitleLabel.Text = title;
         MessageLabel.Text = message;
         StatusImage.Source = imageSource;
-        AccessCodeEntry.Text = accessCode;
-        CodePanel.IsVisible = !string.IsNullOrWhiteSpace(accessCode);
-        SendEmailButton.IsVisible = !string.IsNullOrWhiteSpace(accessCode);
+        ReviewPanel.IsVisible = showReviewPanel;
     }
 
     public BookingPopUp()
-        : this("This Shop is already Registered", "Please contact your shop admin for the account creation code.", "shop_not_found.png")
+        : this("Shop Application Already Exists", "Sign in to view the application status or contact BikeMate support if ownership needs to change.", "shop_not_found.png")
     {
     }
 
     public static BookingPopUp CreateAlreadyRegistered()
     {
         return new BookingPopUp(
-            "This Shop is already Registered",
-            "Please contact your shop admin for the account creation code.",
+            "Shop Application Already Exists",
+            "Sign in to view the application status or contact BikeMate support if ownership needs to change.",
             "shop_not_found.png");
     }
 
-    public static BookingPopUp CreateRegistered(ShopRegistrationResult result)
+    public static BookingPopUp CreateRegistered(ShopApplicationResult result)
     {
         return new BookingPopUp(
-            "Bike shop Successfully Registered",
-            "Account Creation Code",
+            "Bike Shop Application Submitted",
+            "Your shop details were sent to BikeMate web admin for review. You can sign in, but bookings stay locked until approval is complete.",
             "account_success.png",
-            result.AccessCode);
-    }
-
-    private async void OnCopyClicked(object sender, EventArgs e)
-    {
-        if (string.IsNullOrWhiteSpace(_accessCode))
-        {
-            return;
-        }
-
-        await Clipboard.Default.SetTextAsync(_accessCode);
-        await DisplayAlert("Copied", "The account creation code was copied.", "OK");
-    }
-
-    private async void OnSendEmailClicked(object sender, EventArgs e)
-    {
-        await Navigation.PushAsync(new SendToEmailPage(_accessCode));
+            true);
     }
 
     private void OnReturnClicked(object sender, EventArgs e)
     {
-        Application.Current!.MainPage = new NavigationPage(new BIKEMATES_ADMIN.Pages.Intro.AppIntro5());
+        BIKEMATES_ADMIN.App.SetRootPage(new NavigationPage(new BIKEMATES_ADMIN.Pages.Account.Login()));
     }
 }

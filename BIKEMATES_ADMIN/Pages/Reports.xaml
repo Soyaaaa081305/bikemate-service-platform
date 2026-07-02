@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="BIKEMATES_ADMIN.Pages.Reports"
@@ -12,28 +12,29 @@
                     <Label Text="Reports" Style="{StaticResource HeaderTitle}" />
                     <Label Text="Performance insights and analytics." Style="{StaticResource HeaderSubtitle}" />
                 </VerticalStackLayout>
-                <Button Grid.Column="1" Text="Exit" Style="{StaticResource MiniButton}" Clicked="Exit_Clicked" VerticalOptions="Center" />
+                <Button Grid.Column="1" Text="Back" Style="{StaticResource MiniButton}" Clicked="Exit_Clicked" VerticalOptions="Center" />
             </Grid>
         </VerticalStackLayout>
 
         <ScrollView Grid.Row="1">
             <VerticalStackLayout Padding="14,12,14,30" Spacing="14">
                 <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
-                    <Frame Style="{StaticResource SmallCardFrame}"><VerticalStackLayout><Label Text="PHP 0.00" Style="{StaticResource StatNumber}" /><Label Text="Monthly Revenue" Style="{StaticResource SmallMuted}" /></VerticalStackLayout></Frame>
-                    <Frame Grid.Column="1" Style="{StaticResource SmallCardFrame}"><VerticalStackLayout><Label Text="0%" Style="{StaticResource StatNumber}" /><Label Text="Completion Rate" Style="{StaticResource SmallMuted}" /></VerticalStackLayout></Frame>
+                    <Frame Style="{StaticResource SmallCardFrame}"><VerticalStackLayout><Label x:Name="RevenueLabel" Text="PHP 0.00" Style="{StaticResource StatNumber}" /><Label Text="Monthly Revenue" Style="{StaticResource SmallMuted}" /></VerticalStackLayout></Frame>
+                    <Frame Grid.Column="1" Style="{StaticResource SmallCardFrame}"><VerticalStackLayout><Label x:Name="BookingsLabel" Text="0" Style="{StaticResource StatNumber}" /><Label Text="Active Bookings" Style="{StaticResource SmallMuted}" /></VerticalStackLayout></Frame>
                 </Grid>
 
                 <Label Text="Top Services" Style="{StaticResource SectionLabel}" />
                 <Frame Style="{StaticResource CardFrame}">
-                    <Label Text="No service analytics returned by the API yet." Style="{StaticResource SmallMuted}" />
+                    <Label x:Name="ServicesSummaryLabel" Text="Loading service analytics..." Style="{StaticResource SmallMuted}" />
                 </Frame>
 
                 <Label Text="Customer Ratings" Style="{StaticResource SectionLabel}" />
                 <Frame Style="{StaticResource CardFrame}">
-                    <Label Text="Customer ratings will appear after completed bookings are returned by the API." Style="{StaticResource SmallMuted}" />
+                    <Label x:Name="RatingsSummaryLabel" Text="Loading customer rating summary..." Style="{StaticResource SmallMuted}" />
                 </Frame>
 
-                <Button Text="Export Report" Style="{StaticResource PrimaryButton}" IsEnabled="False" />
+                <Button Text="Export Report" Style="{StaticResource PrimaryButton}" Clicked="ExportReport_Clicked" />
+                <Label x:Name="ExportStatusLabel" Text="Export creates a CSV report and opens Android sharing." Style="{StaticResource SmallMuted}" />
             </VerticalStackLayout>
         </ScrollView>
     </Grid>

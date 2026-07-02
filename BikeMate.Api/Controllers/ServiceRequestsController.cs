@@ -61,6 +61,7 @@ public sealed class ServiceRequestsController(
     [HttpGet("{id:int}")]
     public async Task<ActionResult<ServiceRequestDto>> GetById(int id, CancellationToken cancellationToken)
     {
+        await EnsureCanViewAsync(id, cancellationToken);
         return Ok(await serviceRequestService.Query()
             .Where(x => x.RequestId == id)
             .Select(ServiceRequestService.ToDtoExpression())
@@ -73,7 +74,16 @@ public sealed class ServiceRequestsController(
     {
         var userId = User.GetUserId();
 
-        if (!User.IsInRole(AppRoles.SystemAdmin) && !User.IsInRole(AppRoles.ShopAdmin))
+        if (User.IsInRole(AppRoles.ShopAdmin) && !User.IsInRole(AppRoles.SystemAdmin))
+        {
+            var ownsShopRequest = await db.ServiceRequests
+                .AnyAsync(x => x.RequestId == id && x.Shop != null && x.Shop.OwnerUserId == userId, cancellationToken);
+            if (!ownsShopRequest)
+            {
+                return Forbid();
+            }
+        }
+        else if (!User.IsInRole(AppRoles.SystemAdmin))
         {
             var isAssignedMechanic = await db.ServiceRequests
                 .AnyAsync(x => x.RequestId == id && x.Mechanic != null && x.Mechanic.UserId == userId, cancellationToken);
@@ -95,11 +105,13 @@ public sealed class ServiceRequestsController(
         var userId = User.GetUserId();
         var requestEntity = await db.ServiceRequests
             .Include(x => x.Client)
+            .Include(x => x.Shop)
             .SingleAsync(x => x.RequestId == id, cancellationToken);
 
-        if (!User.IsInRole(AppRoles.SystemAdmin) &&
-            !User.IsInRole(AppRoles.ShopAdmin) &&
-            requestEntity.Client!.UserId != userId)
+        var canCancel = User.IsInRole(AppRoles.SystemAdmin) ||
+            requestEntity.Client!.UserId == userId ||
+            (User.IsInRole(AppRoles.ShopAdmin) && requestEntity.Shop?.OwnerUserId == userId);
+        if (!canCancel)
         {
             return Forbid();
         }
@@ -115,6 +127,27 @@ public sealed class ServiceRequestsController(
     public async Task<ActionResult<ServiceRequestDto>> AssignMechanic(int id, AssignMechanicDto dto, CancellationToken cancellationToken)
     {
         var request = await db.ServiceRequests.SingleAsync(x => x.RequestId == id, cancellationToken);
+        if (User.IsInRole(AppRoles.ShopAdmin) && !User.IsInRole(AppRoles.SystemAdmin))
+        {
+            var userId = User.GetUserId();
+            var ownedShopId = await db.Shops
+                .Where(x => x.OwnerUserId == userId)
+                .Select(x => (int?)x.ShopId)
+                .FirstOrDefaultAsync(cancellationToken);
+            if (ownedShopId is null || request.ShopId != ownedShopId)
+            {
+                return Forbid();
+            }
+
+            var mechanicBelongsToShop = await db.ShopMechanics.AnyAsync(
+                x => x.ShopId == ownedShopId && x.MechanicId == dto.MechanicId && x.IsActive,
+                cancellationToken);
+            if (!mechanicBelongsToShop)
+            {
+                return BadRequest(new { error = "Select a mechanic assigned to your shop." });
+            }
+        }
+
         request.MechanicId = dto.MechanicId;
         await db.SaveChangesAsync(cancellationToken);
         var updated = await serviceRequestService.UpdateStatusAsync(id, "accepted", User.GetUserId(), "Mechanic assigned.", cancellationToken);
@@ -161,9 +194,37 @@ public sealed class ServiceRequestsController(
             return BadRequest(new { error = "Select an available service from this shop." });
         }
 
+        Product? selectedProduct = null;
+        if (dto.ProductId is not null)
+        {
+            selectedProduct = await db.Products
+                .Where(x =>
+                    x.ProductId == dto.ProductId &&
+                    x.ShopId == dto.ShopId &&
+                    x.IsActive)
+                .FirstOrDefaultAsync(cancellationToken);
+            if (selectedProduct is null)
+            {
+                return BadRequest(new { error = "Select an available product from this shop." });
+            }
+
+            if (selectedProduct.StockQuantity <= 0)
+            {
+                return BadRequest(new { error = "The selected product is currently out of stock." });
+            }
+        }
+
         request.ShopId = dto.ShopId;
         request.ShopServiceId = service.ShopServiceId;
-        request.EstimatedTotal = service.BasePrice;
+        request.EstimatedTotal = service.BasePrice + (selectedProduct?.Price ?? 0m);
+        if (selectedProduct is not null &&
+            !request.IssueDescription.Contains("Selected product:", StringComparison.OrdinalIgnoreCase))
+        {
+            request.IssueDescription = string.Join(
+                Environment.NewLine,
+                request.IssueDescription,
+                $"Selected product: {selectedProduct.ProductName} (PHP {selectedProduct.Price:0.00})");
+        }
 
         var mechanicId = await db.ShopMechanics
             .Where(x => x.ShopId == dto.ShopId && x.IsActive)

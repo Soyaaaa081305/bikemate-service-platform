@@ -26,8 +26,8 @@
         <Setter Property="CornerRadius" Value="14" />
         <Setter Property="HeightRequest" Value="46" />
         <Setter Property="FontAttributes" Value="Bold" />
-        <Setter Property="FontSize" Value="14" />
-        <Setter Property="FontFamily" Value="OpenSansSemibold" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FontFamily" Value="Inter" />
     </Style>
 
     <Style x:Key="DarkButton" TargetType="Button" BasedOn="{StaticResource PrimaryButton}">
@@ -47,7 +47,7 @@
         <Setter Property="HeightRequest" Value="44" />
         <Setter Property="FontAttributes" Value="Bold" />
         <Setter Property="FontSize" Value="13" />
-        <Setter Property="FontFamily" Value="OpenSansSemibold" />
+        <Setter Property="FontFamily" Value="Inter" />
     </Style>
 
     <Style x:Key="MiniButton" TargetType="Button">
@@ -58,8 +58,8 @@
         <Setter Property="CornerRadius" Value="12" />
         <Setter Property="HeightRequest" Value="38" />
         <Setter Property="FontAttributes" Value="Bold" />
-        <Setter Property="FontSize" Value="12" />
-        <Setter Property="FontFamily" Value="OpenSansSemibold" />
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="FontFamily" Value="PTSansCaptionBold" />
         <Setter Property="Padding" Value="10,0" />
     </Style>
 
@@ -69,7 +69,7 @@
         <Setter Property="PlaceholderColor" Value="#9CA3AF" />
         <Setter Property="HeightRequest" Value="44" />
         <Setter Property="FontSize" Value="13" />
-        <Setter Property="FontFamily" Value="OpenSansRegular" />
+        <Setter Property="FontFamily" Value="PublicSans" />
         <Setter Property="Margin" Value="0,4,0,8" />
     </Style>
 
@@ -78,7 +78,7 @@
         <Setter Property="TextColor" Value="{StaticResource TextDark}" />
         <Setter Property="PlaceholderColor" Value="#9CA3AF" />
         <Setter Property="FontSize" Value="13" />
-        <Setter Property="FontFamily" Value="OpenSansRegular" />
+        <Setter Property="FontFamily" Value="PublicSans" />
         <Setter Property="AutoSize" Value="TextChanges" />
         <Setter Property="MinimumHeightRequest" Value="90" />
     </Style>
@@ -89,7 +89,7 @@
         <Setter Property="TitleColor" Value="#9CA3AF" />
         <Setter Property="HeightRequest" Value="44" />
         <Setter Property="FontSize" Value="13" />
-        <Setter Property="FontFamily" Value="OpenSansRegular" />
+        <Setter Property="FontFamily" Value="PublicSans" />
         <Setter Property="Margin" Value="0,4,0,8" />
     </Style>
 
@@ -98,22 +98,23 @@
         <Setter Property="TextColor" Value="{StaticResource TextDark}" />
         <Setter Property="PlaceholderColor" Value="{StaticResource MutedText}" />
         <Setter Property="FontSize" Value="13" />
-        <Setter Property="FontFamily" Value="OpenSansRegular" />
+        <Setter Property="FontFamily" Value="PublicSans" />
     </Style>
 
     <Style x:Key="Pill" TargetType="Label">
         <Setter Property="TextColor" Value="White" />
         <Setter Property="BackgroundColor" Value="{StaticResource Orange}" />
-        <Setter Property="FontSize" Value="10" />
+        <Setter Property="FontSize" Value="11" />
         <Setter Property="FontAttributes" Value="Bold" />
-        <Setter Property="FontFamily" Value="OpenSansSemibold" />
+        <Setter Property="FontFamily" Value="PTSansCaptionBold" />
         <Setter Property="Padding" Value="8,4" />
     </Style>
 
     <Style x:Key="DataGridHeader" TargetType="Label">
         <Setter Property="TextColor" Value="White" />
-        <Setter Property="FontSize" Value="9" />
+        <Setter Property="FontSize" Value="11" />
         <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="FontFamily" Value="PTSansCaptionBold" />
         <Setter Property="TextTransform" Value="Uppercase" />
     </Style>
 
@@ -125,14 +126,15 @@
         <Setter Property="CornerRadius" Value="18" />
         <Setter Property="HeightRequest" Value="38" />
         <Setter Property="FontAttributes" Value="Bold" />
-        <Setter Property="FontSize" Value="12" />
-        <Setter Property="FontFamily" Value="OpenSansSemibold" />
+        <Setter Property="FontSize" Value="11" />
+        <Setter Property="FontFamily" Value="PTSansCaptionBold" />
     </Style>
 
     <Style x:Key="ChatBubbleOther" TargetType="Label">
         <Setter Property="BackgroundColor" Value="#F3F4F6" />
         <Setter Property="TextColor" Value="{StaticResource TextDark}" />
-        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FontFamily" Value="PublicSans" />
         <Setter Property="Padding" Value="10,8" />
     </Style>
 

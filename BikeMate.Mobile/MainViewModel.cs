@@ -85,6 +85,7 @@ namespace BikeMate
         public ICommand CreateAccountCommand { get; }
         public ICommand ForgotPasswordCommand { get; }
         public ICommand GoogleLoginCommand { get; }
+        public ICommand ConnectionSettingsCommand { get; }
 
         public MainViewModel()
         {
@@ -127,6 +128,7 @@ namespace BikeMate
             CreateAccountCommand = new Command(async () => await OpenCreateAccountAsync());
             ForgotPasswordCommand = new Command(async () => await ForgotPasswordAsync());
             GoogleLoginCommand = new Command(async () => await LoginWithGoogleAsync());
+            ConnectionSettingsCommand = new Command(async () => await OpenConnectionSettingsAsync());
 
             _ = InitializeStartupAsync();
         }
@@ -169,7 +171,9 @@ namespace BikeMate
                     }
                     else
                     {
-                        LoginStatus = "BikeMate could not verify your saved session. Check the API connection, then sign in.";
+                        ClearSavedSessionForLogin();
+                        ApiConfig.ClearBaseUrlOverride();
+                        LoginStatus = "BikeMate could not verify your saved session, so it was cleared. Sign in again.";
                     }
 
                     return;
@@ -287,9 +291,65 @@ namespace BikeMate
             catch (Exception ex)
             {
                 Debug.WriteLine($"Sign-in failed: {ex}");
-                LoginStatus = "Could not reach the BikeMate API. Start the API and try again.";
+                LoginStatus = $"Could not reach the BikeMate API at {ApiConfig.BaseUrl}. Check connection settings and try again.";
                 await Shell.Current.DisplayAlertAsync("Sign in unavailable", LoginStatus, "OK");
             }
+        }
+
+        private static async Task OpenConnectionSettingsAsync()
+        {
+            var current = ApiConfig.BaseUrl;
+            var action = await Shell.Current.DisplayActionSheet(
+                "BikeMate API connection",
+                "Cancel",
+                null,
+                "Set API URL",
+                "Use packaged default",
+                "Show current URL");
+
+            if (action == "Set API URL")
+            {
+                var entered = await Shell.Current.DisplayPromptAsync(
+                    "API URL",
+                    "Enter the API base URL. Examples: https://your-domain.com/api/ or http://192.168.1.10:5000/api/.",
+                    "Save",
+                    "Cancel",
+                    current);
+
+                if (string.IsNullOrWhiteSpace(entered))
+                {
+                    return;
+                }
+
+                try
+                {
+                    ApiConfig.SaveBaseUrlOverride(entered);
+                    await Shell.Current.DisplayAlertAsync("Connection saved", $"BikeMate will use {ApiConfig.BaseUrl}", "OK");
+                }
+                catch (Exception ex)
+                {
+                    await Shell.Current.DisplayAlertAsync("Invalid API URL", ex.Message, "OK");
+                }
+            }
+            else if (action == "Use packaged default")
+            {
+                ApiConfig.ClearBaseUrlOverride();
+                await Shell.Current.DisplayAlertAsync("Connection reset", $"BikeMate will use {ApiConfig.DeviceDefaultBaseUrl}", "OK");
+            }
+            else if (action == "Show current URL")
+            {
+                var mode = ApiConfig.HasBaseUrlOverride ? "Custom override" : "Packaged default";
+                await Shell.Current.DisplayAlertAsync("Current API URL", $"{mode}\n{ApiConfig.BaseUrl}", "OK");
+            }
+        }
+
+        private static void ClearSavedSessionForLogin()
+        {
+            SecureStorage.Default.Remove("access_token");
+            SecureStorage.Default.Remove("primary_role");
+            SecureStorage.Default.Remove("user_id");
+            Preferences.Default.Remove(AppNavigation.ForceLoginPreferenceKey);
+            Preferences.Default.Remove(AppNavigation.LoginMessagePreferenceKey);
         }
 
         private static string PickPrimaryRole(IReadOnlyCollection<string> roles)

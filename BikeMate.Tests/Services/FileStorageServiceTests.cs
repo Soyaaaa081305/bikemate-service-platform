@@ -118,29 +118,34 @@ public sealed class FileStorageServiceTests
     }
 
     [Fact]
-    public async Task SavePlaceholderAsync_ReturnsUrlWithFolderAndFileName()
+    public async Task SaveFileAsync_SanitizesFolderName()
     {
-        var sut = CreateService(new Dictionary<string, string?>
+        var tempDir = Path.Combine(Path.GetTempPath(), $"bikemate-test-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(tempDir);
+        try
         {
-            ["Storage:BaseUrl"] = "https://cdn.bikemate.app/uploads"
-        });
+            var sut = CreateService(
+                new Dictionary<string, string?>
+                {
+                    ["Storage:BaseUrl"] = "https://cdn.bikemate.app/uploads"
+                },
+                contentRootPath: tempDir);
+            var file = new Mock<IFormFile>();
+            file.Setup(f => f.Length).Returns(10);
+            file.Setup(f => f.FileName).Returns("file.jpg");
+            file.Setup(f => f.ContentType).Returns("image/jpeg");
+            file.Setup(f => f.CopyToAsync(It.IsAny<Stream>(), It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
 
-        var url = await sut.SavePlaceholderAsync("profiles", "avatar.jpg", CancellationToken.None);
+            var result = await sut.SaveFileAsync(file.Object, "my folder/../../etc", CancellationToken.None);
 
-        Assert.Equal("https://cdn.bikemate.app/uploads/profiles/avatar.jpg", url);
-    }
-
-    [Fact]
-    public async Task SavePlaceholderAsync_SanitizesFolderName()
-    {
-        var sut = CreateService(new Dictionary<string, string?>
+            Assert.DoesNotContain("..", result.Url);
+            Assert.DoesNotContain("/etc", result.Url);
+            Assert.Contains("my-folder", result.Url);
+        }
+        finally
         {
-            ["Storage:BaseUrl"] = "https://cdn.bikemate.app/uploads"
-        });
-
-        var url = await sut.SavePlaceholderAsync("my folder/../../etc", "file.jpg", CancellationToken.None);
-
-        Assert.DoesNotContain("..", url);
-        Assert.DoesNotContain("/etc", url);
+            Directory.Delete(tempDir, true);
+        }
     }
 }

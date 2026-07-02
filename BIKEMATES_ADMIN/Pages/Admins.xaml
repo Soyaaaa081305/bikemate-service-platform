@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="BIKEMATES_ADMIN.Pages.Admins"
@@ -9,10 +9,10 @@
         <VerticalStackLayout Grid.Row="0" BackgroundColor="{StaticResource Navy}" Padding="18,16,18,18" Spacing="4">
             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
                 <VerticalStackLayout Spacing="2">
-                    <Label Text="Admins" Style="{StaticResource HeaderTitle}" />
-                    <Label Text="Owner-only admin tools and access-code management." Style="{StaticResource HeaderSubtitle}" />
+                    <Label Text="Mechanic Applications" Style="{StaticResource HeaderTitle}" />
+                    <Label Text="Create technician accounts, verify email OTP, then send them for BikeMate approval." Style="{StaticResource HeaderSubtitle}" />
                 </VerticalStackLayout>
-                <Button Grid.Column="1" Text="Exit" Style="{StaticResource MiniButton}" Clicked="Exit_Clicked" VerticalOptions="Center" />
+                <Button Grid.Column="1" Text="Back" Style="{StaticResource MiniButton}" Clicked="Exit_Clicked" VerticalOptions="Center" />
             </Grid>
         </VerticalStackLayout>
 
@@ -20,25 +20,135 @@
             <VerticalStackLayout Padding="14,12,14,30" Spacing="14">
                 <Frame Style="{StaticResource CardFrame}">
                     <VerticalStackLayout Spacing="10">
-                        <Label Text="Account Creation Codes" Style="{StaticResource SectionLabel}" />
-                        <Label Text="The first shop code is created by the shop registration API. Owner-generated admin codes will appear here once the API exposes that endpoint." Style="{StaticResource SmallMuted}" />
-                        <Entry x:Name="GeneratedCodeEntry" Placeholder="No generated admin code yet" IsReadOnly="True" Style="{StaticResource InputEntry}" />
+                        <Label Text="Step 1 - Mechanic Details" Style="{StaticResource SectionLabel}" />
+                        <Label Text="Create the pending mechanic account and send the email OTP. It will not become approval-ready until the OTP is verified." Style="{StaticResource SmallMuted}" />
+
                         <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
-                            <Button Text="Generate Code" Style="{StaticResource PrimaryButton}" Clicked="GenerateCode_Clicked" />
-                            <Button Grid.Column="1" Text="Copy" Style="{StaticResource OutlineButton}" Clicked="CopyCode_Clicked" />
+                            <Entry x:Name="FirstNameEntry" Placeholder="First name" Style="{StaticResource InputEntry}" />
+                            <Entry Grid.Column="1" x:Name="MiddleNameEntry" Placeholder="Middle name" Style="{StaticResource InputEntry}" />
+                        </Grid>
+                        <Entry x:Name="LastNameEntry" Placeholder="Last name" Style="{StaticResource InputEntry}" />
+
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                            <Picker x:Name="SexPicker" Title="Sex" Style="{StaticResource InputPicker}" />
+                            <DatePicker Grid.Column="1" x:Name="BirthdatePicker" />
+                        </Grid>
+
+                        <Entry x:Name="EmailEntry" Placeholder="Email address" Keyboard="Email" Style="{StaticResource InputEntry}" />
+                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                            <Label Text="+63" Style="{StaticResource ItemTitle}" VerticalOptions="Center" />
+                            <Entry Grid.Column="1"
+                                   x:Name="PhoneEntry"
+                                   Placeholder="9XXXXXXXXX"
+                                   Keyboard="Telephone"
+                                   MaxLength="10"
+                                   Style="{StaticResource InputEntry}"
+                                   TextChanged="PhoneEntry_TextChanged" />
+                        </Grid>
+
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                            <Entry x:Name="PasswordEntry" Placeholder="Password" IsPassword="True" Style="{StaticResource InputEntry}" />
+                            <Entry Grid.Column="1" x:Name="ConfirmPasswordEntry" Placeholder="Confirm password" IsPassword="True" Style="{StaticResource InputEntry}" />
+                        </Grid>
+                        <Label Text="Use more than 8 characters." Style="{StaticResource TinyMuted}" />
+
+                        <Label Text="Address and location" Style="{StaticResource SectionLabel}" />
+                        <Label x:Name="LocationStatusLabel" Text="" Style="{StaticResource TinyMuted}" />
+                        <Picker x:Name="RegionPicker"
+                                Title="Select region"
+                                Style="{StaticResource InputPicker}"
+                                SelectedIndexChanged="OnRegionChanged" />
+                        <Picker x:Name="CityPicker"
+                                Title="Select city or municipality"
+                                Style="{StaticResource InputPicker}"
+                                SelectedIndexChanged="OnCityChanged" />
+                        <Label x:Name="ProvinceLabel" Text="" Style="{StaticResource TinyMuted}" />
+                        <Picker x:Name="BarangayPicker"
+                                Title="Select barangay"
+                                Style="{StaticResource InputPicker}" />
+                        <Entry x:Name="AddressEntry" Placeholder="House number, street, subdivision" Style="{StaticResource InputEntry}" />
+                        <Entry x:Name="ZipCodeEntry" Placeholder="ZIP code" Keyboard="Numeric" MaxLength="4" Style="{StaticResource InputEntry}" />
+
+                        <Label Text="Technician Profile" Style="{StaticResource SectionLabel}" />
+                        <Grid ColumnDefinitions="*,120" ColumnSpacing="8">
+                            <Editor x:Name="BioEditor" Placeholder="Short mechanic background, specialties, and shop role" Style="{StaticResource InputEditor}" />
+                            <Entry Grid.Column="1" x:Name="YearsEntry" Placeholder="Years" Keyboard="Numeric" MaxLength="2" Style="{StaticResource InputEntry}" VerticalOptions="Start" />
+                        </Grid>
+
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                            <Button Text="Profile Photo" Style="{StaticResource OutlineButton}" Clicked="PickProfile_Clicked" />
+                            <Button Grid.Column="1" Text="Valid ID" Style="{StaticResource OutlineButton}" Clicked="PickValidId_Clicked" />
+                        </Grid>
+                        <Button Text="Mechanic License / Certification" Style="{StaticResource OutlineButton}" Clicked="PickCertification_Clicked" />
+                        <Label x:Name="FileStatusLabel" Text="No files uploaded yet." Style="{StaticResource SmallMuted}" />
+
+                        <Frame Style="{StaticResource SmallCardFrame}" BackgroundColor="{StaticResource SoftOrange}" BorderColor="{StaticResource SoftOrange}">
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="10">
+                                <CheckBox x:Name="TermsCheckBox" Color="{StaticResource Orange}" VerticalOptions="Start" />
+                                <Label Grid.Column="1"
+                                       Text="I confirm that this mechanic gave permission to create a BikeMate account, and that the submitted ID, license/certification, and contact information are accurate for admin review."
+                                       Style="{StaticResource SmallMuted}" />
+                            </Grid>
+                        </Frame>
+
+                        <Button x:Name="SubmitButton" Text="Create Account and Send OTP" Style="{StaticResource PrimaryButton}" Clicked="Submit_Clicked" />
+                    </VerticalStackLayout>
+                </Frame>
+
+                <Frame Style="{StaticResource CardFrame}">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="Step 2 - Verify Email OTP" Style="{StaticResource SectionLabel}" />
+                        <Label Text="Enter the code sent to the mechanic. After verification, this account becomes ready for BikeMate web-admin review." Style="{StaticResource SmallMuted}" />
+                        <Label x:Name="OtpStatusLabel" Text="No mechanic OTP is pending." Style="{StaticResource TinyMuted}" />
+                        <Grid ColumnDefinitions="*,116" ColumnSpacing="8">
+                            <Entry x:Name="OtpEmailEntry" Placeholder="Mechanic email" Keyboard="Email" Style="{StaticResource InputEntry}" />
+                            <Entry Grid.Column="1" x:Name="OtpEntry" Placeholder="OTP" Keyboard="Numeric" MaxLength="6" Style="{StaticResource InputEntry}" />
+                        </Grid>
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                            <Button Text="Verify OTP" Style="{StaticResource PrimaryButton}" Clicked="VerifyOtp_Clicked" />
+                            <Button Grid.Column="1" Text="Resend OTP" Style="{StaticResource OutlineButton}" Clicked="ResendOtp_Clicked" />
                         </Grid>
                     </VerticalStackLayout>
                 </Frame>
 
-                <Label Text="Admin Accounts" Style="{StaticResource SectionLabel}" />
-                <Frame Style="{StaticResource CardFrame}">
-                    <Label Text="Admin account management will load from dbo.Users and shop roles once the owner/admin listing API is available." Style="{StaticResource SmallMuted}" />
-                </Frame>
+                <Grid ColumnDefinitions="*,Auto">
+                    <VerticalStackLayout>
+                        <Label Text="Mechanic Submissions" Style="{StaticResource SectionLabel}" />
+                        <Label Text="OTP-pending accounts stay here for follow-up. Verified accounts become visible to BikeMate admin approval." Style="{StaticResource SmallMuted}" />
+                    </VerticalStackLayout>
+                    <Button Grid.Column="1" Text="Refresh" Style="{StaticResource MiniButton}" Clicked="Refresh_Clicked" />
+                </Grid>
 
-                <Label Text="Audit Logs" Style="{StaticResource SectionLabel}" />
-                <Frame Style="{StaticResource CardFrame}">
-                    <Label Text="No audit log data is shown until the API returns real admin events." Style="{StaticResource SmallMuted}" />
-                </Frame>
+                <CollectionView x:Name="ApplicationsCollectionView"
+                                ItemsSource="{Binding Applications}"
+                                SelectionMode="None">
+                    <CollectionView.EmptyView>
+                        <Frame Style="{StaticResource CardFrame}">
+                            <Label Text="No mechanic applications submitted from this shop yet." Style="{StaticResource SmallMuted}" />
+                        </Frame>
+                    </CollectionView.EmptyView>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Frame Margin="0,4" Style="{StaticResource SmallCardFrame}">
+                                <VerticalStackLayout Spacing="7">
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8">
+                                        <VerticalStackLayout>
+                                            <Label Text="{Binding FullName}" Style="{StaticResource ItemTitle}" />
+                                            <Label Text="{Binding ShopName}" Style="{StaticResource TinyMuted}" />
+                                        </VerticalStackLayout>
+                                        <Label Grid.Column="1" Text="{Binding StatusText}" TextColor="{Binding StatusColor}" FontAttributes="Bold" FontSize="11" />
+                                    </Grid>
+                                    <Label Text="{Binding Email}" Style="{StaticResource SmallMuted}" />
+                                    <Grid ColumnDefinitions="*,*">
+                                        <Label Text="{Binding OtpText}" Style="{StaticResource TinyMuted}" />
+                                        <Label Grid.Column="1" Text="{Binding ApprovalText}" Style="{StaticResource TinyMuted}" HorizontalTextAlignment="End" />
+                                    </Grid>
+                                    <Label Text="{Binding SubmittedText}" Style="{StaticResource TinyMuted}" />
+                                </VerticalStackLayout>
+                            </Frame>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
             </VerticalStackLayout>
         </ScrollView>
     </Grid>

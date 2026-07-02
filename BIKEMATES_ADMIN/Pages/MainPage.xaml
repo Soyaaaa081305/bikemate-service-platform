@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="BIKEMATES_ADMIN.Pages.MainPage"
@@ -19,7 +19,7 @@
                     <Label x:Name="ShopNameLabel" Text="Loading assigned bike shop..." Style="{StaticResource HeaderSubtitle}" />
                 </VerticalStackLayout>
                 <Button Grid.Column="2" x:Name="NotificationsButton" Text="Alerts" Style="{StaticResource MiniButton}" Clicked="Notifications_Clicked" />
-                <Button Grid.Column="3" Text="Exit" Style="{StaticResource MiniButton}" Clicked="SignOut_Clicked" />
+                <Button Grid.Column="3" Text="Sign Out" Style="{StaticResource MiniButton}" Clicked="SignOut_Clicked" />
             </Grid>
             <Frame Style="{StaticResource DarkCardFrame}" Padding="14">
                 <Grid ColumnDefinitions="*,Auto">
@@ -46,7 +46,7 @@
                         <Frame Grid.Column="1" Style="{StaticResource SmallCardFrame}">
                             <VerticalStackLayout>
                                 <Label x:Name="ActiveBookingsLabel" Text="0" Style="{StaticResource StatNumber}" />
-                                <Label Text="Active Dispatches" Style="{StaticResource SmallMuted}" />
+                                <Label Text="Active Bookings" Style="{StaticResource SmallMuted}" />
                             </VerticalStackLayout>
                         </Frame>
                         <Frame Grid.Row="1" Style="{StaticResource SmallCardFrame}">
@@ -66,9 +66,9 @@
                     <Label Text="Quick Actions" Style="{StaticResource SectionLabel}" />
                     <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="8" RowSpacing="8">
                         <Button Text="+ New Product" Style="{StaticResource DarkButton}" Clicked="Products_Clicked" />
-                        <Button Grid.Column="1" Text="Dispatch Now" Style="{StaticResource PrimaryButton}" Clicked="Dispatch_Clicked" />
-                        <Button Grid.Row="1" Text="View Reports" Style="{StaticResource OutlineButton}" Clicked="Reports_Clicked" />
-                        <Button Grid.Row="1" Grid.Column="1" Text="Generate Code" Style="{StaticResource OutlineButton}" Clicked="Admins_Clicked" />
+                        <Button Grid.Column="1" Text="+ New Service" Style="{StaticResource PrimaryButton}" Clicked="Operations_Clicked" />
+                        <Button Grid.Row="1" Text="Bookings" Style="{StaticResource OutlineButton}" Clicked="Calendar_Clicked" />
+                        <Button Grid.Row="1" Grid.Column="1" Text="View Reports" Style="{StaticResource OutlineButton}" Clicked="Reports_Clicked" />
                     </Grid>
 
                     <Label Text="Mechanic Status" Style="{StaticResource SectionLabel}" />
@@ -93,7 +93,7 @@
 
                     <Label Text="Recent Activity" Style="{StaticResource SectionLabel}" />
                     <Frame Style="{StaticResource CardFrame}">
-                        <Label x:Name="ActivityLabel" Text="Recent activity will appear when the API returns orders, dispatch changes, messages, and inventory events." Style="{StaticResource SmallMuted}" />
+                        <Label x:Name="ActivityLabel" Text="Recent activity will appear when the API returns bookings, service changes, messages, and inventory events." Style="{StaticResource SmallMuted}" />
                     </Frame>
                 </VerticalStackLayout>
             </ScrollView>

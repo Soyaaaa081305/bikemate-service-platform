@@ -16,7 +16,7 @@ namespace BikeMate.Api.Controllers;
 public sealed class CustomersController(BikeMateDbContext db) : ControllerBase
 {
     [HttpGet("me")]
-    public async Task<IActionResult> GetMe(CancellationToken cancellationToken)
+    public async Task<ActionResult<CustomerMeDto>> GetMe(CancellationToken cancellationToken)
     {
         var userId = User.GetUserId();
         var customer = await db.Clients
@@ -25,8 +25,7 @@ public sealed class CustomersController(BikeMateDbContext db) : ControllerBase
             .Include(x => x.Motorcycles)
             .SingleAsync(x => x.UserId == userId, cancellationToken);
 
-        return Ok(new
-        {
+        return Ok(new CustomerMeDto(
             customer.ClientId,
             customer.UserId,
             customer.User!.FirstName,
@@ -43,9 +42,8 @@ public sealed class CustomersController(BikeMateDbContext db) : ControllerBase
             customer.Sex,
             customer.Birthdate,
             customer.ValidIdImageUrl,
-            Addresses = customer.Addresses.Select(ToAddressDto),
-            Motorcycles = customer.Motorcycles.Select(ToMotorcycleDto)
-        });
+            customer.Addresses.Select(ToAddressDto).ToArray(),
+            customer.Motorcycles.Select(ToMotorcycleDto).ToArray()));
     }
 
     [HttpPut("me")]
@@ -83,7 +81,9 @@ public sealed class CustomersController(BikeMateDbContext db) : ControllerBase
 
         customer.MiddleName = Clean(dto.MiddleName);
         customer.Sex = Clean(dto.Sex);
-        customer.Birthdate = dto.Birthdate?.Date;
+        customer.Birthdate = dto.Birthdate is null
+            ? null
+            : AgeRequirement.RequireAdult(dto.Birthdate, "Customer");
 
         await db.SaveChangesAsync(cancellationToken);
         return Ok(new { message = "Profile updated." });
@@ -184,7 +184,7 @@ public sealed class CustomersController(BikeMateDbContext db) : ControllerBase
             .Where(x => x.ShopStatus == "verified")
             .OrderBy(x => x.ShopName)
             .Take(5)
-            .Select(x => new ShopSummaryDto(x.ShopId, x.ShopName, x.AddressLine, x.City, x.ContactNumber, x.ShopStatus, x.Latitude, x.Longitude))
+            .Select(x => new ShopSummaryDto(x.ShopId, x.ShopName, x.AddressLine, x.City, x.ContactNumber, x.ShopStatus, x.Latitude, x.Longitude, x.ShopImageUrl, x.ShopLogoUrl))
             .ToArrayAsync(cancellationToken);
         var mechanics = await db.Mechanics
             .Include(x => x.User)

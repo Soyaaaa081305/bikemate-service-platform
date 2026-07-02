@@ -10,6 +10,7 @@
             Routing.RegisterRoute(nameof(Views.Auth.RegisterPage), typeof(Views.Auth.RegisterPage));
             Routing.RegisterRoute(nameof(Views.Auth.OtpVerificationPage), typeof(Views.Auth.OtpVerificationPage));
             Routing.RegisterRoute(nameof(Views.Auth.PasswordResetPage), typeof(Views.Auth.PasswordResetPage));
+            Routing.RegisterRoute(nameof(Views.Auth.GoogleAccountSetupPage), typeof(Views.Auth.GoogleAccountSetupPage));
             Routing.RegisterRoute(nameof(Views.Customer.CustomerProfilePage), typeof(Views.Customer.CustomerProfilePage));
             Routing.RegisterRoute(nameof(Views.Customer.CustomerNotificationsPage), typeof(Views.Customer.CustomerNotificationsPage));
             Routing.RegisterRoute(nameof(Views.Customer.CustomerHelpDeskPage), typeof(Views.Customer.CustomerHelpDeskPage));
@@ -51,11 +52,6 @@
             Routing.RegisterRoute(nameof(Views.Admin.AdminAuditLogsPage), typeof(Views.Admin.AdminAuditLogsPage));
             Routing.RegisterRoute(nameof(Views.Admin.AdminEmergencyRequestsPage), typeof(Views.Admin.AdminEmergencyRequestsPage));
             Routing.RegisterRoute(nameof(Views.Admin.AdminRevenueReportPage), typeof(Views.Admin.AdminRevenueReportPage));
-            Routing.RegisterRoute(nameof(Views.ShopAdmin.ShopServiceEditPage), typeof(Views.ShopAdmin.ShopServiceEditPage));
-            Routing.RegisterRoute(nameof(Views.ShopAdmin.ShopProductEditPage), typeof(Views.ShopAdmin.ShopProductEditPage));
-            Routing.RegisterRoute(nameof(Views.ShopAdmin.ShopMechanicsPage), typeof(Views.ShopAdmin.ShopMechanicsPage));
-            Routing.RegisterRoute(nameof(Views.ShopAdmin.ShopEarningsPage), typeof(Views.ShopAdmin.ShopEarningsPage));
-            Routing.RegisterRoute(nameof(Views.ShopAdmin.ShopSchedulePage), typeof(Views.ShopAdmin.ShopSchedulePage));
         }
     }
 }

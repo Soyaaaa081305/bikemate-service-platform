@@ -376,7 +376,7 @@ public abstract class MechanicPageBase : ContentPage
             {
                 Text = initials,
                 TextColor = Dark,
-                FontSize = 14,
+                FontSize = AppTypography.BodySize,
                 FontAttributes = FontAttributes.Bold,
                 HorizontalTextAlignment = TextAlignment.Center,
                 VerticalTextAlignment = TextAlignment.Center
@@ -1474,7 +1474,7 @@ public sealed class MechanicMessagesPage : MechanicPageBase
                         {
                             Text = conversation.UnreadCount > 99 ? "99+" : conversation.UnreadCount.ToString(CultureInfo.InvariantCulture),
                             TextColor = Colors.White,
-                            FontSize = 10,
+                            FontSize = AppTypography.CaptionSize,
                             FontAttributes = FontAttributes.Bold,
                             HorizontalTextAlignment = TextAlignment.Center
                         }

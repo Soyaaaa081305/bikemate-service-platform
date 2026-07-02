@@ -4,114 +4,798 @@
 @using BikeMate.WebAdmin.Services
 @inject AdminApiClient AdminApi
 
-<PageTitle>Admin - Pending Approvals</PageTitle>
+<PageTitle>Admin - Account Approvals</PageTitle>
 
-<div class="d-flex justify-content-between align-items-center mb-4 mt-3">
-    <h2 class="fw-bold text-dark">Pending Shop Approvals</h2>
-    <a href="/dashboard" class="btn btn-secondary shadow-sm">
-        Back to Dashboard
-    </a>
-</div>
-
-<ActionMessage Message="@statusMessage" AlertType="@statusType" OnMessageCleared="() => statusMessage = null" />
-
-<div class="card shadow-sm border-0 border-top border-warning border-4">
-    <div class="card-body p-0">
-        @if (pendingShops == null)
-        {
-            <div class="p-5 text-center">
-                <div class="spinner-border text-warning" role="status"></div>
-                <p class="mt-2 text-muted">Loading pending shops...</p>
-            </div>
-        }
-        else if (pendingShops.Length == 0)
-        {
-            <div class="p-5 text-center text-muted">
-                No pending approvals at this time.
-            </div>
-        }
-        else
-        {
-            <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light text-muted small text-uppercase border-bottom border-warning border-2">
-                        <tr>
-                            <th class="ps-4">Shop ID</th>
-                            <th>Shop Name</th>
-                            <th>Location</th>
-                            <th>Status</th>
-                            <th class="text-end pe-4">Verification</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var shop in pendingShops)
-                        {
-                            <tr>
-                                <td class="ps-4 fw-bold text-muted">#@shop.Id</td>
-                                <td class="fw-semibold">@shop.ShopName</td>
-                                <td class="text-muted">@shop.City</td>
-                                <td>
-                                    <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 rounded-pill text-dark">Pending Review</span>
-                                </td>
-                                <td class="text-end pe-4">
-                                    <button class="btn btn-sm btn-success shadow-sm me-1" @onclick="() => HandleApproval(shop.Id, true)">Approve</button>
-                                    <button class="btn btn-sm btn-outline-danger" @onclick="() => HandleApproval(shop.Id, false)">Reject</button>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        }
+<div class="admin-page">
+    <div class="admin-page-header">
+        <div>
+            <h1 class="admin-page-title">Account Approvals</h1>
+            <p class="admin-page-description">Review submitted identity files, business records, OTP status, and profile details before activating BikeMate accounts.</p>
+        </div>
+        <div class="admin-page-actions">
+            <button class="btn btn-outline-primary shadow-sm" disabled="@isProcessing" @onclick="LoadApprovals">
+                <i class="bi bi-arrow-clockwise me-1"></i> Refresh
+            </button>
+        </div>
     </div>
+
+    <ActionMessage Message="@statusMessage" AlertType="@statusType" OnMessageCleared="() => statusMessage = null" />
+
+    @if (IsLoading)
+    {
+        <div class="card">
+            <div class="card-body empty-state">
+                <div class="spinner-border text-warning" role="status"></div>
+                <p class="mt-2 mb-0">Loading submitted applications...</p>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="approval-review-card h-100">
+                    <div class="section-label mb-1">Shops</div>
+                    <h3 class="mb-1">@PendingShopCount waiting</h3>
+                    <p class="dashboard-muted mb-0">Business, DTI, owner ID, and shop profile review.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="approval-review-card h-100">
+                    <div class="section-label mb-1">Customers</div>
+                    <h3 class="mb-1">@PendingCustomerCount waiting</h3>
+                    <p class="dashboard-muted mb-0">Customer identity and email verification review.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="approval-review-card h-100">
+                    <div class="section-label mb-1">Mechanics</div>
+                    <h3 class="mb-1">@PendingMechanicCount waiting</h3>
+                    <p class="dashboard-muted mb-0">Technician identity, license, shop assignment, and OTP review.</p>
+                </div>
+            </div>
+        </div>
+
+        <section class="vstack gap-3 mb-4">
+            <div>
+                <h2 class="admin-page-title">Shop Applications</h2>
+                <p class="dashboard-muted">Owner accounts activate only after business documents and email OTP are verified.</p>
+            </div>
+
+            @if (PendingShopCount == 0)
+            {
+                <div class="card">
+                    <div class="card-body empty-state">No pending shop applications at this time.</div>
+                </div>
+            }
+            else
+            {
+                @foreach (var shop in pendingShops!)
+                {
+                    <details class="dashboard-panel" open>
+                        <summary>
+                            <div>
+                                <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
+                                    <h2 class="admin-page-title mb-0">@shop.ShopName</h2>
+                                    <span class="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-25">Pending review</span>
+                                    <span class="@EmailBadgeClass(shop.OwnerEmailVerified)">
+                                        @(shop.OwnerEmailVerified ? "Email OTP verified" : "Waiting for OTP")
+                                    </span>
+                                </div>
+                                <p class="dashboard-muted">Application #@shop.Id submitted @FormatDate(shop.CreatedAt)</p>
+                            </div>
+                            <i class="bi bi-chevron-down dashboard-panel-chevron"></i>
+                        </summary>
+
+                        <div class="dashboard-panel-body">
+                            <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+                                <div>
+                                    <div class="section-label mb-1">Decision</div>
+                                    <p class="text-muted mb-0">Approve only after the permit, owner ID, DTI number, and shop profile are correct.</p>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-success shadow-sm"
+                                            disabled="@(!CanApprove(shop) || isProcessing)"
+                                            title="Business documents and email OTP are required before approval."
+                                            @onclick="() => HandleShopApproval(shop.Id, true)">
+                                        <i class="bi bi-check2-circle me-1"></i> Approve
+                                    </button>
+                                    <button class="btn btn-outline-danger"
+                                            disabled="@isProcessing"
+                                            @onclick="() => HandleShopApproval(shop.Id, false)">
+                                        <i class="bi bi-x-circle me-1"></i> Reject
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="approval-review-grid">
+                                <section class="approval-review-card">
+                                    <div class="approval-card-heading">
+                                        <div>
+                                            <div class="section-label mb-1">Checklist</div>
+                                            <h3>Documents for review</h3>
+                                        </div>
+                                        <span class="@ApplicationBadgeClass(shop)">@(CanApprove(shop) ? "Ready to approve" : "Needs attention")</span>
+                                    </div>
+
+                                    <div class="approval-checklist">
+                                        @ChecklistItem("Cover photo / shop image", HasSubmitted(shop.ShopImageUrl))
+                                        @ChecklistItem("Business permit", HasSubmitted(shop.BusinessPermitUrl))
+                                        @ChecklistItem("Owner valid ID / license", HasSubmitted(shop.OwnerValidIdUrl))
+                                        @ChecklistItem("DTI registration number", HasSubmitted(shop.DtiRegistrationNumber))
+                                        @ChecklistItem("Email OTP", shop.OwnerEmailVerified)
+                                    </div>
+
+                                    <div class="approval-dti-card">
+                                        <span>DTI Registration Number</span>
+                                        <strong>@Fallback(shop.DtiRegistrationNumber)</strong>
+                                    </div>
+                                </section>
+
+                                <section class="approval-review-card">
+                                    <div class="approval-card-heading">
+                                        <div>
+                                            <div class="section-label mb-1">Owner</div>
+                                            <h3>@Fallback(shop.OwnerName)</h3>
+                                        </div>
+                                        <span class="@EmailBadgeClass(shop.OwnerEmailVerified)">
+                                            @(shop.OwnerEmailVerified ? "OTP verified" : "OTP pending")
+                                        </span>
+                                    </div>
+                                    @Detail("Middle name", shop.OwnerMiddleName)
+                                    @Detail("Email", shop.OwnerEmail)
+                                    @Detail("Mobile", shop.OwnerPhoneNumber)
+                                    @Detail("Sex", shop.OwnerSex)
+                                    @Detail("Birthdate", shop.OwnerBirthdate)
+                                    @Detail("Home address", shop.OwnerFullAddress)
+                                </section>
+
+                                <section class="approval-review-card">
+                                    <div class="approval-card-heading">
+                                        <div>
+                                            <div class="section-label mb-1">Shop Details</div>
+                                            <h3>@Fallback(shop.ShopName)</h3>
+                                        </div>
+                                        <span class="badge rounded-pill bg-warning bg-opacity-10 text-dark border border-warning border-opacity-25">@Fallback(shop.Status)</span>
+                                    </div>
+                                    @Detail("Contact", shop.ContactNumber)
+                                    @Detail("Location", shop.FullAddress)
+                                    @Detail("Submitted", FormatDate(shop.CreatedAt))
+                                    @if (HasSubmitted(shop.Description))
+                                    {
+                                        <div class="mt-3">
+                                            <div class="text-uppercase text-muted small fw-semibold mb-2">Description</div>
+                                            <p class="mb-0 text-dark prewrap">@shop.Description.Trim()</p>
+                                        </div>
+                                    }
+                                </section>
+                            </div>
+
+                            @DocumentGrid(DocumentsFor(shop))
+                        </div>
+                    </details>
+                }
+            }
+        </section>
+
+        <section class="vstack gap-3 mb-4">
+            <div>
+                <h2 class="admin-page-title">Customer Accounts</h2>
+                <p class="dashboard-muted">Customers can sign up and verify email, but booking stays locked until admin approval.</p>
+            </div>
+
+            @if (PendingCustomerCount == 0)
+            {
+                <div class="card">
+                    <div class="card-body empty-state">No pending customer accounts at this time.</div>
+                </div>
+            }
+            else
+            {
+                @foreach (var customer in pendingCustomers!)
+                {
+                    <details class="dashboard-panel">
+                        <summary>
+                            <div>
+                                <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
+                                    <h2 class="admin-page-title mb-0">@Fallback(customer.FullName)</h2>
+                                    <span class="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-25">@Fallback(customer.AccountStatus)</span>
+                                    <span class="@EmailBadgeClass(customer.EmailVerified)">
+                                        @(customer.EmailVerified ? "Email OTP verified" : "Waiting for OTP")
+                                    </span>
+                                </div>
+                                <p class="dashboard-muted">Customer #@customer.ClientId submitted @FormatDate(customer.CreatedAt)</p>
+                            </div>
+                            <i class="bi bi-chevron-down dashboard-panel-chevron"></i>
+                        </summary>
+
+                        <div class="dashboard-panel-body">
+                            <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+                                <div>
+                                    <div class="section-label mb-1">Decision</div>
+                                    <p class="text-muted mb-0">Approve only after email OTP and valid ID review are complete.</p>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-success shadow-sm"
+                                            disabled="@(!CanApprove(customer) || isProcessing)"
+                                            @onclick="() => HandleCustomerApproval(customer.ClientId, true)">
+                                        <i class="bi bi-check2-circle me-1"></i> Approve
+                                    </button>
+                                    <button class="btn btn-outline-danger"
+                                            disabled="@isProcessing"
+                                            @onclick="() => HandleCustomerApproval(customer.ClientId, false)">
+                                        <i class="bi bi-x-circle me-1"></i> Reject
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="approval-review-grid">
+                                <section class="approval-review-card">
+                                    <div class="approval-card-heading">
+                                        <div>
+                                            <div class="section-label mb-1">Checklist</div>
+                                            <h3>Customer verification</h3>
+                                        </div>
+                                        <span class="@ApplicationBadgeClass(CanApprove(customer))">@(CanApprove(customer) ? "Ready to approve" : "Needs attention")</span>
+                                    </div>
+                                    <div class="approval-checklist">
+                                        @ChecklistItem("Email OTP", customer.EmailVerified)
+                                        @ChecklistItem("Valid ID", HasSubmitted(customer.ValidIdImageUrl))
+                                        @ChecklistItem("Mobile number", HasSubmitted(customer.PhoneNumber))
+                                    </div>
+                                </section>
+
+                                <section class="approval-review-card">
+                                    <div class="approval-card-heading">
+                                        <div>
+                                            <div class="section-label mb-1">Personal Details</div>
+                                            <h3>@Fallback(customer.FullName)</h3>
+                                        </div>
+                                    </div>
+                                    @Detail("Middle name", customer.MiddleName)
+                                    @Detail("Email", customer.Email)
+                                    @Detail("Mobile", customer.PhoneNumber)
+                                    @Detail("Sex", customer.Sex)
+                                    @Detail("Birthdate", FormatDate(customer.Birthdate))
+                                </section>
+
+                                <section class="approval-review-card">
+                                    <div class="approval-card-heading">
+                                        <div>
+                                            <div class="section-label mb-1">Address</div>
+                                            <h3>@Fallback(BuildFullAddress(customer.AddressLine, customer.Barangay, customer.City, customer.Province, customer.ZipCode))</h3>
+                                        </div>
+                                    </div>
+                                    @Detail("Address line", customer.AddressLine)
+                                    @Detail("Barangay", customer.Barangay)
+                                    @Detail("City", customer.City)
+                                    @Detail("Province", customer.Province)
+                                    @Detail("ZIP code", customer.ZipCode)
+                                </section>
+                            </div>
+
+                            @DocumentGrid(DocumentsFor(customer))
+                        </div>
+                    </details>
+                }
+            }
+        </section>
+
+        <section class="vstack gap-3">
+            <div>
+                <h2 class="admin-page-title">Mechanic Accounts</h2>
+                <p class="dashboard-muted">Shop owners submit mechanic accounts, but technicians are activated only after system admin review.</p>
+            </div>
+
+            @if (PendingMechanicCount == 0)
+            {
+                <div class="card">
+                    <div class="card-body empty-state">No pending mechanic accounts at this time.</div>
+                </div>
+            }
+            else
+            {
+                @foreach (var mechanic in pendingMechanics!)
+                {
+                    <details class="dashboard-panel">
+                        <summary>
+                            <div>
+                                <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
+                                    <h2 class="admin-page-title mb-0">@Fallback(mechanic.FullName)</h2>
+                                    <span class="badge bg-warning bg-opacity-10 text-dark border border-warning border-opacity-25">@Fallback(mechanic.AccountStatus)</span>
+                                    <span class="@EmailBadgeClass(mechanic.EmailVerified)">
+                                        @(mechanic.EmailVerified ? "Email OTP verified" : "Waiting for OTP")
+                                    </span>
+                                </div>
+                                <p class="dashboard-muted">Mechanic #@mechanic.MechanicId submitted @FormatDate(mechanic.CreatedAt)</p>
+                            </div>
+                            <i class="bi bi-chevron-down dashboard-panel-chevron"></i>
+                        </summary>
+
+                        <div class="dashboard-panel-body">
+                            <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
+                                <div>
+                                    <div class="section-label mb-1">Decision</div>
+                                    <p class="text-muted mb-0">Approve only after email OTP, valid ID, mechanic certification/license, and shop assignment are correct.</p>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-success shadow-sm"
+                                            disabled="@(!CanApprove(mechanic) || isProcessing)"
+                                            @onclick="() => HandleMechanicApproval(mechanic.MechanicId, true)">
+                                        <i class="bi bi-check2-circle me-1"></i> Approve
+                                    </button>
+                                    <button class="btn btn-outline-danger"
+                                            disabled="@isProcessing"
+                                            @onclick="() => HandleMechanicApproval(mechanic.MechanicId, false)">
+                                        <i class="bi bi-x-circle me-1"></i> Reject
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="approval-review-grid">
+                                <section class="approval-review-card">
+                                    <div class="approval-card-heading">
+                                        <div>
+                                            <div class="section-label mb-1">Checklist</div>
+                                            <h3>Technician verification</h3>
+                                        </div>
+                                        <span class="@ApplicationBadgeClass(CanApprove(mechanic))">@(CanApprove(mechanic) ? "Ready to approve" : "Needs attention")</span>
+                                    </div>
+                                    <div class="approval-checklist">
+                                        @ChecklistItem("Email OTP", mechanic.EmailVerified)
+                                        @ChecklistItem("Valid ID", HasSubmitted(mechanic.ValidIdImageUrl))
+                                        @ChecklistItem("Certification / license", HasSubmitted(mechanic.CertificationImageUrl))
+                                        @ChecklistItem("Assigned shop", mechanic.ShopId.HasValue)
+                                    </div>
+                                </section>
+
+                                <section class="approval-review-card">
+                                    <div class="approval-card-heading">
+                                        <div>
+                                            <div class="section-label mb-1">Mechanic</div>
+                                            <h3>@Fallback(mechanic.FullName)</h3>
+                                        </div>
+                                    </div>
+                                    @Detail("Email", mechanic.Email)
+                                    @Detail("Mobile", mechanic.PhoneNumber)
+                                    @Detail("Sex", mechanic.Sex)
+                                    @Detail("Birthdate", FormatDate(mechanic.Birthdate))
+                                    @Detail("Experience", mechanic.YearsExperience.HasValue ? $"{mechanic.YearsExperience} years" : string.Empty)
+                                    @Detail("Shop", mechanic.ShopName)
+                                </section>
+
+                                <section class="approval-review-card">
+                                    <div class="approval-card-heading">
+                                        <div>
+                                            <div class="section-label mb-1">Address and Bio</div>
+                                            <h3>@Fallback(BuildFullAddress(mechanic.AddressLine, mechanic.Barangay, mechanic.City, mechanic.Province, mechanic.ZipCode))</h3>
+                                        </div>
+                                    </div>
+                                    @Detail("Address line", mechanic.AddressLine)
+                                    @Detail("Barangay", mechanic.Barangay)
+                                    @Detail("City", mechanic.City)
+                                    @Detail("Province", mechanic.Province)
+                                    @if (HasSubmitted(mechanic.Bio))
+                                    {
+                                        <div class="mt-3">
+                                            <div class="text-uppercase text-muted small fw-semibold mb-2">Mechanic profile</div>
+                                            <p class="mb-0 text-dark prewrap">@mechanic.Bio.Trim()</p>
+                                        </div>
+                                    }
+                                </section>
+                            </div>
+
+                            @DocumentGrid(DocumentsFor(mechanic))
+                        </div>
+                    </details>
+                }
+            }
+        </section>
+    }
 </div>
 
 @code {
     private ShopDto[]? pendingShops;
+    private CustomerApplicationDto[]? pendingCustomers;
+    private MechanicApplicationDto[]? pendingMechanics;
     private string? statusMessage;
     private string statusType = "danger";
+    private bool isProcessing;
+
+    private bool IsLoading => pendingShops is null || pendingCustomers is null || pendingMechanics is null;
+    private int PendingShopCount => pendingShops?.Length ?? 0;
+    private int PendingCustomerCount => pendingCustomers?.Length ?? 0;
+    private int PendingMechanicCount => pendingMechanics?.Length ?? 0;
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadPendingShops();
+        await LoadApprovals();
     }
 
-    private async Task LoadPendingShops()
+    private async Task LoadApprovals()
     {
         try
         {
             pendingShops = await AdminApi.GetPendingShopsAsync();
-
-            // Force the screen to refresh after data arrives
+            pendingCustomers = await AdminApi.GetPendingCustomerApplicationsAsync();
+            pendingMechanics = await AdminApi.GetPendingMechanicApplicationsAsync();
             StateHasChanged();
         }
         catch (Exception ex)
         {
             statusType = "danger";
-            statusMessage = $"Failed to load shops: {ex.Message}";
+            statusMessage = $"Failed to load applications: {ex.Message}";
         }
     }
 
-    private async Task HandleApproval(int shopId, bool isApproved)
+    private async Task HandleShopApproval(int shopId, bool isApproved)
+    {
+        await HandleDecision(
+            async () =>
+            {
+                if (isApproved)
+                {
+                    await AdminApi.ApproveShopAsync(shopId);
+                }
+                else
+                {
+                    await AdminApi.RejectShopAsync(shopId);
+                }
+            },
+            isApproved ? $"Shop #{shopId} was approved. The owner account is now active." : $"Shop #{shopId} was rejected.",
+            isApproved ? "success" : "warning");
+    }
+
+    private async Task HandleCustomerApproval(int clientId, bool isApproved)
+    {
+        await HandleDecision(
+            () => isApproved ? AdminApi.ApproveCustomerAsync(clientId) : AdminApi.RejectCustomerAsync(clientId),
+            isApproved ? $"Customer #{clientId} was approved. The customer account is now active." : $"Customer #{clientId} was rejected.",
+            isApproved ? "success" : "warning");
+    }
+
+    private async Task HandleMechanicApproval(int mechanicId, bool isApproved)
+    {
+        await HandleDecision(
+            () => isApproved ? AdminApi.ApproveMechanicAsync(mechanicId) : AdminApi.RejectMechanicAsync(mechanicId),
+            isApproved ? $"Mechanic #{mechanicId} was approved and assigned to the submitted shop." : $"Mechanic #{mechanicId} was rejected.",
+            isApproved ? "success" : "warning");
+    }
+
+    private async Task HandleDecision(Func<Task> action, string successMessage, string successType)
     {
         try
         {
             statusMessage = null;
-
-            // Uncomment this when you build the update endpoint!
-            // await AdminApi.ReviewShopAsync(shopId, isApproved);
-
-            statusType = isApproved ? "success" : "warning";
-            string actionText = isApproved ? "approved" : "rejected";
-            statusMessage = $"Shop #{shopId} was successfully {actionText}.";
-
-            // Reload the list to remove the shop from the screen
-            await LoadPendingShops();
+            isProcessing = true;
+            await action();
+            statusType = successType;
+            statusMessage = successMessage;
+            await LoadApprovals();
         }
-        catch (Exception)
+        catch (Exception ex)
         {
             statusType = "danger";
-            statusMessage = "Network error: Could not process the shop review.";
+            statusMessage = ex.Message;
+        }
+        finally
+        {
+            isProcessing = false;
         }
     }
+
+    private static bool CanApprove(ShopDto shop)
+    {
+        return shop.OwnerEmailVerified &&
+            HasSubmitted(shop.ShopImageUrl) &&
+            HasSubmitted(shop.BusinessPermitUrl) &&
+            HasSubmitted(shop.OwnerValidIdUrl) &&
+            HasSubmitted(shop.DtiRegistrationNumber);
+    }
+
+    private static bool CanApprove(CustomerApplicationDto customer)
+    {
+        return customer.EmailVerified && HasSubmitted(customer.ValidIdImageUrl);
+    }
+
+    private static bool CanApprove(MechanicApplicationDto mechanic)
+    {
+        return mechanic.EmailVerified &&
+            HasSubmitted(mechanic.ValidIdImageUrl) &&
+            HasSubmitted(mechanic.CertificationImageUrl) &&
+            mechanic.ShopId.HasValue;
+    }
+
+    private static string EmailBadgeClass(bool verified)
+    {
+        return verified
+            ? "badge rounded-pill bg-success bg-opacity-10 text-success border border-success border-opacity-25"
+            : "badge rounded-pill bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25";
+    }
+
+    private static string ApplicationBadgeClass(ShopDto shop)
+    {
+        return ApplicationBadgeClass(CanApprove(shop));
+    }
+
+    private static string ApplicationBadgeClass(bool ready)
+    {
+        return ready
+            ? "badge rounded-pill bg-success bg-opacity-10 text-success border border-success border-opacity-25"
+            : "badge rounded-pill bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25";
+    }
+
+    private static string FormatDate(DateTime value)
+    {
+        return value == default
+            ? "without a timestamp"
+            : value.ToLocalTime().ToString("MMM dd, yyyy h:mm tt");
+    }
+
+    private static string FormatDate(DateTime? value)
+    {
+        return value.HasValue ? value.Value.ToLocalTime().ToString("MMM dd, yyyy") : string.Empty;
+    }
+
+    private static bool IsImage(string? url)
+    {
+        if (string.IsNullOrWhiteSpace(url))
+        {
+            return false;
+        }
+
+        var clean = url.Split('?', '#')[0].ToLowerInvariant();
+        return clean.EndsWith(".jpg") ||
+            clean.EndsWith(".jpeg") ||
+            clean.EndsWith(".png") ||
+            clean.EndsWith(".webp");
+    }
+
+    private static bool IsPdf(string? url)
+    {
+        if (string.IsNullOrWhiteSpace(url))
+        {
+            return false;
+        }
+
+        return url.Split('?', '#')[0].EndsWith(".pdf", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool HasSubmitted(string? value)
+    {
+        return !string.IsNullOrWhiteSpace(value) &&
+            !string.Equals(value.Trim(), "Not submitted", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string Fallback(string? value)
+    {
+        return string.IsNullOrWhiteSpace(value) ? "Not submitted" : value.Trim();
+    }
+
+    private static string BuildFullAddress(params string?[] parts)
+    {
+        var address = string.Join(", ", parts
+            .Where(part => !string.IsNullOrWhiteSpace(part))
+            .Select(part => part!.Trim()));
+
+        return address;
+    }
+
+    private static string ToReviewUrl(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return string.Empty;
+        }
+
+        var trimmed = value.Trim();
+        if (Uri.TryCreate(trimmed, UriKind.Absolute, out var absolute))
+        {
+            if (absolute.AbsolutePath.StartsWith("/uploads/", StringComparison.OrdinalIgnoreCase) &&
+                (absolute.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase) ||
+                 absolute.Host.Equals("127.0.0.1", StringComparison.OrdinalIgnoreCase)) &&
+                absolute.Port != 5000)
+            {
+                return $"http://localhost:5000{absolute.PathAndQuery}";
+            }
+
+            return absolute.ToString();
+        }
+
+        var path = trimmed.TrimStart('/');
+        return path.StartsWith("uploads/", StringComparison.OrdinalIgnoreCase)
+            ? $"http://localhost:5000/{path}"
+            : trimmed;
+    }
+
+    private static ApprovalDocument[] DocumentsFor(ShopDto shop)
+    {
+        return
+        [
+            CreateDocument("Cover photo / shop image", "Public cover image uploaded from the shop-admin app.", "bi bi-image", shop.ShopImageUrl),
+            CreateDocument("Business permit", "Official permit or registration document for the business.", "bi bi-file-earmark-check", shop.BusinessPermitUrl),
+            CreateDocument("Owner valid ID / license", "Government ID, license, or identity document submitted by the owner.", "bi bi-person-vcard", shop.OwnerValidIdUrl)
+        ];
+    }
+
+    private static ApprovalDocument[] DocumentsFor(CustomerApplicationDto customer)
+    {
+        return
+        [
+            CreateDocument("Profile photo", "Customer profile image submitted during account setup.", "bi bi-person-circle", customer.ProfileImageUrl),
+            CreateDocument("Valid ID", "Identity document submitted for customer approval.", "bi bi-person-vcard", customer.ValidIdImageUrl)
+        ];
+    }
+
+    private static ApprovalDocument[] DocumentsFor(MechanicApplicationDto mechanic)
+    {
+        return
+        [
+            CreateDocument("Profile photo", "Technician profile image submitted by the shop owner.", "bi bi-person-circle", mechanic.ProfileImageUrl),
+            CreateDocument("Valid ID", "Identity document submitted for mechanic approval.", "bi bi-person-vcard", mechanic.ValidIdImageUrl),
+            CreateDocument("Certification / license", "Mechanic certification, license, or proof of skill.", "bi bi-file-earmark-check", mechanic.CertificationImageUrl)
+        ];
+    }
+
+    private static ApprovalDocument CreateDocument(string title, string subtitle, string icon, string? rawUrl)
+    {
+        var publicUrl = ToReviewUrl(rawUrl);
+        return new ApprovalDocument(
+            title,
+            subtitle,
+            icon,
+            rawUrl?.Trim() ?? string.Empty,
+            publicUrl,
+            HasSubmitted(rawUrl),
+            IsImage(publicUrl),
+            IsPdf(publicUrl));
+    }
+
+    private RenderFragment DocumentGrid(IReadOnlyCollection<ApprovalDocument> documents) => builder =>
+    {
+        var submittedDocuments = documents.Where(document => document.HasFile).ToArray();
+        if (submittedDocuments.Length == 0)
+        {
+            return;
+        }
+
+        var sequence = 0;
+        builder.OpenElement(sequence++, "div");
+        builder.AddAttribute(sequence++, "class", "mt-4");
+
+        builder.OpenElement(sequence++, "div");
+        builder.AddAttribute(sequence++, "class", "section-label mb-2");
+        builder.AddContent(sequence++, "Submitted Files");
+        builder.CloseElement();
+
+        builder.OpenElement(sequence++, "div");
+        builder.AddAttribute(sequence++, "class", "approval-document-grid");
+
+        foreach (var document in submittedDocuments)
+        {
+            builder.OpenElement(sequence++, "div");
+            builder.AddAttribute(sequence++, "class", "approval-document-card");
+
+            builder.OpenElement(sequence++, "div");
+            builder.AddAttribute(sequence++, "class", "approval-document-head");
+            builder.OpenElement(sequence++, "span");
+            builder.AddAttribute(sequence++, "class", "approval-document-icon");
+            builder.OpenElement(sequence++, "i");
+            builder.AddAttribute(sequence++, "class", document.Icon);
+            builder.CloseElement();
+            builder.CloseElement();
+            builder.OpenElement(sequence++, "div");
+            builder.OpenElement(sequence++, "h3");
+            builder.AddContent(sequence++, document.Title);
+            builder.CloseElement();
+            builder.OpenElement(sequence++, "p");
+            builder.AddContent(sequence++, document.Subtitle);
+            builder.CloseElement();
+            builder.CloseElement();
+            builder.CloseElement();
+
+            if (document.IsImage)
+            {
+                builder.OpenElement(sequence++, "a");
+                builder.AddAttribute(sequence++, "href", document.PublicUrl);
+                builder.AddAttribute(sequence++, "target", "_blank");
+                builder.AddAttribute(sequence++, "rel", "noopener noreferrer");
+                builder.AddAttribute(sequence++, "class", "approval-preview-link");
+                builder.OpenElement(sequence++, "img");
+                builder.AddAttribute(sequence++, "src", document.PublicUrl);
+                builder.AddAttribute(sequence++, "class", "approval-document-image");
+                builder.AddAttribute(sequence++, "alt", $"{document.Title} preview");
+                builder.CloseElement();
+                builder.CloseElement();
+            }
+            else if (document.IsPdf)
+            {
+                builder.OpenElement(sequence++, "iframe");
+                builder.AddAttribute(sequence++, "src", document.PublicUrl);
+                builder.AddAttribute(sequence++, "class", "approval-document-frame");
+                builder.AddAttribute(sequence++, "title", $"{document.Title} preview");
+                builder.CloseElement();
+            }
+            else
+            {
+                builder.OpenElement(sequence++, "div");
+                builder.AddAttribute(sequence++, "class", "approval-document-empty");
+                builder.AddContent(sequence++, "Preview unavailable");
+                builder.CloseElement();
+            }
+
+            builder.OpenElement(sequence++, "div");
+            builder.AddAttribute(sequence++, "class", "approval-document-actions");
+            builder.OpenElement(sequence++, "a");
+            builder.AddAttribute(sequence++, "class", "btn btn-sm btn-outline-primary");
+            builder.AddAttribute(sequence++, "href", document.PublicUrl);
+            builder.AddAttribute(sequence++, "target", "_blank");
+            builder.AddAttribute(sequence++, "rel", "noopener noreferrer");
+            builder.AddContent(sequence++, "Open full file");
+            builder.CloseElement();
+            builder.OpenElement(sequence++, "span");
+            builder.AddAttribute(sequence++, "class", "small text-muted text-break");
+            builder.AddContent(sequence++, document.RawUrl);
+            builder.CloseElement();
+            builder.CloseElement();
+
+            builder.CloseElement();
+        }
+
+        builder.CloseElement();
+        builder.CloseElement();
+    };
+
+    private RenderFragment ChecklistItem(string label, bool complete) => builder =>
+    {
+        builder.OpenElement(0, "div");
+        builder.AddAttribute(1, "class", complete ? "approval-check-item complete" : "approval-check-item missing");
+
+        builder.OpenElement(2, "i");
+        builder.AddAttribute(3, "class", complete ? "bi bi-check-circle-fill" : "bi bi-exclamation-circle-fill");
+        builder.CloseElement();
+
+        builder.OpenElement(4, "span");
+        builder.AddContent(5, label);
+        builder.CloseElement();
+
+        builder.OpenElement(6, "strong");
+        builder.AddContent(7, complete ? "Submitted" : "Missing");
+        builder.CloseElement();
+
+        builder.CloseElement();
+    };
+
+    private RenderFragment Detail(string label, string? value) => builder =>
+    {
+        if (!HasSubmitted(value))
+        {
+            return;
+        }
+
+        builder.OpenElement(0, "div");
+        builder.AddAttribute(1, "class", "d-flex justify-content-between gap-3 py-1 border-bottom border-light-subtle");
+
+        builder.OpenElement(2, "span");
+        builder.AddAttribute(3, "class", "text-muted small");
+        builder.AddContent(4, label);
+        builder.CloseElement();
+
+        builder.OpenElement(5, "span");
+        builder.AddAttribute(6, "class", "fw-semibold text-end text-break");
+        builder.AddContent(7, value!.Trim());
+        builder.CloseElement();
+
+        builder.CloseElement();
+    };
+
+    private sealed record ApprovalDocument(
+        string Title,
+        string Subtitle,
+        string Icon,
+        string RawUrl,
+        string PublicUrl,
+        bool HasFile,
+        bool IsImage,
+        bool IsPdf);
 }

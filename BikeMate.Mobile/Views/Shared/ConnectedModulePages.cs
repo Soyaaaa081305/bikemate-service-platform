@@ -514,7 +514,7 @@ public sealed class AdminDashboardPage : ContentPage
                             Text = "BIKEMATE",
                             TextColor = Colors.White,
                             FontFamily = "Inter",
-                            FontSize = 14,
+                            FontSize = AppTypography.BodySize,
                             FontAttributes = FontAttributes.Bold
                         },
                         new Label
@@ -558,7 +558,7 @@ public sealed class AdminDashboardPage : ContentPage
             Text = text.ToUpperInvariant(),
             TextColor = Color.FromArgb("#6B7280"),
             FontFamily = "PTSansCaptionBold",
-            FontSize = 10
+            FontSize = AppTypography.CaptionSize
         };
     }
 
@@ -592,7 +592,7 @@ public sealed class AdminDashboardPage : ContentPage
 
     private View BuildTopBar()
     {
-        var user = _state.Me?.Email ?? "admin@bikemate.test";
+        var user = _state.Me?.Email ?? "Admin";
 
         var grid = new Grid
         {
@@ -614,14 +614,14 @@ public sealed class AdminDashboardPage : ContentPage
                     Text = "BIKEMATE ADMIN",
                     TextColor = Color.FromArgb("#6B7280"),
                     FontFamily = "PTSansCaptionBold",
-                    FontSize = 10
+                    FontSize = AppTypography.CaptionSize
                 },
                 new Label
                 {
                     Text = "Operations Console",
                     TextColor = DarkText,
                     FontFamily = "Inter",
-                    FontSize = 16,
+                    FontSize = AppTypography.TitleSize,
                     FontAttributes = FontAttributes.Bold
                 }
             }
@@ -639,7 +639,7 @@ public sealed class AdminDashboardPage : ContentPage
                     Text = user,
                     TextColor = DarkText,
                     FontFamily = "PublicSans",
-                    FontSize = 12,
+                    FontSize = AppTypography.BodySize,
                     VerticalTextAlignment = TextAlignment.Center
                 },
                 new Button
@@ -650,7 +650,7 @@ public sealed class AdminDashboardPage : ContentPage
                     BorderWidth = 1,
                     TextColor = Red,
                     FontFamily = "Inter",
-                    FontSize = 12,
+                    FontSize = AppTypography.BodySize,
                     CornerRadius = 8,
                     HeightRequest = 32,
                     Padding = new Thickness(12, 0),
@@ -688,7 +688,7 @@ public sealed class AdminDashboardPage : ContentPage
             Text = "System Overview",
             TextColor = DarkText,
             FontFamily = "Inter",
-            FontSize = 26,
+            FontSize = AppTypography.TitleSize,
             FontAttributes = FontAttributes.Bold
         }, 0, 0);
 
@@ -701,7 +701,7 @@ public sealed class AdminDashboardPage : ContentPage
             BorderWidth = 1,
             TextColor = Orange,
             FontFamily = "Inter",
-            FontSize = 12,
+            FontSize = AppTypography.BodySize,
             CornerRadius = 8,
             HeightRequest = 36,
             Padding = new Thickness(12, 0),
@@ -756,7 +756,7 @@ public sealed class AdminDashboardPage : ContentPage
                     Text = "Emergency Window",
                     TextColor = DarkText,
                     FontFamily = "Inter",
-                    FontSize = 15,
+                    FontSize = AppTypography.BodySize,
                     FontAttributes = FontAttributes.Bold
                 },
                 new Label
@@ -764,7 +764,7 @@ public sealed class AdminDashboardPage : ContentPage
                     Text = text,
                     TextColor = MutedText,
                     FontFamily = "PublicSans",
-                    FontSize = 12
+                    FontSize = AppTypography.BodySize
                 }
             }
         }, 1, 0);
@@ -775,7 +775,7 @@ public sealed class AdminDashboardPage : ContentPage
             BackgroundColor = Red,
             TextColor = Colors.White,
             FontFamily = "Inter",
-            FontSize = 12,
+            FontSize = AppTypography.BodySize,
             CornerRadius = 8,
             HeightRequest = 36,
             Padding = new Thickness(12, 0),
@@ -835,7 +835,7 @@ public sealed class AdminDashboardPage : ContentPage
             Text = "Weekly User Growth",
             TextColor = Orange,
             FontFamily = "Inter",
-            FontSize = 15,
+            FontSize = AppTypography.BodySize,
             FontAttributes = FontAttributes.Bold
         }, 0, 0);
 
@@ -859,7 +859,7 @@ public sealed class AdminDashboardPage : ContentPage
             Text = _state.Summary.TotalCustomers.ToString(CultureInfo.InvariantCulture),
             TextColor = DarkText,
             FontFamily = "Inter",
-            FontSize = 26,
+            FontSize = AppTypography.TitleSize,
             FontAttributes = FontAttributes.Bold
         });
 
@@ -868,7 +868,7 @@ public sealed class AdminDashboardPage : ContentPage
             Text = "Total Customers",
             TextColor = MutedText,
             FontFamily = "PublicSans",
-            FontSize = 12
+            FontSize = AppTypography.BodySize
         });
 
         stack.Add(chart);
@@ -959,7 +959,7 @@ public sealed class AdminDashboardPage : ContentPage
             Text = "Network Health",
             TextColor = DarkText,
             FontFamily = "Inter",
-            FontSize = 16,
+            FontSize = AppTypography.TitleSize,
             FontAttributes = FontAttributes.Bold
         });
 
@@ -1017,7 +1017,7 @@ public sealed class AdminDashboardPage : ContentPage
             BorderWidth = 0,
             TextColor = accent,
             FontFamily = "PublicSans",
-            FontSize = 12,
+            FontSize = AppTypography.BodySize,
             Padding = new Thickness(0),
             HeightRequest = 28,
             Command = new Command(async () => await Shell.Current.GoToAsync(route))
@@ -1028,7 +1028,7 @@ public sealed class AdminDashboardPage : ContentPage
             Text = value,
             TextColor = DarkText,
             FontFamily = "PublicSans",
-            FontSize = 14
+            FontSize = AppTypography.BodySize
         });
 
         stack.Add(new ProgressBar
@@ -1066,7 +1066,7 @@ public sealed class AdminDashboardPage : ContentPage
             Text = $"Live Service Requests ({activeRequests.Length} Active)",
             TextColor = DarkText,
             FontFamily = "Inter",
-            FontSize = 16,
+            FontSize = AppTypography.TitleSize,
             FontAttributes = FontAttributes.Bold
         }, 0, 0);
         header.Add(new Button
@@ -1091,7 +1091,7 @@ public sealed class AdminDashboardPage : ContentPage
                 Text = "No live requests are active right now.",
                 TextColor = MutedText,
                 FontFamily = "PublicSans",
-                FontSize = 12
+                FontSize = AppTypography.BodySize
             });
         }
         else
@@ -1176,7 +1176,7 @@ public sealed class AdminDashboardPage : ContentPage
                     Text = $"PHP {request.FinalTotal:0.00}",
                     TextColor = DarkText,
                     FontFamily = "Inter",
-                    FontSize = 12,
+                    FontSize = AppTypography.BodySize,
                     FontAttributes = FontAttributes.Bold,
                     HorizontalTextAlignment = TextAlignment.End
                 },
@@ -1185,7 +1185,7 @@ public sealed class AdminDashboardPage : ContentPage
                     Text = request.CreatedAt.ToLocalTime().ToString("MMM d, h:mm tt", CultureInfo.InvariantCulture),
                     TextColor = MutedText,
                     FontFamily = "PublicSans",
-                    FontSize = 10,
+                    FontSize = AppTypography.CaptionSize,
                     HorizontalTextAlignment = TextAlignment.End
                 }
             }
@@ -1216,7 +1216,7 @@ public sealed class AdminDashboardPage : ContentPage
                 Text = text,
                 TextColor = Colors.White,
                 FontFamily = "PTSansCaptionBold",
-                FontSize = 10,
+                FontSize = AppTypography.CaptionSize,
                 HorizontalTextAlignment = TextAlignment.Center
             }
         };
@@ -1388,76 +1388,4 @@ public sealed class AdminAuditLogsPage() : ConnectedModulePage(
     "admin/audit-logs",
     "No audit logs were returned.");
 
-}
-
-namespace BikeMate.Views.ShopAdmin
-{
-
-using BikeMate.Views.Shared;
-
-public sealed class ShopDashboardPage() : ConnectedModulePage(
-    "Shop Dashboard",
-    "Bookings, services, inventory, staff, ratings, and earnings.",
-    "shop/dashboard",
-    "No shop dashboard data was returned yet.",
-    new ModuleAction("Services", "//ShopServicesPage"),
-    new ModuleAction("Products", "//ShopProductsPage"),
-    new ModuleAction("Bookings", "//ShopBookingsPage"),
-    new ModuleAction("Mechanics", nameof(ShopMechanicsPage)));
-
-public sealed class ShopProfilePage() : ConnectedModulePage(
-    "Shop Profile",
-    "Business profile, address, contact, and verification state.",
-    "shop/profile",
-    "No shop profile data was returned yet.");
-
-public sealed class ShopServicesPage() : ConnectedModulePage(
-    "Services",
-    "Live shop services, categories, pricing, duration, and active state.",
-    "shop/services",
-    "No services have been added yet.",
-    new ModuleAction("Add or Edit", nameof(ShopServiceEditPage)));
-
-public sealed class ShopServiceEditPage() : ConnectedModulePage(
-    "Service Editor",
-    "Existing service records prepared for add, edit, disable, and image management API calls.",
-    "shop/services",
-    "No service records are available to edit yet.");
-
-public sealed class ShopProductsPage() : ConnectedModulePage(
-    "Products",
-    "Inventory, stock quantity, pricing, and active state.",
-    "shop/inventory",
-    "No inventory products have been added yet.",
-    new ModuleAction("Add or Edit", nameof(ShopProductEditPage)));
-
-public sealed class ShopProductEditPage() : ConnectedModulePage(
-    "Product Editor",
-    "Existing product records prepared for add, edit, disable, and image management API calls.",
-    "shop/inventory",
-    "No product records are available to edit yet.");
-
-public sealed class ShopBookingsPage() : ConnectedModulePage(
-    "Bookings",
-    "Incoming, active, and completed bookings related to this shop.",
-    "shop/bookings",
-    "No shop bookings were returned.");
-
-public sealed class ShopMechanicsPage() : ConnectedModulePage(
-    "Mechanics",
-    "Mechanics assigned to this shop and their availability/performance.",
-    "shop/mechanics",
-    "No mechanics are assigned to this shop yet.");
-
-public sealed class ShopEarningsPage() : ConnectedModulePage(
-    "Earnings",
-    "Paid bookings and PayMongo payment records for this shop.",
-    "shop/payments",
-    "No shop payment records were returned.");
-
-public sealed class ShopSchedulePage() : ConnectedModulePage(
-    "Schedule",
-    "Shop bookings displayed as the first connected schedule view.",
-    "shop/bookings",
-    "No scheduled shop bookings were returned.");
 }

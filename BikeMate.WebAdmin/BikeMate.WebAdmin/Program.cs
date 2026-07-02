@@ -14,7 +14,7 @@ builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true, relo
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 builder.Services.AddControllers();
 var connectionString = builder.Configuration.GetConnectionString("BikeMateDb")
-    ?? "Server=.\\SQL2025;Database=BikeMatesDB;Trusted_Connection=True;TrustServerCertificate=True;Command Timeout=300;";
+    ?? "Server=localhost\\SQLEXPRESS;Database=BikeMatesDB_Dev;Trusted_Connection=True;TrustServerCertificate=True;Command Timeout=300;";
 
 builder.Services.AddDbContext<BikeMateDbContext>(options =>
     options.UseSqlServer(connectionString));

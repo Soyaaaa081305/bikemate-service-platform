@@ -5,6 +5,7 @@ public partial class CustomerShell : Shell
     public CustomerShell()
     {
         InitializeComponent();
+        Routing.RegisterRoute(nameof(Views.Auth.GoogleAccountSetupPage), typeof(Views.Auth.GoogleAccountSetupPage));
         Routing.RegisterRoute(nameof(Views.Customer.CustomerProfilePage), typeof(Views.Customer.CustomerProfilePage));
         Routing.RegisterRoute(nameof(Views.Customer.CustomerNotificationsPage), typeof(Views.Customer.CustomerNotificationsPage));
         Routing.RegisterRoute(nameof(Views.Customer.CustomerHelpDeskPage), typeof(Views.Customer.CustomerHelpDeskPage));

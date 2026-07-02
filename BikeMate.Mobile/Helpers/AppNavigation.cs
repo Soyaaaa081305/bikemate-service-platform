@@ -8,14 +8,20 @@ public static class AppNavigation
 {
     public const string ForceLoginPreferenceKey = "bikemate_force_login_after_logout";
     public const string LoginMessagePreferenceKey = "bikemate_login_message";
+    private const string ShopAdminAppPackageName = "com.companyname.bikemates_admin";
     private static int _handlingUnauthorized;
 
     public static async Task NavigateByRoleAsync(string? role)
     {
+        if (string.Equals(role, AppRoles.ShopAdmin, StringComparison.OrdinalIgnoreCase))
+        {
+            await OpenShopAdminAppAsync();
+            return;
+        }
+
         var route = role switch
         {
             AppRoles.Mechanic => "//MechanicDashboardPage",
-            AppRoles.ShopAdmin => "//ShopDashboardPage",
             AppRoles.SystemAdmin => "//AdminDashboardPage",
             _ => "//CustomerHomePage"
         };
@@ -45,6 +51,48 @@ public static class AppNavigation
                 await shell.GoToAsync(route);
             }
         });
+    }
+
+    public static async Task OpenShopAdminAppAsync()
+    {
+        ClearSavedSession("Shop admin accounts use the separate BIKEMATES_ADMIN app.");
+
+        await MainThread.InvokeOnMainThreadAsync(async () =>
+        {
+            await Task.Yield();
+            var opened = TryLaunchShopAdminApp();
+            if (opened)
+            {
+                return;
+            }
+
+            var page = Shell.Current?.CurrentPage ?? Application.Current?.Windows.FirstOrDefault()?.Page;
+            if (page is not null)
+            {
+                await page.DisplayAlertAsync(
+                    "Open BIKEMATES_ADMIN",
+                    "Shop admin accounts now use the separate BIKEMATES_ADMIN app. Install or run that app, then sign in with the shop owner account you created.",
+                    "OK");
+            }
+        });
+    }
+
+    private static bool TryLaunchShopAdminApp()
+    {
+#if ANDROID
+        var context = Android.App.Application.Context;
+        var launchIntent = context.PackageManager?.GetLaunchIntentForPackage(ShopAdminAppPackageName);
+        if (launchIntent is null)
+        {
+            return false;
+        }
+
+        launchIntent.AddFlags(Android.Content.ActivityFlags.NewTask | Android.Content.ActivityFlags.ClearTop);
+        context.StartActivity(launchIntent);
+        return true;
+#else
+        return false;
+#endif
     }
 
     public static async Task SignOutAsync(string? loginMessage = null)

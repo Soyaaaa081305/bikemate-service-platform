@@ -1,4 +1,4 @@
-using System.Security.Cryptography;
+using BikeMate.Api.Helpers;
 using BikeMate.Api.Services;
 using BikeMate.Core.Constants;
 using BikeMate.Core.Entities;
@@ -13,12 +13,128 @@ namespace BikeMate.Api.Controllers;
 [Route("api/shop-onboarding")]
 public sealed class ShopOnboardingController(
     BikeMateDbContext db,
-    IPasswordService passwordService) : ControllerBase
+    IPasswordService passwordService,
+    IOtpService otpService,
+    IEmailService emailService) : ControllerBase
 {
-    private const string ShopAccessPurposePrefix = "shop_access_code:";
+    [HttpPost("apply")]
+    [AllowAnonymous]
+    public async Task<ActionResult<ShopApplicationResponse>> Apply(
+        ShopOwnerApplicationRequest dto,
+        CancellationToken cancellationToken)
+    {
+        var firstName = Require(dto.FirstName, "First name");
+        var lastName = Require(dto.LastName, "Last name");
+        var email = AuthService.NormalizeEmail(dto.Email);
+        var phoneNumber = Require(dto.PhoneNumber, "Phone number");
+        var password = Require(dto.Password, "Password");
+        var shopName = Require(dto.ShopName, "Shop name");
+        var shopAddress = Require(dto.ShopAddress, "Shop address");
+        var city = Require(dto.ShopCity, "Shop city");
+        var province = Require(dto.ShopProvince, "Shop province");
+        var validIdPath = Require(dto.ValidIdPath, "Valid ID");
+        var businessPermitPath = Require(dto.BusinessPermitPath, "Business permit");
+        var shopImagePath = Require(dto.ShopImagePath, "Shop image");
+        var dtiRegistrationNumber = Require(dto.DtiRegistrationNumber, "DTI registration number");
+        var ownerBirthdate = AgeRequirement.RequireAdult(dto.Birthdate, "Shop-admin owner");
+
+        if (password.Length <= 8)
+        {
+            throw new InvalidOperationException("Password must be more than 8 characters.");
+        }
+
+        await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
+
+        if (await db.Users.AnyAsync(x => x.Email == email && x.AccountStatus != "deleted", cancellationToken))
+        {
+            throw new InvalidOperationException("Email is already registered.");
+        }
+
+        if (await db.Users.AnyAsync(x => x.PhoneNumber == phoneNumber && x.AccountStatus != "deleted", cancellationToken))
+        {
+            throw new InvalidOperationException("Phone number is already registered.");
+        }
+
+        if (await ShopExistsAsync(shopName, shopAddress, city, province, cancellationToken))
+        {
+            throw new InvalidOperationException("This shop is already registered.");
+        }
+
+        var roleId = await db.Roles
+            .Where(x => x.RoleName == AppRoles.ShopAdmin)
+            .Select(x => x.RoleId)
+            .SingleAsync(cancellationToken);
+
+        var owner = new User
+        {
+            FirstName = firstName,
+            LastName = lastName,
+            Email = email,
+            PhoneNumber = phoneNumber,
+            PasswordHash = passwordService.HashPassword(password),
+            EmailVerified = false,
+            AccountStatus = "pending",
+            CreatedAt = DateTime.UtcNow,
+            UserRoles =
+            [
+                new UserRole
+                {
+                    RoleId = roleId,
+                    AssignedAt = DateTime.UtcNow
+                }
+            ]
+        };
+
+        var shop = new Shop
+        {
+            Owner = owner,
+            ShopName = shopName,
+            ShopDescription = BuildShopDescription(dto.ShopDescription, dtiRegistrationNumber),
+            AddressLine = BuildAddress(dto.ShopAddress, dto.ShopBarangay, dto.ShopCity, dto.ShopProvince, dto.ShopZipCode),
+            City = city,
+            Province = province,
+            ContactNumber = phoneNumber,
+            BusinessPermitUrl = businessPermitPath,
+            ShopImageUrl = shopImagePath,
+            OwnerValidIdUrl = validIdPath,
+            OwnerMiddleName = CleanOptional(dto.MiddleName),
+            OwnerSex = CleanOptional(dto.Sex),
+            OwnerBirthdate = ownerBirthdate,
+            OwnerAddressLine = CleanOptional(dto.Address),
+            OwnerBarangay = CleanOptional(dto.Barangay),
+            OwnerCity = CleanOptional(dto.City),
+            OwnerProvince = CleanOptional(dto.Province),
+            OwnerZipCode = CleanOptional(dto.ZipCode),
+            ShopStatus = "pending",
+            CreatedAt = DateTime.UtcNow
+        };
+
+        db.Shops.Add(shop);
+        await db.SaveChangesAsync(cancellationToken);
+
+        var otpCode = otpService.GenerateCode();
+        db.OtpVerifications.Add(new OtpVerification
+        {
+            UserId = owner.UserId,
+            OtpHash = otpService.HashCode(otpCode),
+            Purpose = "email_verification",
+            ExpiresAt = DateTime.UtcNow.AddMinutes(10),
+            CreatedAt = DateTime.UtcNow
+        });
+        await db.SaveChangesAsync(cancellationToken);
+        await emailService.SendOtpAsync(owner, otpCode, "email_verification", cancellationToken);
+
+        await transaction.CommitAsync(cancellationToken);
+
+        return Ok(new ShopApplicationResponse(
+            shop.ShopId,
+            shop.ShopName,
+            shop.ShopStatus,
+            "Your shop application was submitted for BikeMate admin approval."));
+    }
 
     [HttpPost("register-shop")]
-    [AllowAnonymous]
+    [Authorize(Roles = AppRoles.SystemAdmin)]
     public async Task<ActionResult<ShopRegistrationResponse>> RegisterShop(
         ShopRegistrationRequest dto,
         CancellationToken cancellationToken)
@@ -75,19 +191,13 @@ public sealed class ShopOnboardingController(
         db.Shops.Add(shop);
         await db.SaveChangesAsync(cancellationToken);
 
-        var accessCode = GenerateAccessCode();
-        db.OtpVerifications.Add(new OtpVerification
-        {
-            UserId = owner.UserId,
-            OtpHash = passwordService.HashPassword(accessCode),
-            Purpose = ShopAccessPurposePrefix + shop.ShopId,
-            ExpiresAt = DateTime.UtcNow.AddDays(30),
-            CreatedAt = DateTime.UtcNow
-        });
-        await db.SaveChangesAsync(cancellationToken);
         await transaction.CommitAsync(cancellationToken);
 
-        return Ok(new ShopRegistrationResponse(shop.ShopId, shop.ShopName, accessCode, string.Empty));
+        return Ok(new ShopRegistrationResponse(
+            shop.ShopId,
+            shop.ShopName,
+            shop.ShopStatus,
+            "Shop was registered for approval."));
     }
 
     [HttpPost("shop-exists")]
@@ -98,75 +208,41 @@ public sealed class ShopOnboardingController(
     {
         var shopName = Require(dto.ShopName, "Shop name");
         var shopAddress = BuildAddress(dto.ShopAddress, dto.ShopBarangay, dto.ShopCity, dto.ShopProvince, dto.ShopZipCode);
-        var exists = await ShopExistsAsync(shopName, shopAddress, dto.ShopCity, dto.ShopProvince, cancellationToken);
+        var exists = await ShopExistsAsync(
+            shopName,
+            shopAddress,
+            dto.ShopCity,
+            dto.ShopProvince,
+            cancellationToken,
+            requireVerified: true);
         return Ok(new ShopExistsResponse(exists));
     }
 
-    [HttpPost("create-account")]
+    [HttpGet("application-status")]
     [AllowAnonymous]
-    public async Task<ActionResult<ShopAdminAccountResponse>> CreateAccount(
-        ShopAdminAccountRequest dto,
+    public async Task<ActionResult<ShopApplicationStatusResponse>> ApplicationStatus(
+        [FromQuery] string email,
         CancellationToken cancellationToken)
     {
-        var firstName = Require(dto.FirstName, "First name");
-        var lastName = Require(dto.LastName, "Last name");
-        var email = AuthService.NormalizeEmail(dto.Email);
-        var phoneNumber = Require(dto.PhoneNumber, "Phone number");
-        var password = Require(dto.Password, "Password");
-        var shopName = Require(dto.ShopName, "Shop name");
-        var accessCode = Require(dto.AccessCode, "Access code");
-        var shopAddress = BuildAddress(dto.ShopAddress, dto.ShopBarangay, dto.ShopCity, dto.ShopProvince, dto.ShopZipCode);
+        var normalizedEmail = AuthService.NormalizeEmail(email);
+        var application = await db.Shops
+            .AsNoTracking()
+            .Include(x => x.Owner)
+            .Where(x => x.Owner != null && x.Owner.Email == normalizedEmail)
+            .Where(x => x.ShopStatus != "deleted")
+            .OrderByDescending(x => x.CreatedAt)
+            .Select(x => new ShopApplicationStatusResponse(
+                x.ShopId,
+                x.ShopName,
+                x.ShopStatus,
+                x.Owner!.AccountStatus,
+                x.Owner.EmailVerified,
+                x.UpdatedAt ?? x.CreatedAt))
+            .FirstOrDefaultAsync(cancellationToken);
 
-        if (password.Length <= 8)
-        {
-            throw new InvalidOperationException("Password must be more than 8 characters.");
-        }
-
-        await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
-
-        var candidates = await LoadAccessCodeCandidatesAsync(shopName, shopAddress, dto.ShopCity, dto.ShopProvince, cancellationToken);
-        var matched = candidates.FirstOrDefault(x => passwordService.VerifyPassword(accessCode, x.Otp.OtpHash));
-        if (matched is null)
-        {
-            foreach (var candidate in candidates)
-            {
-                candidate.Otp.Attempts++;
-            }
-
-            await db.SaveChangesAsync(cancellationToken);
-            throw new InvalidOperationException("Bike shop not found, or the access code is invalid.");
-        }
-
-        var existingUser = await db.Users.SingleOrDefaultAsync(x => x.Email == email, cancellationToken);
-        if (existingUser is not null && existingUser.UserId != matched.Shop.OwnerUserId)
-        {
-            throw new InvalidOperationException("That email is already used by another account.");
-        }
-
-        var owner = await db.Users.SingleAsync(x => x.UserId == matched.Shop.OwnerUserId, cancellationToken);
-        owner.FirstName = firstName;
-        owner.LastName = lastName;
-        owner.Email = email;
-        owner.PhoneNumber = phoneNumber;
-        owner.PasswordHash = passwordService.HashPassword(password);
-        owner.EmailVerified = true;
-        owner.AccountStatus = "active";
-        owner.UpdatedAt = DateTime.UtcNow;
-
-        await EnsureShopAdminRoleAsync(owner.UserId, cancellationToken);
-        matched.Otp.ConsumedAt = DateTime.UtcNow;
-        matched.Otp.Attempts++;
-        await db.SaveChangesAsync(cancellationToken);
-        await transaction.CommitAsync(cancellationToken);
-
-        return Ok(new ShopAdminAccountResponse(
-            owner.UserId,
-            owner.FirstName,
-            owner.LastName,
-            owner.Email,
-            matched.Shop.ShopId,
-            matched.Shop.ShopName,
-            matched.Shop.ShopStatus));
+        return application is null
+            ? NotFound(new { error = "No shop application was found for this email address." })
+            : Ok(application);
     }
 
     private async Task<bool> ShopExistsAsync(
@@ -174,59 +250,21 @@ public sealed class ShopOnboardingController(
         string? shopAddress,
         string? city,
         string? province,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        bool requireVerified = false)
     {
         var normalizedShopName = shopName.Trim().ToLowerInvariant();
         var shops = await db.Shops
             .Where(x => x.ShopName.ToLower() == normalizedShopName)
+            .Where(x =>
+                x.ShopStatus.ToLower().Trim() == "pending" ||
+                x.ShopStatus.ToLower().Trim() == "verified" ||
+                x.ShopStatus.ToLower().Trim() == "suspended")
             .ToArrayAsync(cancellationToken);
 
-        return shops.Any(shop => ShopMatchesLocation(shop, shopAddress, city, province));
-    }
-
-    private async Task<List<ShopAccessCodeCandidate>> LoadAccessCodeCandidatesAsync(
-        string shopName,
-        string shopAddress,
-        string? city,
-        string? province,
-        CancellationToken cancellationToken)
-    {
-        var normalizedShopName = shopName.Trim().ToLowerInvariant();
-        var now = DateTime.UtcNow;
-        var candidates = await (
-            from otp in db.OtpVerifications
-            join shop in db.Shops on otp.UserId equals shop.OwnerUserId
-            where otp.ConsumedAt == null
-                && otp.ExpiresAt > now
-                && otp.Purpose.StartsWith(ShopAccessPurposePrefix)
-                && shop.ShopName.ToLower() == normalizedShopName
-            select new ShopAccessCodeCandidate(otp, shop))
-            .ToListAsync(cancellationToken);
-
-        return candidates
-            .Where(x => string.Equals(x.Otp.Purpose, ShopAccessPurposePrefix + x.Shop.ShopId, StringComparison.OrdinalIgnoreCase))
-            .Where(x => ShopMatchesLocation(x.Shop, shopAddress, city, province))
-            .ToList();
-    }
-
-    private async Task EnsureShopAdminRoleAsync(int userId, CancellationToken cancellationToken)
-    {
-        var roleId = await db.Roles
-            .Where(x => x.RoleName == AppRoles.ShopAdmin)
-            .Select(x => x.RoleId)
-            .SingleAsync(cancellationToken);
-
-        if (await db.UserRoles.AnyAsync(x => x.UserId == userId && x.RoleId == roleId, cancellationToken))
-        {
-            return;
-        }
-
-        db.UserRoles.Add(new UserRole
-        {
-            UserId = userId,
-            RoleId = roleId,
-            AssignedAt = DateTime.UtcNow
-        });
+        return shops.Any(shop =>
+            (!requireVerified || IsVerifiedShop(shop)) &&
+            ShopMatchesLocation(shop, shopAddress, city, province));
     }
 
     private async Task<string> CreatePendingOwnerEmailAsync(CancellationToken cancellationToken)
@@ -250,16 +288,9 @@ public sealed class ShopOnboardingController(
              string.Equals(shop.Province?.Trim(), province?.Trim(), StringComparison.OrdinalIgnoreCase));
     }
 
-    private static string GenerateAccessCode()
+    private static bool IsVerifiedShop(Shop shop)
     {
-        const string alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-        Span<char> code = stackalloc char[9];
-        for (var i = 0; i < code.Length; i++)
-        {
-            code[i] = i == 4 ? '-' : alphabet[RandomNumberGenerator.GetInt32(alphabet.Length)];
-        }
-
-        return new string(code);
+        return string.Equals(shop.ShopStatus?.Trim(), "verified", StringComparison.OrdinalIgnoreCase);
     }
 
     private static string BuildAddress(params string?[] parts)
@@ -308,8 +339,6 @@ public sealed class ShopOnboardingController(
             ? (parts[0], "Admin")
             : (parts[0], string.Join(' ', parts.Skip(1)));
     }
-
-    private sealed record ShopAccessCodeCandidate(OtpVerification Otp, Shop Shop);
 }
 
 public sealed record ShopRegistrationRequest(
@@ -326,20 +355,10 @@ public sealed record ShopRegistrationRequest(
 public sealed record ShopRegistrationResponse(
     int ShopId,
     string ShopName,
-    string AccessCode,
-    string AdminEmail);
+    string ShopStatus,
+    string Message);
 
-public sealed record ShopExistsRequest(
-    string ShopName,
-    string? ShopProvince,
-    string? ShopCity,
-    string? ShopBarangay,
-    string? ShopAddress,
-    string? ShopZipCode);
-
-public sealed record ShopExistsResponse(bool Exists);
-
-public sealed record ShopAdminAccountRequest(
+public sealed record ShopOwnerApplicationRequest(
     string FirstName,
     string? MiddleName,
     string LastName,
@@ -353,20 +372,38 @@ public sealed record ShopAdminAccountRequest(
     string? Barangay,
     string? Address,
     string? ZipCode,
-    string? ValidIdPath,
+    string ValidIdPath,
     string ShopName,
+    string? ShopDescription,
     string? ShopProvince,
     string? ShopCity,
     string? ShopBarangay,
     string? ShopAddress,
     string? ShopZipCode,
-    string AccessCode);
+    string BusinessPermitPath,
+    string ShopImagePath,
+    string DtiRegistrationNumber);
 
-public sealed record ShopAdminAccountResponse(
-    int UserId,
-    string FirstName,
-    string LastName,
-    string Email,
+public sealed record ShopApplicationResponse(
     int ShopId,
     string ShopName,
-    string ShopStatus);
+    string ShopStatus,
+    string Message);
+
+public sealed record ShopApplicationStatusResponse(
+    int ShopId,
+    string ShopName,
+    string ShopStatus,
+    string AccountStatus,
+    bool EmailVerified,
+    DateTime UpdatedAt);
+
+public sealed record ShopExistsRequest(
+    string ShopName,
+    string? ShopProvince,
+    string? ShopCity,
+    string? ShopBarangay,
+    string? ShopAddress,
+    string? ShopZipCode);
+
+public sealed record ShopExistsResponse(bool Exists);

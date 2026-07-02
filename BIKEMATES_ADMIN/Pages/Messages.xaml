@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="BIKEMATES_ADMIN.Pages.Messages"
@@ -9,7 +9,7 @@
         <VerticalStackLayout Grid.Row="0" BackgroundColor="{StaticResource Navy}" Padding="18,16,18,18" Spacing="8">
             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
                 <Label Text="Messages" Style="{StaticResource HeaderTitle}" VerticalOptions="Center" />
-                <Button Grid.Column="1" Text="Exit" Style="{StaticResource MiniButton}" Clicked="Exit_Clicked" VerticalOptions="Center" />
+                <Button Grid.Column="1" Text="Back" Style="{StaticResource MiniButton}" Clicked="Exit_Clicked" VerticalOptions="Center" />
             </Grid>
             <SearchBar Placeholder="Search conversations" Style="{StaticResource SearchInput}" TextChanged="SearchBar_TextChanged" />
             <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">

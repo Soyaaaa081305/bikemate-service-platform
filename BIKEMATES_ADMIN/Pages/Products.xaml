@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="BIKEMATES_ADMIN.Pages.Products"
@@ -12,7 +12,7 @@
                     <Label Text="Products" Style="{StaticResource HeaderTitle}" />
                     <Label Text="Add, edit, delete, and monitor product stock." Style="{StaticResource HeaderSubtitle}" />
                 </VerticalStackLayout>
-                <Button Grid.Column="1" Text="Exit" Style="{StaticResource MiniButton}" Clicked="Exit_Clicked" VerticalOptions="Center" />
+                <Button Grid.Column="1" Text="Back" Style="{StaticResource MiniButton}" Clicked="Exit_Clicked" VerticalOptions="Center" />
             </Grid>
         </VerticalStackLayout>
 
@@ -21,6 +21,9 @@
                 <Frame Style="{StaticResource CardFrame}">
                     <VerticalStackLayout Spacing="8">
                         <Label Text="Product Editor" Style="{StaticResource SectionLabel}" />
+                        <Label x:Name="ProductEditorStatusLabel"
+                               Text="Select an item below to update it, or enter new details to add a product."
+                               Style="{StaticResource SmallMuted}" />
                         <Grid ColumnDefinitions="96,*" ColumnSpacing="12">
                             <Frame WidthRequest="96" HeightRequest="96" CornerRadius="16" Padding="0" HasShadow="False" BorderColor="{StaticResource LineColor}" BackgroundColor="{StaticResource SoftGray}">
                                 <Grid>
@@ -30,13 +33,12 @@
                             </Frame>
                             <VerticalStackLayout Grid.Column="1" Spacing="0">
                                 <Entry x:Name="ProductNameEntry" Placeholder="Product name" Style="{StaticResource InputEntry}" />
-                                <Picker x:Name="CategoryPicker" Title="Category" Style="{StaticResource InputPicker}">
-                                    <Picker.ItemsSource>
-                                        <x:Array Type="{x:Type x:String}">
-                                            <x:String>Frames</x:String><x:String>Drivetrain</x:String><x:String>Wheels</x:String><x:String>Brakes</x:String><x:String>Cockpit</x:String><x:String>Accessories</x:String><x:String>Wearables</x:String>
-                                        </x:Array>
-                                    </Picker.ItemsSource>
-                                </Picker>
+                                <SearchBar x:Name="ProductCategorySearchBar"
+                                           Placeholder="Search product category"
+                                           Style="{StaticResource SearchInput}"
+                                           TextChanged="ProductCategorySearchBar_TextChanged" />
+                                <Picker x:Name="CategoryPicker" Title="Category" Style="{StaticResource InputPicker}" />
+                                <Button Text="Add Category" Style="{StaticResource OutlineButton}" Clicked="AddProductCategory_Clicked" />
                                 <Button Text="Choose Product Image" Style="{StaticResource OutlineButton}" Clicked="PickProductImage_Clicked" />
                             </VerticalStackLayout>
                         </Grid>

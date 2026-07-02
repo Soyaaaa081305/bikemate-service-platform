@@ -5,6 +5,37 @@
              Shell.NavBarIsVisible="False"
              BackgroundColor="{StaticResource PageBg}">
 
-    <Grid RowDefinitions="Auto,*"><VerticalStackLayout BackgroundColor="{StaticResource Navy}" Padding="18,16,18,18"><Label Text="Help &amp; Support" Style="{StaticResource HeaderTitle}"/><Label Text="FAQs, documentation, and support tickets." Style="{StaticResource HeaderSubtitle}"/></VerticalStackLayout><ScrollView Grid.Row="1"><VerticalStackLayout Padding="14,12,14,30" Spacing="14"><Label Text="COMMON QUESTIONS" Style="{StaticResource SectionLabel}"/><Frame Style="{StaticResource CardFrame}"><VerticalStackLayout Spacing="10"><Label Text="How do I generate an admin account code?" Style="{StaticResource BodyText}"/><Label Text="How do I assign a mechanic to a request?" Style="{StaticResource BodyText}"/><Label Text="How do I update PayMongo payment status?" Style="{StaticResource BodyText}"/></VerticalStackLayout></Frame><Label Text="CONTACT SUPPORT" Style="{StaticResource SectionLabel}"/><Frame Style="{StaticResource CardFrame}"><VerticalStackLayout Spacing="8"><Entry Placeholder="Subject" Style="{StaticResource InputEntry}"/><Editor Placeholder="Describe your issue" Style="{StaticResource InputEditor}"/><Button Text="Send Support Ticket" Style="{StaticResource PrimaryButton}"/></VerticalStackLayout></Frame></VerticalStackLayout></ScrollView></Grid>
+    <Grid RowDefinitions="Auto,*">
+        <VerticalStackLayout Grid.Row="0" BackgroundColor="{StaticResource Navy}" Padding="18,16,18,18" Spacing="4">
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                <VerticalStackLayout Spacing="2">
+                    <Label Text="Help &amp; Support" Style="{StaticResource HeaderTitle}" />
+                    <Label Text="FAQs, documentation, and support tickets." Style="{StaticResource HeaderSubtitle}" />
+                </VerticalStackLayout>
+                <Button Grid.Column="1" Text="Back" Style="{StaticResource MiniButton}" Clicked="Exit_Clicked" VerticalOptions="Center" />
+            </Grid>
+        </VerticalStackLayout>
+
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="14,12,14,30" Spacing="14">
+                <Label Text="COMMON QUESTIONS" Style="{StaticResource SectionLabel}" />
+                <Frame Style="{StaticResource CardFrame}">
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="How do shop accounts get approved?" Style="{StaticResource BodyText}" />
+                        <Label Text="How do I manage services and products?" Style="{StaticResource BodyText}" />
+                        <Label Text="How do I update PayMongo payment status?" Style="{StaticResource BodyText}" />
+                    </VerticalStackLayout>
+                </Frame>
+                <Label Text="CONTACT SUPPORT" Style="{StaticResource SectionLabel}" />
+                <Frame Style="{StaticResource CardFrame}">
+                    <VerticalStackLayout Spacing="8">
+                        <Entry Placeholder="Subject" Style="{StaticResource InputEntry}" />
+                        <Editor Placeholder="Describe your issue" Style="{StaticResource InputEditor}" />
+                        <Button Text="Send Support Ticket" Style="{StaticResource PrimaryButton}" />
+                    </VerticalStackLayout>
+                </Frame>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
 
 </ContentPage>

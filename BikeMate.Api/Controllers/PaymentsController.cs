@@ -101,6 +101,11 @@ public sealed class PaymentsController(
     [Authorize]
     public async Task<ActionResult<IReadOnlyCollection<PaymentDto>>> GetForRequest(int requestId, CancellationToken cancellationToken)
     {
+        if (!await CanViewRequestPaymentsAsync(requestId, cancellationToken))
+        {
+            return Forbid();
+        }
+
         return Ok(await QueryPayments()
             .Where(x => x.RequestId == requestId)
             .Select(x => ToDto(x))
@@ -111,10 +116,20 @@ public sealed class PaymentsController(
     [Authorize]
     public async Task<ActionResult<PaymentDto>> GetById(int paymentId, CancellationToken cancellationToken)
     {
-        return Ok(await QueryPayments()
+        var payment = await QueryPayments()
             .Where(x => x.PaymentId == paymentId)
-            .Select(x => ToDto(x))
-            .SingleAsync(cancellationToken));
+            .SingleOrDefaultAsync(cancellationToken);
+        if (payment is null)
+        {
+            return NotFound();
+        }
+
+        if (!await CanViewRequestPaymentsAsync(payment.RequestId, cancellationToken))
+        {
+            return Forbid();
+        }
+
+        return Ok(ToDto(payment));
     }
 
     [HttpGet("{paymentId:int}/status")]
@@ -168,6 +183,11 @@ public sealed class PaymentsController(
     [Authorize]
     public async Task<ActionResult<PaymentDto>> LatestForRequest(int requestId, CancellationToken cancellationToken)
     {
+        if (!await CanViewRequestPaymentsAsync(requestId, cancellationToken))
+        {
+            return Forbid();
+        }
+
         var payment = await QueryPayments()
             .Where(x => x.RequestId == requestId)
             .OrderByDescending(x => x.CreatedAt)
@@ -191,6 +211,22 @@ public sealed class PaymentsController(
     private IQueryable<Payment> QueryPayments()
     {
         return db.Payments.Include(x => x.PaymentStatus).Include(x => x.Client);
+    }
+
+    private async Task<bool> CanViewRequestPaymentsAsync(int requestId, CancellationToken cancellationToken)
+    {
+        if (User.IsInRole(AppRoles.SystemAdmin))
+        {
+            return true;
+        }
+
+        var userId = User.GetUserId();
+        return await db.ServiceRequests.AnyAsync(x =>
+            x.RequestId == requestId &&
+            ((x.Client != null && x.Client.UserId == userId) ||
+             (x.Mechanic != null && x.Mechanic.UserId == userId) ||
+             (x.Shop != null && x.Shop.OwnerUserId == userId)),
+            cancellationToken);
     }
 
     private static PaymentDto ToDto(Payment x)

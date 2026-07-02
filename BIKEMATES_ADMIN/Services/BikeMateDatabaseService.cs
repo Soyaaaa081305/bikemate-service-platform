@@ -16,11 +16,31 @@ public sealed record AuthenticatedUser(
     string? ShopStatus,
     bool IsOwner = true);
 
-public sealed record ShopRegistrationResult(
+public sealed record ShopApplicationResult(
     int ShopId,
     string ShopName,
-    string AccessCode,
-    string AdminEmail);
+    string ShopStatus,
+    string Message);
+
+public sealed record ShopApplicationStatus(
+    int ShopId,
+    string ShopName,
+    string ShopStatus,
+    string AccountStatus,
+    bool EmailVerified,
+    DateTime UpdatedAt);
+
+public sealed record UploadedFileResult(
+    string Url,
+    string FileName,
+    string ContentType,
+    long SizeBytes);
+
+public sealed record PhilippineRegion(string Code, string Name);
+
+public sealed record PhilippineLocality(string Code, string Name, string Type, string RegionCode, string? Province);
+
+public sealed record PhilippineBarangay(string Code, string Name, string LocalityCode);
 
 public sealed record AdminShopProfile(
     int ShopId,
@@ -32,7 +52,53 @@ public sealed record AdminShopProfile(
     string? ContactNumber,
     string ShopStatus,
     decimal? Latitude,
-    decimal? Longitude);
+    decimal? Longitude,
+    string? ShopImageUrl = null,
+    string? ShopLogoUrl = null);
+
+public sealed record ShopSetupStatus(
+    AdminShopProfile Profile,
+    int ProductCount,
+    int ServiceCount)
+{
+    public bool HasCoverPhoto => !string.IsNullOrWhiteSpace(Profile.ShopImageUrl);
+    public bool HasProfilePicture => !string.IsNullOrWhiteSpace(Profile.ShopLogoUrl);
+    public bool HasDescription => !string.IsNullOrWhiteSpace(Profile.ShopDescription);
+    public bool HasProducts => ProductCount > 0;
+    public bool HasServices => ServiceCount > 0;
+    public bool IsComplete => HasCoverPhoto && HasProfilePicture && HasDescription && HasProducts && HasServices;
+}
+
+public sealed record AdminShopApplicationDetails(
+    int ShopId,
+    string ShopName,
+    string ShopStatus,
+    string? ShopDescription,
+    string? ShopAddressLine,
+    string? ShopBarangay,
+    string? ShopCity,
+    string? ShopProvince,
+    string? ShopZipCode,
+    string? ContactNumber,
+    string? BusinessPermitUrl,
+    string? ShopImageUrl,
+    string? OwnerValidIdUrl,
+    string? DtiRegistrationNumber,
+    string? OwnerFirstName,
+    string? OwnerMiddleName,
+    string? OwnerLastName,
+    string? OwnerEmail,
+    string? OwnerPhoneNumber,
+    string? OwnerSex,
+    DateTime? OwnerBirthdate,
+    string? OwnerAddressLine,
+    string? OwnerBarangay,
+    string? OwnerCity,
+    string? OwnerProvince,
+    string? OwnerZipCode,
+    bool OwnerEmailVerified,
+    DateTime CreatedAt,
+    DateTime? UpdatedAt);
 
 public sealed record AdminDashboard(
     AdminShopProfile Profile,
@@ -51,13 +117,43 @@ public sealed record AdminProduct(
     string? ProductDescription,
     decimal Price,
     int StockQuantity,
-    bool IsActive);
+    bool IsActive,
+    string? ProductImageUrl);
 
 public sealed record UpsertAdminProduct(
     string ProductName,
     string? ProductDescription,
     decimal Price,
     int StockQuantity,
+    bool IsActive,
+    string? ProductImageUrl);
+
+public sealed record AdminServiceCategory(
+    int CategoryId,
+    string CategoryName,
+    string? Description);
+
+public sealed record UpsertAdminServiceCategory(
+    string CategoryName,
+    string? Description);
+
+public sealed record AdminShopService(
+    int ShopServiceId,
+    int ShopId,
+    int CategoryId,
+    string CategoryName,
+    string ServiceName,
+    string? ServiceDescription,
+    decimal BasePrice,
+    int EstimatedMinutes,
+    bool IsActive);
+
+public sealed record UpsertAdminShopService(
+    int CategoryId,
+    string ServiceName,
+    string? ServiceDescription,
+    decimal BasePrice,
+    int EstimatedMinutes,
     bool IsActive);
 
 public sealed record AdminMechanic(
@@ -69,6 +165,57 @@ public sealed record AdminMechanic(
     string AvailabilityStatus,
     decimal AverageRating,
     int TotalCompletedJobs);
+
+public sealed record AdminMechanicApplication(
+    int MechanicId,
+    int UserId,
+    string FirstName,
+    string? MiddleName,
+    string LastName,
+    string FullName,
+    string Email,
+    string? PhoneNumber,
+    string AccountStatus,
+    bool EmailVerified,
+    bool IsVerified,
+    string AvailabilityStatus,
+    string? Sex,
+    DateTime? Birthdate,
+    string? AddressLine,
+    string? Barangay,
+    string? City,
+    string? Province,
+    string? ZipCode,
+    string? ProfileImageUrl,
+    string? ValidIdImageUrl,
+    string? CertificationImageUrl,
+    string? Bio,
+    int? YearsExperience,
+    int? ShopId,
+    string? ShopName,
+    bool IsAssignedToShop,
+    DateTime CreatedAt,
+    DateTime? UpdatedAt);
+
+public sealed record CreateAdminMechanicApplication(
+    string FirstName,
+    string? MiddleName,
+    string LastName,
+    string? Sex,
+    string? Birthdate,
+    string Email,
+    string PhoneNumber,
+    string Password,
+    string? AddressLine,
+    string? Barangay,
+    string? City,
+    string? Province,
+    string? ZipCode,
+    string ValidIdImageUrl,
+    string CertificationImageUrl,
+    string? ProfileImageUrl,
+    string? Bio,
+    int? YearsExperience);
 
 public sealed record AdminServiceRequest(
     int RequestId,
@@ -128,9 +275,12 @@ public sealed class AccountCreationDraft
     public string LastName { get; set; } = string.Empty;
     public string Sex { get; set; } = string.Empty;
     public string Birthdate { get; set; } = string.Empty;
+    public bool BirthdateSelected { get; set; }
     public string Email { get; set; } = string.Empty;
     public string PhoneNumber { get; set; } = string.Empty;
     public string Password { get; set; } = string.Empty;
+    public string RegionCode { get; set; } = string.Empty;
+    public string LocalityCode { get; set; } = string.Empty;
     public string Province { get; set; } = string.Empty;
     public string City { get; set; } = string.Empty;
     public string Barangay { get; set; } = string.Empty;
@@ -138,25 +288,22 @@ public sealed class AccountCreationDraft
     public string ZipCode { get; set; } = string.Empty;
     public string ValidIdPath { get; set; } = string.Empty;
     public string ShopName { get; set; } = string.Empty;
+    public string ShopRegionCode { get; set; } = string.Empty;
+    public string ShopLocalityCode { get; set; } = string.Empty;
     public string ShopProvince { get; set; } = string.Empty;
     public string ShopCity { get; set; } = string.Empty;
     public string ShopBarangay { get; set; } = string.Empty;
     public string ShopAddress { get; set; } = string.Empty;
     public string ShopZipCode { get; set; } = string.Empty;
-    public string AccessCode { get; set; } = string.Empty;
-}
-
-public sealed class ShopRegistrationDraft
-{
-    public string ShopName { get; set; } = string.Empty;
-    public string OwnerName { get; set; } = string.Empty;
     public string ShopDescription { get; set; } = string.Empty;
-    public string ShopAddress { get; set; } = string.Empty;
-    public string City { get; set; } = string.Empty;
-    public string Province { get; set; } = string.Empty;
     public string BusinessPermitPath { get; set; } = string.Empty;
     public string ShopImagePath { get; set; } = string.Empty;
     public string DtiRegistrationNumber { get; set; } = string.Empty;
+    public bool ShopTermsAccepted { get; set; }
+    public string ApplicationStatus { get; set; } = string.Empty;
+    public bool EmailVerified { get; set; }
+    public string SubmittedAt { get; set; } = string.Empty;
+    public string UpdatedAt { get; set; } = string.Empty;
 }
 
 public static class AppSession
@@ -169,8 +316,33 @@ public static class BikeMateDatabaseService
 {
     private const string ShopAdminRole = "ShopAdmin";
     private const string SystemAdminRole = "SystemAdmin";
+    private const string SubmittedShopApplicationKey = "shop_application:last";
+    private const string ApiBaseUrlPreferenceKey = "bikemates_admin_api_base_url";
+    private const string ApiBaseUrlEnvironmentVariable = "BIKEMATE_API_BASE_URL";
     private static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
-    private static readonly Lazy<string> ApiBaseUrl = new(LoadApiBaseUrl);
+
+    public static string CurrentApiBaseUrl => LoadApiBaseUrl();
+
+    public static string PackagedDefaultApiBaseUrl => EnsureApiPath(LoadPackagedOrDefaultApiBaseUrl());
+
+    public static bool HasApiBaseUrlOverride =>
+        !string.IsNullOrWhiteSpace(Preferences.Get(ApiBaseUrlPreferenceKey, string.Empty));
+
+    public static void SaveApiBaseUrlOverride(string baseUrl)
+    {
+        var normalized = EnsureApiPath(baseUrl);
+        if (!Uri.TryCreate(normalized, UriKind.Absolute, out _))
+        {
+            throw new InvalidOperationException("Enter a valid BikeMate API URL, for example https://your-ngrok-domain.ngrok-free.dev/api/ or http://127.0.0.1:5000/api/ when using adb reverse.");
+        }
+
+        Preferences.Set(ApiBaseUrlPreferenceKey, normalized);
+    }
+
+    public static void ClearApiBaseUrlOverride()
+    {
+        Preferences.Remove(ApiBaseUrlPreferenceKey);
+    }
 
     public static async Task<AuthenticatedUser> LoginAsync(string email, string password)
     {
@@ -195,9 +367,14 @@ public static class BikeMateDatabaseService
         }
 
         var shop = await TryLoadOwnedShopAsync(http, auth.AccessToken);
+        if (auth.User.AccountStatus == "pending")
+        {
+            throw new InvalidOperationException("Your shop application is pending BikeMate admin approval.");
+        }
+
         if (shop is null)
         {
-            throw new InvalidOperationException("No shop was returned by the API for this account. Register a bike shop first, or use admin@bikemate.test with the seeded BikeMate database.");
+            throw new InvalidOperationException("No shop was returned by the API for this account. Register and approve a bike shop first, then sign in with that ShopAdmin account.");
         }
 
         var user = new AuthenticatedUser(
@@ -215,7 +392,7 @@ public static class BikeMateDatabaseService
         return user;
     }
 
-    public static async Task<AuthenticatedUser> CreateShopAdminAccountAsync(AccountCreationDraft draft)
+    public static async Task<ShopApplicationResult> SubmitShopOwnerApplicationAsync(AccountCreationDraft draft)
     {
         if (string.IsNullOrWhiteSpace(draft.Password) || draft.Password.Length <= 8)
         {
@@ -224,8 +401,8 @@ public static class BikeMateDatabaseService
 
         using var http = CreateHttpClient();
         using var response = await http.PostAsJsonAsync(
-            "shop-onboarding/create-account",
-            new ShopAdminAccountRequest(
+            "shop-onboarding/apply",
+            new ShopOwnerApplicationRequest(
                 Require(draft.FirstName, "First name"),
                 draft.MiddleName,
                 Require(draft.LastName, "Last name"),
@@ -239,45 +416,225 @@ public static class BikeMateDatabaseService
                 draft.Barangay,
                 draft.Address,
                 draft.ZipCode,
-                draft.ValidIdPath,
+                Require(draft.ValidIdPath, "Valid ID"),
                 Require(draft.ShopName, "Shop name"),
+                draft.ShopDescription,
                 draft.ShopProvince,
                 draft.ShopCity,
                 draft.ShopBarangay,
                 draft.ShopAddress,
                 draft.ShopZipCode,
-                Require(draft.AccessCode, "Access code")),
+                Require(draft.BusinessPermitPath, "Business permit"),
+                Require(draft.ShopImagePath, "Shop image"),
+                Require(draft.DtiRegistrationNumber, "DTI registration number")),
             JsonOptions);
 
-        var created = await ReadApiAsync<ShopAdminAccountResponse>(response);
-        return new AuthenticatedUser(
-            created.UserId,
-            created.FirstName,
-            created.LastName,
-            created.Email,
-            created.ShopId,
-            created.ShopName,
-            created.ShopStatus);
+        return await ReadApiAsync<ShopApplicationResult>(response);
     }
 
-    public static async Task<ShopRegistrationResult> RegisterShopAsync(ShopRegistrationDraft draft)
+    public static void SaveSubmittedShopApplication(AccountCreationDraft draft)
+    {
+        var snapshot = CreateSubmittedDraftSnapshot(draft);
+        var json = JsonSerializer.Serialize(snapshot, JsonOptions);
+        Preferences.Set(SubmittedShopApplicationKey, json);
+
+        var email = NormalizeEmail(snapshot.Email);
+        if (!string.IsNullOrWhiteSpace(email))
+        {
+            Preferences.Set(SubmittedShopApplicationKey + ":" + email, json);
+        }
+    }
+
+    public static void ClearSubmittedShopApplication(string? email = null)
+    {
+        var normalizedEmail = string.IsNullOrWhiteSpace(email) ? string.Empty : NormalizeEmail(email);
+        if (!string.IsNullOrWhiteSpace(normalizedEmail))
+        {
+            Preferences.Remove(SubmittedShopApplicationKey + ":" + normalizedEmail);
+        }
+
+        var saved = TryGetSubmittedShopApplication();
+        if (saved is null ||
+            string.IsNullOrWhiteSpace(normalizedEmail) ||
+            string.Equals(NormalizeEmail(saved.Email), normalizedEmail, StringComparison.OrdinalIgnoreCase))
+        {
+            Preferences.Remove(SubmittedShopApplicationKey);
+        }
+    }
+
+    public static AccountCreationDraft? TryGetSubmittedShopApplication(string? email = null)
+    {
+        try
+        {
+            var normalizedEmail = string.IsNullOrWhiteSpace(email) ? string.Empty : NormalizeEmail(email);
+            var json = string.IsNullOrWhiteSpace(normalizedEmail)
+                ? null
+                : Preferences.Get(SubmittedShopApplicationKey + ":" + normalizedEmail, null);
+
+            json ??= Preferences.Get(SubmittedShopApplicationKey, null);
+            return string.IsNullOrWhiteSpace(json)
+                ? null
+                : JsonSerializer.Deserialize<AccountCreationDraft>(json, JsonOptions);
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    public static async Task<AccountCreationDraft?> RefreshSubmittedShopApplicationAsync(string? email = null)
+    {
+        var draft = TryGetSubmittedShopApplication(email);
+        var normalizedEmail = NormalizeEmail(email ?? draft?.Email ?? string.Empty);
+        if (string.IsNullOrWhiteSpace(normalizedEmail))
+        {
+            return draft;
+        }
+
+        try
+        {
+            using var http = CreateHttpClient();
+            using var response = await http.GetAsync($"shop-onboarding/application-status?email={Uri.EscapeDataString(normalizedEmail)}");
+            if (response.StatusCode == HttpStatusCode.NotFound)
+            {
+                return draft;
+            }
+
+            var status = await ReadApiAsync<ShopApplicationStatus>(response);
+            if (IsApprovedShopApplication(status))
+            {
+                ClearSubmittedShopApplication(normalizedEmail);
+                return null;
+            }
+
+            draft ??= new AccountCreationDraft { Email = normalizedEmail };
+            draft.Email = normalizedEmail;
+            draft.ShopName = status.ShopName;
+            draft.ApplicationStatus = status.ShopStatus;
+            draft.EmailVerified = status.EmailVerified;
+            draft.UpdatedAt = status.UpdatedAt.ToString("O");
+            SaveSubmittedShopApplication(draft);
+            return draft;
+        }
+        catch
+        {
+            return draft;
+        }
+    }
+
+    public static async Task<UploadedFileResult> UploadOnboardingFileAsync(FileResult file, string folder)
+    {
+        using var http = CreateHttpClient();
+        await using var stream = await file.OpenReadAsync();
+        using var content = new MultipartFormDataContent();
+        using var streamContent = new StreamContent(stream);
+        streamContent.Headers.ContentType = new MediaTypeHeaderValue(ContentTypeFor(file));
+        content.Add(streamContent, "file", file.FileName);
+        content.Add(new StringContent(folder), "folder");
+
+        using var response = await http.PostAsync("files/onboarding-upload", content);
+        return await ReadApiAsync<UploadedFileResult>(response);
+    }
+
+    public static async Task<UploadedFileResult> UploadShopFileAsync(FileResult file, string folder)
+    {
+        using var http = CreateAuthorizedHttpClient();
+        await using var stream = await file.OpenReadAsync();
+        using var content = new MultipartFormDataContent();
+        using var streamContent = new StreamContent(stream);
+        streamContent.Headers.ContentType = new MediaTypeHeaderValue(ContentTypeFor(file));
+        content.Add(streamContent, "file", file.FileName);
+        content.Add(new StringContent(folder), "folder");
+
+        using var response = await http.PostAsync("files/upload", content);
+        return await ReadApiAsync<UploadedFileResult>(response);
+    }
+
+    public static async Task ForgotPasswordAsync(string email)
     {
         using var http = CreateHttpClient();
         using var response = await http.PostAsJsonAsync(
-            "shop-onboarding/register-shop",
-            new ShopRegistrationRequest(
-                Require(draft.ShopName, "Shop name"),
-                Require(draft.OwnerName, "Shop owner"),
-                draft.ShopDescription,
-                Require(draft.ShopAddress, "Shop address"),
-                Require(draft.City, "City"),
-                Require(draft.Province, "Province"),
-                draft.BusinessPermitPath,
-                draft.ShopImagePath,
-                draft.DtiRegistrationNumber),
+            "auth/forgot-password",
+            new ForgotPasswordRequest(NormalizeEmail(Require(email, "Email"))),
             JsonOptions);
+        await EnsureSuccessAsync(response);
+    }
 
-        return await ReadApiAsync<ShopRegistrationResult>(response);
+    public static async Task ResendPasswordResetOtpAsync(string email)
+    {
+        using var http = CreateHttpClient();
+        using var response = await http.PostAsJsonAsync(
+            "auth/resend-password-reset-otp",
+            new ResendPasswordResetOtpRequest(NormalizeEmail(Require(email, "Email"))),
+            JsonOptions);
+        await EnsureSuccessAsync(response);
+    }
+
+    public static async Task VerifyPasswordResetOtpAsync(string email, string otpCode)
+    {
+        using var http = CreateHttpClient();
+        using var response = await http.PostAsJsonAsync(
+            "auth/verify-password-reset-otp",
+            new VerifyPasswordResetOtpRequest(
+                NormalizeEmail(Require(email, "Email")),
+                Require(otpCode, "Reset code")),
+            JsonOptions);
+        await EnsureSuccessAsync(response);
+    }
+
+    public static async Task VerifyEmailOtpAsync(string email, string otpCode)
+    {
+        using var http = CreateHttpClient();
+        using var response = await http.PostAsJsonAsync(
+            "auth/verify-otp",
+            new VerifyOtpRequest(NormalizeEmail(Require(email, "Email")), Require(otpCode, "Verification code"), "email_verification"),
+            JsonOptions);
+        await EnsureSuccessAsync(response);
+    }
+
+    public static async Task ResendEmailOtpAsync(string email)
+    {
+        using var http = CreateHttpClient();
+        using var response = await http.PostAsJsonAsync(
+            "auth/resend-otp",
+            new ResendOtpRequest(NormalizeEmail(Require(email, "Email")), "email_verification"),
+            JsonOptions);
+        await EnsureSuccessAsync(response);
+    }
+
+    public static async Task ResetPasswordAsync(string email, string token, string newPassword, string confirmPassword)
+    {
+        using var http = CreateHttpClient();
+        using var response = await http.PostAsJsonAsync(
+            "auth/reset-password",
+            new ResetPasswordRequest(
+                NormalizeEmail(Require(email, "Email")),
+                Require(token, "Reset code"),
+                Require(newPassword, "New password"),
+                Require(confirmPassword, "Confirm password")),
+            JsonOptions);
+        await EnsureSuccessAsync(response);
+    }
+
+    public static async Task<IReadOnlyList<PhilippineRegion>> GetPhilippineRegionsAsync()
+    {
+        using var http = CreateHttpClient();
+        using var response = await http.GetAsync("geography/regions");
+        return await ReadApiAsync<PhilippineRegion[]>(response);
+    }
+
+    public static async Task<IReadOnlyList<PhilippineLocality>> GetPhilippineLocalitiesAsync(string regionCode)
+    {
+        using var http = CreateHttpClient();
+        using var response = await http.GetAsync($"geography/regions/{Uri.EscapeDataString(regionCode)}/localities");
+        return await ReadApiAsync<PhilippineLocality[]>(response);
+    }
+
+    public static async Task<IReadOnlyList<PhilippineBarangay>> GetPhilippineBarangaysAsync(string localityCode)
+    {
+        using var http = CreateHttpClient();
+        using var response = await http.GetAsync($"geography/localities/{Uri.EscapeDataString(localityCode)}/barangays");
+        return await ReadApiAsync<PhilippineBarangay[]>(response);
     }
 
     public static async Task<bool> ShopExistsForAccountCreationAsync(AccountCreationDraft draft)
@@ -312,6 +669,27 @@ public static class BikeMateDatabaseService
         return await ReadApiAsync<AdminShopProfile>(response);
     }
 
+    public static async Task<ShopSetupStatus> GetShopSetupStatusAsync()
+    {
+        var profile = await GetShopProfileAsync();
+        var products = await GetProductsAsync();
+        var services = await GetShopServicesAsync();
+        return new ShopSetupStatus(
+            profile,
+            products.Count(product => product.IsActive),
+            services.Count(service => service.IsActive));
+    }
+
+    public static async Task<AccountCreationDraft> GetSubmittedShopApplicationFromApiAsync()
+    {
+        using var http = CreateAuthorizedHttpClient();
+        using var response = await http.GetAsync("shop/application");
+        var details = await ReadApiAsync<AdminShopApplicationDetails>(response);
+        var draft = CreateSubmittedDraftSnapshot(details);
+        SaveSubmittedShopApplication(draft);
+        return draft;
+    }
+
     public static async Task<AdminShopProfile> UpdateShopProfileAsync(AdminShopProfile profile)
     {
         using var http = CreateAuthorizedHttpClient();
@@ -330,6 +708,26 @@ public static class BikeMateDatabaseService
             },
             JsonOptions);
         return await ReadApiAsync<AdminShopProfile>(response);
+    }
+
+    public static async Task UpdateShopCoverImageAsync(string mediaUrl)
+    {
+        using var http = CreateAuthorizedHttpClient();
+        using var response = await http.PostAsJsonAsync(
+            "shop/profile/image",
+            new UploadMediaRequest(Require(mediaUrl, "Cover photo"), "image", null),
+            JsonOptions);
+        await EnsureSuccessAsync(response);
+    }
+
+    public static async Task UpdateShopLogoAsync(string mediaUrl)
+    {
+        using var http = CreateAuthorizedHttpClient();
+        using var response = await http.PostAsJsonAsync(
+            "shop/profile/logo",
+            new UploadMediaRequest(Require(mediaUrl, "Profile picture"), "image", null),
+            JsonOptions);
+        await EnsureSuccessAsync(response);
     }
 
     public static async Task<IReadOnlyCollection<AdminProduct>> GetProductsAsync()
@@ -360,11 +758,67 @@ public static class BikeMateDatabaseService
         await EnsureSuccessAsync(response);
     }
 
+    public static async Task<IReadOnlyCollection<AdminServiceCategory>> GetServiceCategoriesAsync()
+    {
+        using var http = CreateAuthorizedHttpClient();
+        using var response = await http.GetAsync("services/categories");
+        return await ReadApiAsync<AdminServiceCategory[]>(response);
+    }
+
+    public static async Task<AdminServiceCategory> AddServiceCategoryAsync(UpsertAdminServiceCategory category)
+    {
+        using var http = CreateAuthorizedHttpClient();
+        using var response = await http.PostAsJsonAsync("services/categories", category, JsonOptions);
+        return await ReadApiAsync<AdminServiceCategory>(response);
+    }
+
+    public static async Task<IReadOnlyCollection<AdminShopService>> GetShopServicesAsync()
+    {
+        using var http = CreateAuthorizedHttpClient();
+        using var response = await http.GetAsync("shop/services");
+        return await ReadApiAsync<AdminShopService[]>(response);
+    }
+
+    public static async Task<AdminShopService> AddShopServiceAsync(UpsertAdminShopService service)
+    {
+        using var http = CreateAuthorizedHttpClient();
+        using var response = await http.PostAsJsonAsync("shop/services", service, JsonOptions);
+        return await ReadApiAsync<AdminShopService>(response);
+    }
+
+    public static async Task<AdminShopService> UpdateShopServiceAsync(int serviceId, UpsertAdminShopService service)
+    {
+        using var http = CreateAuthorizedHttpClient();
+        using var response = await http.PutAsJsonAsync($"shop/services/{serviceId}", service, JsonOptions);
+        return await ReadApiAsync<AdminShopService>(response);
+    }
+
+    public static async Task DeleteShopServiceAsync(int serviceId)
+    {
+        using var http = CreateAuthorizedHttpClient();
+        using var response = await http.DeleteAsync($"shop/services/{serviceId}");
+        await EnsureSuccessAsync(response);
+    }
+
     public static async Task<IReadOnlyCollection<AdminMechanic>> GetMechanicsAsync()
     {
         using var http = CreateAuthorizedHttpClient();
         using var response = await http.GetAsync("shop/mechanics");
         return await ReadApiAsync<AdminMechanic[]>(response);
+    }
+
+    public static async Task<IReadOnlyCollection<AdminMechanicApplication>> GetMechanicApplicationsAsync()
+    {
+        using var http = CreateAuthorizedHttpClient();
+        using var response = await http.GetAsync("shop/mechanic-applications");
+        return await ReadApiAsync<AdminMechanicApplication[]>(response);
+    }
+
+    public static async Task<AdminMechanicApplication> CreateMechanicApplicationAsync(CreateAdminMechanicApplication application)
+    {
+        using var http = CreateAuthorizedHttpClient();
+        using var response = await http.PostAsJsonAsync("shop/mechanic-applications", application, JsonOptions);
+        return await ReadApiAsync<AdminMechanicApplication>(response);
     }
 
     public static async Task<IReadOnlyCollection<AdminServiceRequest>> GetBookingsAsync()
@@ -446,12 +900,19 @@ public static class BikeMateDatabaseService
         return shops.FirstOrDefault();
     }
 
+    private static bool IsApprovedShopApplication(ShopApplicationStatus status)
+    {
+        return string.Equals(status.ShopStatus, "verified", StringComparison.OrdinalIgnoreCase) &&
+            string.Equals(status.AccountStatus, "active", StringComparison.OrdinalIgnoreCase);
+    }
+
     private static HttpClient CreateHttpClient()
     {
         var handler = new HttpClientHandler();
-        var baseUrl = ApiBaseUrl.Value;
+        var baseUrl = CurrentApiBaseUrl;
         if (baseUrl.Contains("10.0.2.2", StringComparison.OrdinalIgnoreCase) ||
-            baseUrl.Contains("localhost", StringComparison.OrdinalIgnoreCase))
+            baseUrl.Contains("localhost", StringComparison.OrdinalIgnoreCase) ||
+            baseUrl.Contains("127.0.0.1", StringComparison.OrdinalIgnoreCase))
         {
             handler.ServerCertificateCustomValidationCallback =
                 HttpClientHandler.DangerousAcceptAnyServerCertificateValidator;
@@ -459,7 +920,7 @@ public static class BikeMateDatabaseService
 
         var client = new HttpClient(handler)
         {
-            BaseAddress = new Uri(EnsureTrailingSlash(baseUrl)),
+            BaseAddress = new Uri(baseUrl),
             Timeout = TimeSpan.FromSeconds(30)
         };
 
@@ -515,7 +976,7 @@ public static class BikeMateDatabaseService
     {
         if (response.StatusCode == HttpStatusCode.Forbidden)
         {
-            return "This account is not allowed to access this shop data. Use a ShopAdmin account, or use admin@bikemate.test after restarting the updated BikeMate API.";
+            return "This account is not allowed to access this shop data. Use the ShopAdmin account that owns the registered bike shop.";
         }
 
         if (response.StatusCode == HttpStatusCode.Unauthorized)
@@ -524,7 +985,8 @@ public static class BikeMateDatabaseService
             AppSession.AccessToken = null;
             return "Your login session expired. Please sign in again.";
         }
-if (!string.IsNullOrWhiteSpace(payload))
+
+        if (!string.IsNullOrWhiteSpace(payload))
         {
             try
             {
@@ -558,6 +1020,20 @@ if (!string.IsNullOrWhiteSpace(payload))
 
     private static string LoadApiBaseUrl()
     {
+        var saved = Preferences.Get(ApiBaseUrlPreferenceKey, string.Empty);
+        if (!string.IsNullOrWhiteSpace(saved))
+        {
+            return EnsureApiPath(saved);
+        }
+
+        var environmentValue = Environment.GetEnvironmentVariable(ApiBaseUrlEnvironmentVariable);
+        return EnsureApiPath(string.IsNullOrWhiteSpace(environmentValue)
+            ? LoadPackagedOrDefaultApiBaseUrl()
+            : environmentValue);
+    }
+
+    private static string LoadPackagedOrDefaultApiBaseUrl()
+    {
         var candidates = new[]
         {
             Path.Combine(AppContext.BaseDirectory, "appsettings.json"),
@@ -575,14 +1051,14 @@ if (!string.IsNullOrWhiteSpace(payload))
             var apiBaseUrl = ReadApiBaseUrl(stream);
             if (!string.IsNullOrWhiteSpace(apiBaseUrl))
             {
-                return EnsureTrailingSlash(apiBaseUrl);
+                return apiBaseUrl;
             }
         }
 
         var packagedApiBaseUrl = ReadPackagedApiBaseUrl();
-        return EnsureTrailingSlash(string.IsNullOrWhiteSpace(packagedApiBaseUrl)
+        return string.IsNullOrWhiteSpace(packagedApiBaseUrl)
             ? DefaultApiBaseUrl()
-            : packagedApiBaseUrl);
+            : packagedApiBaseUrl;
     }
 
     private static string? ReadPackagedApiBaseUrl()
@@ -623,17 +1099,26 @@ if (!string.IsNullOrWhiteSpace(payload))
     private static string DefaultApiBaseUrl()
     {
 #if ANDROID
-        return "http://10.0.2.2:5000/api/";
+        return "https://hungrily-imagines-suffering.ngrok-free.dev/api/";
 #else
         return "https://localhost:5001/api/";
 #endif
     }
 
-    private static string EnsureTrailingSlash(string value)
+    private static string EnsureApiPath(string value)
     {
-        return value.EndsWith("/", StringComparison.Ordinal) ? value : value + "/";
+        var trimmed = value.Trim();
+        if (!trimmed.EndsWith("/", StringComparison.Ordinal))
+        {
+            trimmed += "/";
+        }
+
+        return trimmed.EndsWith("/api/", StringComparison.OrdinalIgnoreCase)
+            ? trimmed
+            : $"{trimmed.TrimEnd('/')}/api/";
     }
-private static string NormalizeEmail(string email)
+
+    private static string NormalizeEmail(string email)
     {
         return (email ?? string.Empty).Trim().ToLowerInvariant();
     }
@@ -646,6 +1131,112 @@ private static string NormalizeEmail(string email)
         }
 
         return value.Trim();
+    }
+
+    private static string ContentTypeFor(FileResult file)
+    {
+        if (!string.IsNullOrWhiteSpace(file.ContentType))
+        {
+            return file.ContentType;
+        }
+
+        return Path.GetExtension(file.FileName).ToLowerInvariant() switch
+        {
+            ".jpg" or ".jpeg" => "image/jpeg",
+            ".png" => "image/png",
+            ".webp" => "image/webp",
+            ".pdf" => "application/pdf",
+            ".txt" => "text/plain",
+            ".doc" => "application/msword",
+            ".docx" => "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            ".mp4" => "video/mp4",
+            ".webm" => "video/webm",
+            ".mov" => "video/quicktime",
+            ".3gp" => "video/3gpp",
+            _ => "application/octet-stream"
+        };
+    }
+
+    private static AccountCreationDraft CreateSubmittedDraftSnapshot(AccountCreationDraft draft)
+    {
+        return new AccountCreationDraft
+        {
+            FullName = draft.FullName,
+            FirstName = draft.FirstName,
+            MiddleName = draft.MiddleName,
+            LastName = draft.LastName,
+            Sex = draft.Sex,
+            Birthdate = draft.Birthdate,
+            BirthdateSelected = draft.BirthdateSelected,
+            Email = NormalizeEmail(draft.Email),
+            PhoneNumber = draft.PhoneNumber,
+            Password = string.Empty,
+            RegionCode = draft.RegionCode,
+            LocalityCode = draft.LocalityCode,
+            Province = draft.Province,
+            City = draft.City,
+            Barangay = draft.Barangay,
+            Address = draft.Address,
+            ZipCode = draft.ZipCode,
+            ValidIdPath = draft.ValidIdPath,
+            ShopName = draft.ShopName,
+            ShopRegionCode = draft.ShopRegionCode,
+            ShopLocalityCode = draft.ShopLocalityCode,
+            ShopProvince = draft.ShopProvince,
+            ShopCity = draft.ShopCity,
+            ShopBarangay = draft.ShopBarangay,
+            ShopAddress = draft.ShopAddress,
+            ShopZipCode = draft.ShopZipCode,
+            ShopDescription = draft.ShopDescription,
+            BusinessPermitPath = draft.BusinessPermitPath,
+            ShopImagePath = draft.ShopImagePath,
+            DtiRegistrationNumber = draft.DtiRegistrationNumber,
+            ShopTermsAccepted = draft.ShopTermsAccepted,
+            ApplicationStatus = draft.ApplicationStatus,
+            EmailVerified = draft.EmailVerified,
+            SubmittedAt = draft.SubmittedAt,
+            UpdatedAt = draft.UpdatedAt
+        };
+    }
+
+    private static AccountCreationDraft CreateSubmittedDraftSnapshot(AdminShopApplicationDetails details)
+    {
+        var draft = new AccountCreationDraft
+        {
+            FirstName = details.OwnerFirstName ?? string.Empty,
+            MiddleName = details.OwnerMiddleName ?? string.Empty,
+            LastName = details.OwnerLastName ?? string.Empty,
+            Sex = details.OwnerSex ?? string.Empty,
+            Birthdate = details.OwnerBirthdate?.ToString("yyyy-MM-dd") ?? string.Empty,
+            BirthdateSelected = details.OwnerBirthdate.HasValue,
+            Email = NormalizeEmail(details.OwnerEmail ?? string.Empty),
+            PhoneNumber = details.OwnerPhoneNumber ?? string.Empty,
+            Province = details.OwnerProvince ?? string.Empty,
+            City = details.OwnerCity ?? string.Empty,
+            Barangay = details.OwnerBarangay ?? string.Empty,
+            Address = details.OwnerAddressLine ?? string.Empty,
+            ZipCode = details.OwnerZipCode ?? string.Empty,
+            ValidIdPath = details.OwnerValidIdUrl ?? string.Empty,
+            ShopName = details.ShopName,
+            ShopDescription = details.ShopDescription ?? string.Empty,
+            ShopProvince = details.ShopProvince ?? string.Empty,
+            ShopCity = details.ShopCity ?? string.Empty,
+            ShopBarangay = details.ShopBarangay ?? string.Empty,
+            ShopAddress = details.ShopAddressLine ?? string.Empty,
+            ShopZipCode = details.ShopZipCode ?? string.Empty,
+            BusinessPermitPath = details.BusinessPermitUrl ?? string.Empty,
+            ShopImagePath = details.ShopImageUrl ?? string.Empty,
+            DtiRegistrationNumber = details.DtiRegistrationNumber ?? string.Empty,
+            ShopTermsAccepted = true,
+            ApplicationStatus = details.ShopStatus,
+            EmailVerified = details.OwnerEmailVerified,
+            SubmittedAt = details.CreatedAt.ToString("O"),
+            UpdatedAt = details.UpdatedAt?.ToString("O") ?? string.Empty
+        };
+
+        draft.FullName = string.Join(" ", new[] { draft.FirstName, draft.MiddleName, draft.LastName }
+            .Where(part => !string.IsNullOrWhiteSpace(part)));
+        return draft;
     }
 
     private sealed record LoginRequest(string Email, string Password);
@@ -676,17 +1267,6 @@ private static string NormalizeEmail(string email)
         decimal? Latitude,
         decimal? Longitude);
 
-    private sealed record ShopRegistrationRequest(
-        string ShopName,
-        string OwnerName,
-        string? ShopDescription,
-        string ShopAddress,
-        string City,
-        string Province,
-        string? BusinessPermitPath,
-        string? ShopImagePath,
-        string? DtiRegistrationNumber);
-
     private sealed record ShopExistsRequest(
         string ShopName,
         string? ShopProvince,
@@ -697,7 +1277,19 @@ private static string NormalizeEmail(string email)
 
     private sealed record ShopExistsResponse(bool Exists);
 
-    private sealed record ShopAdminAccountRequest(
+    private sealed record ForgotPasswordRequest(string Email);
+
+    private sealed record VerifyOtpRequest(string Email, string OtpCode, string Purpose);
+
+    private sealed record ResendOtpRequest(string Email, string Purpose);
+
+    private sealed record VerifyPasswordResetOtpRequest(string Email, string OtpCode);
+
+    private sealed record ResendPasswordResetOtpRequest(string Email);
+
+    private sealed record ResetPasswordRequest(string Email, string Token, string NewPassword, string ConfirmPassword);
+
+    private sealed record ShopOwnerApplicationRequest(
         string FirstName,
         string? MiddleName,
         string LastName,
@@ -711,23 +1303,19 @@ private static string NormalizeEmail(string email)
         string? Barangay,
         string? Address,
         string? ZipCode,
-        string? ValidIdPath,
+        string ValidIdPath,
         string ShopName,
+        string? ShopDescription,
         string? ShopProvince,
         string? ShopCity,
         string? ShopBarangay,
         string? ShopAddress,
         string? ShopZipCode,
-        string AccessCode);
+        string BusinessPermitPath,
+        string ShopImagePath,
+        string DtiRegistrationNumber);
 
-    private sealed record ShopAdminAccountResponse(
-        int UserId,
-        string FirstName,
-        string LastName,
-        string Email,
-        int ShopId,
-        string ShopName,
-        string ShopStatus);
+    private sealed record UploadMediaRequest(string MediaUrl, string MediaType, string? Caption);
 }
 
 

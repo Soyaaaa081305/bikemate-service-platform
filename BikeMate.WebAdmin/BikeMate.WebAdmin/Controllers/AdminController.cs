@@ -136,7 +136,7 @@ public class AdminController : ControllerBase
             {
                 Id = s.ShopId,
                 ShopName = s.ShopName,
-                City = s.City ?? "Unknown",
+                City = s.City ?? string.Empty,
                 Status = s.ShopStatus
             })
             .ToArrayAsync();
@@ -152,8 +152,8 @@ public class AdminController : ControllerBase
             .Select(s => new ShopDto
             {
                 Id = s.ShopId,
-                ShopName = s.ShopName ?? "Unnamed Shop",
-                City = s.City ?? "Unknown Location",
+                ShopName = s.ShopName ?? string.Empty,
+                City = s.City ?? string.Empty,
                 Status = s.ShopStatus ?? "pending"
             })
             .ToArrayAsync();
@@ -174,9 +174,9 @@ public class AdminController : ControllerBase
             {
                 ShopId = s.ShopId,
                 ShopName = s.ShopName,
-                Description = s.ShopDescription ?? "No description provided.",
+                Description = s.ShopDescription ?? string.Empty,
                 FullAddress = $"{s.AddressLine}, {s.City}, {s.Province}",
-                ContactNumber = s.ContactNumber ?? "No contact number",
+                ContactNumber = s.ContactNumber ?? string.Empty,
                 Status = s.ShopStatus ?? "pending",
                 OwnerName = s.Owner!.FirstName + " " + s.Owner.LastName,
                 CreatedAt = s.CreatedAt,
@@ -224,7 +224,7 @@ public class AdminController : ControllerBase
             {
                 Id = sr.RequestId,
                 ClientName = sr.Client.User.FirstName + " " + sr.Client.User.LastName,
-                ServiceName = sr.ShopService != null ? sr.ShopService.ServiceName : "General Service",
+                ServiceName = sr.ShopService != null ? sr.ShopService.ServiceName : string.Empty,
                 Status = sr.CurrentStatus.StatusName,
                 TotalAmount = sr.EstimatedTotal
             })
@@ -268,14 +268,14 @@ public class AdminController : ControllerBase
                 PaymentId = p.PaymentId,
                 RequestId = p.RequestId,
                 CustomerName = p.Client.User.FirstName + " " + p.Client.User.LastName,
-                CustomerPhone = p.Client.User.PhoneNumber ?? "No phone provided",
+                CustomerPhone = p.Client.User.PhoneNumber ?? string.Empty,
                 Amount = p.Amount,
                 Currency = p.Currency,
                 Status = p.PaymentStatus.StatusName,
                 Method = p.PaymentMethod != null ? p.PaymentMethod.MethodName : "Not Selected",
                 ProviderName = p.ProviderName,
-                ReferenceNumber = p.ProviderReferenceNumber ?? "N/A",
-                CheckoutUrl = p.CheckoutUrl ?? "N/A",
+                ReferenceNumber = p.ProviderReferenceNumber ?? string.Empty,
+                CheckoutUrl = p.CheckoutUrl ?? string.Empty,
                 CreatedAt = p.CreatedAt,
                 PaidAt = p.PaidAt
             })
@@ -301,24 +301,24 @@ public class AdminController : ControllerBase
                 MechanicId = m.MechanicId,
                 FullName = m.User.FirstName + " " + m.User.LastName,
                 Email = m.User.Email,
-                Phone = m.User.PhoneNumber ?? "No phone on record",
+                Phone = m.User.PhoneNumber ?? string.Empty,
                 Status = m.AvailabilityStatus,
                 AverageRating = m.AverageRating,
                 TotalJobs = m.TotalCompletedJobs,
-                Bio = m.Bio ?? "No biography provided.",
+                Bio = m.Bio ?? string.Empty,
                 YearsExperience = m.YearsExperience ?? 0,
 
                 // Gets the shop they are currently assigned to
                 CurrentShopName = m.ShopMechanics
                     .Where(sm => sm.IsActive)
                     .Select(sm => sm.Shop.ShopName)
-                    .FirstOrDefault() ?? "Independent / No Shop",
+                    .FirstOrDefault() ?? string.Empty,
 
                 // Grabs their history
                 ServiceHistory = m.AssignedRequests.Select(sr => new MechanicServiceHistoryDto
                 {
                     RequestId = sr.RequestId,
-                    ServiceName = sr.ShopService != null ? sr.ShopService.ServiceName : "General Service",
+                    ServiceName = sr.ShopService != null ? sr.ShopService.ServiceName : string.Empty,
                     Status = sr.CurrentStatus.StatusName,
                     Date = sr.CreatedAt
                 }).OrderByDescending(x => x.Date).ToList(),
@@ -327,7 +327,7 @@ public class AdminController : ControllerBase
                 Reviews = m.Reviews.Select(r => new MechanicReviewDto
                 {
                     Rating = r.Rating,
-                    Comment = r.Comment ?? "No written comment.",
+                    Comment = r.Comment ?? string.Empty,
                     CustomerName = r.Client.User.FirstName,
                     Date = r.CreatedAt
                 }).OrderByDescending(x => x.Date).ToList()
@@ -427,9 +427,9 @@ public class AdminController : ControllerBase
             .Select(sr => new ServiceRequestDetailsDto
             {
                 RequestId = sr.RequestId,
-                ServiceName = sr.ShopService != null ? sr.ShopService.ServiceName : "Custom Service",
+                ServiceName = sr.ShopService != null ? sr.ShopService.ServiceName : string.Empty,
                 Status = sr.CurrentStatus.StatusName,
-                Description = sr.IssueDescription ?? "No description provided by customer.",
+                Description = sr.IssueDescription ?? string.Empty,
                 TotalAmount = sr.FinalTotal,
                 CreatedAt = sr.CreatedAt,
                 Latitude = sr.ServiceLatitude,
@@ -438,13 +438,13 @@ public class AdminController : ControllerBase
                 // Customer mapping
                 CustomerId = sr.ClientId,
                 CustomerName = sr.Client.User.FirstName + " " + sr.Client.User.LastName,
-                CustomerPhone = sr.Client.User.PhoneNumber ?? "No phone on record",
+                CustomerPhone = sr.Client.User.PhoneNumber ?? string.Empty,
 
                 // Mechanic & Shop mapping
                 MechanicId = sr.MechanicId,
                 MechanicName = sr.Mechanic != null ? (sr.Mechanic.User.FirstName + " " + sr.Mechanic.User.LastName) : "Pending Assignment",
-                MechanicPhone = sr.Mechanic != null ? (sr.Mechanic.User.PhoneNumber ?? "N/A") : "N/A",
-                ShopName = sr.ShopService != null ? sr.ShopService.Shop.ShopName : "N/A",
+                MechanicPhone = sr.Mechanic != null ? (sr.Mechanic.User.PhoneNumber ?? string.Empty) : string.Empty,
+                ShopName = sr.ShopService != null ? sr.ShopService.Shop.ShopName : string.Empty,
 
                 // Grab the latest payment status if one exists
                 PaymentStatus = sr.Payments.OrderByDescending(p => p.CreatedAt)
@@ -477,7 +477,8 @@ public class AdminController : ControllerBase
         User? user;
         try
         {
-            user = await _context.Users.FirstOrDefaultAsync(u => u.Email == email);
+            var normalizedEmail = email.Trim().ToLowerInvariant();
+            user = await _context.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == normalizedEmail);
         }
         catch (Exception)
         {
@@ -485,9 +486,12 @@ public class AdminController : ControllerBase
         }
 
         if (user == null) return Redirect("/login?error=true");
+        if (!string.Equals(user.AccountStatus, "active", StringComparison.OrdinalIgnoreCase))
+        {
+            return Redirect("/login?error=true");
+        }
 
-        string hashedInput = "sha256:" + HashString(password);
-        if (user.PasswordHash != hashedInput)
+        if (!PasswordMatches(password, user.PasswordHash))
         {
             return Redirect("/login?error=true");
         }
@@ -495,7 +499,10 @@ public class AdminController : ControllerBase
         bool isSystemAdmin;
         try
         {
-            isSystemAdmin = await _context.UserRoles.AnyAsync(ur => ur.UserId == user.UserId && ur.RoleId == 4);
+            isSystemAdmin = await _context.UserRoles.AnyAsync(ur =>
+                ur.UserId == user.UserId &&
+                ur.Role != null &&
+                ur.Role.RoleName == "SystemAdmin");
         }
         catch (Exception)
         {
@@ -526,7 +533,27 @@ public class AdminController : ControllerBase
         return status.Trim().ToLowerInvariant() is "active" or "pending" or "suspended";
     }
 
-    private string HashString(string input)
+    private static bool PasswordMatches(string password, string? storedHash)
+    {
+        if (string.IsNullOrWhiteSpace(storedHash)) return false;
+
+        if (storedHash.StartsWith("sha256:", StringComparison.OrdinalIgnoreCase))
+        {
+            var expectedHash = "sha256:" + HashString(password);
+            return string.Equals(storedHash, expectedHash, StringComparison.OrdinalIgnoreCase);
+        }
+
+        try
+        {
+            return BCrypt.Net.BCrypt.Verify(password, storedHash);
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
+    private static string HashString(string input)
     {
         using SHA256 sha256 = SHA256.Create();
         byte[] bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(input));

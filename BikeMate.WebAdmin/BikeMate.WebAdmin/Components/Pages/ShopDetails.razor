@@ -1,184 +1,430 @@
 @page "/shops/details/{Id:int}"
 @rendermode InteractiveServer
+@using System.Globalization
 @using BikeMate.WebAdmin.DTOs
 @using BikeMate.WebAdmin.Services
 @inject AdminApiClient AdminApi
 @inject IJSRuntime JS
+@inject NavigationManager Navigation
 
-<div class="mb-4 mt-3 d-flex justify-content-between align-items-center">
-    <h2 class="fw-bold text-dark mb-0">Shop Profile</h2>
-    
-    <div class="d-flex gap-2 align-items-center">
-        @if (shop != null)
-        {
-            @if (shop.Status.ToLower() != "verified")
-            {
-                <button class="btn btn-success shadow-sm" @onclick="ApproveShop" disabled="@isProcessing">
-                    <i class="bi bi-check-circle me-1"></i> Approve
-                </button>
-            }
-            @if (shop.Status.ToLower() != "suspended")
-            {
-                <button class="btn btn-outline-danger shadow-sm" @onclick="SuspendShop" disabled="@isProcessing">
-                    <i class="bi bi-slash-circle me-1"></i> Suspend
-                </button>
-            }
-        }
-        <a href="/shops" class="btn btn-outline-secondary shadow-sm ms-2">
-            <i class="bi bi-arrow-left"></i> Back
-        </a>
-    </div>
-</div>
+<PageTitle>Admin - Shop Details</PageTitle>
 
-<ActionMessage Message="@statusMessage" AlertType="@statusType" OnMessageCleared="() => statusMessage = null" />
-
-@if (shop == null)
-{
-    @if (!string.IsNullOrWhiteSpace(statusMessage))
-    {
-        <div class="card border-0 shadow-sm">
-            <div class="card-body p-5 text-center">
-                <h5 class="fw-bold">Shop profile unavailable</h5>
-                <p class="text-muted">@statusMessage</p>
-                <button class="btn btn-outline-primary" @onclick="LoadShop">Retry</button>
-            </div>
+<div class="admin-page">
+    <div class="admin-page-header">
+        <div>
+            <h1 class="admin-page-title">Shop Profile</h1>
+            <p class="admin-page-description">Review the complete business record, submitted files, catalog, and mechanic assignments.</p>
         </div>
+
+        <div class="admin-page-actions">
+            @if (shop != null)
+            {
+                <a href="/shops/edit/@shop.ShopId" class="btn btn-outline-primary shadow-sm">
+                    <i class="bi bi-pencil-square me-1"></i> Edit
+                </a>
+                @if (!string.Equals(shop.Status, "verified", StringComparison.OrdinalIgnoreCase))
+                {
+                    <button class="btn btn-success shadow-sm" @onclick="ApproveShop" disabled="@isProcessing">
+                        <i class="bi bi-check-circle me-1"></i> Approve
+                    </button>
+                }
+                @if (!string.Equals(shop.Status, "suspended", StringComparison.OrdinalIgnoreCase))
+                {
+                    <button class="btn btn-outline-danger shadow-sm" @onclick="SuspendShop" disabled="@isProcessing">
+                        <i class="bi bi-slash-circle me-1"></i> Suspend
+                    </button>
+                }
+                <button class="btn btn-danger shadow-sm" @onclick="DeleteShop" disabled="@isProcessing">
+                    <i class="bi bi-trash me-1"></i> Delete
+                </button>
+            }
+            <a href="/shops" class="btn btn-outline-secondary shadow-sm">
+                <i class="bi bi-arrow-left"></i> Back
+            </a>
+        </div>
+    </div>
+
+    <ActionMessage Message="@statusMessage" AlertType="@statusType" OnMessageCleared="() => statusMessage = null" />
+
+    @if (shop == null)
+    {
+        @if (!string.IsNullOrWhiteSpace(statusMessage))
+        {
+            <div class="card admin-table-card">
+                <div class="card-body empty-state">
+                    <h2 class="admin-page-title">Shop profile unavailable</h2>
+                    <p>@statusMessage</p>
+                    <button class="btn btn-outline-primary" @onclick="LoadShop">Retry</button>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <div class="spinner-border text-info" role="status"></div>
+                <p class="mt-2 mb-0">Loading complete shop profile...</p>
+            </div>
+        }
     }
     else
     {
-        <div class="p-5 text-center">
-            <div class="spinner-border text-info" role="status"></div>
-            <p class="mt-2 text-muted">Loading complete shop profile...</p>
-        </div>
-    }
-}
-else
-{
-    <div class="row g-4">
-        <div class="col-md-8">
-            <div class="card shadow-sm border-0 h-100">
-                <div class="card-body">
-                    <div class="d-flex justify-content-between align-items-start mb-4">
-                        <div>
-                            <h3 class="fw-bold text-primary mb-1">@shop.ShopName</h3>
-                            <p class="text-muted mb-0"><i class="bi bi-geo-alt-fill me-2"></i>@shop.FullAddress</p>
-                        </div>
-                        @if (shop.Status.ToLower() == "verified")
-                        {
-                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill px-3 py-2">Verified Partner</span>
-                        }
-                        else
-                        {
-                            <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 rounded-pill text-dark px-3 py-2">@shop.Status.ToUpper()</span>
-                        }
-                    </div>
-
-                    <h6 class="fw-bold text-uppercase text-muted mb-3">About the Shop</h6>
-                    <p class="mb-4">@shop.Description</p>
-
-                    <div class="row bg-light p-3 rounded-3">
-                        <div class="col-sm-6 mb-3 mb-sm-0">
-                            <h6 class="text-muted mb-1 text-uppercase small">Owner / Manager</h6>
-                            <p class="fw-bold mb-0">@shop.OwnerName</p>
-                        </div>
-                        <div class="col-sm-6">
-                            <h6 class="text-muted mb-1 text-uppercase small">Contact Number</h6>
-                            <p class="fw-bold mb-0">@shop.ContactNumber</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-4">
-            <div class="card shadow-sm border-0 h-100 bg-light">
-                <div class="card-body text-center pt-5">
-                    <div class="mb-4">
-                        <i class="bi bi-shop text-primary opacity-50" style="font-size: 3rem;"></i>
-                    </div>
-                    <h5 class="fw-bold text-dark mb-3">System Record</h5>
-
-                    <ul class="list-group list-group-flush text-start shadow-sm rounded">
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            Shop ID
-                            <span class="badge bg-secondary rounded-pill">#@shop.ShopId</span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            Date Registered
-                            <span class="text-muted small">@shop.CreatedAt.ToString("MMM dd, yyyy")</span>
-                        </li>
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            Total Mechanics
-                            <span class="badge bg-primary rounded-pill">@shop.Mechanics.Count</span>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="card shadow-sm border-0 mt-4">
-        <div class="card-header bg-white pt-4 pb-2 border-bottom-0">
-            <h5 class="fw-bold mb-0"><i class="bi bi-tools me-2 text-primary"></i>Assigned Mechanics</h5>
-        </div>
-        <div class="card-body p-0">
-            @if (shop.Mechanics.Count == 0)
+        <div class="card admin-table-card overflow-hidden mb-4">
+            @if (HasSubmitted(shop.ShopImageUrl))
             {
-                <div class="p-4 text-center text-muted">
-                    No mechanics are currently assigned to this shop.
-                </div>
+                <img src="@ToReviewUrl(shop.ShopImageUrl)" class="shop-detail-cover" alt="@($"{shop.ShopName} cover photo")" />
             }
             else
             {
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light text-muted small text-uppercase">
-                            <tr>
-                                <th class="ps-4">Mechanic ID</th>
-                                <th>Name</th>
-                                <th>Rating</th>
-                                <th>Current Status</th>
-                                <th class="text-end pe-4">Profile</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var mech in shop.Mechanics)
-                            {
-                                <tr>
-                                    <td class="ps-4 fw-bold text-muted">#@mech.MechanicId</td>
-                                    <td class="fw-semibold">@mech.Name</td>
-                                    <td>? @mech.Rating</td>
-                                    <td>
-                                        @if (mech.Status.ToLower() == "online")
-                                        {
-                                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill">Online</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 rounded-pill">Offline</span>
-                                        }
-                                    </td>
-                                    <td class="text-end pe-4">
-                                        <a href="/mechanics/details/@mech.MechanicId" class="btn btn-sm btn-outline-secondary">View Profile</a>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
+                <div class="shop-detail-cover shop-detail-cover-empty">
+                    <i class="bi bi-image"></i>
+                    <span>No cover photo submitted</span>
                 </div>
             }
+
+            <div class="card-body">
+                <div class="shop-detail-identity">
+                    <div class="shop-detail-logo">
+                        @if (HasSubmitted(shop.ShopLogoUrl))
+                        {
+                            <img src="@ToReviewUrl(shop.ShopLogoUrl)" alt="@($"{shop.ShopName} logo")" />
+                        }
+                        else
+                        {
+                            <i class="bi bi-shop"></i>
+                        }
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                            <h2 class="admin-page-title mb-0">@shop.ShopName</h2>
+                            <span class="@ShopStatusBadgeClass(shop.Status)">@LabelStatus(shop.Status)</span>
+                        </div>
+                        @if (HasSubmitted(shop.FullAddress))
+                        {
+                            <p class="text-muted mb-1"><i class="bi bi-geo-alt me-1"></i>@shop.FullAddress</p>
+                        }
+                        @if (HasSubmitted(shop.ContactNumber))
+                        {
+                            <p class="text-muted mb-0"><i class="bi bi-telephone me-1"></i>@shop.ContactNumber</p>
+                        }
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
-}
+
+        <div class="row g-4">
+            <div class="col-xl-8">
+                <div class="card admin-table-card h-100">
+                    <div class="card-header bg-white border-bottom-0 pt-4 px-4">
+                        <h2 class="admin-page-title mb-1">Business Details</h2>
+                        <p class="admin-page-description mb-0">Information submitted by the shop during onboarding.</p>
+                    </div>
+                    <div class="card-body px-4">
+                        <div class="mb-4">
+                            @if (HasSubmitted(shop.Description))
+                            {
+                                <div class="section-label mb-2">Description</div>
+                                <p class="prewrap mb-0">@shop.Description.Trim()</p>
+                            }
+                        </div>
+
+                        <div class="shop-detail-facts">
+                            @DetailItem("Shop ID", $"#{shop.ShopId}", "bi bi-hash")
+                            @DetailItem("DTI Registration", Fallback(shop.DtiRegistrationNumber), "bi bi-file-earmark-text")
+                            @DetailItem("Contact Number", Fallback(shop.ContactNumber), "bi bi-telephone")
+                            @DetailItem("Address Line", Fallback(shop.AddressLine), "bi bi-house")
+                            @DetailItem("City", Fallback(shop.City), "bi bi-buildings")
+                            @DetailItem("Province", Fallback(shop.Province), "bi bi-map")
+                            @DetailItem("Coordinates", Coordinates(shop), "bi bi-pin-map")
+                            @DetailItem("Registered", FormatDate(shop.CreatedAt), "bi bi-calendar-check")
+                            @DetailItem("Last Updated", FormatDate(shop.UpdatedAt), "bi bi-clock-history")
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-4">
+                <div class="card admin-table-card h-100">
+                    <div class="card-header bg-white border-bottom-0 pt-4 px-4">
+                        <h2 class="admin-page-title mb-1">Owner Details</h2>
+                        <p class="admin-page-description mb-0">Account and identity details tied to this shop.</p>
+                    </div>
+                    <div class="card-body px-4">
+                        <div class="shop-detail-owner mb-4">
+                            <span class="metric-icon bg-primary bg-opacity-10 text-primary">
+                                <i class="bi bi-person-badge"></i>
+                            </span>
+                            <div>
+                                <h3 class="mb-1">@Fallback(shop.OwnerName)</h3>
+                                <span class="badge bg-light text-dark border">@EmailStatus(shop.OwnerEmailVerified)</span>
+                            </div>
+                        </div>
+
+                        <div class="shop-detail-facts single">
+                            @DetailItem("Middle Name", Fallback(shop.OwnerMiddleName), "bi bi-person-lines-fill")
+                            @DetailItem("Email Address", Fallback(shop.OwnerEmail), "bi bi-envelope")
+                            @DetailItem("Mobile Number", Fallback(shop.OwnerPhoneNumber), "bi bi-phone")
+                            @DetailItem("Sex", Fallback(shop.OwnerSex), "bi bi-person")
+                            @DetailItem("Birthdate", FormatDate(shop.OwnerBirthdate), "bi bi-calendar")
+                            @DetailItem("Home Address", Fallback(shop.OwnerFullAddress), "bi bi-house-door")
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card admin-table-card mt-4">
+            <div class="card-header bg-white border-bottom-0 pt-4 px-4">
+                <h2 class="admin-page-title mb-1">Submitted Files</h2>
+                <p class="admin-page-description mb-0">Uploaded business and identity files linked to this shop account.</p>
+            </div>
+            <div class="card-body px-4">
+                <div class="approval-document-grid">
+                    @foreach (var document in DocumentsFor(shop))
+                    {
+                        <div class="approval-document-card">
+                            <div class="approval-document-head">
+                                <span class="approval-document-icon"><i class="@document.Icon"></i></span>
+                                <div>
+                                    <h3>@document.Title</h3>
+                                    <p>@document.Subtitle</p>
+                                </div>
+                            </div>
+
+                            @if (!document.HasFile)
+                            {
+                                <div class="approval-document-empty">Not submitted</div>
+                            }
+                            else if (document.IsImage)
+                            {
+                                <a href="@document.PublicUrl" target="_blank" rel="noopener noreferrer" class="approval-preview-link">
+                                    <img src="@document.PublicUrl" class="approval-document-image" alt="@($"{document.Title} preview")" />
+                                </a>
+                            }
+                            else if (document.IsPdf)
+                            {
+                                <iframe src="@document.PublicUrl" class="approval-document-frame" title="@($"{document.Title} preview")"></iframe>
+                            }
+                            else
+                            {
+                                <div class="approval-document-empty">Preview unavailable</div>
+                            }
+
+                            <div class="approval-document-actions">
+                                @if (document.HasFile)
+                                {
+                                    <a class="btn btn-sm btn-outline-primary" href="@document.PublicUrl" target="_blank" rel="noopener noreferrer">Open full file</a>
+                                }
+                                <span class="small text-muted text-break">@Fallback(document.RawUrl)</span>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mt-1">
+            <div class="col-xl-7">
+                <div class="card admin-table-card h-100">
+                    <div class="card-header bg-white border-bottom-0 pt-4 px-4">
+                        <h2 class="admin-page-title mb-1">Services Offered</h2>
+                        <p class="admin-page-description mb-0">The services customers can book from this shop.</p>
+                    </div>
+                    <div class="card-body px-4">
+                        @if (shop.Services.Count == 0)
+                        {
+                            <div class="empty-state py-4">No services added for this shop.</div>
+                        }
+                        else
+                        {
+                            <div class="shop-catalog-list">
+                                @foreach (var service in shop.Services)
+                                {
+                                    <div class="shop-catalog-item">
+                                        <div>
+                                            <div class="d-flex flex-wrap gap-2 align-items-center mb-1">
+                                                <h3>@service.ServiceName</h3>
+                                                <span class="@CatalogStatusBadgeClass(service.IsActive)">@CatalogStatus(service.IsActive)</span>
+                                            </div>
+                                            <p class="text-muted mb-2">@Fallback(service.Description)</p>
+                                            <div class="shop-catalog-meta">
+                                                <span><i class="bi bi-tags"></i>@Fallback(service.CategoryName)</span>
+                                                <span><i class="bi bi-cash"></i>@FormatCurrency(service.BasePrice)</span>
+                                                <span><i class="bi bi-clock"></i>@service.EstimatedMinutes min</span>
+                                                <span><i class="bi bi-calendar-plus"></i>@FormatDate(service.CreatedAt)</span>
+                                            </div>
+                                            @if (SubmittedUrls(service.ImageUrls).Any())
+                                            {
+                                                <div class="shop-detail-thumbs">
+                                                    @foreach (var imageUrl in SubmittedUrls(service.ImageUrls).Take(4))
+                                                    {
+                                                        <a href="@ToReviewUrl(imageUrl)" target="_blank" rel="noopener noreferrer">
+                                                            <img src="@ToReviewUrl(imageUrl)" alt="@($"{service.ServiceName} image")" />
+                                                        </a>
+                                                    }
+                                                </div>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-5">
+                <div class="card admin-table-card h-100">
+                    <div class="card-header bg-white border-bottom-0 pt-4 px-4">
+                        <h2 class="admin-page-title mb-1">Products</h2>
+                        <p class="admin-page-description mb-0">Shop items available for modifications or parts-related bookings.</p>
+                    </div>
+                    <div class="card-body px-4">
+                        @if (shop.Products.Count == 0)
+                        {
+                            <div class="empty-state py-4">No products added for this shop.</div>
+                        }
+                        else
+                        {
+                            <div class="shop-catalog-list">
+                                @foreach (var product in shop.Products)
+                                {
+                                    <div class="shop-catalog-item">
+                                        <div class="d-flex gap-3">
+                                            <div class="shop-product-image">
+                                                @if (SubmittedUrls(product.ImageUrls).Any())
+                                                {
+                                                    <img src="@ToReviewUrl(SubmittedUrls(product.ImageUrls).First())" alt="@($"{product.ProductName} image")" />
+                                                }
+                                                else
+                                                {
+                                                    <i class="bi bi-box-seam"></i>
+                                                }
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <div class="d-flex flex-wrap gap-2 align-items-center mb-1">
+                                                    <h3>@product.ProductName</h3>
+                                                    <span class="@CatalogStatusBadgeClass(product.IsActive)">@CatalogStatus(product.IsActive)</span>
+                                                </div>
+                                                <p class="text-muted mb-2">@Fallback(product.Description)</p>
+                                                <div class="shop-catalog-meta">
+                                                    <span><i class="bi bi-cash"></i>@FormatCurrency(product.Price)</span>
+                                                    <span><i class="bi bi-boxes"></i>@product.StockQuantity in stock</span>
+                                                    <span><i class="bi bi-calendar-plus"></i>@FormatDate(product.CreatedAt)</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mt-1">
+            <div class="col-xl-5">
+                <div class="card admin-table-card h-100">
+                    <div class="card-header bg-white border-bottom-0 pt-4 px-4">
+                        <h2 class="admin-page-title mb-1">Operating Hours</h2>
+                        <p class="admin-page-description mb-0">Published shop availability for customer bookings.</p>
+                    </div>
+                    <div class="card-body px-4">
+                        @if (shop.OperatingHours.Count == 0)
+                        {
+                            <div class="empty-state py-4">No operating hours recorded.</div>
+                        }
+                        else
+                        {
+                            <div class="table-responsive">
+                                <table class="table align-middle mb-0">
+                                    <thead class="table-light text-muted text-uppercase">
+                                        <tr>
+                                            <th>Day</th>
+                                            <th>Hours</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var hour in shop.OperatingHours)
+                                        {
+                                            <tr>
+                                                <td class="fw-semibold">@hour.DayName</td>
+                                                <td>@(hour.IsClosed ? "Closed" : $"{hour.OpeningTime} - {hour.ClosingTime}")</td>
+                                                <td><span class="@CatalogStatusBadgeClass(!hour.IsClosed)">@(hour.IsClosed ? "Closed" : "Open")</span></td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-xl-7">
+                <div class="card admin-table-card h-100">
+                    <div class="card-header bg-white border-bottom-0 pt-4 px-4">
+                        <h2 class="admin-page-title mb-1">Assigned Mechanics</h2>
+                        <p class="admin-page-description mb-0">Technicians currently or previously connected to this shop.</p>
+                    </div>
+                    <div class="card-body p-0">
+                        @if (shop.Mechanics.Count == 0)
+                        {
+                            <div class="empty-state py-4">No mechanics are assigned to this shop.</div>
+                        }
+                        else
+                        {
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle mb-0">
+                                    <thead class="table-light text-muted text-uppercase">
+                                        <tr>
+                                            <th class="ps-4">Mechanic</th>
+                                            <th>Rating</th>
+                                            <th>Availability</th>
+                                            <th>Assignment</th>
+                                            <th class="text-end pe-4">Profile</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var mechanic in shop.Mechanics)
+                                        {
+                                            <tr>
+                                                <td class="ps-4">
+                                                    <div class="fw-semibold">@mechanic.Name</div>
+                                                    <div class="small text-muted">#@mechanic.MechanicId</div>
+                                                </td>
+                                                <td>@mechanic.Rating.ToString("0.0")</td>
+                                                <td><span class="@MechanicAvailabilityBadgeClass(mechanic.Status)">@LabelStatus(mechanic.Status)</span></td>
+                                                <td>
+                                                    <span class="@CatalogStatusBadgeClass(mechanic.IsActive)">@CatalogStatus(mechanic.IsActive)</span>
+                                                    <div class="small text-muted">@FormatDate(mechanic.AssignedAt)</div>
+                                                </td>
+                                                <td class="text-end pe-4">
+                                                    <a href="/mechanics/details/@mechanic.MechanicId" class="btn btn-sm btn-outline-secondary">View Profile</a>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
 
 @code {
     [Parameter]
     public int Id { get; set; }
 
     private ShopDetailsDto? shop;
-    private bool isProcessing = false;
+    private bool isProcessing;
     private string? statusMessage;
     private string statusType = "danger";
+    private ShopApprovalResultDto? approvalResult;
 
     protected override async Task OnInitializedAsync()
     {
@@ -213,9 +459,11 @@ else
         isProcessing = true;
         try
         {
-            await AdminApi.ApproveShopAsync(Id);
+            approvalResult = await AdminApi.ApproveShopAsync(Id);
             statusType = "success";
-            statusMessage = "Shop approved successfully.";
+            statusMessage = approvalResult.OwnerActivated
+                ? "Shop approved successfully. The owner account is now active."
+                : "Shop approved successfully.";
             await LoadShop();
         }
         catch (Exception ex)
@@ -252,4 +500,240 @@ else
             isProcessing = false;
         }
     }
+
+    private async Task DeleteShop()
+    {
+        bool confirmed = await JS.InvokeAsync<bool>(
+            "confirm",
+            $"Delete {shop?.ShopName}? This disables its services, products, and mechanic assignments. Its shop-admin login will also be deleted if this is the owner's only shop.");
+        if (!confirmed) return;
+
+        isProcessing = true;
+        try
+        {
+            await AdminApi.DeleteShopAsync(Id);
+            Navigation.NavigateTo("/shops");
+        }
+        catch (Exception ex)
+        {
+            statusType = "danger";
+            statusMessage = ex.Message;
+        }
+        finally
+        {
+            isProcessing = false;
+        }
+    }
+
+    private RenderFragment DetailItem(string label, string value, string icon) => builder =>
+    {
+        if (!HasDisplayValue(value))
+        {
+            return;
+        }
+
+        builder.OpenElement(0, "div");
+        builder.AddAttribute(1, "class", "shop-detail-fact");
+        builder.OpenElement(2, "span");
+        builder.AddAttribute(3, "class", "shop-detail-fact-icon");
+        builder.OpenElement(4, "i");
+        builder.AddAttribute(5, "class", icon);
+        builder.CloseElement();
+        builder.CloseElement();
+        builder.OpenElement(6, "div");
+        builder.OpenElement(7, "small");
+        builder.AddContent(8, label);
+        builder.CloseElement();
+        builder.OpenElement(9, "strong");
+        builder.AddContent(10, value);
+        builder.CloseElement();
+        builder.CloseElement();
+        builder.CloseElement();
+    };
+
+    private static ShopDocument[] DocumentsFor(ShopDetailsDto shop)
+    {
+        ShopDocument[] documents =
+        [
+            CreateDocument("Cover photo / shop image", "Public cover image uploaded from the shop-admin app.", "bi bi-image", shop.ShopImageUrl),
+            CreateDocument("Profile picture / logo", "Small shop profile image shown on customer-facing shop cards.", "bi bi-person-square", shop.ShopLogoUrl),
+            CreateDocument("Business permit", "Official permit or registration document for the business.", "bi bi-file-earmark-check", shop.BusinessPermitUrl),
+            CreateDocument("Owner valid ID / license", "Government ID, license, or identity document submitted by the owner.", "bi bi-person-vcard", shop.OwnerValidIdUrl)
+        ];
+
+        return documents.Where(document => document.HasFile).ToArray();
+    }
+
+    private static ShopDocument CreateDocument(string title, string subtitle, string icon, string? rawUrl)
+    {
+        var publicUrl = ToReviewUrl(rawUrl);
+        return new ShopDocument(
+            title,
+            subtitle,
+            icon,
+            rawUrl?.Trim() ?? string.Empty,
+            publicUrl,
+            HasSubmitted(rawUrl),
+            IsImage(publicUrl),
+            IsPdf(publicUrl));
+    }
+
+    private static IEnumerable<string> SubmittedUrls(IEnumerable<string> urls)
+    {
+        return urls.Where(HasSubmitted);
+    }
+
+    private static string ToReviewUrl(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return string.Empty;
+        }
+
+        var trimmed = value.Trim();
+        if (Uri.TryCreate(trimmed, UriKind.Absolute, out var absolute))
+        {
+            if (absolute.AbsolutePath.StartsWith("/uploads/", StringComparison.OrdinalIgnoreCase) &&
+                (absolute.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase) ||
+                 absolute.Host.Equals("127.0.0.1", StringComparison.OrdinalIgnoreCase)) &&
+                absolute.Port != 5000)
+            {
+                return $"http://localhost:5000{absolute.PathAndQuery}";
+            }
+
+            return absolute.ToString();
+        }
+
+        var path = trimmed.TrimStart('/');
+        return path.StartsWith("uploads/", StringComparison.OrdinalIgnoreCase)
+            ? $"http://localhost:5000/{path}"
+            : trimmed;
+    }
+
+    private static bool HasSubmitted(string? value)
+    {
+        return !string.IsNullOrWhiteSpace(value) &&
+            !string.Equals(value.Trim(), "N/A", StringComparison.OrdinalIgnoreCase) &&
+            !string.Equals(value.Trim(), "Not submitted", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool HasDisplayValue(string? value)
+    {
+        if (!HasSubmitted(value))
+        {
+            return false;
+        }
+
+        var trimmed = value!.Trim();
+        return !string.Equals(trimmed, "Not recorded", StringComparison.OrdinalIgnoreCase) &&
+            !string.Equals(trimmed, "No address provided", StringComparison.OrdinalIgnoreCase) &&
+            !string.Equals(trimmed, "No description provided.", StringComparison.OrdinalIgnoreCase) &&
+            !string.Equals(trimmed, "Price not set", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsImage(string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return false;
+        }
+
+        var lower = value.Split('?')[0].ToLowerInvariant();
+        return lower.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
+            lower.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase) ||
+            lower.EndsWith(".png", StringComparison.OrdinalIgnoreCase) ||
+            lower.EndsWith(".webp", StringComparison.OrdinalIgnoreCase) ||
+            lower.EndsWith(".gif", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsPdf(string? value)
+    {
+        return value?.Split('?')[0].EndsWith(".pdf", StringComparison.OrdinalIgnoreCase) == true;
+    }
+
+    private static string Fallback(string? value)
+    {
+        return string.IsNullOrWhiteSpace(value) ? "Not submitted" : value.Trim();
+    }
+
+    private static string Coordinates(ShopDetailsDto shop)
+    {
+        return shop.Latitude.HasValue && shop.Longitude.HasValue
+            ? $"{shop.Latitude.Value:0.######}, {shop.Longitude.Value:0.######}"
+            : "Not submitted";
+    }
+
+    private static string FormatDate(DateTime value)
+    {
+        return value == default ? "Not recorded" : value.ToString("MMM dd, yyyy h:mm tt", CultureInfo.InvariantCulture);
+    }
+
+    private static string FormatDate(DateTime? value)
+    {
+        return value.HasValue ? FormatDate(value.Value) : "Not recorded";
+    }
+
+    private static string FormatCurrency(decimal value)
+    {
+        return value <= 0
+            ? "Price not set"
+            : value.ToString("C", CultureInfo.GetCultureInfo("en-PH"));
+    }
+
+    private static string EmailStatus(bool isVerified)
+    {
+        return isVerified ? "Email verified" : "Email not verified";
+    }
+
+    private static string LabelStatus(string status)
+    {
+        return string.IsNullOrWhiteSpace(status)
+            ? "Unknown"
+            : char.ToUpperInvariant(status[0]) + status[1..].ToLowerInvariant();
+    }
+
+    private static string ShopStatusBadgeClass(string status)
+    {
+        return status.Trim().ToLowerInvariant() switch
+        {
+            "verified" => "badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill",
+            "pending" => "badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 rounded-pill text-dark",
+            "suspended" => "badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25 rounded-pill",
+            "rejected" => "badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 rounded-pill",
+            "deleted" => "badge bg-dark bg-opacity-10 text-dark border border-dark border-opacity-25 rounded-pill",
+            _ => "badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 rounded-pill"
+        };
+    }
+
+    private static string CatalogStatus(bool active)
+    {
+        return active ? "Active" : "Inactive";
+    }
+
+    private static string CatalogStatusBadgeClass(bool active)
+    {
+        return active
+            ? "badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill"
+            : "badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 rounded-pill";
+    }
+
+    private static string MechanicAvailabilityBadgeClass(string status)
+    {
+        return status.Trim().ToLowerInvariant() switch
+        {
+            "online" or "available" => "badge bg-success bg-opacity-10 text-success border border-success border-opacity-25 rounded-pill",
+            "busy" => "badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 rounded-pill text-dark",
+            _ => "badge bg-secondary bg-opacity-10 text-secondary border border-secondary border-opacity-25 rounded-pill"
+        };
+    }
+
+    private sealed record ShopDocument(
+        string Title,
+        string Subtitle,
+        string Icon,
+        string RawUrl,
+        string PublicUrl,
+        bool HasFile,
+        bool IsImage,
+        bool IsPdf);
 }

@@ -2,12 +2,12 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="BIKEMATES_ADMIN.Pages.Account.AccCreate0"
-             BackgroundColor="#F6F6F6">
+             BackgroundColor="White">
 
     <Grid RowDefinitions="Auto,*,Auto">
         <Border Grid.Row="0" BackgroundColor="#242424" StrokeThickness="0" Padding="20,24,20,18">
             <VerticalStackLayout Spacing="2">
-                <Label Text="Create an Account" FontSize="22" FontAttributes="Bold" TextColor="White" />
+                <Label Text="Create an Account" FontSize="18" FontAttributes="Bold" TextColor="White" />
                 <Label Text="Step 1 of 5 - Account credentials" FontSize="13" TextColor="#E6E6E6" />
             </VerticalStackLayout>
         </Border>
@@ -18,31 +18,32 @@
                     <Border.StrokeShape><RoundRectangle CornerRadius="8" /></Border.StrokeShape>
                     <VerticalStackLayout Spacing="13">
                         <Label Text="Account credentials" FontSize="18" FontAttributes="Bold" TextColor="#242424" />
-                        <Label Text="Use the email and password you will use to access the shop admin side." FontSize="13" TextColor="#6E6E6E" />
+                        <Label Text="Create the owner account that BikeMate web admin will review with your shop documents." FontSize="13" TextColor="#6E6E6E" />
 
                         <Label Text="Phone number *" FontSize="11" FontAttributes="Bold" TextColor="#242424" />
                         <Border Stroke="#DCDCDC" BackgroundColor="#FAFAFA" Padding="12,2">
                             <Border.StrokeShape><RoundRectangle CornerRadius="8" /></Border.StrokeShape>
-                            <Entry x:Name="PhoneEntry" Placeholder="Phone number" Keyboard="Telephone" />
+                            <Entry x:Name="PhoneEntry" Placeholder="09XXXXXXXXX" Keyboard="Telephone" MaxLength="11" ReturnType="Next" />
                         </Border>
 
                         <Label Text="Email *" FontSize="11" FontAttributes="Bold" TextColor="#242424" />
                         <Border Stroke="#DCDCDC" BackgroundColor="#FAFAFA" Padding="12,2">
                             <Border.StrokeShape><RoundRectangle CornerRadius="8" /></Border.StrokeShape>
-                            <Entry x:Name="EmailEntry" Placeholder="admin@example.com" Keyboard="Email" />
+                            <Entry x:Name="EmailEntry" Placeholder="name@example.com" Keyboard="Email" ReturnType="Next" />
                         </Border>
 
                         <Label Text="Password *" FontSize="11" FontAttributes="Bold" TextColor="#242424" />
                         <Border Stroke="#DCDCDC" BackgroundColor="#FAFAFA" Padding="12,2">
                             <Border.StrokeShape><RoundRectangle CornerRadius="8" /></Border.StrokeShape>
-                            <Entry x:Name="PasswordEntry" Placeholder="Password" IsPassword="True" />
+                            <Entry x:Name="PasswordEntry" Placeholder="Password" IsPassword="True" ReturnType="Next" />
                         </Border>
 
                         <Label Text="Confirm password *" FontSize="11" FontAttributes="Bold" TextColor="#242424" />
                         <Border Stroke="#DCDCDC" BackgroundColor="#FAFAFA" Padding="12,2">
                             <Border.StrokeShape><RoundRectangle CornerRadius="8" /></Border.StrokeShape>
-                            <Entry x:Name="ConfirmPasswordEntry" Placeholder="Confirm password" IsPassword="True" />
+                            <Entry x:Name="ConfirmPasswordEntry" Placeholder="Confirm password" IsPassword="True" ReturnType="Go" />
                         </Border>
+                        <Label Text="Use more than 8 characters." FontSize="11" TextColor="#6E6E6E" />
                     </VerticalStackLayout>
                 </Border>
             </VerticalStackLayout>

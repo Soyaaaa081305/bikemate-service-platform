@@ -2,19 +2,19 @@
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="BIKEMATES_ADMIN.Pages.Account.Login"
-             BackgroundColor="#F6F6F6">
+             BackgroundColor="White">
 
     <ScrollView>
         <VerticalStackLayout Padding="20,30,20,28" Spacing="18">
             <VerticalStackLayout Spacing="8">
                 <Image Source="bikemate_logo.png" HeightRequest="88" HorizontalOptions="Center" />
                 <Label Text="BIKEMATES ADMIN"
-                       FontFamily="OpenSansSemibold"
-                       FontSize="19"
+                       FontFamily="Inter"
+                       FontSize="18"
                        FontAttributes="Bold"
                        TextColor="#242424"
                        HorizontalTextAlignment="Center" />
-                <Label Text="Manage your bike shop, team, orders, and service requests."
+                <Label Text="Manage a BikeMate partner shop after admin approval."
                        FontSize="13"
                        TextColor="#6E6E6E"
                        HorizontalTextAlignment="Center" />
@@ -27,14 +27,44 @@
                 <VerticalStackLayout Spacing="14">
                     <VerticalStackLayout Spacing="4">
                         <Label Text="Shop admin sign in"
-                               FontFamily="OpenSansSemibold"
+                               FontFamily="Inter"
                                FontSize="18"
                                FontAttributes="Bold"
                                TextColor="#242424" />
-                        <Label Text="Your role and assigned bike shop are loaded after login."
+                        <Label Text="Sign in with an approved ShopAdmin account."
                                FontSize="13"
                                TextColor="#6E6E6E" />
                     </VerticalStackLayout>
+
+                    <Border x:Name="PendingApplicationPanel"
+                            IsVisible="False"
+                            BackgroundColor="#FFF7F2"
+                            Stroke="#FFD1BD"
+                            Padding="12">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="8" />
+                        </Border.StrokeShape>
+                        <VerticalStackLayout Spacing="8">
+                            <Label Text="Application waiting for approval"
+                                   FontFamily="Inter"
+                                   FontSize="14"
+                                   FontAttributes="Bold"
+                                   TextColor="#7A3A12" />
+                            <Label x:Name="PendingApplicationLabel"
+                                   Text="Your submitted shop-admin application is saved on this device."
+                                   FontSize="12"
+                                   TextColor="#7A3A12" />
+                            <Button Text="View Submission"
+                                    BackgroundColor="White"
+                                    TextColor="#242424"
+                                    BorderColor="#FFD1BD"
+                                    BorderWidth="1"
+                                    FontAttributes="Bold"
+                                    CornerRadius="8"
+                                    HeightRequest="42"
+                                    Clicked="OnViewPendingApplicationClicked" />
+                        </VerticalStackLayout>
+                    </Border>
 
                     <VerticalStackLayout Spacing="5">
                         <Label Text="Email address" FontSize="11" FontAttributes="Bold" TextColor="#242424" />
@@ -43,9 +73,10 @@
                                 <RoundRectangle CornerRadius="8" />
                             </Border.StrokeShape>
                             <Entry x:Name="EmailEntry"
-                                   Placeholder="admin@bikemate.test"
+                                   Placeholder="name@example.com"
                                    Keyboard="Email"
                                    ReturnType="Next"
+                                   TextChanged="OnEmailChanged"
                                    TextColor="#242424"
                                    PlaceholderColor="#6E6E6E" />
                         </Border>
@@ -64,6 +95,15 @@
                                    TextColor="#242424"
                                    PlaceholderColor="#6E6E6E" />
                         </Border>
+                        <Button Text="Forgot password?"
+                                BackgroundColor="Transparent"
+                                TextColor="#FF6B2C"
+                                FontAttributes="Bold"
+                                HorizontalOptions="End"
+                                HeightRequest="34"
+                                MinimumHeightRequest="34"
+                                Padding="0"
+                                Clicked="OnForgotPasswordClicked" />
                     </VerticalStackLayout>
 
                     <Button x:Name="LoginButton"
@@ -75,7 +115,12 @@
                             HeightRequest="48"
                             Clicked="OnLoginClicked" />
 
-                    <Button Text="Create Account"
+                    <Label Text="First time here? Submit your shop-admin application for BikeMate review."
+                           FontSize="13"
+                           TextColor="#6E6E6E"
+                           HorizontalTextAlignment="Center" />
+
+                    <Button Text="Apply for Shop Admin"
                             BackgroundColor="White"
                             TextColor="#242424"
                             BorderColor="#DADCE0"
@@ -85,13 +130,15 @@
                             HeightRequest="48"
                             Clicked="OnCreateAccountClicked" />
 
-                    <Button Text="Forgot password?"
+                    <Button Text="Connection settings"
                             BackgroundColor="Transparent"
-                            TextColor="#FF6B2C"
+                            TextColor="#6E6E6E"
                             FontAttributes="Bold"
-                            HeightRequest="34"
-                            MinimumHeightRequest="34"
-                            Clicked="OnForgotPasswordClicked" />
+                            FontSize="11"
+                            HeightRequest="30"
+                            MinimumHeightRequest="30"
+                            Padding="0"
+                            Clicked="OnConnectionSettingsClicked" />
                 </VerticalStackLayout>
             </Border>
         </VerticalStackLayout>

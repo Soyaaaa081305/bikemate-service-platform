@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Headers;
+using Microsoft.Maui.Storage;
 
 namespace BikeMate.Helpers;
 
@@ -15,20 +16,57 @@ public sealed class ApiSessionExpiredException(string message) : InvalidOperatio
 
 public static class ApiConfig
 {
-    public const string BaseUrl =
+    private const string ApiBaseUrlPreferenceKey = "bikemate_api_base_url";
+    private const string ApiBaseUrlEnvironmentVariable = "BIKEMATE_API_BASE_URL";
+
+    private const string DefaultBaseUrl =
 #if ANDROID
         "https://hungrily-imagines-suffering.ngrok-free.dev/api/";
 #else
         "https://localhost:5001/api/";
 #endif
 
+    public static string BaseUrl => ResolveBaseUrl();
+
+    public static string DeviceDefaultBaseUrl => EnsureApiPath(DefaultBaseUrl);
+
+    public static bool HasBaseUrlOverride =>
+        !string.IsNullOrWhiteSpace(Preferences.Default.Get(ApiBaseUrlPreferenceKey, string.Empty));
+
     public static bool UsesLocalDevelopmentCertificate =>
         BaseUrl.Contains("10.0.2.2", StringComparison.OrdinalIgnoreCase) ||
-        BaseUrl.Contains("localhost", StringComparison.OrdinalIgnoreCase);
+        BaseUrl.Contains("localhost", StringComparison.OrdinalIgnoreCase) ||
+        BaseUrl.Contains("127.0.0.1", StringComparison.OrdinalIgnoreCase);
 
     public static bool UsesNgrokTunnel =>
         Uri.TryCreate(BaseUrl, UriKind.Absolute, out var uri) &&
         uri.Host.Contains("ngrok", StringComparison.OrdinalIgnoreCase);
+
+    public static string ToPublicUrl(string? value, string fallback)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return fallback;
+        }
+
+        if (Uri.TryCreate(value, UriKind.Absolute, out var absoluteUri))
+        {
+            return absoluteUri.AbsolutePath.StartsWith("/uploads/", StringComparison.OrdinalIgnoreCase)
+                ? ToCurrentApiOriginUrl(absoluteUri.PathAndQuery)
+                : absoluteUri.ToString();
+        }
+
+        var relativePath = value.TrimStart('/');
+        return ToCurrentApiOriginUrl(relativePath);
+    }
+
+    private static string ToCurrentApiOriginUrl(string path)
+    {
+        var apiBase = new Uri(BaseUrl, UriKind.Absolute);
+        var origin = new Uri($"{apiBase.Scheme}://{apiBase.Authority}/");
+        var relativePath = path.TrimStart('/');
+        return new Uri(origin, relativePath).ToString();
+    }
 
     public static void AddRequiredHeaders(HttpClient http)
     {
@@ -36,6 +74,22 @@ public static class ApiConfig
         {
             http.DefaultRequestHeaders.TryAddWithoutValidation("ngrok-skip-browser-warning", "true");
         }
+    }
+
+    public static void SaveBaseUrlOverride(string baseUrl)
+    {
+        var normalized = EnsureApiPath(baseUrl);
+        if (!Uri.TryCreate(normalized, UriKind.Absolute, out _))
+        {
+            throw new InvalidOperationException("Enter a valid BikeMate API URL, for example https://your-ngrok-domain.ngrok-free.dev/api/ or http://127.0.0.1:5000/api/ when using adb reverse.");
+        }
+
+        Preferences.Default.Set(ApiBaseUrlPreferenceKey, normalized);
+    }
+
+    public static void ClearBaseUrlOverride()
+    {
+        Preferences.Default.Remove(ApiBaseUrlPreferenceKey);
     }
 
     public static HttpClient CreateHttpClient()
@@ -115,5 +169,30 @@ public static class ApiConfig
 
         await AppNavigation.HandleUnauthorizedAsync();
         throw new ApiSessionExpiredException("Your BikeMate session has expired. Please sign in again.");
+    }
+
+    private static string ResolveBaseUrl()
+    {
+        var stored = Preferences.Default.Get(ApiBaseUrlPreferenceKey, string.Empty);
+        if (!string.IsNullOrWhiteSpace(stored))
+        {
+            return EnsureApiPath(stored);
+        }
+
+        var environmentValue = Environment.GetEnvironmentVariable(ApiBaseUrlEnvironmentVariable);
+        return EnsureApiPath(string.IsNullOrWhiteSpace(environmentValue) ? DefaultBaseUrl : environmentValue);
+    }
+
+    private static string EnsureApiPath(string value)
+    {
+        var trimmed = value.Trim();
+        if (!trimmed.EndsWith("/", StringComparison.Ordinal))
+        {
+            trimmed += "/";
+        }
+
+        return trimmed.EndsWith("/api/", StringComparison.OrdinalIgnoreCase)
+            ? trimmed
+            : $"{trimmed.TrimEnd('/')}/api/";
     }
 }

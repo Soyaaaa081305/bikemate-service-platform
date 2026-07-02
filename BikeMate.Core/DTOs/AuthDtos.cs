@@ -7,7 +7,8 @@ public sealed record RegisterRequestDto(
     string Password,
     string ConfirmPassword,
     string? PhoneNumber,
-    string Role);
+    string Role,
+    DateTime? Birthdate = null);
 
 public sealed record LoginRequestDto(
     string Email,

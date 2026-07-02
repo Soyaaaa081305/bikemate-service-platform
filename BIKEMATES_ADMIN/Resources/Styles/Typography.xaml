@@ -4,7 +4,8 @@
 
     <!-- BIKE MATES ADMIN TYPOGRAPHY + THEME
          Merge this file before AdminStyles.xaml in App.xaml.
-         Keep all font sizes, colors, and label styles here so every page stays consistent. -->
+         Keep typography on the BikeMate three-size scale:
+         11 caption, 13 body, 18 title. Fonts: PT Sans Caption, Public Sans, Inter. -->
 
     <Color x:Key="Navy">#21313F</Color>
     <Color x:Key="NavySoft">#2B3E4E</Color>
@@ -21,11 +22,6 @@
     <Color x:Key="Blue">#2563EB</Color>
     <Color x:Key="Violet">#7C3AED</Color>
     <Color x:Key="Yellow">#CA8A04</Color>
-    <Color x:Key="StatusAvailable">#16A34A</Color>
-    <Color x:Key="StatusUnavailable">#DC2626</Color>
-    <Color x:Key="StatusDispatched">#FF8A3D</Color>
-    <Color x:Key="StatusArrived">#CA8A04</Color>
-
     <Color x:Key="SoftOrange">#FFF3E8</Color>
     <Color x:Key="SoftGreen">#F0FDF4</Color>
     <Color x:Key="SoftBlue">#EFF6FF</Color>
@@ -37,50 +33,50 @@
     <!-- Default typography -->
     <Style TargetType="Label">
         <Setter Property="TextColor" Value="{StaticResource TextDark}" />
-        <Setter Property="FontFamily" Value="OpenSansRegular" />
+        <Setter Property="FontFamily" Value="PublicSans" />
         <Setter Property="FontSize" Value="13" />
     </Style>
 
     <Style x:Key="AppTitle" TargetType="Label">
         <Setter Property="TextColor" Value="White" />
-        <Setter Property="FontFamily" Value="OpenSansSemibold" />
-        <Setter Property="FontSize" Value="20" />
+        <Setter Property="FontFamily" Value="Inter" />
+        <Setter Property="FontSize" Value="18" />
         <Setter Property="FontAttributes" Value="Bold" />
     </Style>
 
     <Style x:Key="PageTitle" TargetType="Label">
         <Setter Property="TextColor" Value="{StaticResource TextDark}" />
-        <Setter Property="FontFamily" Value="OpenSansSemibold" />
-        <Setter Property="FontSize" Value="20" />
+        <Setter Property="FontFamily" Value="Inter" />
+        <Setter Property="FontSize" Value="18" />
         <Setter Property="FontAttributes" Value="Bold" />
     </Style>
 
     <Style x:Key="HeaderTitle" TargetType="Label">
         <Setter Property="TextColor" Value="White" />
-        <Setter Property="FontFamily" Value="OpenSansSemibold" />
+        <Setter Property="FontFamily" Value="Inter" />
         <Setter Property="FontSize" Value="18" />
         <Setter Property="FontAttributes" Value="Bold" />
     </Style>
 
     <Style x:Key="HeaderSubtitle" TargetType="Label">
         <Setter Property="TextColor" Value="#B8C0CC" />
-        <Setter Property="FontFamily" Value="OpenSansRegular" />
-        <Setter Property="FontSize" Value="12" />
+        <Setter Property="FontFamily" Value="PTSansCaption" />
+        <Setter Property="FontSize" Value="11" />
     </Style>
 
     <Style x:Key="SectionLabel" TargetType="Label">
         <Setter Property="TextColor" Value="#6B7280" />
-        <Setter Property="FontFamily" Value="OpenSansSemibold" />
+        <Setter Property="FontFamily" Value="PTSansCaptionBold" />
         <Setter Property="FontSize" Value="11" />
         <Setter Property="FontAttributes" Value="Bold" />
-        <Setter Property="CharacterSpacing" Value="1" />
+        <Setter Property="CharacterSpacing" Value="0" />
         <Setter Property="TextTransform" Value="Uppercase" />
         <Setter Property="Margin" Value="2,8,0,2" />
     </Style>
 
     <Style x:Key="ItemTitle" TargetType="Label">
         <Setter Property="TextColor" Value="{StaticResource TextDark}" />
-        <Setter Property="FontFamily" Value="OpenSansSemibold" />
+        <Setter Property="FontFamily" Value="Inter" />
         <Setter Property="FontSize" Value="13" />
         <Setter Property="FontAttributes" Value="Bold" />
         <Setter Property="LineBreakMode" Value="TailTruncation" />
@@ -88,26 +84,26 @@
 
     <Style x:Key="BodyText" TargetType="Label">
         <Setter Property="TextColor" Value="{StaticResource TextDark}" />
-        <Setter Property="FontFamily" Value="OpenSansRegular" />
+        <Setter Property="FontFamily" Value="PublicSans" />
         <Setter Property="FontSize" Value="13" />
     </Style>
 
     <Style x:Key="SmallMuted" TargetType="Label">
         <Setter Property="TextColor" Value="{StaticResource MutedText}" />
-        <Setter Property="FontFamily" Value="OpenSansRegular" />
+        <Setter Property="FontFamily" Value="PTSansCaption" />
         <Setter Property="FontSize" Value="11" />
     </Style>
 
     <Style x:Key="TinyMuted" TargetType="Label">
         <Setter Property="TextColor" Value="{StaticResource MutedText}" />
-        <Setter Property="FontFamily" Value="OpenSansRegular" />
-        <Setter Property="FontSize" Value="10" />
+        <Setter Property="FontFamily" Value="PTSansCaption" />
+        <Setter Property="FontSize" Value="11" />
     </Style>
 
     <Style x:Key="StatNumber" TargetType="Label">
         <Setter Property="TextColor" Value="{StaticResource TextDark}" />
-        <Setter Property="FontFamily" Value="OpenSansSemibold" />
-        <Setter Property="FontSize" Value="22" />
+        <Setter Property="FontFamily" Value="Inter" />
+        <Setter Property="FontSize" Value="18" />
         <Setter Property="FontAttributes" Value="Bold" />
     </Style>
 

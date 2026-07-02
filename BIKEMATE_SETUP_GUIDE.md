@@ -203,19 +203,18 @@ Only enable call UI when Agora is configured and a native MAUI binding exists.
 
 Until the native SDK is added, BikeMate should show an in-app support session state, not fake video/audio.
 
-## 13. Blazor Admin And Shop Web
+## 13. System Admin Web
 
-Recommended project:
+Use the single system admin web project:
 
 ```powershell
-dotnet new blazor -n BikeMate.Web
-dotnet sln BikeMate.sln add BikeMate.Web\BikeMate.Web.csproj
+dotnet run --project BikeMate.WebAdmin\BikeMate.WebAdmin\BikeMate.WebAdmin.csproj
 ```
 
-Use the same API and database. Suggested routes:
+Use the same API and database. The old `BikeMate.Web` customer/shop web project is not part of the active solution. Suggested routes:
 
 - `/admin/login`, `/admin/dashboard`, `/admin/users`, `/admin/service-requests`, `/admin/emergency-requests`, `/admin/payments`, `/admin/audit-logs`
-- `/shop/login`, `/shop/dashboard`, `/shop/profile`, `/shop/services`, `/shop/bookings`, `/shop/inventory`, `/shop/payments`, `/shop/reviews`
+- `/admin/shops`, `/admin/mechanics`, `/admin/approvals`
 
 Global CSS variables:
 

@@ -23,6 +23,11 @@ public sealed class AuthController(
     [AllowAnonymous]
     public async Task<ActionResult<AuthResponseDto>> Register(RegisterRequestDto dto, CancellationToken cancellationToken)
     {
+        if (!string.Equals(dto.Role, AppRoles.Customer, StringComparison.OrdinalIgnoreCase))
+        {
+            return BadRequest(new { error = "Only customer accounts can self-register. Shop and mechanic accounts must be created or approved by BikeMate admin." });
+        }
+
         return Ok(await authService.RegisterAsync(dto, cancellationToken));
     }
 
@@ -62,14 +67,14 @@ public sealed class AuthController(
     [AllowAnonymous]
     public async Task<ActionResult<AuthResponseDto>> GoogleLogin(GoogleLoginRequestDto dto, CancellationToken cancellationToken)
     {
-        return Ok(await authService.GoogleLoginAsync(dto, cancellationToken));
+        return Ok(await authService.GoogleLoginAsync(dto with { Role = AppRoles.Customer }, cancellationToken));
     }
 
     [HttpPost("google/mobile-complete")]
     [AllowAnonymous]
     public async Task<ActionResult<AuthResponseDto>> GoogleMobileComplete(GoogleLoginRequestDto dto, CancellationToken cancellationToken)
     {
-        return Ok(await authService.GoogleLoginAsync(dto, cancellationToken));
+        return Ok(await authService.GoogleLoginAsync(dto with { Role = AppRoles.Customer }, cancellationToken));
     }
 
     [HttpGet("google/start")]
@@ -90,18 +95,41 @@ public sealed class AuthController(
         }
 
         var redirectUri = GetGoogleRedirectUri();
-        var selectedRole = AppRoles.All.Contains(role ?? string.Empty) ? role! : AppRoles.Customer;
+        var loginRole = string.Equals(role, AppRoles.ShopAdmin, StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(role, AppRoles.Mechanic, StringComparison.OrdinalIgnoreCase)
+            ? role
+            : AppRoles.Customer;
         var query = new Dictionary<string, string?>
         {
             ["client_id"] = clientId,
             ["redirect_uri"] = redirectUri,
             ["response_type"] = "code",
             ["scope"] = "openid email profile",
-            ["state"] = selectedRole,
+            ["state"] = loginRole,
             ["prompt"] = "select_account"
         };
 
         return Redirect(QueryHelpers.AddQueryString("https://accounts.google.com/o/oauth2/v2/auth", query));
+    }
+
+    [HttpGet("google/status")]
+    [AllowAnonymous]
+    public IActionResult GoogleStatus()
+    {
+        var clientId = GetGoogleWebClientId();
+        var clientSecret = GetGoogleWebClientSecret();
+        var redirectUri = GetGoogleRedirectUri();
+        var mobileCallback = GetMobileGoogleCallbackUri();
+
+        return Ok(new
+        {
+            configured = !string.IsNullOrWhiteSpace(clientId) && !string.IsNullOrWhiteSpace(clientSecret),
+            webClientIdEnding = MaskGoogleClientId(clientId),
+            hasWebClientSecret = !string.IsNullOrWhiteSpace(clientSecret),
+            redirectUri,
+            mobileCallbackUri = mobileCallback,
+            note = "The redirectUri must be added exactly in Google Cloud Console under the Web OAuth client Authorized redirect URIs."
+        });
     }
 
     [HttpGet("google/callback")]
@@ -125,8 +153,7 @@ public sealed class AuthController(
         try
         {
             var idToken = await ExchangeGoogleCodeForIdTokenAsync(code, cancellationToken);
-            var role = AppRoles.All.Contains(state ?? string.Empty) ? state! : AppRoles.Customer;
-            var auth = await authService.GoogleLoginAsync(new GoogleLoginRequestDto(idToken, role), cancellationToken);
+            var auth = await authService.GoogleLoginAsync(new GoogleLoginRequestDto(idToken, AppRoles.Customer), cancellationToken);
             var callback = QueryHelpers.AddQueryString(GetMobileGoogleCallbackUri(), new Dictionary<string, string?>
             {
                 ["access_token"] = auth.AccessToken,
@@ -162,7 +189,7 @@ public sealed class AuthController(
     public async Task<IActionResult> ForgotPassword(ForgotPasswordRequestDto dto, CancellationToken cancellationToken)
     {
         await authService.ForgotPasswordAsync(dto, cancellationToken);
-        return Ok(new { message = "If that email exists, BikeMate sent a reset code." });
+        return Ok(new { message = "BikeMate sent a reset code." });
     }
 
     [HttpPost("verify-password-reset-otp")]
@@ -178,7 +205,7 @@ public sealed class AuthController(
     public async Task<IActionResult> ResendPasswordResetOtp(ResendPasswordResetOtpRequestDto dto, CancellationToken cancellationToken)
     {
         await authService.ResendPasswordResetOtpAsync(dto, cancellationToken);
-        return Ok(new { message = "If that email exists, BikeMate sent a new reset code." });
+        return Ok(new { message = "BikeMate sent a new reset code." });
     }
 
     [HttpPost("reset-password")]
@@ -206,7 +233,7 @@ public sealed class AuthController(
     private async Task<string> ExchangeGoogleCodeForIdTokenAsync(string code, CancellationToken cancellationToken)
     {
         var clientId = GetGoogleWebClientId();
-        var clientSecret = configuration["GoogleAuth:WebClientSecret"] ?? configuration["GoogleAuth:ClientSecret"];
+        var clientSecret = GetGoogleWebClientSecret();
         if (string.IsNullOrWhiteSpace(clientId) ||
             string.IsNullOrWhiteSpace(clientSecret) ||
             clientSecret.StartsWith("YOUR_", StringComparison.OrdinalIgnoreCase))
@@ -245,6 +272,25 @@ public sealed class AuthController(
         return string.IsNullOrWhiteSpace(clientId) || clientId.StartsWith("YOUR_", StringComparison.OrdinalIgnoreCase)
             ? null
             : clientId;
+    }
+
+    private string? GetGoogleWebClientSecret()
+    {
+        var clientSecret = configuration["GoogleAuth:WebClientSecret"] ?? configuration["GoogleAuth:ClientSecret"];
+        return string.IsNullOrWhiteSpace(clientSecret) || clientSecret.StartsWith("YOUR_", StringComparison.OrdinalIgnoreCase)
+            ? null
+            : clientSecret;
+    }
+
+    private static string? MaskGoogleClientId(string? clientId)
+    {
+        if (string.IsNullOrWhiteSpace(clientId))
+        {
+            return null;
+        }
+
+        var suffix = clientId.Length <= 12 ? clientId : clientId[^12..];
+        return $"...{suffix}";
     }
 
     private string GetGoogleRedirectUri()

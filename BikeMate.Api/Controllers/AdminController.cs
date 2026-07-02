@@ -65,6 +65,32 @@ public sealed class AdminController(BikeMateDbContext db, IAdminReportService re
         return UpdateUserStatus(userId, new UpdateUserStatusDto("active"), cancellationToken);
     }
 
+    [HttpDelete("users/{userId:int}")]
+    public async Task<IActionResult> DeleteUser(int userId, CancellationToken cancellationToken)
+    {
+        var user = await db.Users
+            .Include(x => x.UserRoles).ThenInclude(x => x.Role)
+            .Include(x => x.AuthProviders)
+            .Include(x => x.DeviceTokens)
+            .SingleAsync(x => x.UserId == userId, cancellationToken);
+
+        if (user.UserRoles.Any(role => string.Equals(role.Role?.RoleName, AppRoles.SystemAdmin, StringComparison.OrdinalIgnoreCase)))
+        {
+            return BadRequest(new { error = "System admin accounts cannot be deleted from the admin user directory." });
+        }
+
+        if (string.Equals(user.AccountStatus, "deleted", StringComparison.OrdinalIgnoreCase))
+        {
+            return NoContent();
+        }
+
+        var oldValue = $"{user.Email}|{user.AccountStatus}";
+        DeletedAccountIdentity.Anonymize(user);
+        AddAudit("DeleteUserAccount", "users", userId.ToString(), oldValue, "deleted");
+        await db.SaveChangesAsync(cancellationToken);
+        return NoContent();
+    }
+
     [HttpGet("customers")]
     public async Task<IActionResult> Customers(CancellationToken cancellationToken)
     {
@@ -82,6 +108,80 @@ public sealed class AdminController(BikeMateDbContext db, IAdminReportService re
                 x.CreatedAt
             })
             .ToArrayAsync(cancellationToken));
+    }
+
+    [HttpGet("customers/pending")]
+    public async Task<ActionResult<IReadOnlyCollection<CustomerApplicationDto>>> PendingCustomers(CancellationToken cancellationToken)
+    {
+        return Ok(await db.Clients
+            .Include(x => x.User)
+            .Include(x => x.Addresses)
+            .Where(x => x.User!.AccountStatus == "pending")
+            .OrderByDescending(x => x.CreatedAt)
+            .Select(x => new CustomerApplicationDto(
+                x.ClientId,
+                x.UserId,
+                x.User!.FirstName,
+                x.MiddleName,
+                x.User.LastName,
+                x.User.FirstName + " " + x.User.LastName,
+                x.User.Email,
+                x.User.PhoneNumber,
+                x.User.AccountStatus,
+                x.User.EmailVerified,
+                x.Sex,
+                x.Birthdate,
+                x.User.ProfileImageUrl,
+                x.ValidIdImageUrl,
+                x.Addresses.OrderByDescending(a => a.IsDefault).Select(a => a.AddressLine).FirstOrDefault(),
+                x.Addresses.OrderByDescending(a => a.IsDefault).Select(a => a.Barangay).FirstOrDefault(),
+                x.Addresses.OrderByDescending(a => a.IsDefault).Select(a => a.City).FirstOrDefault(),
+                x.Addresses.OrderByDescending(a => a.IsDefault).Select(a => a.Province).FirstOrDefault(),
+                x.Addresses.OrderByDescending(a => a.IsDefault).Select(a => a.PostalCode).FirstOrDefault(),
+                x.User.CreatedAt,
+                x.User.UpdatedAt))
+            .ToArrayAsync(cancellationToken));
+    }
+
+    [HttpPut("customers/{clientId:int}/verify")]
+    public async Task<IActionResult> VerifyCustomer(int clientId, VerificationDecisionDto dto, CancellationToken cancellationToken)
+    {
+        var customer = await db.Clients.Include(x => x.User).SingleAsync(x => x.ClientId == clientId, cancellationToken);
+        if (customer.User is null)
+        {
+            return BadRequest(new { error = "This customer does not have a user account to activate." });
+        }
+
+        if (!customer.User.EmailVerified)
+        {
+            return BadRequest(new { error = "The customer must verify the email OTP before approval." });
+        }
+
+        if (string.IsNullOrWhiteSpace(customer.ValidIdImageUrl))
+        {
+            return BadRequest(new { error = "A valid ID image is required before customer approval." });
+        }
+
+        customer.User.AccountStatus = "active";
+        customer.User.UpdatedAt = DateTime.UtcNow;
+        AddAudit("VerifyCustomer", "clients", clientId.ToString(), "pending", "active");
+        await db.SaveChangesAsync(cancellationToken);
+        return Ok(new { message = "Customer approved.", dto.Notes });
+    }
+
+    [HttpPut("customers/{clientId:int}/reject")]
+    public async Task<IActionResult> RejectCustomer(int clientId, VerificationDecisionDto dto, CancellationToken cancellationToken)
+    {
+        var customer = await db.Clients.Include(x => x.User).SingleAsync(x => x.ClientId == clientId, cancellationToken);
+        if (customer.User is not null)
+        {
+            customer.User.AccountStatus = "rejected";
+            customer.User.UpdatedAt = DateTime.UtcNow;
+        }
+
+        AddAudit("RejectCustomer", "clients", clientId.ToString(), "pending", dto.Notes ?? "rejected");
+        await db.SaveChangesAsync(cancellationToken);
+        return Ok(new { message = "Customer rejected.", dto.Notes });
     }
 
     [HttpGet("mechanics")]
@@ -123,17 +223,82 @@ public sealed class AdminController(BikeMateDbContext db, IAdminReportService re
     }
 
     [HttpGet("mechanics/pending")]
-    public async Task<IActionResult> PendingMechanics(CancellationToken cancellationToken)
+    public async Task<ActionResult<IReadOnlyCollection<MechanicApplicationDto>>> PendingMechanics(CancellationToken cancellationToken)
     {
-        return Ok(await db.Mechanics.Include(x => x.User).Where(x => !x.IsVerified).ToArrayAsync(cancellationToken));
+        return Ok(await db.Mechanics
+            .Include(x => x.User)
+            .Include(x => x.ShopMechanics).ThenInclude(x => x.Shop)
+            .Where(x =>
+                x.User != null &&
+                x.User.EmailVerified &&
+                x.User.AccountStatus != "deleted" &&
+                x.User.AccountStatus != "rejected" &&
+                (!x.IsVerified || x.User.AccountStatus == "pending"))
+            .OrderByDescending(x => x.CreatedAt)
+            .Select(x => new MechanicApplicationDto(
+                x.MechanicId,
+                x.UserId,
+                x.User!.FirstName,
+                x.MiddleName,
+                x.User.LastName,
+                x.User.FirstName + " " + x.User.LastName,
+                x.User.Email,
+                x.User.PhoneNumber,
+                x.User.AccountStatus,
+                x.User.EmailVerified,
+                x.IsVerified,
+                x.AvailabilityStatus,
+                x.Sex,
+                x.Birthdate,
+                x.AddressLine,
+                x.Barangay,
+                x.City,
+                x.Province,
+                x.ZipCode,
+                x.User.ProfileImageUrl,
+                x.ValidIdImageUrl,
+                x.CertificationImageUrl,
+                x.Bio,
+                x.YearsExperience,
+                x.ShopMechanics.OrderByDescending(sm => sm.AssignedAt).Select(sm => (int?)sm.ShopId).FirstOrDefault(),
+                x.ShopMechanics.OrderByDescending(sm => sm.AssignedAt).Select(sm => sm.Shop!.ShopName).FirstOrDefault(),
+                x.ShopMechanics.Any(sm => sm.IsActive),
+                x.CreatedAt,
+                x.UpdatedAt))
+            .ToArrayAsync(cancellationToken));
     }
 
     [HttpPut("mechanics/{mechanicId:int}/verify")]
     public async Task<IActionResult> VerifyMechanic(int mechanicId, VerificationDecisionDto dto, CancellationToken cancellationToken)
     {
-        var mechanic = await db.Mechanics.SingleAsync(x => x.MechanicId == mechanicId, cancellationToken);
+        var mechanic = await db.Mechanics
+            .Include(x => x.User)
+            .Include(x => x.ShopMechanics)
+            .SingleAsync(x => x.MechanicId == mechanicId, cancellationToken);
+        if (mechanic.User is null)
+        {
+            return BadRequest(new { error = "This mechanic does not have a user account to activate." });
+        }
+
+        if (!mechanic.User.EmailVerified)
+        {
+            return BadRequest(new { error = "The mechanic must verify the email OTP before approval." });
+        }
+
+        if (string.IsNullOrWhiteSpace(mechanic.ValidIdImageUrl) || string.IsNullOrWhiteSpace(mechanic.CertificationImageUrl))
+        {
+            return BadRequest(new { error = "Valid ID and mechanic certification/license files are required before approval." });
+        }
+
         mechanic.IsVerified = true;
+        mechanic.User.AccountStatus = "active";
         mechanic.UpdatedAt = DateTime.UtcNow;
+        mechanic.User.UpdatedAt = DateTime.UtcNow;
+        foreach (var assignment in mechanic.ShopMechanics)
+        {
+            assignment.IsActive = true;
+        }
+
         AddAudit("VerifyMechanic", "mechanics", mechanicId.ToString(), "pending", "verified");
         await db.SaveChangesAsync(cancellationToken);
         return Ok(new { message = "Mechanic verified.", dto.Notes });
@@ -142,10 +307,16 @@ public sealed class AdminController(BikeMateDbContext db, IAdminReportService re
     [HttpPut("mechanics/{mechanicId:int}/reject")]
     public async Task<IActionResult> RejectMechanic(int mechanicId, VerificationDecisionDto dto, CancellationToken cancellationToken)
     {
-        var mechanic = await db.Mechanics.Include(x => x.User).SingleAsync(x => x.MechanicId == mechanicId, cancellationToken);
+        var mechanic = await db.Mechanics.Include(x => x.User).Include(x => x.ShopMechanics).SingleAsync(x => x.MechanicId == mechanicId, cancellationToken);
         mechanic.IsVerified = false;
         mechanic.User!.AccountStatus = "rejected";
         mechanic.UpdatedAt = DateTime.UtcNow;
+        mechanic.User.UpdatedAt = DateTime.UtcNow;
+        foreach (var assignment in mechanic.ShopMechanics)
+        {
+            assignment.IsActive = false;
+        }
+
         AddAudit("RejectMechanic", "mechanics", mechanicId.ToString(), "pending", dto.Notes ?? "rejected");
         await db.SaveChangesAsync(cancellationToken);
         return Ok(new { message = "Mechanic rejected.", dto.Notes });
@@ -154,15 +325,66 @@ public sealed class AdminController(BikeMateDbContext db, IAdminReportService re
     [HttpGet("shops/pending")]
     public async Task<IActionResult> PendingShops(CancellationToken cancellationToken)
     {
-        return Ok(await db.Shops.Where(x => x.ShopStatus == "pending").ToArrayAsync(cancellationToken));
+        return Ok(await db.Shops
+            .Include(x => x.Owner)
+            .Where(x => x.ShopStatus == "pending")
+            .OrderByDescending(x => x.CreatedAt)
+            .Select(x => new
+            {
+                x.ShopId,
+                x.ShopName,
+                x.ShopDescription,
+                x.AddressLine,
+                x.City,
+                x.Province,
+                x.ContactNumber,
+                x.BusinessPermitUrl,
+                x.ShopImageUrl,
+                x.OwnerValidIdUrl,
+                x.OwnerMiddleName,
+                x.OwnerSex,
+                x.OwnerBirthdate,
+                x.OwnerAddressLine,
+                x.OwnerBarangay,
+                x.OwnerCity,
+                x.OwnerProvince,
+                x.OwnerZipCode,
+                x.ShopStatus,
+                x.CreatedAt,
+                Owner = x.Owner == null ? null : new
+                {
+                    x.Owner.UserId,
+                    x.Owner.FirstName,
+                    x.Owner.LastName,
+                    x.Owner.Email,
+                    x.Owner.PhoneNumber,
+                    x.Owner.EmailVerified,
+                    x.Owner.AccountStatus
+                }
+            })
+            .ToArrayAsync(cancellationToken));
     }
 
     [HttpPut("shops/{shopId:int}/verify")]
     public async Task<IActionResult> VerifyShop(int shopId, VerificationDecisionDto dto, CancellationToken cancellationToken)
     {
-        var shop = await db.Shops.SingleAsync(x => x.ShopId == shopId, cancellationToken);
+        var shop = await db.Shops
+            .Include(x => x.Owner)
+            .SingleAsync(x => x.ShopId == shopId, cancellationToken);
+        if (shop.Owner is null)
+        {
+            return BadRequest(new { error = "This shop does not have an owner account to activate." });
+        }
+
+        if (!shop.Owner.EmailVerified)
+        {
+            return BadRequest(new { error = "The owner must verify the email OTP before this shop can be approved." });
+        }
+
         shop.ShopStatus = "verified";
         shop.UpdatedAt = DateTime.UtcNow;
+        shop.Owner.AccountStatus = "active";
+        shop.Owner.UpdatedAt = DateTime.UtcNow;
         AddAudit("VerifyShop", "shops", shopId.ToString(), "pending", "verified");
         await db.SaveChangesAsync(cancellationToken);
         return Ok(new { message = "Shop verified.", dto.Notes });
@@ -171,9 +393,17 @@ public sealed class AdminController(BikeMateDbContext db, IAdminReportService re
     [HttpPut("shops/{shopId:int}/reject")]
     public async Task<IActionResult> RejectShop(int shopId, VerificationDecisionDto dto, CancellationToken cancellationToken)
     {
-        var shop = await db.Shops.SingleAsync(x => x.ShopId == shopId, cancellationToken);
+        var shop = await db.Shops
+            .Include(x => x.Owner)
+            .SingleAsync(x => x.ShopId == shopId, cancellationToken);
         shop.ShopStatus = "rejected";
         shop.UpdatedAt = DateTime.UtcNow;
+        if (shop.Owner is not null)
+        {
+            shop.Owner.AccountStatus = "rejected";
+            shop.Owner.UpdatedAt = DateTime.UtcNow;
+        }
+
         AddAudit("RejectShop", "shops", shopId.ToString(), "pending", dto.Notes ?? "rejected");
         await db.SaveChangesAsync(cancellationToken);
         return Ok(new { message = "Shop rejected.", dto.Notes });

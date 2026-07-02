@@ -61,6 +61,8 @@ public sealed record UpsertMotorcycleDto(
 
 public sealed record ServiceCategoryDto(int CategoryId, string CategoryName, string? Description);
 
+public sealed record UpsertServiceCategoryDto(string CategoryName, string? Description);
+
 public sealed record ShopSummaryDto(
     int ShopId,
     string ShopName,
@@ -69,7 +71,11 @@ public sealed record ShopSummaryDto(
     string? ContactNumber,
     string ShopStatus,
     decimal? Latitude,
-    decimal? Longitude);
+    decimal? Longitude,
+    string? ShopImageUrl = null,
+    string? ShopLogoUrl = null,
+    int ActiveServiceCount = 0,
+    decimal? StartingPrice = null);
 
 public sealed record ShopDetailsDto(
     int ShopId,
@@ -81,7 +87,40 @@ public sealed record ShopDetailsDto(
     string? ContactNumber,
     string ShopStatus,
     decimal? Latitude,
-    decimal? Longitude);
+    decimal? Longitude,
+    string? ShopImageUrl = null,
+    string? ShopLogoUrl = null);
+
+public sealed record ShopApplicationDetailsDto(
+    int ShopId,
+    string ShopName,
+    string ShopStatus,
+    string? ShopDescription,
+    string? ShopAddressLine,
+    string? ShopBarangay,
+    string? ShopCity,
+    string? ShopProvince,
+    string? ShopZipCode,
+    string? ContactNumber,
+    string? BusinessPermitUrl,
+    string? ShopImageUrl,
+    string? OwnerValidIdUrl,
+    string? DtiRegistrationNumber,
+    string? OwnerFirstName,
+    string? OwnerMiddleName,
+    string? OwnerLastName,
+    string? OwnerEmail,
+    string? OwnerPhoneNumber,
+    string? OwnerSex,
+    DateTime? OwnerBirthdate,
+    string? OwnerAddressLine,
+    string? OwnerBarangay,
+    string? OwnerCity,
+    string? OwnerProvince,
+    string? OwnerZipCode,
+    bool OwnerEmailVerified,
+    DateTime CreatedAt,
+    DateTime? UpdatedAt);
 
 public sealed record UpsertShopDto(
     string ShopName,
@@ -119,14 +158,16 @@ public sealed record ProductDto(
     string? ProductDescription,
     decimal Price,
     int StockQuantity,
-    bool IsActive);
+    bool IsActive,
+    string? ProductImageUrl);
 
 public sealed record UpsertProductDto(
     string ProductName,
     string? ProductDescription,
     decimal Price,
     int StockQuantity,
-    bool IsActive);
+    bool IsActive,
+    string? ProductImageUrl);
 
 public sealed record CreateServiceRequestDto(
     int? ShopId,
@@ -159,7 +200,50 @@ public sealed record UpdateRequestStatusDto(string Status, string? Notes);
 public sealed record AssignMechanicDto(int MechanicId);
 public sealed record UploadMediaDto(string MediaUrl, string MediaType, string? Caption);
 public sealed record UploadedFileDto(string Url, string FileName, string ContentType, long SizeBytes);
-public sealed record SelectShopDto(int ShopId, int? ShopServiceId);
+public sealed record SelectShopDto(int ShopId, int? ShopServiceId, int? ProductId = null);
+
+public sealed record CustomerMeDto(
+    int ClientId,
+    int UserId,
+    string FirstName,
+    string? MiddleName,
+    string LastName,
+    string Email,
+    string? PhoneNumber,
+    string? ProfileImageUrl,
+    bool EmailVerified,
+    bool PhoneVerified,
+    string AccountStatus,
+    DateTime CreatedAt,
+    DateTime? UpdatedAt,
+    string? Sex,
+    DateTime? Birthdate,
+    string? ValidIdImageUrl,
+    IReadOnlyList<CustomerAddressDto> Addresses,
+    IReadOnlyList<MotorcycleDto> Motorcycles);
+
+public sealed record CustomerApplicationDto(
+    int ClientId,
+    int UserId,
+    string FirstName,
+    string? MiddleName,
+    string LastName,
+    string FullName,
+    string Email,
+    string? PhoneNumber,
+    string AccountStatus,
+    bool EmailVerified,
+    string? Sex,
+    DateTime? Birthdate,
+    string? ProfileImageUrl,
+    string? ValidIdImageUrl,
+    string? AddressLine,
+    string? Barangay,
+    string? City,
+    string? Province,
+    string? ZipCode,
+    DateTime CreatedAt,
+    DateTime? UpdatedAt);
 
 public sealed record MechanicProfileDto(
     int MechanicId,
@@ -171,6 +255,57 @@ public sealed record MechanicProfileDto(
     string AvailabilityStatus,
     decimal AverageRating,
     int TotalCompletedJobs);
+
+public sealed record MechanicApplicationDto(
+    int MechanicId,
+    int UserId,
+    string FirstName,
+    string? MiddleName,
+    string LastName,
+    string FullName,
+    string Email,
+    string? PhoneNumber,
+    string AccountStatus,
+    bool EmailVerified,
+    bool IsVerified,
+    string AvailabilityStatus,
+    string? Sex,
+    DateTime? Birthdate,
+    string? AddressLine,
+    string? Barangay,
+    string? City,
+    string? Province,
+    string? ZipCode,
+    string? ProfileImageUrl,
+    string? ValidIdImageUrl,
+    string? CertificationImageUrl,
+    string? Bio,
+    int? YearsExperience,
+    int? ShopId,
+    string? ShopName,
+    bool IsAssignedToShop,
+    DateTime CreatedAt,
+    DateTime? UpdatedAt);
+
+public sealed record CreateMechanicApplicationDto(
+    string FirstName,
+    string? MiddleName,
+    string LastName,
+    string? Sex,
+    string? Birthdate,
+    string Email,
+    string PhoneNumber,
+    string Password,
+    string? AddressLine,
+    string? Barangay,
+    string? City,
+    string? Province,
+    string? ZipCode,
+    string ValidIdImageUrl,
+    string CertificationImageUrl,
+    string? ProfileImageUrl,
+    string? Bio,
+    int? YearsExperience);
 
 public sealed record UpdateMechanicProfileDto(
     string? Bio,
@@ -184,6 +319,39 @@ public sealed record LiveLocationDto(int LiveLocationId, int? RequestId, int? Me
 public sealed record MapPointDto(decimal Latitude, decimal Longitude, string Address, string? PlaceId);
 public sealed record MapPlaceSuggestionDto(string PlaceId, string Description);
 public sealed record MapDirectionsDto(string DistanceText, string DurationText, int? DistanceMeters, int? DurationSeconds, string? EncodedPolyline);
+
+public sealed record PhilippineRegionDto(string Code, string Name);
+public sealed record PhilippineLocalityDto(string Code, string Name, string Type, string RegionCode, string? Province);
+public sealed record PhilippineBarangayDto(string Code, string Name, string LocalityCode);
+public sealed record PhilippineLocationMatchDto(PhilippineRegionDto Region, PhilippineLocalityDto Locality);
+
+public sealed record ShopReputationDto(
+    int ShopId,
+    decimal AverageRating,
+    int ReviewCount,
+    int CompletedJobs,
+    IReadOnlyList<ShopTechnicianSummaryDto> TopTechnicians,
+    IReadOnlyList<ShopCustomerReviewDto> RecentReviews);
+
+public sealed record ShopTechnicianSummaryDto(
+    int MechanicId,
+    string FullName,
+    string? ProfileImageUrl,
+    decimal AverageRating,
+    int ReviewCount,
+    int CompletedJobs,
+    int? YearsExperience,
+    string AvailabilityStatus,
+    bool IsVerified);
+
+public sealed record ShopCustomerReviewDto(
+    int ReviewId,
+    int Rating,
+    string? Comment,
+    string CustomerName,
+    string TechnicianName,
+    string? ServiceName,
+    DateTime CreatedAt);
 
 public sealed record CreateEmergencyRequestDto(
     decimal Latitude,
@@ -264,6 +432,16 @@ public sealed record CreateReviewDto(int RequestId, int Rating, string? Comment)
 public sealed record ReviewDto(int ReviewId, int RequestId, int MechanicId, int Rating, string? Comment, DateTime CreatedAt);
 
 public sealed record RegisterDeviceTokenDto(string DeviceToken, string Platform);
+
+public sealed record NotificationDto(
+    int NotificationId,
+    int UserId,
+    string? NotificationType,
+    string Title,
+    string Message,
+    string? DataJson,
+    bool IsRead,
+    DateTime CreatedAt);
 
 public sealed record AdminDashboardDto(
     int TotalUsers,
