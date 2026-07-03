@@ -1,0 +1,241 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="BikeMate.MainPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    BackgroundColor="White"
+    Shell.NavBarIsVisible="False">
+
+    <Grid>
+        <Grid IsVisible="{Binding IsStartupVisible}" Padding="20" BackgroundColor="White">
+            <VerticalStackLayout Spacing="14" VerticalOptions="Center" HorizontalOptions="Center">
+                <Image Source="bikemate_logo.png" HeightRequest="104" WidthRequest="104" />
+                <Label
+                    Text="BikeMate"
+                    FontFamily="Inter"
+                    FontSize="18"
+                    FontAttributes="Bold"
+                    TextColor="#242424"
+                    HorizontalTextAlignment="Center" />
+                <ActivityIndicator IsRunning="True" Color="#FF6B2C" HeightRequest="32" WidthRequest="32" />
+                <Label
+                    Text="Checking your session..."
+                    FontFamily="PTSansCaption"
+                    FontSize="11"
+                    TextColor="#6E6E6E"
+                    HorizontalTextAlignment="Center" />
+            </VerticalStackLayout>
+        </Grid>
+
+        <Grid
+            IsVisible="{Binding IsOnboardingVisible}"
+            RowDefinitions="Auto,*,Auto,Auto"
+            Padding="20,20,20,28"
+            BackgroundColor="White">
+            <Button
+                Grid.Row="0"
+                Text="Skip"
+                Command="{Binding SkipOnboardingCommand}"
+                HorizontalOptions="End"
+                BackgroundColor="Transparent"
+                TextColor="#6E6E6E"
+                Padding="10,0" />
+
+            <CarouselView
+                x:Name="boardingCarousel"
+                Grid.Row="1"
+                ItemsSource="{Binding BoardingItems}"
+                Position="{Binding CurrentPosition}"
+                BackgroundColor="White">
+                <CarouselView.ItemTemplate>
+                    <DataTemplate>
+                        <VerticalStackLayout
+                            VerticalOptions="Center"
+                            HorizontalOptions="Fill"
+                            Spacing="18"
+                            Padding="10">
+                            <Image
+                                Source="{Binding ImageSource}"
+                                HeightRequest="190"
+                                WidthRequest="190"
+                                HorizontalOptions="Center"
+                                Aspect="AspectFit" />
+                            <Label
+                                Text="{Binding Title}"
+                                FontFamily="Inter"
+                                FontSize="18"
+                                FontAttributes="Bold"
+                                HorizontalTextAlignment="Center"
+                                TextColor="#242424" />
+                            <Label
+                                Text="{Binding Description}"
+                                FontFamily="PublicSans"
+                                FontSize="13"
+                                HorizontalTextAlignment="Center"
+                                TextColor="#6E6E6E"
+                                Margin="10,0" />
+                        </VerticalStackLayout>
+                    </DataTemplate>
+                </CarouselView.ItemTemplate>
+            </CarouselView>
+
+            <IndicatorView
+                Grid.Row="2"
+                HorizontalOptions="Center"
+                Margin="0,0,0,18"
+                IndicatorColor="#DCDCDC"
+                SelectedIndicatorColor="#FF6B2C"
+                ItemsSource="{Binding BoardingItems}"
+                Position="{Binding CurrentPosition}" />
+
+            <Button
+                Grid.Row="3"
+                Text="{Binding CurrentButtonText}"
+                Command="{Binding NextCommand}"
+                BackgroundColor="#FF6B2C"
+                TextColor="White"
+                CornerRadius="8"
+                HeightRequest="48"
+                FontFamily="Inter"
+                FontAttributes="Bold" />
+        </Grid>
+
+        <ScrollView IsVisible="{Binding IsLoginVisible}" BackgroundColor="White">
+            <VerticalStackLayout Padding="20,30,20,28" Spacing="18">
+                <VerticalStackLayout Spacing="8">
+                    <Image Source="bikemate_logo.png" HeightRequest="88" HorizontalOptions="Center" />
+                    <Label
+                        Text="BikeMate"
+                        FontFamily="Inter"
+                        FontSize="18"
+                        FontAttributes="Bold"
+                        TextColor="#242424"
+                        HorizontalTextAlignment="Center" />
+                    <Label
+                        Text="Motorcycle repair and roadside support, when you need it."
+                        FontFamily="PublicSans"
+                        FontSize="13"
+                        TextColor="#6E6E6E"
+                        HorizontalTextAlignment="Center" />
+                </VerticalStackLayout>
+
+                <Border BackgroundColor="White" Stroke="#E6E6E6" Padding="18">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="8" />
+                    </Border.StrokeShape>
+                    <VerticalStackLayout Spacing="14">
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Sign in" FontFamily="Inter" FontSize="18" FontAttributes="Bold" TextColor="#242424" />
+                            <Label Text="Use your BikeMate account to continue." FontFamily="PublicSans" FontSize="13" TextColor="#6E6E6E" />
+                        </VerticalStackLayout>
+
+                        <VerticalStackLayout Spacing="5">
+                            <Label Text="Email address" FontFamily="PTSansCaptionBold" FontSize="11" TextColor="#242424" />
+                            <Border Stroke="#DCDCDC" BackgroundColor="#FAFAFA" Padding="12,2">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="8" />
+                                </Border.StrokeShape>
+                                <Entry
+                                    Placeholder="Enter your email (name@gmail.com)"
+                                    Keyboard="Email"
+                                    Text="{Binding Email}"
+                                    TextColor="#242424"
+                                    PlaceholderColor="#6E6E6E" />
+                            </Border>
+                        </VerticalStackLayout>
+
+                        <VerticalStackLayout Spacing="5">
+                            <Label Text="Password" FontFamily="PTSansCaptionBold" FontSize="11" TextColor="#242424" />
+                            <Border Stroke="#DCDCDC" BackgroundColor="#FAFAFA" Padding="12,2">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="8" />
+                                </Border.StrokeShape>
+                                <Entry
+                                    Placeholder="Enter your password"
+                                    IsPassword="True"
+                                    Text="{Binding Password}"
+                                    TextColor="#242424"
+                                    PlaceholderColor="#6E6E6E" />
+                            </Border>
+                            <Button
+                                Text="Forgot password?"
+                                Command="{Binding ForgotPasswordCommand}"
+                                HorizontalOptions="End"
+                                BackgroundColor="Transparent"
+                                TextColor="#FF6B2C"
+                                Padding="4,0" />
+                        </VerticalStackLayout>
+
+                        <Button
+                            Text="Sign in"
+                            Command="{Binding SignInCommand}"
+                            BackgroundColor="#FF6B2C"
+                            TextColor="White"
+                            CornerRadius="8"
+                            HeightRequest="48"
+                            FontFamily="Inter"
+                            FontAttributes="Bold" />
+
+                        <Label
+                            Text="{Binding LoginStatus}"
+                            FontFamily="PTSansCaption"
+                            FontSize="11"
+                            TextColor="#6E6E6E"
+                            HorizontalTextAlignment="Center" />
+
+                        <Grid ColumnDefinitions="*,Auto,*" ColumnSpacing="10">
+                            <BoxView HeightRequest="1" BackgroundColor="#E6E6E6" VerticalOptions="Center" />
+                            <Label Grid.Column="1" Text="or" FontFamily="PTSansCaption" FontSize="11" TextColor="#6E6E6E" />
+                            <BoxView Grid.Column="2" HeightRequest="1" BackgroundColor="#E6E6E6" VerticalOptions="Center" />
+                        </Grid>
+
+                        <Button
+                            Text="Continue with Google"
+                            Command="{Binding GoogleLoginCommand}"
+                            ImageSource="google_logo.png"
+                            ContentLayout="Left,12"
+                            TextColor="#242424"
+                            BackgroundColor="White"
+                            BorderColor="#DADCE0"
+                            BorderWidth="1"
+                            CornerRadius="8"
+                            HeightRequest="48"
+                            FontFamily="Inter"
+                            FontAttributes="Bold" />
+
+                        <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="8" HorizontalOptions="Center">
+                            <Label
+                                Text="New to BikeMate?"
+                                FontFamily="PublicSans"
+                                FontSize="13"
+                                TextColor="#6E6E6E"
+                                VerticalTextAlignment="Center" />
+                            <Button
+                                Grid.Column="1"
+                                Text="Create account"
+                                Command="{Binding CreateAccountCommand}"
+                                BackgroundColor="Transparent"
+                                TextColor="#FF6B2C"
+                                FontFamily="Inter"
+                                FontAttributes="Bold"
+                                Padding="4,0"
+                                HeightRequest="34"
+                                MinimumHeightRequest="34" />
+                        </Grid>
+
+                        <Button
+                            Text="Connection settings"
+                            Command="{Binding ConnectionSettingsCommand}"
+                            BackgroundColor="Transparent"
+                            TextColor="#6E6E6E"
+                            FontFamily="PTSansCaptionBold"
+                            FontSize="11"
+                            Padding="4,0"
+                            HeightRequest="30"
+                            MinimumHeightRequest="30" />
+                    </VerticalStackLayout>
+                </Border>
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

@@ -1,0 +1,304 @@
+{"kind":"deck","id":"pr/4wpmr0","name":"Deck"}
+{"kind":"layout","layoutId":"1c715f53-a1e6-4775-9309-4dbc3d45cd78","name":"Master","type":"master"}
+{"kind":"layout","layoutId":"4901701f-cf99-4134-a1b9-04c1208ba709","name":"Title Slide","type":"title"}
+{"kind":"slide","id":"sl/g12f0m","slide":1,"title":"BikeMate","textShapes":7}
+{"kind":"textbox","id":"sh/fu18jqh0","slide":1,"text":"BikeMate","textPreview":"BikeMate","textChars":8,"textLines":1,"bbox":[64,78,780,98]}
+{"kind":"textbox","id":"sh/4fu18jqh","slide":1,"text":"Motorcycle Service Assistance System","textPreview":"Motorcycle Service Assistance System","textChars":36,"textLines":1,"bbox":[68,184,760,44]}
+{"kind":"textbox","id":"sh/x0nuxc3y","slide":1,"text":"Formal Project Presentation","textPreview":"Formal Project Presentation","textChars":27,"textLines":1,"bbox":[68,250,560,34]}
+{"kind":"shape","id":"sh/qxs72x4n","slide":1,"bbox":[790,58,376,590]}
+{"kind":"textbox","id":"sh/83itgfml","slide":1,"text":"Prepared by: [Group Name]","textPreview":"Prepared by: [Group Name]","textChars":25,"textLines":1,"bbox":[68,562,600,30]}
+{"kind":"textbox","id":"sh/xobm58z2","slide":1,"text":"Members: [Member 1], [Member 2], [Member 3], [Member 4]","textPreview":"Members: [Member 1], [Member 2], [Member 3], [Member 4]","textChars":55,"textLines":1,"bbox":[68,598,760,28]}
+{"kind":"textbox","id":"sh/mtwra5gb","slide":1,"text":"BikeMate Motorcycle Service Assistance System","textPreview":"BikeMate Motorcycle Service Assistance System","textChars":45,"textLines":1,"bbox":[64,666,600,24]}
+{"kind":"textbox","id":"sh/fepkzupw","slide":1,"text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[1160,662,56,28]}
+{"kind":"image","id":"im/adsji5sn","slide":1,"name":"","alt":"BikeMate customer home screen","bbox":[814,82,328,542]}
+{"kind":"notes","id":"nt/g12f0m","slide":1,"text":""}
+{"kind":"slide","id":"sl/5w6q6f","slide":2,"title":"BIKEMATE PROJECT PRESENTATION","textShapes":19}
+{"kind":"textbox","id":"sh/lwval87e","slide":2,"text":"BIKEMATE PROJECT PRESENTATION","textPreview":"BIKEMATE PROJECT PRESENTATION","textChars":29,"textLines":1,"bbox":[64,40,540,28]}
+{"kind":"textbox","id":"sh/e9cvixcz","slide":2,"text":"The presentation follows the project from problem to validated system.","textPreview":"The presentation follows the project from problem to validated system.","textChars":70,"textLines":1,"bbox":[64,82,900,92]}
+{"kind":"shape","id":"sh/3q5o7qpg","slide":2,"bbox":[64,178,1152,1]}
+{"kind":"textbox","id":"sh/w3m94fu1","slide":2,"text":"01","textPreview":"01","textChars":2,"textLines":1,"bbox":[84,220,64,40]}
+{"kind":"textbox","id":"sh/loj2t83i","slide":2,"text":"Context","textPreview":"Context","textChars":7,"textLines":1,"bbox":[164,216,220,34]}
+{"kind":"textbox","id":"sh/ex0nuxc3","slide":2,"text":"Why motorcycle service support needs a digital workflow","textPreview":"Why motorcycle service support needs a digital workflow","textChars":55,"textLines":1,"bbox":[392,220,720,34]}
+{"kind":"shape","id":"sh/3itgfmlk","slide":2,"bbox":[164,268,950,1]}
+{"kind":"textbox","id":"sh/szqtcj6t","slide":2,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[84,296,64,40]}
+{"kind":"textbox","id":"sh/lkjm1cfa","slide":2,"text":"Objectives","textPreview":"Objectives","textChars":10,"textLines":1,"bbox":[164,292,220,34]}
+{"kind":"textbox","id":"sh/hcrmhk3q","slide":2,"text":"What the system is designed to accomplish","textPreview":"What the system is designed to accomplish","textChars":41,"textLines":1,"bbox":[392,296,720,34]}
+{"kind":"shape","id":"sh/orytsvu9","slide":2,"bbox":[164,344,950,1]}
+{"kind":"textbox","id":"sh/z61032ls","slide":2,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[84,372,64,40]}
+{"kind":"textbox","id":"sh/al87ed8b","slide":2,"text":"Scope","textPreview":"Scope","textChars":5,"textLines":1,"bbox":[164,368,220,34]}
+{"kind":"textbox","id":"sh/h0fepkzu","slide":2,"text":"Which users, modules, and features are included","textPreview":"Which users, modules, and features are included","textChars":47,"textLines":1,"bbox":[392,372,720,34]}
+{"kind":"shape","id":"sh/sfil0rqd","slide":2,"bbox":[164,420,950,1]}
+{"kind":"textbox","id":"sh/zupwb2hw","slide":2,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[84,448,64,40]}
+{"kind":"textbox","id":"sh/a9w3m94f","slide":2,"text":"Demonstration","textPreview":"Demonstration","textChars":13,"textLines":1,"bbox":[164,444,220,34]}
+{"kind":"textbox","id":"sh/hwfyxobm","slide":2,"text":"How the mobile, API, database, and web admin parts work","textPreview":"How the mobile, API, database, and web admin parts work","textChars":55,"textLines":1,"bbox":[392,448,720,34]}
+{"kind":"shape","id":"sh/obm58z25","slide":2,"bbox":[164,496,950,1]}
+{"kind":"textbox","id":"sh/knih4byh","slide":2,"text":"05","textPreview":"05","textChars":2,"textLines":1,"bbox":[84,524,64,40]}
+{"kind":"textbox","id":"sh/d8bat47y","slide":2,"text":"Verification","textPreview":"Verification","textChars":12,"textLines":1,"bbox":[164,520,220,34]}
+{"kind":"textbox","id":"sh/2lszqtcj","slide":2,"text":"What was tested and what remains for production deployment","textPreview":"What was tested and what remains for production deployment","textChars":58,"textLines":1,"bbox":[392,524,720,34]}
+{"kind":"textbox","id":"sh/v6psfil0","slide":2,"text":"BikeMate Motorcycle Service Assistance System","textPreview":"BikeMate Motorcycle Service Assistance System","textChars":45,"textLines":1,"bbox":[64,666,600,24]}
+{"kind":"textbox","id":"sh/kf6dcbul","slide":2,"text":"02","textPreview":"02","textChars":2,"textLines":1,"bbox":[1160,662,56,28]}
+{"kind":"notes","id":"nt/5w6q6f","slide":2,"text":""}
+{"kind":"slide","id":"sl/xl4bhd","slide":3,"title":"BIKEMATE PROJECT PRESENTATION","textShapes":10}
+{"kind":"textbox","id":"sh/kb6xkf6d","slide":3,"text":"BIKEMATE PROJECT PRESENTATION","textPreview":"BIKEMATE PROJECT PRESENTATION","textChars":29,"textLines":1,"bbox":[64,40,540,28]}
+{"kind":"textbox","id":"sh/rqd4vmtw","slide":3,"text":"BikeMate responds to a practical gap in motorcycle repair access.","textPreview":"BikeMate responds to a practical gap in motorcycle repair access.","textChars":65,"textLines":1,"bbox":[64,82,900,92]}
+{"kind":"shape","id":"sh/25kb6xkf","slide":3,"bbox":[64,178,1152,1]}
+{"kind":"textbox","id":"sh/9knih4by","slide":3,"text":"Background","textPreview":"Background","textChars":10,"textLines":1,"bbox":[74,224,280,34]}
+{"kind":"textbox","id":"sh/kzupwb2h","slide":3,"text":"Motorcycle riders often need repair help quickly, but available shops, trusted mechanics, price expectations, status updates, and emergency support are usually fragmented across calls, referrals, and manual searching.","textPreview":"Motorcycle riders often need repair help quickly, but available shops, trusted mechanics, price expectations, status updates, and emergen...","textChars":217,"textLines":1,"bbox":[74,270,490,150]}
+{"kind":"shape","id":"sh/re1w7mp0","slide":3,"bbox":[640,224,500,300]}
+{"kind":"shape","id":"sh/2t83itgf","slide":3,"bbox":[680,277,8,8]}
+{"kind":"textbox","id":"sh/9gr2p8nq","slide":3,"text":"Customers need faster discovery and clearer repair tracking.","textPreview":"Customers need faster discovery and clearer repair tracking.","textChars":60,"textLines":1,"bbox":[702,268,393,52]}
+{"kind":"shape","id":"sh/gvy90je9","slide":3,"bbox":[680,331,8,8]}
+{"kind":"textbox","id":"sh/yd0z6103","slide":3,"text":"Mechanics need organized job assignment and status tools.","textPreview":"Mechanics need organized job assignment and status tools.","textChars":57,"textLines":1,"bbox":[702,322,393,52]}
+{"kind":"shape","id":"sh/rytsvu9k","slide":3,"bbox":[680,385,8,8]}
+{"kind":"textbox","id":"sh/gfmlkjm1","slide":3,"text":"Shops need a way to manage services, bookings, products, and reputation.","textPreview":"Shops need a way to manage services, bookings, products, and reputation.","textChars":72,"textLines":1,"bbox":[702,376,393,52]}
+{"kind":"shape","id":"sh/90je9cvi","slide":3,"bbox":[680,439,8,8]}
+{"kind":"textbox","id":"sh/y1kre1w7","slide":3,"text":"Administrators need verification and monitoring controls.","textPreview":"Administrators need verification and monitoring controls.","textChars":57,"textLines":1,"bbox":[702,430,393,52]}
+{"kind":"textbox","id":"sh/rmhk3q5o","slide":3,"text":"BikeMate Motorcycle Service Assistance System","textPreview":"BikeMate Motorcycle Service Assistance System","textChars":45,"textLines":1,"bbox":[64,666,600,24]}
+{"kind":"textbox","id":"sh/g7adsji5","slide":3,"text":"03","textPreview":"03","textChars":2,"textLines":1,"bbox":[1160,662,56,28]}
+{"kind":"notes","id":"nt/xl4bhd","slide":3,"text":""}
+{"kind":"slide","id":"sl/itznnn","slide":4,"title":"BIKEMATE PROJECT PRESENTATION","textShapes":12}
+{"kind":"textbox","id":"sh/5o7qpg3e","slide":4,"text":"BIKEMATE PROJECT PRESENTATION","textPreview":"BIKEMATE PROJECT PRESENTATION","textChars":29,"textLines":1,"bbox":[64,40,540,28]}
+{"kind":"textbox","id":"sh/yxobm58z","slide":4,"text":"The project objective is to connect riders, shops, mechanics, and administrators.","textPreview":"The project objective is to connect riders, shops, mechanics, and administrators.","textChars":81,"textLines":1,"bbox":[64,82,900,92]}
+{"kind":"shape","id":"sh/nih4byhg","slide":4,"bbox":[64,178,1152,1]}
+{"kind":"shape","id":"sh/gr2p8nqx","slide":4,"bbox":[70,228,460,300]}
+{"kind":"textbox","id":"sh/9cvixcze","slide":4,"text":"General Objective","textPreview":"General Objective","textChars":17,"textLines":1,"bbox":[104,262,350,36]}
+{"kind":"textbox","id":"sh/ylc7u54z","slide":4,"text":"Develop a motorcycle service assistance platform that supports service booking, emergency repair requests, real-time communication, payment tracking, and platform administration.","textPreview":"Develop a motorcycle service assistance platform that supports service booking, emergency repair requests, real-time communication, payme...","textChars":178,"textLines":1,"bbox":[104,318,380,140]}
+{"kind":"textbox","id":"sh/r65wjudg","slide":4,"text":"Specific Objectives","textPreview":"Specific Objectives","textChars":19,"textLines":1,"bbox":[610,226,420,36]}
+{"kind":"shape","id":"sh/gfmlkjm1","slide":4,"bbox":[616,295,8,8]}
+{"kind":"textbox","id":"sh/90je9cvi","slide":4,"text":"Enable customers to register, book repairs, track requests, and pay.","textPreview":"Enable customers to register, book repairs, track requests, and pay.","textChars":68,"textLines":1,"bbox":[638,286,538,45]}
+{"kind":"shape","id":"sh/lc7u54zi","slide":4,"bbox":[616,342,8,8]}
+{"kind":"textbox","id":"sh/wra5gbq1","slide":4,"text":"Enable mechanics to accept jobs and update service progress.","textPreview":"Enable mechanics to accept jobs and update service progress.","textChars":60,"textLines":1,"bbox":[638,333,538,45]}
+{"kind":"shape","id":"sh/36hcrmhk","slide":4,"bbox":[616,389,8,8]}
+{"kind":"textbox","id":"sh/eloj2t83","slide":4,"text":"Enable shops to manage services, products, bookings, and staff.","textPreview":"Enable shops to manage services, products, bookings, and staff.","textChars":63,"textLines":1,"bbox":[638,380,538,45]}
+{"kind":"shape","id":"sh/l0rqd4vm","slide":4,"bbox":[616,436,8,8]}
+{"kind":"textbox","id":"sh/wfyxobm5","slide":4,"text":"Enable system admins to verify users and monitor operations.","textPreview":"Enable system admins to verify users and monitor operations.","textChars":60,"textLines":1,"bbox":[638,427,538,45]}
+{"kind":"shape","id":"sh/7u54zido","slide":4,"bbox":[616,483,8,8]}
+{"kind":"textbox","id":"sh/ed8bat47","slide":4,"text":"Store platform data in a normalized SQL Server database.","textPreview":"Store platform data in a normalized SQL Server database.","textChars":56,"textLines":1,"bbox":[638,474,538,45]}
+{"kind":"textbox","id":"sh/psfil0rq","slide":4,"text":"BikeMate Motorcycle Service Assistance System","textPreview":"BikeMate Motorcycle Service Assistance System","textChars":45,"textLines":1,"bbox":[64,666,600,24]}
+{"kind":"textbox","id":"sh/w7mp0bi9","slide":4,"text":"04","textPreview":"04","textChars":2,"textLines":1,"bbox":[1160,662,56,28]}
+{"kind":"notes","id":"nt/itznnn","slide":4,"text":""}
+{"kind":"slide","id":"sl/pcxo7h","slide":5,"title":"BIKEMATE PROJECT PRESENTATION","textShapes":14}
+{"kind":"textbox","id":"sh/zqtcj6to","slide":5,"text":"BIKEMATE PROJECT PRESENTATION","textPreview":"BIKEMATE PROJECT PRESENTATION","textChars":29,"textLines":1,"bbox":[64,40,540,28]}
+{"kind":"textbox","id":"sh/obm58z25","slide":5,"text":"The scope covers the full local prototype for a service marketplace.","textPreview":"The scope covers the full local prototype for a service marketplace.","textChars":68,"textLines":1,"bbox":[64,82,900,92]}
+{"kind":"shape","id":"sh/hwfyxobm","slide":5,"bbox":[64,178,1152,1]}
+{"kind":"shape","id":"sh/6xkf6dcb","slide":5,"bbox":[74,224,490,104]}
+{"kind":"textbox","id":"sh/zed8v6ps","slide":5,"text":"Mobile users","textPreview":"Mobile users","textChars":12,"textLines":1,"bbox":[98,242,420,28]}
+{"kind":"textbox","id":"sh/oza1gvy9","slide":5,"text":"Customer, mechanic, system-admin mobile shells and role routing.","textPreview":"Customer, mechanic, system-admin mobile shells and role routing.","textChars":64,"textLines":1,"bbox":[98,276,430,38]}
+{"kind":"shape","id":"sh/hk3q5o7q","slide":5,"bbox":[652,224,490,104]}
+{"kind":"textbox","id":"sh/al87ed8b","slide":5,"text":"Shop operations","textPreview":"Shop operations","textChars":15,"textLines":1,"bbox":[676,242,420,28]}
+{"kind":"textbox","id":"sh/z61032ls","slide":5,"text":"Separate MAUI shop-admin app for onboarding and management.","textPreview":"Separate MAUI shop-admin app for onboarding and management.","textChars":59,"textLines":1,"bbox":[676,276,430,38]}
+{"kind":"shape","id":"sh/za1gvy90","slide":5,"bbox":[74,358,490,104]}
+{"kind":"textbox","id":"sh/ap4r65wj","slide":5,"text":"Backend services","textPreview":"Backend services","textChars":16,"textLines":1,"bbox":[98,376,420,28]}
+{"kind":"textbox","id":"sh/hgn29gr2","slide":5,"text":"ASP.NET Core API for auth, service requests, payments, chat, emergency, reports, and files.","textPreview":"ASP.NET Core API for auth, service requests, payments, chat, emergency, reports, and files.","textChars":91,"textLines":1,"bbox":[98,410,430,38]}
+{"kind":"shape","id":"sh/svu9knih","slide":5,"bbox":[652,358,490,104]}
+{"kind":"textbox","id":"sh/zidonyd0","slide":5,"text":"Data layer","textPreview":"Data layer","textChars":10,"textLines":1,"bbox":[676,376,420,28]}
+{"kind":"textbox","id":"sh/a1gvy90j","slide":5,"text":"SQL Server schema, EF Core migrations, seed data, and trigger scripts.","textPreview":"SQL Server schema, EF Core migrations, seed data, and trigger scripts.","textChars":70,"textLines":1,"bbox":[676,410,430,38]}
+{"kind":"shape","id":"sh/hoza1gvy","slide":5,"bbox":[74,492,490,104]}
+{"kind":"textbox","id":"sh/s36hcrmh","slide":5,"text":"Web administration","textPreview":"Web administration","textChars":18,"textLines":1,"bbox":[98,510,420,28]}
+{"kind":"textbox","id":"sh/3m94fu18","slide":5,"text":"Blazor dashboard for approvals, users, shops, mechanics, payments, requests, and emergencies.","textPreview":"Blazor dashboard for approvals, users, shops, mechanics, payments, requests, and emergencies.","textChars":93,"textLines":1,"bbox":[98,544,430,38]}
+{"kind":"textbox","id":"sh/a5gbq1or","slide":5,"text":"BikeMate Motorcycle Service Assistance System","textPreview":"BikeMate Motorcycle Service Assistance System","textChars":45,"textLines":1,"bbox":[64,666,600,24]}
+{"kind":"textbox","id":"sh/yxobm58z","slide":5,"text":"05","textPreview":"05","textChars":2,"textLines":1,"bbox":[1160,662,56,28]}
+{"kind":"notes","id":"nt/pcxo7h","slide":5,"text":""}
+{"kind":"slide","id":"sl/ud74mx","slide":6,"title":"BIKEMATE PROJECT PRESENTATION","textShapes":14}
+{"kind":"textbox","id":"sh/r65wjudg","slide":6,"text":"BIKEMATE PROJECT PRESENTATION","textPreview":"BIKEMATE PROJECT PRESENTATION","textChars":29,"textLines":1,"bbox":[64,40,540,28]}
+{"kind":"textbox","id":"sh/gr2p8nqx","slide":6,"text":"The architecture separates user apps, API logic, shared contracts, and persistence.","textPreview":"The architecture separates user apps, API logic, shared contracts, and persistence.","textChars":83,"textLines":1,"bbox":[64,82,900,92]}
+{"kind":"shape","id":"sh/9cvixcze","slide":6,"bbox":[64,178,1152,1]}
+{"kind":"shape","id":"sh/yxobm58z","slide":6,"bbox":[72,244,306,104]}
+{"kind":"textbox","id":"sh/nih4byhg","slide":6,"text":"BikeMate.Mobile","textPreview":"BikeMate.Mobile","textChars":15,"textLines":1,"bbox":[90,262,270,28]}
+{"kind":"textbox","id":"sh/g3ex0nux","slide":6,"text":"Customer, mechanic, and system-admin mobile screens","textPreview":"Customer, mechanic, and system-admin mobile screens","textChars":51,"textLines":1,"bbox":[90,294,270,38]}
+{"kind":"shape","id":"sh/5o7qpg3e","slide":6,"bbox":[72,396,306,104]}
+{"kind":"textbox","id":"sh/y1kre1w7","slide":6,"text":"BIKEMATES_ADMIN","textPreview":"BIKEMATES_ADMIN","textChars":15,"textLines":1,"bbox":[90,414,270,28]}
+{"kind":"textbox","id":"sh/rmhk3q5o","slide":6,"text":"Shop owner onboarding and shop management app","textPreview":"Shop owner onboarding and shop management app","textChars":45,"textLines":1,"bbox":[90,446,270,38]}
+{"kind":"shape","id":"sh/fa9w3m94","slide":6,"bbox":[480,320,306,104]}
+{"kind":"textbox","id":"sh/qpg3ex0n","slide":6,"text":"BikeMate.Api","textPreview":"BikeMate.Api","textChars":12,"textLines":1,"bbox":[498,338,270,28]}
+{"kind":"textbox","id":"sh/xczed8v6","slide":6,"text":"Authentication, requests, messaging, payments, emergency, reports","textPreview":"Authentication, requests, messaging, payments, emergency, reports","textChars":65,"textLines":1,"bbox":[498,370,270,38]}
+{"kind":"shape","id":"sh/8v6psfil","slide":6,"bbox":[850,244,306,104]}
+{"kind":"textbox","id":"sh/fyxobm58","slide":6,"text":"BikeMate.Core","textPreview":"BikeMate.Core","textChars":13,"textLines":1,"bbox":[868,262,270,28]}
+{"kind":"textbox","id":"sh/qd4vmtwr","slide":6,"text":"DTOs, constants, and entity contracts shared by projects","textPreview":"DTOs, constants, and entity contracts shared by projects","textChars":56,"textLines":1,"bbox":[868,294,270,38]}
+{"kind":"shape","id":"sh/x4nap4r6","slide":6,"bbox":[850,396,306,104]}
+{"kind":"textbox","id":"sh/8jqh0fep","slide":6,"text":"BikeMate.Infrastructure","textPreview":"BikeMate.Infrastructure","textChars":23,"textLines":1,"bbox":[868,414,270,28]}
+{"kind":"textbox","id":"sh/fmlkjm1c","slide":6,"text":"EF Core DbContext, SQL Server migrations, and scripts","textPreview":"EF Core DbContext, SQL Server migrations, and scripts","textChars":53,"textLines":1,"bbox":[868,446,270,38]}
+{"kind":"shape","id":"sh/q1orytsv","slide":6,"bbox":[378,296,102,54]}
+{"kind":"shape","id":"sh/y1kre1w7","slide":6,"bbox":[378,350,102,98]}
+{"kind":"shape","id":"sh/rmhk3q5o","slide":6,"bbox":[786,296,64,54]}
+{"kind":"shape","id":"sh/g7adsji5","slide":6,"bbox":[786,350,64,98]}
+{"kind":"textbox","id":"sh/9s36hcrm","slide":6,"text":"BikeMate Motorcycle Service Assistance System","textPreview":"BikeMate Motorcycle Service Assistance System","textChars":45,"textLines":1,"bbox":[64,666,600,24]}
+{"kind":"textbox","id":"sh/yd0z6103","slide":6,"text":"06","textPreview":"06","textChars":2,"textLines":1,"bbox":[1160,662,56,28]}
+{"kind":"notes","id":"nt/ud74mx","slide":6,"text":""}
+{"kind":"slide","id":"sl/lalewu","slide":7,"title":"BIKEMATE PROJECT PRESENTATION","textShapes":16}
+{"kind":"textbox","id":"sh/m1cfa9w3","slide":7,"text":"BIKEMATE PROJECT PRESENTATION","textPreview":"BIKEMATE PROJECT PRESENTATION","textChars":29,"textLines":1,"bbox":[64,40,540,28]}
+{"kind":"textbox","id":"sh/tsvu9kni","slide":7,"text":"The technology stack is built around .NET with SQL Server persistence.","textPreview":"The technology stack is built around .NET with SQL Server persistence.","textChars":70,"textLines":1,"bbox":[64,82,900,92]}
+{"kind":"shape","id":"sh/47y1kre1","slide":7,"bbox":[64,178,1152,1]}
+{"kind":"textbox","id":"sh/bat47y1k","slide":7,"text":"Mobile","textPreview":"Mobile","textChars":6,"textLines":1,"bbox":[86,220,280,32]}
+{"kind":"textbox","id":"sh/mp0bi9s3","slide":7,"text":".NET MAUI, C#, XAML, Android target","textPreview":".NET MAUI, C#, XAML, Android target","textChars":35,"textLines":1,"bbox":[370,220,760,32]}
+{"kind":"shape","id":"sh/tgfmlkjm","slide":7,"bbox":[86,264,1040,1]}
+{"kind":"textbox","id":"sh/4vmtwra5","slide":7,"text":"Backend","textPreview":"Backend","textChars":7,"textLines":1,"bbox":[86,282,280,32]}
+{"kind":"textbox","id":"sh/b2hwfyxo","slide":7,"text":"ASP.NET Core Web API, JWT bearer authentication, SignalR","textPreview":"ASP.NET Core Web API, JWT bearer authentication, SignalR","textChars":56,"textLines":1,"bbox":[370,282,760,32]}
+{"kind":"shape","id":"sh/mhk3q5o7","slide":7,"bbox":[86,326,1040,1]}
+{"kind":"textbox","id":"sh/0z61032l","slide":7,"text":"Data","textPreview":"Data","textChars":4,"textLines":1,"bbox":[86,344,280,32]}
+{"kind":"textbox","id":"sh/pkzupwb2","slide":7,"text":"SQL Server, Entity Framework Core, migrations, SQL scripts","textPreview":"SQL Server, Entity Framework Core, migrations, SQL scripts","textChars":58,"textLines":1,"bbox":[370,344,760,32]}
+{"kind":"shape","id":"sh/itgfmlkj","slide":7,"bbox":[86,388,1040,1]}
+{"kind":"textbox","id":"sh/7ed8bat4","slide":7,"text":"Web Admin","textPreview":"Web Admin","textChars":9,"textLines":1,"bbox":[86,406,280,32]}
+{"kind":"textbox","id":"sh/0nuxc3yl","slide":7,"text":"Blazor, Razor components, Bootstrap styling","textPreview":"Blazor, Razor components, Bootstrap styling","textChars":43,"textLines":1,"bbox":[370,406,760,32]}
+{"kind":"shape","id":"sh/p8nqxs72","slide":7,"bbox":[86,450,1040,1]}
+{"kind":"textbox","id":"sh/ih4byhgn","slide":7,"text":"Testing","textPreview":"Testing","textChars":7,"textLines":1,"bbox":[86,468,280,32]}
+{"kind":"textbox","id":"sh/72x4nap4","slide":7,"text":"xUnit tests for services, constants, middleware, and helpers","textPreview":"xUnit tests for services, constants, middleware, and helpers","textChars":60,"textLines":1,"bbox":[370,468,760,32]}
+{"kind":"shape","id":"sh/wjudg7ad","slide":7,"bbox":[86,512,1040,1]}
+{"kind":"textbox","id":"sh/p4r65wju","slide":7,"text":"Prepared Integrations","textPreview":"Prepared Integrations","textChars":21,"textLines":1,"bbox":[86,530,280,32]}
+{"kind":"textbox","id":"sh/9gr2p8nq","slide":7,"text":"PayMongo, Google OAuth, email/OTP, Firebase, file storage","textPreview":"PayMongo, Google OAuth, email/OTP, Firebase, file storage","textChars":57,"textLines":1,"bbox":[370,530,760,32]}
+{"kind":"shape","id":"sh/gvy90je9","slide":7,"bbox":[86,574,1040,1]}
+{"kind":"textbox","id":"sh/ra5gbq1o","slide":7,"text":"BikeMate Motorcycle Service Assistance System","textPreview":"BikeMate Motorcycle Service Assistance System","textChars":45,"textLines":1,"bbox":[64,666,600,24]}
+{"kind":"textbox","id":"sh/2p8nqxs7","slide":7,"text":"07","textPreview":"07","textChars":2,"textLines":1,"bbox":[1160,662,56,28]}
+{"kind":"notes","id":"nt/lalewu","slide":7,"text":""}
+{"kind":"slide","id":"sl/1csjd0","slide":8,"title":"BIKEMATE PROJECT PRESENTATION","textShapes":12}
+{"kind":"textbox","id":"sh/l0rqd4vm","slide":8,"text":"BIKEMATE PROJECT PRESENTATION","textPreview":"BIKEMATE PROJECT PRESENTATION","textChars":29,"textLines":1,"bbox":[64,40,540,28]}
+{"kind":"textbox","id":"sh/ed8bat47","slide":8,"text":"Four roles define the system behavior and access boundaries.","textPreview":"Four roles define the system behavior and access boundaries.","textChars":60,"textLines":1,"bbox":[64,82,900,92]}
+{"kind":"shape","id":"sh/7u54zido","slide":8,"bbox":[64,178,1152,1]}
+{"kind":"shape","id":"sh/wra5gbq1","slide":8,"bbox":[74,234,500,128]}
+{"kind":"textbox","id":"sh/lc7u54zi","slide":8,"text":"Customer","textPreview":"Customer","textChars":8,"textLines":1,"bbox":[98,256,420,30]}
+{"kind":"textbox","id":"sh/eloj2t83","slide":8,"text":"Books repair services, tracks jobs, chats, pays, reviews, and requests emergency support.","textPreview":"Books repair services, tracks jobs, chats, pays, reviews, and requests emergency support.","textChars":89,"textLines":1,"bbox":[98,296,430,48]}
+{"kind":"shape","id":"sh/36hcrmhk","slide":8,"bbox":[636,234,500,128]}
+{"kind":"textbox","id":"sh/wval87ed","slide":8,"text":"Mechanic / Rider","textPreview":"Mechanic / Rider","textChars":16,"textLines":1,"bbox":[660,256,420,30]}
+{"kind":"textbox","id":"sh/pg3ex0nu","slide":8,"text":"Receives assigned work, accepts or rejects jobs, updates progress, shares location, and views ratings.","textPreview":"Receives assigned work, accepts or rejects jobs, updates progress, shares location, and views ratings.","textChars":102,"textLines":1,"bbox":[660,296,430,48]}
+{"kind":"shape","id":"sh/loj2t83i","slide":8,"bbox":[74,410,500,128]}
+{"kind":"textbox","id":"sh/w3m94fu1","slide":8,"text":"Shop Admin","textPreview":"Shop Admin","textChars":10,"textLines":1,"bbox":[98,432,420,30]}
+{"kind":"textbox","id":"sh/3itgfmlk","slide":8,"text":"Submits shop application, manages profile, services, products, bookings, mechanics, messages, and reports.","textPreview":"Submits shop application, manages profile, services, products, bookings, mechanics, messages, and reports.","textChars":106,"textLines":1,"bbox":[98,472,430,48]}
+{"kind":"shape","id":"sh/ex0nuxc3","slide":8,"bbox":[636,410,500,128]}
+{"kind":"textbox","id":"sh/lwval87e","slide":8,"text":"System Admin","textPreview":"System Admin","textChars":12,"textLines":1,"bbox":[660,432,420,30]}
+{"kind":"textbox","id":"sh/wb2hwfyx","slide":8,"text":"Approves accounts, monitors requests, manages users, shops, mechanics, payments, and emergency queues.","textPreview":"Approves accounts, monitors requests, manages users, shops, mechanics, payments, and emergency queues.","textChars":102,"textLines":1,"bbox":[660,472,430,48]}
+{"kind":"textbox","id":"sh/3q5o7qpg","slide":8,"text":"BikeMate Motorcycle Service Assistance System","textPreview":"BikeMate Motorcycle Service Assistance System","textChars":45,"textLines":1,"bbox":[64,666,600,24]}
+{"kind":"textbox","id":"sh/e9cvixcz","slide":8,"text":"08","textPreview":"08","textChars":2,"textLines":1,"bbox":[1160,662,56,28]}
+{"kind":"notes","id":"nt/1csjd0","slide":8,"text":""}
+{"kind":"slide","id":"sl/5uohn6","slide":9,"title":"BIKEMATE PROJECT PRESENTATION","textShapes":8}
+{"kind":"textbox","id":"sh/1032lszq","slide":9,"text":"BIKEMATE PROJECT PRESENTATION","textPreview":"BIKEMATE PROJECT PRESENTATION","textChars":29,"textLines":1,"bbox":[64,40,540,28]}
+{"kind":"textbox","id":"sh/u9knih4b","slide":9,"text":"The customer flow moves from discovery to booking, tracking, and payment.","textPreview":"The customer flow moves from discovery to booking, tracking, and payment.","textChars":73,"textLines":1,"bbox":[64,82,900,92]}
+{"kind":"shape","id":"sh/judg7ads","slide":9,"bbox":[64,178,1152,1]}
+{"kind":"textbox","id":"sh/jm1cfa9w","slide":9,"text":"Home","textPreview":"Home","textChars":4,"textLines":1,"bbox":[132,612,180,26]}
+{"kind":"textbox","id":"sh/cvixczed","slide":9,"text":"Booking","textPreview":"Booking","textChars":7,"textLines":1,"bbox":[434,612,180,26]}
+{"kind":"textbox","id":"sh/5gbq1ory","slide":9,"text":"Payment","textPreview":"Payment","textChars":7,"textLines":1,"bbox":[736,612,180,26]}
+{"kind":"textbox","id":"sh/18jqh0fe","slide":9,"text":"Users can view services, create a repair request, schedule work, track status, and manage payment records.","textPreview":"Users can view services, create a repair request, schedule work, track status, and manage payment records.","textChars":106,"textLines":1,"bbox":[982,252,200,250]}
+{"kind":"textbox","id":"sh/8nqxs72x","slide":9,"text":"BikeMate Motorcycle Service Assistance System","textPreview":"BikeMate Motorcycle Service Assistance System","textChars":45,"textLines":1,"bbox":[64,666,600,24]}
+{"kind":"textbox","id":"sh/j2t83itg","slide":9,"text":"09","textPreview":"09","textChars":2,"textLines":1,"bbox":[1160,662,56,28]}
+{"kind":"image","id":"im/t47y1kre","slide":9,"name":"","alt":"Customer home screen","bbox":[92,218,260,380]}
+{"kind":"image","id":"im/0je9cvix","slide":9,"name":"","alt":"Booking screen","bbox":[394,218,260,380]}
+{"kind":"image","id":"im/byhgn29g","slide":9,"name":"","alt":"Payment details screen","bbox":[696,218,260,380]}
+{"kind":"notes","id":"nt/5uohn6","slide":9,"text":""}
+{"kind":"slide","id":"sl/ld0ki9","slide":10,"title":"BIKEMATE PROJECT PRESENTATION","textShapes":9}
+{"kind":"textbox","id":"sh/vy90je9c","slide":10,"text":"BIKEMATE PROJECT PRESENTATION","textPreview":"BIKEMATE PROJECT PRESENTATION","textChars":29,"textLines":1,"bbox":[64,40,540,28]}
+{"kind":"textbox","id":"sh/oj2t83it","slide":10,"text":"Communication and emergency support make the service workflow responsive.","textPreview":"Communication and emergency support make the service workflow responsive.","textChars":73,"textLines":1,"bbox":[64,82,900,92]}
+{"kind":"shape","id":"sh/d4vmtwra","slide":10,"bbox":[64,178,1152,1]}
+{"kind":"shape","id":"sh/o7qpg3ex","slide":10,"bbox":[680,236,452,282]}
+{"kind":"textbox","id":"sh/dsji5sne","slide":10,"text":"Emergency workflow","textPreview":"Emergency workflow","textChars":18,"textLines":1,"bbox":[716,270,360,34]}
+{"kind":"shape","id":"sh/6tovahoz","slide":10,"bbox":[720,335,8,8]}
+{"kind":"textbox","id":"sh/vahoza1g","slide":10,"text":"Customer sends location and emergency details.","textPreview":"Customer sends location and emergency details.","textChars":46,"textLines":1,"bbox":[742,326,338,46]}
+{"kind":"shape","id":"sh/7qpg3ex0","slide":10,"bbox":[720,383,8,8]}
+{"kind":"textbox","id":"sh/i5sneloj","slide":10,"text":"Nearby responders are identified by the backend.","textPreview":"Nearby responders are identified by the backend.","textChars":48,"textLines":1,"bbox":[742,374,338,46]}
+{"kind":"shape","id":"sh/pwb2hwfy","slide":10,"bbox":[720,431,8,8]}
+{"kind":"textbox","id":"sh/0bi9s36h","slide":10,"text":"Mechanic or admin can monitor and accept the case.","textPreview":"Mechanic or admin can monitor and accept the case.","textChars":50,"textLines":1,"bbox":[742,422,338,46]}
+{"kind":"shape","id":"sh/7y1kre1w","slide":10,"bbox":[720,479,8,8]}
+{"kind":"textbox","id":"sh/ed8v6psf","slide":10,"text":"SignalR supports emergency, location, and notification updates.","textPreview":"SignalR supports emergency, location, and notification updates.","textChars":63,"textLines":1,"bbox":[742,470,338,46]}
+{"kind":"textbox","id":"sh/p4r65wju","slide":10,"text":"BikeMate Motorcycle Service Assistance System","textPreview":"BikeMate Motorcycle Service Assistance System","textChars":45,"textLines":1,"bbox":[64,666,600,24]}
+{"kind":"textbox","id":"sh/wjudg7ad","slide":10,"text":"10","textPreview":"10","textChars":2,"textLines":1,"bbox":[1160,662,56,28]}
+{"kind":"image","id":"im/b2hwfyxo","slide":10,"name":"","alt":"Messages list screen","bbox":[86,220,250,372]}
+{"kind":"image","id":"im/mhk3q5o7","slide":10,"name":"","alt":"Chat screen","bbox":[368,220,250,372]}
+{"kind":"notes","id":"nt/ld0ki9","slide":10,"text":""}
+{"kind":"slide","id":"sl/k9bobp","slide":11,"title":"BIKEMATE PROJECT PRESENTATION","textShapes":12}
+{"kind":"textbox","id":"sh/1kre1w7m","slide":11,"text":"BIKEMATE PROJECT PRESENTATION","textPreview":"BIKEMATE PROJECT PRESENTATION","textChars":29,"textLines":1,"bbox":[64,40,540,28]}
+{"kind":"textbox","id":"sh/uxc3ylc7","slide":11,"text":"Shop and system administrators keep the platform trustworthy.","textPreview":"Shop and system administrators keep the platform trustworthy.","textChars":61,"textLines":1,"bbox":[64,82,900,92]}
+{"kind":"shape","id":"sh/ji5snelo","slide":11,"bbox":[64,178,1152,1]}
+{"kind":"shape","id":"sh/crmhk3q5","slide":11,"bbox":[84,238,500,292]}
+{"kind":"textbox","id":"sh/1cfa9w3m","slide":11,"text":"Shop Admin App","textPreview":"Shop Admin App","textChars":14,"textLines":1,"bbox":[116,272,400,34]}
+{"kind":"shape","id":"sh/ulwval87","slide":11,"bbox":[122,343,8,8]}
+{"kind":"textbox","id":"sh/j6tovaho","slide":11,"text":"Shop application and OTP verification","textPreview":"Shop application and OTP verification","textChars":37,"textLines":1,"bbox":[144,334,378,48]}
+{"kind":"shape","id":"sh/8nqxs72x","slide":11,"bbox":[122,393,8,8]}
+{"kind":"textbox","id":"sh/18jqh0fe","slide":11,"text":"Owner, shop, permit, and valid ID details","textPreview":"Owner, shop, permit, and valid ID details","textChars":41,"textLines":1,"bbox":[144,384,378,48]}
+{"kind":"shape","id":"sh/psfil0rq","slide":11,"bbox":[122,443,8,8]}
+{"kind":"textbox","id":"sh/w7mp0bi9","slide":11,"text":"Services, products, bookings, mechanics, messages, reports","textPreview":"Services, products, bookings, mechanics, messages, reports","textChars":58,"textLines":1,"bbox":[144,434,378,48]}
+{"kind":"shape","id":"sh/7mp0bi9s","slide":11,"bbox":[666,238,500,292]}
+{"kind":"textbox","id":"sh/e1w7mp0b","slide":11,"text":"System Admin Web","textPreview":"System Admin Web","textChars":16,"textLines":1,"bbox":[698,272,400,34]}
+{"kind":"shape","id":"sh/pg3ex0nu","slide":11,"bbox":[704,343,8,8]}
+{"kind":"textbox","id":"sh/wval87ed","slide":11,"text":"Dashboard for platform monitoring","textPreview":"Dashboard for platform monitoring","textChars":33,"textLines":1,"bbox":[726,334,378,48]}
+{"kind":"shape","id":"sh/7adsji5s","slide":11,"bbox":[704,393,8,8]}
+{"kind":"textbox","id":"sh/epkzupwb","slide":11,"text":"User, shop, mechanic, and customer approvals","textPreview":"User, shop, mechanic, and customer approvals","textChars":44,"textLines":1,"bbox":[726,384,378,48]}
+{"kind":"shape","id":"sh/lc7u54zi","slide":11,"bbox":[704,443,8,8]}
+{"kind":"textbox","id":"sh/wra5gbq1","slide":11,"text":"Requests, emergency queue, payments, and admin accounts","textPreview":"Requests, emergency queue, payments, and admin accounts","textChars":55,"textLines":1,"bbox":[726,434,378,48]}
+{"kind":"textbox","id":"sh/s36hcrmh","slide":11,"text":"BikeMate Motorcycle Service Assistance System","textPreview":"BikeMate Motorcycle Service Assistance System","textChars":45,"textLines":1,"bbox":[64,666,600,24]}
+{"kind":"textbox","id":"sh/hoza1gvy","slide":11,"text":"11","textPreview":"11","textChars":2,"textLines":1,"bbox":[1160,662,56,28]}
+{"kind":"notes","id":"nt/k9bobp","slide":11,"text":""}
+{"kind":"slide","id":"sl/fmodex","slide":12,"title":"BIKEMATE PROJECT PRESENTATION","textShapes":14}
+{"kind":"textbox","id":"sh/vixczed8","slide":12,"text":"BIKEMATE PROJECT PRESENTATION","textPreview":"BIKEMATE PROJECT PRESENTATION","textChars":29,"textLines":1,"bbox":[64,40,540,28]}
+{"kind":"textbox","id":"sh/k3q5o7qp","slide":12,"text":"The database records both operations and accountability.","textPreview":"The database records both operations and accountability.","textChars":56,"textLines":1,"bbox":[64,82,900,92]}
+{"kind":"shape","id":"sh/donyd0z6","slide":12,"bbox":[64,178,1152,1]}
+{"kind":"textbox","id":"sh/6psfil0r","slide":12,"text":"Identity","textPreview":"Identity","textChars":8,"textLines":1,"bbox":[94,224,230,30]}
+{"kind":"textbox","id":"sh/val87ed8","slide":12,"text":"Users, roles, OTP, reset tokens, auth providers, device tokens","textPreview":"Users, roles, OTP, reset tokens, auth providers, device tokens","textChars":62,"textLines":1,"bbox":[344,224,790,30]}
+{"kind":"shape","id":"sh/kre1w7mp","slide":12,"bbox":[94,270,1030,1]}
+{"kind":"textbox","id":"sh/dcbulwva","slide":12,"text":"Service network","textPreview":"Service network","textChars":15,"textLines":1,"bbox":[94,296,230,30]}
+{"kind":"textbox","id":"sh/2lszqtcj","slide":12,"text":"Clients, motorcycles, mechanics, shops, hours, services, products","textPreview":"Clients, motorcycles, mechanics, shops, hours, services, products","textChars":65,"textLines":1,"bbox":[344,296,790,30]}
+{"kind":"shape","id":"sh/v6psfil0","slide":12,"bbox":[94,342,1030,1]}
+{"kind":"textbox","id":"sh/bq1oryts","slide":12,"text":"Transactions","textPreview":"Transactions","textChars":12,"textLines":1,"bbox":[94,368,230,30]}
+{"kind":"textbox","id":"sh/m58z25kb","slide":12,"text":"Service requests, status history, media, payments, payment events","textPreview":"Service requests, status history, media, payments, payment events","textChars":65,"textLines":1,"bbox":[344,368,790,30]}
+{"kind":"shape","id":"sh/twra5gbq","slide":12,"bbox":[94,414,1030,1]}
+{"kind":"textbox","id":"sh/4byhgn29","slide":12,"text":"Engagement","textPreview":"Engagement","textChars":10,"textLines":1,"bbox":[94,440,230,30]}
+{"kind":"textbox","id":"sh/b2hwfyxo","slide":12,"text":"Conversations, messages, reviews, notifications, live locations","textPreview":"Conversations, messages, reviews, notifications, live locations","textChars":63,"textLines":1,"bbox":[344,440,790,30]}
+{"kind":"shape","id":"sh/mhk3q5o7","slide":12,"bbox":[94,486,1030,1]}
+{"kind":"textbox","id":"sh/t83itgfm","slide":12,"text":"Governance","textPreview":"Governance","textChars":10,"textLines":1,"bbox":[94,512,230,30]}
+{"kind":"textbox","id":"sh/4nap4r65","slide":12,"text":"Audit logs, verification status, account status, shop status","textPreview":"Audit logs, verification status, account status, shop status","textChars":60,"textLines":1,"bbox":[344,512,790,30]}
+{"kind":"shape","id":"sh/bat47y1k","slide":12,"bbox":[94,558,1030,1]}
+{"kind":"textbox","id":"sh/mp0bi9s3","slide":12,"text":"BikeMate Motorcycle Service Assistance System","textPreview":"BikeMate Motorcycle Service Assistance System","textChars":45,"textLines":1,"bbox":[64,666,600,24]}
+{"kind":"textbox","id":"sh/uxc3ylc7","slide":12,"text":"12","textPreview":"12","textChars":2,"textLines":1,"bbox":[1160,662,56,28]}
+{"kind":"notes","id":"nt/fmodex","slide":12,"text":""}
+{"kind":"slide","id":"sl/y8ef7i","slide":13,"title":"BIKEMATE PROJECT PRESENTATION","textShapes":11}
+{"kind":"textbox","id":"sh/4r65wjud","slide":13,"text":"BIKEMATE PROJECT PRESENTATION","textPreview":"BIKEMATE PROJECT PRESENTATION","textChars":29,"textLines":1,"bbox":[64,40,540,28]}
+{"kind":"textbox","id":"sh/f6dcbulw","slide":13,"text":"The API exposes the main business workflows through role-aware endpoints.","textPreview":"The API exposes the main business workflows through role-aware endpoints.","textChars":73,"textLines":1,"bbox":[64,82,900,92]}
+{"kind":"shape","id":"sh/mlkjm1cf","slide":13,"bbox":[64,178,1152,1]}
+{"kind":"shape","id":"sh/xkf6dcbu","slide":13,"bbox":[80,246,310,272]}
+{"kind":"textbox","id":"sh/4zidonyd","slide":13,"text":"Core APIs","textPreview":"Core APIs","textChars":9,"textLines":1,"bbox":[104,278,260,34]}
+{"kind":"textbox","id":"sh/fepkzupw","slide":13,"text":"Auth\nCustomers\nMechanics\nShops\nServices\nProducts","textPreview":"Auth | Customers | Mechanics | Shops | Services | Products","textChars":48,"textLines":6,"bbox":[104,328,240,150]}
+{"kind":"shape","id":"sh/mtwra5gb","slide":13,"bbox":[462,246,310,272]}
+{"kind":"textbox","id":"sh/xobm58z2","slide":13,"text":"Operations","textPreview":"Operations","textChars":10,"textLines":1,"bbox":[486,278,260,34]}
+{"kind":"textbox","id":"sh/83itgfml","slide":13,"text":"Service Requests\nEmergency\nPayments\nMessages\nLocation\nNotifications","textPreview":"Service Requests | Emergency | Payments | Messages | Location | Notifications","textChars":67,"textLines":6,"bbox":[486,328,240,150]}
+{"kind":"shape","id":"sh/y90je9cv","slide":13,"bbox":[844,246,310,272]}
+{"kind":"textbox","id":"sh/nuxc3ylc","slide":13,"text":"Administration","textPreview":"Administration","textChars":14,"textLines":1,"bbox":[868,278,260,34]}
+{"kind":"textbox","id":"sh/gbq1oryt","slide":13,"text":"Admin Dashboard\nApprovals\nReports\nUsers\nFiles\nDevices","textPreview":"Admin Dashboard | Approvals | Reports | Users | Files | Devices","textChars":53,"textLines":6,"bbox":[868,328,240,150]}
+{"kind":"textbox","id":"sh/5wjudg7a","slide":13,"text":"Real-time hubs: booking, chat, emergency, location, notification","textPreview":"Real-time hubs: booking, chat, emergency, location, notification","textChars":64,"textLines":1,"bbox":[122,568,940,34]}
+{"kind":"textbox","id":"sh/yhgn29gr","slide":13,"text":"BikeMate Motorcycle Service Assistance System","textPreview":"BikeMate Motorcycle Service Assistance System","textChars":45,"textLines":1,"bbox":[64,666,600,24]}
+{"kind":"textbox","id":"sh/n29gr2p8","slide":13,"text":"13","textPreview":"13","textChars":2,"textLines":1,"bbox":[1160,662,56,28]}
+{"kind":"notes","id":"nt/y8ef7i","slide":13,"text":""}
+{"kind":"slide","id":"sl/9s5pcc","slide":14,"title":"BIKEMATE PROJECT PRESENTATION","textShapes":16}
+{"kind":"textbox","id":"sh/3ylc7u54","slide":14,"text":"BIKEMATE PROJECT PRESENTATION","textPreview":"BIKEMATE PROJECT PRESENTATION","textChars":29,"textLines":1,"bbox":[64,40,540,28]}
+{"kind":"textbox","id":"sh/sji5snel","slide":14,"text":"Testing confirms the system is ready for local demonstration.","textPreview":"Testing confirms the system is ready for local demonstration.","textChars":61,"textLines":1,"bbox":[64,82,900,92]}
+{"kind":"shape","id":"sh/h4byhgn2","slide":14,"bbox":[64,178,1152,1]}
+{"kind":"shape","id":"sh/a5gbq1or","slide":14,"bbox":[90,238,250,112]}
+{"kind":"textbox","id":"sh/3m94fu18","slide":14,"text":"4","textPreview":"4","textChars":1,"textLines":1,"bbox":[110,256,210,42]}
+{"kind":"textbox","id":"sh/s72x4nap","slide":14,"text":"Verified roles","textPreview":"Verified roles","textChars":14,"textLines":1,"bbox":[110,302,210,34]}
+{"kind":"shape","id":"sh/lszqtcj6","slide":14,"bbox":[370,238,250,112]}
+{"kind":"textbox","id":"sh/a1gvy90j","slide":14,"text":"36","textPreview":"36","textChars":2,"textLines":1,"bbox":[390,256,210,42]}
+{"kind":"textbox","id":"sh/zidonyd0","slide":14,"text":"Database tables","textPreview":"Database tables","textChars":15,"textLines":1,"bbox":[390,302,210,34]}
+{"kind":"shape","id":"sh/re1w7mp0","slide":14,"bbox":[650,238,250,112]}
+{"kind":"textbox","id":"sh/2t83itgf","slide":14,"text":"5","textPreview":"5","textChars":1,"textLines":1,"bbox":[670,256,210,42]}
+{"kind":"textbox","id":"sh/9knih4by","slide":14,"text":"SignalR hubs","textPreview":"SignalR hubs","textChars":12,"textLines":1,"bbox":[670,302,210,34]}
+{"kind":"shape","id":"sh/kzupwb2h","slide":14,"bbox":[930,238,250,112]}
+{"kind":"textbox","id":"sh/rqd4vmtw","slide":14,"text":"6","textPreview":"6","textChars":1,"textLines":1,"bbox":[950,256,210,42]}
+{"kind":"textbox","id":"sh/25kb6xkf","slide":14,"text":"Main projects","textPreview":"Main projects","textChars":13,"textLines":1,"bbox":[950,302,210,34]}
+{"kind":"shape","id":"sh/9w3m94fu","slide":14,"bbox":[116,429,8,8]}
+{"kind":"textbox","id":"sh/kb6xkf6d","slide":14,"text":"API build, health endpoint, login, authorization, and role data passed.","textPreview":"API build, health endpoint, login, authorization, and role data passed.","textChars":71,"textLines":1,"bbox":[138,420,978,46]}
+{"kind":"shape","id":"sh/r2p8nqxs","slide":14,"bbox":[116,477,8,8]}
+{"kind":"textbox","id":"sh/2hwfyxob","slide":14,"text":"Customer, mechanic, shop admin, and system admin workflows were smoke-tested.","textPreview":"Customer, mechanic, shop admin, and system admin workflows were smoke-tested.","textChars":77,"textLines":1,"bbox":[138,468,978,46]}
+{"kind":"shape","id":"sh/q1orytsv","slide":14,"bbox":[116,525,8,8]}
+{"kind":"textbox","id":"sh/fmlkjm1c","slide":14,"text":"Android build and emulator launch were verified for the mobile app.","textPreview":"Android build and emulator launch were verified for the mobile app.","textChars":67,"textLines":1,"bbox":[138,516,978,46]}
+{"kind":"shape","id":"sh/87ed8bat","slide":14,"bbox":[116,573,8,8]}
+{"kind":"textbox","id":"sh/xs72x4na","slide":14,"text":"Production payment, OAuth, email, notification, and storage keys remain external requirements.","textPreview":"Production payment, OAuth, email, notification, and storage keys remain external requirements.","textChars":94,"textLines":1,"bbox":[138,564,978,46]}
+{"kind":"textbox","id":"sh/qtcj6tov","slide":14,"text":"BikeMate Motorcycle Service Assistance System","textPreview":"BikeMate Motorcycle Service Assistance System","textChars":45,"textLines":1,"bbox":[64,666,600,24]}
+{"kind":"textbox","id":"sh/je9cvixc","slide":14,"text":"14","textPreview":"14","textChars":2,"textLines":1,"bbox":[1160,662,56,28]}
+{"kind":"notes","id":"nt/9s5pcc","slide":14,"text":""}
+{"kind":"slide","id":"sl/r7b5b3","slide":15,"title":"BIKEMATE PROJECT PRESENTATION","textShapes":7}
+{"kind":"textbox","id":"sh/p4r65wju","slide":15,"text":"BIKEMATE PROJECT PRESENTATION","textPreview":"BIKEMATE PROJECT PRESENTATION","textChars":29,"textLines":1,"bbox":[64,40,540,28]}
+{"kind":"textbox","id":"sh/ed8v6psf","slide":15,"text":"BikeMate demonstrates a complete foundation for motorcycle service assistance.","textPreview":"BikeMate demonstrates a complete foundation for motorcycle service assistance.","textChars":78,"textLines":1,"bbox":[64,82,900,92]}
+{"kind":"shape","id":"sh/7y1kre1w","slide":15,"bbox":[64,178,1152,1]}
+{"kind":"textbox","id":"sh/0bi9s36h","slide":15,"text":"The project delivers a working full-stack prototype with mobile apps, web administration, backend APIs, real-time hubs, database schema, tests, and demo assets. Its value is the organized connection between customers who need help, mechanics who provide service, shops that manage operations, and administrators who maintain trust.","textPreview":"The project delivers a working full-stack prototype with mobile apps, web administration, backend APIs, real-time hubs, database schema, ...","textChars":331,"textLines":1,"bbox":[100,238,990,180]}
+{"kind":"shape","id":"sh/pwb2hwfy","slide":15,"bbox":[100,470,990,92]}
+{"kind":"textbox","id":"sh/i5sneloj","slide":15,"text":"Conclusion","textPreview":"Conclusion","textChars":10,"textLines":1,"bbox":[132,496,200,30]}
+{"kind":"textbox","id":"sh/7qpg3ex0","slide":15,"text":"BikeMate is ready for formal presentation and local project demonstration.","textPreview":"BikeMate is ready for formal presentation and local project demonstration.","textChars":74,"textLines":1,"bbox":[336,496,680,32]}
+{"kind":"textbox","id":"sh/0z61032l","slide":15,"text":"BikeMate Motorcycle Service Assistance System","textPreview":"BikeMate Motorcycle Service Assistance System","textChars":45,"textLines":1,"bbox":[64,666,600,24]}
+{"kind":"textbox","id":"sh/pkzupwb2","slide":15,"text":"15","textPreview":"15","textChars":2,"textLines":1,"bbox":[1160,662,56,28]}
+{"kind":"notes","id":"nt/r7b5b3","slide":15,"text":""}

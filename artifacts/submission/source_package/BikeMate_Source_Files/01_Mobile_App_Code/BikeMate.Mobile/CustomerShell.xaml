@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Shell
+    x:Class="BikeMate.CustomerShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:customer="clr-namespace:BikeMate.Views.Customer"
+    Title="BikeMate"
+    Shell.NavBarIsVisible="False">
+
+    <TabBar>
+        <ShellContent Title="Home" Route="CustomerHomePage" ContentTemplate="{DataTemplate customer:CustomerHomePage}" />
+        <ShellContent Title="Schedule" Route="CustomerSchedulePage" ContentTemplate="{DataTemplate customer:CustomerSchedulePage}" />
+        <ShellContent Title="Messages" Route="CustomerMessagesPage" ContentTemplate="{DataTemplate customer:CustomerMessagesPage}" />
+        <ShellContent Title="Payments" Route="CustomerPaymentsPage" ContentTemplate="{DataTemplate customer:CustomerPaymentsPage}" />
+    </TabBar>
+</Shell>

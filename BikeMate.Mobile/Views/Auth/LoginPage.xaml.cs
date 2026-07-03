@@ -3,6 +3,7 @@ using BikeMate.Core.Constants;
 using BikeMate.Core.DTOs;
 using BikeMate.Helpers;
 using BikeMate.Services;
+using Microsoft.Maui.ApplicationModel;
 
 namespace BikeMate.Views.Auth;
 
@@ -27,10 +28,10 @@ public partial class LoginPage : ContentPage
             var auth = await GoogleSignInService.SignInAsync(AppRoles.Customer);
             await GoogleSignInService.StoreAuthAsync(auth);
             var role = GoogleSignInService.PickPrimaryRole(auth.User.Roles);
-            if (role == AppRoles.Customer &&
-                string.Equals(auth.User.AccountStatus, "pending", StringComparison.OrdinalIgnoreCase))
+            if (role == AppRoles.Customer && await ShouldOpenGoogleCustomerSetupAsync(auth))
             {
-                await Shell.Current.GoToAsync(nameof(GoogleAccountSetupPage));
+                SetBusy(false);
+                await NavigateToGoogleSetupAsync();
                 return;
             }
 
@@ -65,7 +66,7 @@ public partial class LoginPage : ContentPage
     private async void OnConnectionSettingsClicked(object? sender, EventArgs e)
     {
         var current = ApiConfig.BaseUrl;
-        var action = await DisplayActionSheet(
+        var action = await DisplayActionSheetAsync(
             "BikeMate API connection",
             "Cancel",
             null,
@@ -162,6 +163,78 @@ public partial class LoginPage : ContentPage
         BusyIndicator.IsRunning = value;
         SignInButton.IsEnabled = !value;
         GoogleButton.IsEnabled = !value;
+    }
+
+    private static async Task<bool> ShouldOpenGoogleCustomerSetupAsync(AuthResponseDto auth)
+    {
+        if (string.Equals(auth.User.AccountStatus, "pending", StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        try
+        {
+            var customer = await CustomerApiClient.GetCustomerAsync();
+            return IsGoogleCustomerSetupIncomplete(customer);
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Google customer setup check failed: {ex}");
+            return true;
+        }
+    }
+
+    private static bool IsGoogleCustomerSetupIncomplete(CustomerMeDto customer)
+    {
+        var address = customer.Addresses.FirstOrDefault(item => item.IsDefault) ?? customer.Addresses.FirstOrDefault();
+        var motorcycle = customer.Motorcycles.FirstOrDefault();
+
+        return string.IsNullOrWhiteSpace(customer.PhoneNumber) ||
+            string.IsNullOrWhiteSpace(customer.Sex) ||
+            customer.Birthdate is null ||
+            string.IsNullOrWhiteSpace(customer.ValidIdImageUrl) ||
+            address is null ||
+            string.IsNullOrWhiteSpace(address.AddressLine) ||
+            string.IsNullOrWhiteSpace(address.City) ||
+            string.IsNullOrWhiteSpace(address.Province) ||
+            string.IsNullOrWhiteSpace(address.PostalCode) ||
+            motorcycle is null ||
+            string.IsNullOrWhiteSpace(motorcycle.Brand) ||
+            string.IsNullOrWhiteSpace(motorcycle.Model) ||
+            string.IsNullOrWhiteSpace(motorcycle.PlateNumber);
+    }
+
+    private static async Task NavigateToGoogleSetupAsync()
+    {
+        await MainThread.InvokeOnMainThreadAsync(async () =>
+        {
+            await Task.Yield();
+
+            if (Application.Current?.Windows.Count > 0)
+            {
+                Application.Current.Windows[0].Page ??= new AppShell();
+            }
+
+            if (Shell.Current is not null)
+            {
+                try
+                {
+                    await Shell.Current.GoToAsync(nameof(GoogleAccountSetupPage));
+                    return;
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Google setup route failed: {ex}");
+                    await Shell.Current.Navigation.PushAsync(new GoogleAccountSetupPage());
+                    return;
+                }
+            }
+
+            if (Application.Current?.Windows.Count > 0)
+            {
+                Application.Current.Windows[0].Page = new NavigationPage(new GoogleAccountSetupPage());
+            }
+        });
     }
 
     private static string PickPrimaryRole(IReadOnlyCollection<string> roles)

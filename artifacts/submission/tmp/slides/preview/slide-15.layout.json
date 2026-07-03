@@ -1,0 +1,557 @@
+{
+  "schema": "openai.presentation.layout/v4",
+  "unit": "px",
+  "slide": {
+    "aid": "sl/r7b5b3",
+    "id": "r7b5b3",
+    "slide": 15,
+    "layoutId": "4901701f-cf99-4134-a1b9-04c1208ba709",
+    "layoutName": "Title Slide",
+    "layoutType": "title",
+    "masterLayoutId": "1c715f53-a1e6-4775-9309-4dbc3d45cd78",
+    "masterLayoutName": "Master",
+    "frame": {
+      "left": 0,
+      "top": 0,
+      "width": 1280,
+      "height": 720
+    }
+  },
+  "theme": {
+    "colorSchemeName": "ChatGPT",
+    "colors": {
+      "accent1": "#156082",
+      "accent2": "#E97132",
+      "accent3": "#196B24",
+      "accent4": "#0F9ED5",
+      "accent5": "#A02B93",
+      "accent6": "#4EA72E",
+      "bg1": "#FFFFFF",
+      "bg2": "#000000",
+      "tx1": "#1F1F1F",
+      "tx2": "#FFFFFF",
+      "dk1": "#000000",
+      "lt1": "#FFFFFF",
+      "dk2": "#0E2841",
+      "lt2": "#E8E8E8",
+      "hlink": "#467886",
+      "folHlink": "#96607D"
+    },
+    "typefaces": [
+      "+mn-lt"
+    ]
+  },
+  "inheritedLayers": [
+    {
+      "scope": "layout",
+      "id": "4901701f-cf99-4134-a1b9-04c1208ba709",
+      "name": "Title Slide",
+      "type": "title",
+      "parentLayoutId": "1c715f53-a1e6-4775-9309-4dbc3d45cd78",
+      "elements": []
+    },
+    {
+      "scope": "master",
+      "id": "1c715f53-a1e6-4775-9309-4dbc3d45cd78",
+      "name": "Master",
+      "type": "master",
+      "elements": []
+    }
+  ],
+  "elements": [
+    {
+      "order": 1,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/p4r65wju",
+      "id": "1",
+      "bbox": [
+        64,
+        40,
+        540,
+        28
+      ],
+      "geometry": "rect",
+      "text": "BIKEMATE PROJECT PRESENTATION",
+      "textPreview": "BIKEMATE PROJECT PRESENTATION",
+      "resolvedFontSize": 14,
+      "resolvedTextStyle": {
+        "fontSize": 14,
+        "typeface": "+mn-lt",
+        "color": "#FF6B2C",
+        "bold": true,
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "BIKEMATE PROJECT PRESENTATION"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "BIKEMATE PROJECT PRESENTATION",
+          "resolvedTextStyle": {
+            "fontSize": 14,
+            "color": "#FF6B2C",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "BIKEMATE PROJECT PRESENTATION",
+              "fontSize": 14,
+              "color": "#FF6B2C",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 2,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/ed8v6psf",
+      "id": "2",
+      "bbox": [
+        64,
+        82,
+        900,
+        92
+      ],
+      "geometry": "rect",
+      "text": "BikeMate demonstrates a complete foundation for motorcycle service assistance.",
+      "textPreview": "BikeMate demonstrates a complete foundation for motorcycle service assistance.",
+      "resolvedFontSize": 42,
+      "resolvedTextStyle": {
+        "fontSize": 42,
+        "typeface": "+mn-lt",
+        "color": "#111111",
+        "bold": true,
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "BikeMate demonstrates a complete foundation for"
+          },
+          {
+            "index": 2,
+            "text": "motorcycle service assistance."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "BikeMate demonstrates a complete foundation for motorcycle service assistance.",
+          "resolvedTextStyle": {
+            "fontSize": 42,
+            "color": "#111111",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "BikeMate demonstrates a complete foundation for motorcycle service assistance.",
+              "fontSize": 42,
+              "color": "#111111",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 3,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/7y1kre1w",
+      "id": "3",
+      "bbox": [
+        64,
+        178,
+        1152,
+        1
+      ],
+      "geometry": "rect",
+      "fillColor": "#B9BDC4",
+      "lineColor": "#B9BDC4",
+      "lineWidth": 0
+    },
+    {
+      "order": 4,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/0bi9s36h",
+      "id": "4",
+      "bbox": [
+        100,
+        238,
+        990,
+        180
+      ],
+      "geometry": "rect",
+      "text": "The project delivers a working full-stack prototype with mobile apps, web administration, backend APIs, real-time hubs, database schema, tests, and demo assets. Its value is the organized connection between customers who need help, mechanics who provide service, shops that manage operations, and administrators who maintain trust.",
+      "textPreview": "The project delivers a working full-stack prototype with mobile apps, web administration, backend APIs, real-time hubs, database schema, ...",
+      "resolvedFontSize": 28,
+      "resolvedTextStyle": {
+        "fontSize": 28,
+        "typeface": "+mn-lt",
+        "color": "#111111",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 5,
+        "lines": [
+          {
+            "index": 1,
+            "text": "The project delivers a working full-stack prototype with mobile apps, web"
+          },
+          {
+            "index": 2,
+            "text": "administration, backend APIs, real-time hubs, database schema, tests, and demo"
+          },
+          {
+            "index": 3,
+            "text": "assets. Its value is the organized connection between customers who need help,"
+          },
+          {
+            "index": 4,
+            "text": "mechanics who provide service, shops that manage operations, and administrators"
+          },
+          {
+            "index": 5,
+            "text": "who maintain trust."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "The project delivers a working full-stack prototype with mobile apps, web administration, backend APIs, real-time hubs, database schema, tests, and demo assets. Its value is the organized connection between customers who need help, mechanics who provide service, shops that manage operations, and administrators who maintain trust.",
+          "resolvedTextStyle": {
+            "fontSize": 28,
+            "color": "#111111",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "The project delivers a working full-stack prototype with mobile apps, web administration, backend APIs, real-time hubs, database schema, tests, and demo assets. Its value is the organized connection between customers who need help, mechanics who provide service, shops that manage operations, and administrators who maintain trust.",
+              "fontSize": 28,
+              "color": "#111111",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 5,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/pwb2hwfy",
+      "id": "5",
+      "bbox": [
+        100,
+        470,
+        990,
+        92
+      ],
+      "geometry": "rect",
+      "fillColor": "#FFF1EA",
+      "lineColor": "#D8DBE0",
+      "lineWidth": 1
+    },
+    {
+      "order": 6,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/i5sneloj",
+      "id": "6",
+      "bbox": [
+        132,
+        496,
+        200,
+        30
+      ],
+      "geometry": "rect",
+      "text": "Conclusion",
+      "textPreview": "Conclusion",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "color": "#FF6B2C",
+        "bold": true,
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "Conclusion"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "Conclusion",
+          "resolvedTextStyle": {
+            "fontSize": 24,
+            "color": "#FF6B2C",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "Conclusion",
+              "fontSize": 24,
+              "color": "#FF6B2C",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 7,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/7qpg3ex0",
+      "id": "7",
+      "bbox": [
+        336,
+        496,
+        680,
+        32
+      ],
+      "geometry": "rect",
+      "text": "BikeMate is ready for formal presentation and local project demonstration.",
+      "textPreview": "BikeMate is ready for formal presentation and local project demonstration.",
+      "resolvedFontSize": 24,
+      "resolvedTextStyle": {
+        "fontSize": 24,
+        "typeface": "+mn-lt",
+        "color": "#111111",
+        "bold": true,
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 2,
+        "lines": [
+          {
+            "index": 1,
+            "text": "BikeMate is ready for formal presentation and local project"
+          },
+          {
+            "index": 2,
+            "text": "demonstration."
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "BikeMate is ready for formal presentation and local project demonstration.",
+          "resolvedTextStyle": {
+            "fontSize": 24,
+            "color": "#111111",
+            "bold": true,
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "BikeMate is ready for formal presentation and local project demonstration.",
+              "fontSize": 24,
+              "color": "#111111",
+              "bold": true,
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 8,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/0z61032l",
+      "id": "8",
+      "bbox": [
+        64,
+        666,
+        600,
+        24
+      ],
+      "geometry": "rect",
+      "text": "BikeMate Motorcycle Service Assistance System",
+      "textPreview": "BikeMate Motorcycle Service Assistance System",
+      "resolvedFontSize": 12,
+      "resolvedTextStyle": {
+        "fontSize": 12,
+        "typeface": "+mn-lt",
+        "color": "#5F6268",
+        "alignment": "left",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "BikeMate Motorcycle Service Assistance System"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "BikeMate Motorcycle Service Assistance System",
+          "resolvedTextStyle": {
+            "fontSize": 12,
+            "color": "#5F6268",
+            "alignment": "left"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "BikeMate Motorcycle Service Assistance System",
+              "fontSize": 12,
+              "color": "#5F6268",
+              "alignment": "left"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    },
+    {
+      "order": 9,
+      "kind": "shape",
+      "scope": "slide",
+      "aid": "sh/pkzupwb2",
+      "id": "9",
+      "bbox": [
+        1160,
+        662,
+        56,
+        28
+      ],
+      "geometry": "rect",
+      "text": "15",
+      "textPreview": "15",
+      "resolvedFontSize": 14,
+      "resolvedTextStyle": {
+        "fontSize": 14,
+        "typeface": "+mn-lt",
+        "color": "#5F6268",
+        "bold": true,
+        "alignment": "right",
+        "insets": {
+          "top": 4.8,
+          "right": 9.6,
+          "bottom": 4.8,
+          "left": 9.6
+        }
+      },
+      "textLayout": {
+        "lineCount": 1,
+        "lines": [
+          {
+            "index": 1,
+            "text": "15"
+          }
+        ]
+      },
+      "paragraphs": [
+        {
+          "index": 1,
+          "text": "15",
+          "resolvedTextStyle": {
+            "fontSize": 14,
+            "color": "#5F6268",
+            "bold": true,
+            "alignment": "right"
+          },
+          "runs": [
+            {
+              "index": 1,
+              "text": "15",
+              "fontSize": 14,
+              "color": "#5F6268",
+              "bold": true,
+              "alignment": "right"
+            }
+          ],
+          "marginLeft": 0
+        }
+      ],
+      "lineWidth": 0
+    }
+  ],
+  "composeRuns": []
+}

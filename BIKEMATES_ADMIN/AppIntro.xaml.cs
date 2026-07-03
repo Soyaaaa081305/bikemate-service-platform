@@ -7,7 +7,7 @@ public partial class AppIntro : ContentPage
         InitializeComponent();
     }
 
-    private async void OnLetGoClicked(object sender, EventArgs e)
+    private async void OnLetGoClicked(object? sender, EventArgs e)
     {
         await Navigation.PushAsync(new AppIntro2());
     }

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="BIKEMATES_ADMIN.Pages.Account.AccCreate1"
+             BackgroundColor="White">
+
+    <Grid RowDefinitions="Auto,*,Auto">
+        <Border Grid.Row="0" BackgroundColor="#242424" StrokeThickness="0" Padding="20,24,20,18">
+            <VerticalStackLayout Spacing="2">
+                <Label Text="Create an Account" FontSize="18" FontAttributes="Bold" TextColor="White" />
+                <Label Text="Step 2 of 5 - Personal information" FontSize="13" TextColor="#E6E6E6" />
+            </VerticalStackLayout>
+        </Border>
+
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="20,22" Spacing="14">
+                <Border BackgroundColor="White" Stroke="#E6E6E6" Padding="16">
+                    <Border.StrokeShape><RoundRectangle CornerRadius="8" /></Border.StrokeShape>
+                    <VerticalStackLayout Spacing="13">
+                        <Label Text="Personal information" FontSize="18" FontAttributes="Bold" TextColor="#242424" />
+                        <Label Text="This name will appear on shop admin activity and profile pages." FontSize="13" TextColor="#6E6E6E" />
+
+                        <Label Text="First name *" FontSize="11" FontAttributes="Bold" TextColor="#242424" />
+                        <Border Stroke="#DCDCDC" BackgroundColor="#FAFAFA" Padding="12,2">
+                            <Border.StrokeShape><RoundRectangle CornerRadius="8" /></Border.StrokeShape>
+                            <Entry x:Name="FirstNameEntry" Placeholder="First name" />
+                        </Border>
+
+                        <Label Text="Middle name" FontSize="11" FontAttributes="Bold" TextColor="#242424" />
+                        <Border Stroke="#DCDCDC" BackgroundColor="#FAFAFA" Padding="12,2">
+                            <Border.StrokeShape><RoundRectangle CornerRadius="8" /></Border.StrokeShape>
+                            <Entry x:Name="MiddleNameEntry" Placeholder="Middle name" />
+                        </Border>
+
+                        <Label Text="Last name *" FontSize="11" FontAttributes="Bold" TextColor="#242424" />
+                        <Border Stroke="#DCDCDC" BackgroundColor="#FAFAFA" Padding="12,2">
+                            <Border.StrokeShape><RoundRectangle CornerRadius="8" /></Border.StrokeShape>
+                            <Entry x:Name="LastNameEntry" Placeholder="Last name" />
+                        </Border>
+
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                            <VerticalStackLayout Spacing="5">
+                                <Label Text="Sex *" FontSize="11" FontAttributes="Bold" TextColor="#242424" />
+                                <Border Stroke="#DCDCDC" BackgroundColor="#FAFAFA" Padding="12,2">
+                                    <Border.StrokeShape><RoundRectangle CornerRadius="8" /></Border.StrokeShape>
+                                    <Picker x:Name="SexPicker" Title="Select">
+                                        <Picker.ItemsSource>
+                                            <x:Array Type="{x:Type x:String}">
+                                                <x:String>Female</x:String>
+                                                <x:String>Male</x:String>
+                                                <x:String>Prefer not to say</x:String>
+                                            </x:Array>
+                                        </Picker.ItemsSource>
+                                    </Picker>
+                                </Border>
+                            </VerticalStackLayout>
+                            <VerticalStackLayout Grid.Column="1" Spacing="5">
+                                <Label Text="Birthdate *" FontSize="11" FontAttributes="Bold" TextColor="#242424" />
+                                <Border Stroke="#DCDCDC" BackgroundColor="#FAFAFA" Padding="12,2">
+                                    <Border.StrokeShape><RoundRectangle CornerRadius="8" /></Border.StrokeShape>
+                                    <DatePicker x:Name="BirthdatePicker" />
+                                </Border>
+                            </VerticalStackLayout>
+                        </Grid>
+                    </VerticalStackLayout>
+                </Border>
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <Button Grid.Row="2" Text="Continue" BackgroundColor="#FF6B2C" TextColor="White"
+                FontAttributes="Bold" CornerRadius="8" HeightRequest="50" Margin="20,10,20,24"
+                Clicked="OnContinueClicked" />
+    </Grid>
+</ContentPage>

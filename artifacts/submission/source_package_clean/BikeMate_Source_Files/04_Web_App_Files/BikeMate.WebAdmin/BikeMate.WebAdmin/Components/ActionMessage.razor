@@ -1,0 +1,35 @@
+﻿@if (!string.IsNullOrEmpty(Message))
+{
+    <div class="alert alert-@AlertType alert-dismissible fade show shadow-sm mb-4" role="alert">
+        @if (AlertType == "danger")
+        {
+            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        }
+        else if (AlertType == "success")
+        {
+            <i class="bi bi-check-circle-fill me-2"></i>
+        }
+
+        @Message
+
+        <button type="button" class="btn-close" @onclick="ClearMessage"></button>
+    </div>
+}
+
+@code {
+    // These parameters allow other pages to pass data into this component
+    [Parameter]
+    public string? Message { get; set; }
+
+    [Parameter]
+    public string AlertType { get; set; } = "danger"; // Default to red errors
+
+    [Parameter]
+    public EventCallback OnMessageCleared { get; set; }
+
+    private async Task ClearMessage()
+    {
+        Message = null;
+        await OnMessageCleared.InvokeAsync();
+    }
+}

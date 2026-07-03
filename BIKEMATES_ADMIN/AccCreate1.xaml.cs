@@ -39,7 +39,7 @@ public partial class AccCreate1 : ContentPage
         base.OnDisappearing();
     }
 
-    private async void OnContinueClicked(object sender, EventArgs e)
+    private async void OnContinueClicked(object? sender, EventArgs e)
     {
         SaveDraft();
         var birthdate = BirthdatePicker.Date ?? DateTime.Today;
@@ -48,19 +48,19 @@ public partial class AccCreate1 : ContentPage
             string.IsNullOrWhiteSpace(_draft.LastName) ||
             string.IsNullOrWhiteSpace(_draft.Sex))
         {
-            await DisplayAlert("Missing Information", "Please complete your first name, last name, and sex.", "OK");
+            await DisplayAlertAsync("Missing Information", "Please complete your first name, last name, and sex.", "OK");
             return;
         }
 
         if (!_draft.BirthdateSelected || string.IsNullOrWhiteSpace(_draft.Birthdate))
         {
-            await DisplayAlert("Birthdate Required", "Please choose the owner's birthdate so BikeMate can confirm the account owner is at least 18 years old.", "OK");
+            await DisplayAlertAsync("Birthdate Required", "Please choose the owner's birthdate so BikeMate can confirm the account owner is at least 18 years old.", "OK");
             return;
         }
 
         if (CalculateAge(birthdate, DateTime.Today) < 18)
         {
-            await DisplayAlert("Age Requirement", "Shop-admin account owners must be at least 18 years old.", "OK");
+            await DisplayAlertAsync("Age Requirement", "Shop-admin account owners must be at least 18 years old.", "OK");
             return;
         }
 

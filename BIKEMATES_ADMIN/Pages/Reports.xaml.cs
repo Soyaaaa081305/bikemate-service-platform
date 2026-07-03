@@ -41,7 +41,7 @@ public partial class Reports : ContentPage
         }
     }
 
-    private async void ExportReport_Clicked(object sender, EventArgs e)
+    private async void ExportReport_Clicked(object? sender, EventArgs e)
     {
         try
         {
@@ -64,7 +64,7 @@ public partial class Reports : ContentPage
 
             await File.WriteAllLinesAsync(path, lines);
             ExportStatusLabel.Text = $"Exported: {path}";
-            await DisplayAlert("Report Exported", $"CSV report saved as {fileName}. BikeMate will open Android sharing next.", "OK");
+            await DisplayAlertAsync("Report Exported", $"CSV report saved as {fileName}. BikeMate will open Android sharing next.", "OK");
             await Share.Default.RequestAsync(new ShareFileRequest
             {
                 Title = "BikeMate shop report",
@@ -73,7 +73,7 @@ public partial class Reports : ContentPage
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Export Failed", ex.Message, "OK");
+            await DisplayAlertAsync("Export Failed", ex.Message, "OK");
         }
     }
 

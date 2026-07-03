@@ -1,0 +1,6 @@
+@BikeMate.Api_HostAddress = https://localhost:5001
+
+GET {{BikeMate.Api_HostAddress}}/api/health
+Accept: application/json
+
+###

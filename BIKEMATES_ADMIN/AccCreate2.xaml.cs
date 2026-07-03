@@ -12,6 +12,7 @@ public partial class AccCreate2 : ContentPage
     private bool _loadingLocations;
     private bool _updatingPickers;
     private bool _restoredDraft;
+    private LocalIdCardScanResult? _localIdScanResult;
 
     public AccCreate2()
         : this(new AccountCreationDraft())
@@ -62,7 +63,7 @@ public partial class AccCreate2 : ContentPage
         }
     }
 
-    private async void OnRegionChanged(object sender, EventArgs e)
+    private async void OnRegionChanged(object? sender, EventArgs e)
     {
         if (_updatingPickers)
         {
@@ -98,7 +99,7 @@ public partial class AccCreate2 : ContentPage
         }
     }
 
-    private async void OnCityChanged(object sender, EventArgs e)
+    private async void OnCityChanged(object? sender, EventArgs e)
     {
         if (_updatingPickers)
         {
@@ -132,35 +133,70 @@ public partial class AccCreate2 : ContentPage
         }
     }
 
-    private async void OnPickValidIdClicked(object sender, EventArgs e)
+    private async void OnPickValidIdClicked(object? sender, EventArgs e)
     {
         try
         {
-            var file = await FilePicker.Default.PickAsync(new PickOptions
+            var scan = await new LocalIdCardScannerService().ScanAsync("Scan owner valid ID");
+            if (!scan.IsSuccessful)
             {
-                PickerTitle = "Select valid ID"
-            });
+                if (scan.WasCancelled)
+                {
+                    return;
+                }
 
-            if (file is null)
-            {
+                await DisplayAlertAsync("ID Scan", scan.ErrorMessage ?? "The ID scan could not be completed.", "OK");
                 return;
             }
 
+            var processedImagePath = scan.LocalProcessedImagePath;
+            if (string.IsNullOrWhiteSpace(processedImagePath))
+            {
+                await DisplayAlertAsync("ID Scan", "BikeMate could not prepare the scanned ID image. Please scan again.", "OK");
+                return;
+            }
+
+            var file = new FileResult(processedImagePath)
+            {
+                FileName = Path.GetFileName(processedImagePath),
+                ContentType = "image/jpeg"
+            };
             ValidIdLabel.Text = "Uploading valid ID...";
             var uploaded = await BikeMateDatabaseService.UploadOnboardingFileAsync(file, "shop-owner-ids");
             _draft.ValidIdPath = uploaded.Url;
             ValidIdLabel.Text = uploaded.FileName;
+            _localIdScanResult = scan;
+            ValidIdScanLabel.Text = $"Scanned and uploaded for BikeMate admin review. Readability: {FormatReadability(scan.ReadabilityStatus)}.";
         }
         catch (Exception ex)
         {
             ValidIdLabel.Text = string.IsNullOrWhiteSpace(_draft.ValidIdPath)
                 ? "No file selected"
                 : Path.GetFileName(_draft.ValidIdPath);
-            await DisplayAlert("Upload Failed", $"Unable to upload a valid ID file. {ex.Message}", "OK");
+            await DisplayAlertAsync("Upload Failed", $"Unable to upload a valid ID file. {ex.Message}", "OK");
         }
     }
 
-    private async void OnContinueClicked(object sender, EventArgs e)
+    private async void OnScanValidIdClicked(object? sender, EventArgs e)
+    {
+        var result = await new LocalIdCardScannerService().ScanAsync();
+        if (!result.IsSuccessful)
+        {
+            if (result.WasCancelled)
+            {
+                return;
+            }
+
+            await DisplayAlertAsync("ID Scan", result.ErrorMessage ?? "The ID scan could not be completed.", "OK");
+            return;
+        }
+
+        _localIdScanResult = result;
+        ValidIdScanLabel.Text = $"Preview scan: {FormatReadability(result.ReadabilityStatus)}. Use Upload to submit a camera scan for BikeMate admin review.";
+        await DisplayAlertAsync("ID Scan Completed", "This preview was processed on your device only. Use Upload to scan and submit the ID for BikeMate admin approval.", "OK");
+    }
+
+    private async void OnContinueClicked(object? sender, EventArgs e)
     {
         SaveDraft();
         var region = SelectedRegion();
@@ -174,17 +210,30 @@ public partial class AccCreate2 : ContentPage
             string.IsNullOrWhiteSpace(_draft.ZipCode) ||
             string.IsNullOrWhiteSpace(_draft.ValidIdPath))
         {
-            await DisplayAlert("Missing Information", "Please complete your Philippine address, zip code, and upload a valid ID.", "OK");
+            var message = _localIdScanResult is not null && string.IsNullOrWhiteSpace(_draft.ValidIdPath)
+                ? "Your ID scan is local only and was not uploaded. Please upload the owner valid ID for BikeMate admin review."
+                : "Please complete your Philippine address, zip code, and upload a valid ID.";
+            await DisplayAlertAsync("Missing Information", message, "OK");
             return;
         }
 
         if (!Regex.IsMatch(_draft.ZipCode.Trim(), @"^\d{4}$"))
         {
-            await DisplayAlert("Invalid Zip Code", "Enter a 4-digit Philippine zip code.", "OK");
+            await DisplayAlertAsync("Invalid Zip Code", "Enter a 4-digit Philippine zip code.", "OK");
             return;
         }
 
         await Navigation.PushAsync(new AccCreate3(_draft));
+    }
+
+    private static string FormatReadability(LocalIdCardReadabilityStatus status)
+    {
+        return status switch
+        {
+            LocalIdCardReadabilityStatus.Readable => "Readable",
+            LocalIdCardReadabilityStatus.Unreadable => "Could not read ID clearly",
+            _ => "Needs manual review"
+        };
     }
 
     private async Task RestoreDraftAsync()

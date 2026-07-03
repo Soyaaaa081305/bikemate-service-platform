@@ -1,0 +1,204 @@
+@page "/dashboard"
+@page "/"
+@rendermode InteractiveServer
+@using BikeMate.WebAdmin.DTOs
+@using BikeMate.WebAdmin.Services
+@inject AdminApiClient AdminApi
+
+<PageTitle>Admin Dashboard</PageTitle>
+
+<div class="dashboard-page">
+    <div class="admin-page-header">
+        <div>
+            <h1 class="admin-page-title">System Overview</h1>
+            <p class="admin-page-description">Monitor approval work, service activity, mechanics, shops, and emergency requests from one console.</p>
+        </div>
+
+        <button class="btn btn-outline-primary shadow-sm" @onclick="LoadDashboard" disabled="@(dashboardData == null && string.IsNullOrWhiteSpace(loadError))">
+            <i class="bi bi-arrow-clockwise me-1"></i> Refresh
+        </button>
+    </div>
+
+    @if (dashboardData == null)
+    {
+        @if (!string.IsNullOrWhiteSpace(loadError))
+        {
+            <div class="alert alert-danger shadow-sm" role="alert">
+                <div class="fw-bold mb-1">Dashboard unavailable</div>
+                <div class="mb-3">@loadError</div>
+                <button class="btn btn-sm btn-outline-danger" @onclick="LoadDashboard">Retry</button>
+            </div>
+        }
+        else
+        {
+            <div class="d-flex justify-content-center py-5">
+                <div class="spinner-border text-primary" role="status"></div>
+            </div>
+        }
+    }
+    else
+    {
+        <section class="dashboard-banner">
+            <div class="dashboard-banner-copy">
+                <div class="dashboard-banner-icon">
+                    <i class="bi bi-exclamation-octagon-fill"></i>
+                </div>
+                <div>
+                    <h2 class="dashboard-card-title mb-0">Emergency Window</h2>
+                    <p class="dashboard-muted">@emergencyCount active emergency request@(emergencyCount == 1 ? "" : "s") need monitoring.</p>
+                </div>
+            </div>
+
+            <a href="/emergency" class="btn btn-danger shadow-sm text-nowrap">
+                Open Emergency Window
+            </a>
+        </section>
+
+        <details class="dashboard-panel" open>
+            <summary>
+                <div>
+                    <h2 class="dashboard-card-title mb-0">Platform Summary</h2>
+                    <p class="dashboard-muted">Customer growth and partner readiness.</p>
+                </div>
+                <i class="bi bi-chevron-down dashboard-panel-chevron"></i>
+            </summary>
+
+            <div class="dashboard-panel-body">
+                <div class="dashboard-grid">
+                    <section class="dashboard-card">
+                        <div class="dashboard-card-head">
+                            <h3 class="dashboard-card-title text-primary mb-0">
+                                <i class="bi bi-graph-up me-2"></i>Weekly User Growth
+                            </h3>
+                            <a href="/users" class="btn btn-sm btn-outline-primary">Users</a>
+                        </div>
+
+                        <div class="dashboard-stat-large">
+                            <div class="dashboard-stat-value">@dashboardData.TotalCustomers</div>
+                            <div class="dashboard-stat-label">Total customers</div>
+                        </div>
+
+                        <div class="dashboard-bars">
+                            @{
+                                var maxUsers = Math.Max(dashboardData.WeeklyRegistrations.Max(w => w.UserCount), 1);
+                            }
+                            @foreach (var day in dashboardData.WeeklyRegistrations)
+                            {
+                                var heightPercent = (double)day.UserCount / maxUsers * 100;
+                                <div class="dashboard-bar-item">
+                                    <div class="dashboard-bar-value">@(day.UserCount > 0 ? day.UserCount.ToString() : "")</div>
+                                    <div class="dashboard-bar-track">
+                                        <div class="dashboard-bar-fill" style="height: @(heightPercent)%"></div>
+                                    </div>
+                                    <div class="dashboard-bar-label">@day.DayName</div>
+                                </div>
+                            }
+                        </div>
+                    </section>
+
+                    <section class="dashboard-card">
+                        <h3 class="dashboard-card-title">Network Health</h3>
+
+                        <div class="dashboard-health-block">
+                            <div class="dashboard-health-head">
+                                <span><i class="bi bi-tools text-success me-2"></i><strong>Mechanics online</strong></span>
+                                <a href="/mechanics" class="text-decoration-none">Manage <i class="bi bi-chevron-right"></i></a>
+                            </div>
+                            <div class="dashboard-stat-value-sm">@dashboardData.OnlineMechanics <span class="dashboard-stat-label-inline">/ @dashboardData.TotalMechanics active</span></div>
+                            <div class="progress dashboard-progress">
+                                @{
+                                    var mechPercent = dashboardData.TotalMechanics > 0 ? (dashboardData.OnlineMechanics * 100) / dashboardData.TotalMechanics : 0;
+                                }
+                                <div class="progress-bar bg-success" role="progressbar" style="width: @mechPercent%"></div>
+                            </div>
+                        </div>
+
+                        <div class="dashboard-health-block">
+                            <div class="dashboard-health-head">
+                                <span><i class="bi bi-shop text-info me-2"></i><strong>Verified shops</strong></span>
+                                <a href="/shops" class="text-decoration-none">Manage <i class="bi bi-chevron-right"></i></a>
+                            </div>
+                            <div class="dashboard-stat-value-sm">@dashboardData.VerifiedShops <span class="dashboard-stat-label-inline">/ @dashboardData.TotalShops total</span></div>
+                            <div class="progress dashboard-progress">
+                                @{
+                                    var shopPercent = dashboardData.TotalShops > 0 ? (dashboardData.VerifiedShops * 100) / dashboardData.TotalShops : 0;
+                                }
+                                <div class="progress-bar bg-info" role="progressbar" style="width: @shopPercent%"></div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
+        </details>
+
+        <details class="dashboard-panel" open>
+            <summary>
+                <div>
+                    <h2 class="dashboard-card-title mb-0">Service Activity</h2>
+                    <p class="dashboard-muted">@dashboardData.PendingServiceRequests active request@(dashboardData.PendingServiceRequests == 1 ? "" : "s") currently need tracking.</p>
+                </div>
+                <i class="bi bi-chevron-down dashboard-panel-chevron"></i>
+            </summary>
+
+            <div class="dashboard-panel-body">
+                <div class="dashboard-card-head mb-2">
+                    <h3 class="dashboard-card-title text-dark mb-0">Live Service Requests</h3>
+                    <a href="/requests" class="btn btn-sm btn-outline-warning text-dark">Open requests</a>
+                </div>
+
+                @if (dashboardData.RecentActiveRequests.Count == 0)
+                {
+                    <div class="text-muted py-4 text-center">No active requests at this moment.</div>
+                }
+                else
+                {
+                    <div class="list-group list-group-flush">
+                        @foreach (var req in dashboardData.RecentActiveRequests)
+                        {
+                            <div class="list-group-item px-0 py-3 dashboard-request-row">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="dashboard-request-icon">
+                                        <i class="bi bi-exclamation-triangle-fill"></i>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold">@req.ServiceName <span class="text-muted fw-normal ms-1">#@req.RequestId</span></div>
+                                        <small class="text-muted">@req.TimeAgo</small>
+                                    </div>
+                                </div>
+                                <span class="badge bg-warning text-dark px-3 py-2 text-uppercase">@req.Status.Replace("_", " ")</span>
+                            </div>
+                        }
+                    </div>
+                }
+            </div>
+        </details>
+    }
+</div>
+
+@code {
+    private AdminDashboardDto? dashboardData;
+    private string? loadError;
+    private int emergencyCount;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDashboard();
+    }
+
+    private async Task LoadDashboard()
+    {
+        loadError = null;
+        dashboardData = null;
+
+        try
+        {
+            dashboardData = await AdminApi.GetDashboardDataAsync();
+            emergencyCount = (await AdminApi.GetEmergencyRequestsAsync())?.Length ?? 0;
+            loadError = dashboardData == null ? AdminApi.LastError ?? "No dashboard data was returned." : null;
+        }
+        catch (Exception ex)
+        {
+            loadError = ex.Message;
+        }
+    }
+}

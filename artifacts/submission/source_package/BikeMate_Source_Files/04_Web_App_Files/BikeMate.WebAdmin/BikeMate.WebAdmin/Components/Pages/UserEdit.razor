@@ -1,0 +1,208 @@
+@page "/users/edit/{Id:int}"
+@rendermode InteractiveServer
+@using BikeMate.WebAdmin.DTOs
+@using BikeMate.WebAdmin.Services
+@inject AdminApiClient AdminApi
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
+<PageTitle>Edit User Profile</PageTitle>
+
+<div class="mb-4 mt-3 d-flex justify-content-between align-items-center">
+    <h2 class="fw-bold text-dark mb-0">Edit User Account</h2>
+
+    <a href="/users" class="btn btn-outline-secondary shadow-sm">
+        <i class="bi bi-arrow-left"></i> Back to Directory
+    </a>
+</div>
+
+<ActionMessage Message="@statusMessage" AlertType="@statusType" OnMessageCleared="() => statusMessage = null" />
+
+<div class="card admin-form-card border-top border-primary border-4">
+    <div class="card-body p-4">
+        @if (userModel == null)
+        {
+            <div class="text-center p-5">
+                <div class="spinner-border text-primary" role="status"></div>
+            </div>
+        }
+        else
+        {
+            <EditForm Model="@userModel" OnValidSubmit="HandleValidSubmit">
+                <DataAnnotationsValidator />
+
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold text-muted small text-uppercase">First Name</label>
+                        <InputText @bind-Value="userModel.FirstName" class="form-control" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold text-muted small text-uppercase">Last Name</label>
+                        <InputText @bind-Value="userModel.LastName" class="form-control" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold text-muted small text-uppercase">Email Address <span class="text-danger">*</span></label>
+                        <InputText @bind-Value="userModel.Email" class="form-control bg-light" disabled />
+                        <div class="form-text">Emails cannot be changed manually by an admin.</div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label fw-bold text-muted small text-uppercase">Phone Number</label>
+                        <InputText @bind-Value="userModel.PhoneNumber" class="form-control" placeholder="+63..." />
+                    </div>
+
+                    <div class="col-md-12">
+                        <label class="form-label fw-bold text-muted small text-uppercase">Account Status</label>
+                        <InputSelect @bind-Value="userModel.AccountStatus" class="form-select">
+                            <option value="active">Active</option>
+                            <option value="suspended">Suspended</option>
+                            <option value="pending">Pending</option>
+                        </InputSelect>
+                    </div>
+                </div>
+
+                <hr class="my-4" />
+
+                <div class="d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-light" @onclick="CancelEdit">Cancel</button>
+
+                    <button type="submit" class="btn btn-primary px-4 shadow-sm" disabled="@isSaving">
+                        @if (isSaving)
+                        {
+                            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                            <span>Saving...</span>
+                        }
+                        else
+                        {
+                            <span>Save Changes</span>
+                        }
+                    </button>
+                </div>
+            </EditForm>
+        }
+    </div>
+</div>
+
+@if (userModel is not null)
+{
+    <div class="card admin-form-card border-danger mt-3">
+        <div class="card-body p-4 d-flex flex-column flex-md-row justify-content-between gap-3 align-items-md-center">
+            <div>
+                <h3 class="h6 fw-bold text-danger mb-1">Delete account</h3>
+                <p class="text-muted mb-0">
+                    Anonymizes this account, removes login access, clears contact/login data, and keeps existing booking/payment records intact.
+                </p>
+            </div>
+            <button type="button" class="btn btn-outline-danger px-4" disabled="@isDeleting" @onclick="DeleteCurrentUser">
+                @if (isDeleting)
+                {
+                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    <span>Deleting...</span>
+                }
+                else
+                {
+                    <span>Delete Account</span>
+                }
+            </button>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private UserEditDto? userModel;
+    private string? statusMessage;
+    private string statusType = "success";
+    private bool isSaving = false;
+    private bool isDeleting = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            userModel = await AdminApi.GetUserForEditAsync(Id);
+        }
+        catch (Exception)
+        {
+            statusType = "danger";
+            statusMessage = "Error loading user details. They may have been deleted.";
+        }
+    }
+
+    private async Task CancelEdit()
+    {
+        // Warn them if they are about to leave unsaved changes
+        bool confirmed = await JS.InvokeAsync<bool>("confirm", "Are you sure you want to cancel? Any unsaved changes will be lost.");
+        if (confirmed)
+        {
+            Navigation.NavigateTo("/users");
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (userModel == null) return;
+
+        // Warn them before committing the database change
+        bool confirmed = await JS.InvokeAsync<bool>("confirm", $"Are you sure you want to save these changes for {userModel.FirstName}?");
+        if (!confirmed) return;
+
+        isSaving = true;
+        statusMessage = null;
+
+        try
+        {
+            await AdminApi.UpdateUserAsync(Id, userModel);
+
+            statusType = "success";
+            statusMessage = "User profile updated successfully!";
+        }
+        catch (Exception ex)
+        {
+            statusType = "danger";
+            statusMessage = $"Failed to save changes: {ex.Message}";
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private async Task DeleteCurrentUser()
+    {
+        if (userModel == null || isDeleting)
+        {
+            return;
+        }
+
+        var confirmed = await JS.InvokeAsync<bool>(
+            "confirm",
+            $"Delete {userModel.FirstName} {userModel.LastName}'s account?\n\nThis anonymizes the account, removes login access, clears contact/login data, and releases the email for future registration. This cannot be undone.");
+        if (!confirmed)
+        {
+            return;
+        }
+
+        isDeleting = true;
+        statusMessage = null;
+
+        try
+        {
+            await AdminApi.DeleteUserAsync(Id);
+            Navigation.NavigateTo("/users");
+        }
+        catch (Exception ex)
+        {
+            statusType = "danger";
+            statusMessage = $"Failed to delete account: {ex.Message}";
+        }
+        finally
+        {
+            isDeleting = false;
+        }
+    }
+}

@@ -24,22 +24,22 @@ public partial class AccCreate5 : ContentPage
             : "View Submitted Application";
         if (!string.IsNullOrWhiteSpace(shopName) || !string.IsNullOrWhiteSpace(email))
         {
-            SuccessDetailsLabel.Text = $"Enter the OTP sent to {FormatEmail(email)}. After verification, {FormatShop(shopName)} will be pending BikeMate admin approval.";
+            SuccessDetailsLabel.Text = $"Enter the OTP sent to {FormatEmail(email)}. After verification, {FormatShop(shopName)} will be placed under BikeMate admin review.";
         }
     }
 
-    private async void OnVerifyClicked(object sender, EventArgs e)
+    private async void OnVerifyClicked(object? sender, EventArgs e)
     {
         if (string.IsNullOrWhiteSpace(_email))
         {
-            await DisplayAlert("Email Missing", "BikeMate could not find the application email. Please return to login and try again.", "OK");
+            await DisplayAlertAsync("Email Missing", "BikeMate could not find the application email. Please return to login and try again.", "OK");
             return;
         }
 
         var otp = OtpEntry.Text?.Trim() ?? string.Empty;
         if (otp.Length != 6 || !otp.All(char.IsDigit))
         {
-            await DisplayAlert("Invalid OTP", "Enter the 6-digit code sent to your email.", "OK");
+            await DisplayAlertAsync("Invalid OTP", "Enter the 6-digit code sent to your email.", "OK");
             return;
         }
 
@@ -56,7 +56,7 @@ public partial class AccCreate5 : ContentPage
             }
 
             TitleLabel.Text = "Application Submitted";
-            SuccessDetailsLabel.Text = $"Your email is verified. {FormatShop(_shopName)} is now waiting for BikeMate admin approval. You can sign in after approval.";
+            SuccessDetailsLabel.Text = $"Your email is verified. {FormatShop(_shopName)} is now waiting for BikeMate admin approval. You can sign in once the application is approved.";
             OtpInputFrame.IsVisible = false;
             VerifyButton.IsVisible = false;
             ResendButton.IsVisible = false;
@@ -64,11 +64,11 @@ public partial class AccCreate5 : ContentPage
             ProceedButton.IsEnabled = true;
             ProceedButton.BackgroundColor = Color.FromArgb("#FF6B2C");
             ProceedButton.TextColor = Colors.White;
-            await DisplayAlert("Email Verified", "Your shop-admin email was verified. Please wait for BikeMate admin approval.", "OK");
+            await DisplayAlertAsync("Email verified", "Your shop-admin email was verified. BikeMate admin will review the submitted shop details next.", "OK");
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Verification Failed", ex.Message, "OK");
+            await DisplayAlertAsync("Verification Failed", ex.Message, "OK");
         }
         finally
         {
@@ -76,11 +76,11 @@ public partial class AccCreate5 : ContentPage
         }
     }
 
-    private async void OnResendClicked(object sender, EventArgs e)
+    private async void OnResendClicked(object? sender, EventArgs e)
     {
         if (string.IsNullOrWhiteSpace(_email))
         {
-            await DisplayAlert("Email Missing", "BikeMate could not find the application email. Please return to login and try again.", "OK");
+            await DisplayAlertAsync("Email Missing", "BikeMate could not find the application email. Please return to login and try again.", "OK");
             return;
         }
 
@@ -88,11 +88,11 @@ public partial class AccCreate5 : ContentPage
         try
         {
             await BIKEMATES_ADMIN.Services.BikeMateDatabaseService.ResendEmailOtpAsync(_email);
-            await DisplayAlert("OTP Sent", "BikeMate sent a new verification code to your email.", "OK");
+            await DisplayAlertAsync("OTP sent", "BikeMate sent a new verification code to your email. Use the latest code to continue the application review flow.", "OK");
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Resend Failed", ex.Message, "OK");
+            await DisplayAlertAsync("Resend Failed", ex.Message, "OK");
         }
         finally
         {
@@ -100,23 +100,18 @@ public partial class AccCreate5 : ContentPage
         }
     }
 
-    private async void OnViewApplicationClicked(object sender, EventArgs e)
+    private async void OnViewApplicationClicked(object? sender, EventArgs e)
     {
         if (_submittedDraft is null)
         {
-            await DisplayAlert("No Application Saved", "BikeMate could not find a local copy of the submitted application on this device.", "OK");
+            await DisplayAlertAsync("No Application Saved", "BikeMate could not find a local copy of the submitted application on this device.", "OK");
             return;
         }
 
         await Navigation.PushAsync(new ShopApplicationReviewPage(_submittedDraft));
     }
 
-    private void OnReturnToLoginClicked(object sender, EventArgs e)
-    {
-        BIKEMATES_ADMIN.App.SetRootPage(new NavigationPage(new Login()));
-    }
-
-    private void OnProceedToLoginClicked(object sender, EventArgs e)
+    private void OnProceedToLoginClicked(object? sender, EventArgs e)
     {
         if (!_verified)
         {

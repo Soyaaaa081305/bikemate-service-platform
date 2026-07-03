@@ -25,7 +25,7 @@ public partial class AccCreate0 : ContentPage
         base.OnDisappearing();
     }
 
-    private async void OnContinueClicked(object sender, EventArgs e)
+    private async void OnContinueClicked(object? sender, EventArgs e)
     {
         SaveDraft();
         var password = PasswordEntry.Text ?? string.Empty;
@@ -36,32 +36,32 @@ public partial class AccCreate0 : ContentPage
             string.IsNullOrWhiteSpace(password) ||
             string.IsNullOrWhiteSpace(confirmPassword))
         {
-            await DisplayAlert("Missing Information", "Please complete all credential fields.", "OK");
+            await DisplayAlertAsync("Missing Information", "Please complete all credential fields.", "OK");
             return;
         }
 
         var normalizedPhone = NormalizePhone(_draft.PhoneNumber);
         if (!Regex.IsMatch(normalizedPhone, @"^09\d{9}$"))
         {
-            await DisplayAlert("Invalid Phone Number", "Enter an 11-digit Philippine mobile number that starts with 09.", "OK");
+            await DisplayAlertAsync("Invalid Phone Number", "Enter an 11-digit Philippine mobile number that starts with 09.", "OK");
             return;
         }
 
         if (!Regex.IsMatch(_draft.Email.Trim(), @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
         {
-            await DisplayAlert("Invalid Email", "Enter a valid email address with @ and a domain such as .com.", "OK");
+            await DisplayAlertAsync("Invalid Email", "Enter a valid email address with @ and a domain such as .com.", "OK");
             return;
         }
 
         if (!string.Equals(password, confirmPassword, StringComparison.Ordinal))
         {
-            await DisplayAlert("Password Mismatch", "Password and confirm password must match.", "OK");
+            await DisplayAlertAsync("Password Mismatch", "Password and confirm password must match.", "OK");
             return;
         }
 
         if (password.Length <= 8)
         {
-            await DisplayAlert("Password Too Short", "Password must be more than 8 characters.", "OK");
+            await DisplayAlertAsync("Password Too Short", "Password must be more than 8 characters.", "OK");
             return;
         }
 

@@ -1,4 +1,4 @@
-﻿using BIKEMATES_ADMIN.Services;
+using BIKEMATES_ADMIN.Services;
 
 namespace BIKEMATES_ADMIN.Pages;
 
@@ -30,18 +30,18 @@ public partial class MenuPage : ContentPage
         InitialsLabel.Text = BuildInitials(firstName, lastName);
     }
 
-    private async void Home_Clicked(object sender, EventArgs e) => await GoToTabAsync("Home");
-    private async void ShopProfile_Clicked(object sender, EventArgs e) => await GoToTabAsync("Profile");
-    private async void Products_Clicked(object sender, EventArgs e) => await Shell.Current.GoToAsync(nameof(Products));
-    private async void Logistics_Clicked(object sender, EventArgs e) => await Shell.Current.GoToAsync(nameof(Logistics));
-    private async void Calendar_Clicked(object sender, EventArgs e) => await Shell.Current.GoToAsync(nameof(Calendar));
-    private async void Operations_Clicked(object sender, EventArgs e) => await Shell.Current.GoToAsync(nameof(Operations));
-    private async void Admins_Clicked(object sender, EventArgs e) => await Shell.Current.GoToAsync(nameof(Admins));
-    private async void Messages_Clicked(object sender, EventArgs e) => await GoToTabAsync("MessagesTab");
-    private async void Reports_Clicked(object sender, EventArgs e) => await Shell.Current.GoToAsync(nameof(Reports));
-    private async void Notifications_Clicked(object sender, EventArgs e) => await Shell.Current.GoToAsync(nameof(Notifications));
-    private async void Settings_Clicked(object sender, EventArgs e) => await Shell.Current.GoToAsync(nameof(Settings));
-    private async void Help_Clicked(object sender, EventArgs e) => await Shell.Current.GoToAsync(nameof(HelpSupport));
+    private async void Home_Clicked(object? sender, EventArgs e) => await GoToTabAsync("Home");
+    private async void ShopProfile_Clicked(object? sender, EventArgs e) => await GoToTabAsync("Profile");
+    private async void Products_Clicked(object? sender, EventArgs e) => await Shell.Current.GoToAsync(nameof(Products));
+    private async void Logistics_Clicked(object? sender, EventArgs e) => await Shell.Current.GoToAsync(nameof(Logistics));
+    private async void Calendar_Clicked(object? sender, EventArgs e) => await Shell.Current.GoToAsync(nameof(Calendar));
+    private async void Operations_Clicked(object? sender, EventArgs e) => await Shell.Current.GoToAsync(nameof(Operations));
+    private async void Admins_Clicked(object? sender, EventArgs e) => await Shell.Current.GoToAsync(nameof(Admins));
+    private async void Messages_Clicked(object? sender, EventArgs e) => await GoToTabAsync("MessagesTab");
+    private async void Reports_Clicked(object? sender, EventArgs e) => await Shell.Current.GoToAsync(nameof(Reports));
+    private async void Notifications_Clicked(object? sender, EventArgs e) => await Shell.Current.GoToAsync(nameof(Notifications));
+    private async void Settings_Clicked(object? sender, EventArgs e) => await Shell.Current.GoToAsync(nameof(Settings));
+    private async void Help_Clicked(object? sender, EventArgs e) => await Shell.Current.GoToAsync(nameof(HelpSupport));
 
     private static Task GoToTabAsync(string route)
     {

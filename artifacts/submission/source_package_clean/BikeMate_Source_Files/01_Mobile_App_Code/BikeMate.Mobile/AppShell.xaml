@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<Shell
+    x:Class="BikeMate.AppShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:local="clr-namespace:BikeMate"
+    xmlns:auth="clr-namespace:BikeMate.Views.Auth"
+    xmlns:customer="clr-namespace:BikeMate.Views.Customer"
+    xmlns:mechanic="clr-namespace:BikeMate.Views.Mechanic"
+    xmlns:admin="clr-namespace:BikeMate.Views.Admin"
+    Title="BikeMate"
+    Shell.NavBarIsVisible="False">
+
+    <ShellContent
+        Title="BikeMate"
+        ContentTemplate="{DataTemplate local:MainPage}"
+        Route="MainPage" />
+
+    <TabBar Route="CustomerArea">
+        <ShellContent Title="Home" Route="CustomerHomePage" ContentTemplate="{DataTemplate customer:CustomerHomePage}" />
+        <ShellContent Title="Schedule" Route="CustomerSchedulePage" ContentTemplate="{DataTemplate customer:CustomerSchedulePage}" />
+        <ShellContent Title="Messages" Route="CustomerMessagesPage" ContentTemplate="{DataTemplate customer:CustomerMessagesPage}" />
+        <ShellContent Title="Payments" Route="CustomerPaymentsPage" ContentTemplate="{DataTemplate customer:CustomerPaymentsPage}" />
+    </TabBar>
+
+    <TabBar Route="MechanicArea">
+        <ShellContent Title="Dashboard" Route="MechanicDashboardPage" ContentTemplate="{DataTemplate mechanic:MechanicDashboardPage}" />
+        <ShellContent Title="Jobs" Route="MechanicJobsPage" ContentTemplate="{DataTemplate mechanic:MechanicJobsPage}" />
+        <ShellContent Title="Messages" Route="MechanicMessagesPage" ContentTemplate="{DataTemplate mechanic:MechanicMessagesPage}" />
+        <ShellContent Title="Profile" Route="MechanicProfilePage" ContentTemplate="{DataTemplate mechanic:MechanicProfilePage}" />
+        <ShellContent Title="Logout" Route="MechanicLogoutPage" ContentTemplate="{DataTemplate mechanic:MechanicLogoutPage}" />
+    </TabBar>
+
+    <ShellContent
+        Title="Admin"
+        Route="AdminDashboardPage"
+        ContentTemplate="{DataTemplate admin:AdminDashboardPage}" />
+
+</Shell>

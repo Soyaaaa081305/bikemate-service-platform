@@ -1,0 +1,8 @@
+<Solution>
+  <Project Path="../BikeMate.Api/BikeMate.Api.csproj" />
+  <Project Path="../BikeMate.Core/BikeMate.Core.csproj" />
+  <Project Path="../BikeMate.Infrastructure/BikeMate.Infrastructure.csproj" />
+  <Project Path="../BikeMate.Mobile/BikeMate.Mobile.csproj" />
+  <Project Path="../BikeMate.Tests/BikeMate.Tests.csproj" />
+  <Project Path="BikeMate.WebAdmin/BikeMate.WebAdmin.csproj" />
+</Solution>

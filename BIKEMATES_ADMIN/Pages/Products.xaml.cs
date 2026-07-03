@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using BIKEMATES_ADMIN.Services;
 using Microsoft.Maui.Graphics;
 using Microsoft.Maui.Media;
@@ -48,18 +48,18 @@ public partial class Products : ContentPage
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Products", $"Unable to load products from API: {ex.Message}", "OK");
+            await DisplayAlertAsync("Products", $"Unable to load products from API: {ex.Message}", "OK");
         }
     }
 
-    private async void PickProductImage_Clicked(object sender, EventArgs e)
+    private async void PickProductImage_Clicked(object? sender, EventArgs e)
     {
         try
         {
-            FileResult? photo = await MediaPicker.Default.PickPhotoAsync(new MediaPickerOptions
+            FileResult? photo = (await MediaPicker.Default.PickPhotosAsync(new MediaPickerOptions
             {
                 Title = "Choose product image"
-            });
+            })).FirstOrDefault();
 
             if (photo is null)
                 return;
@@ -72,11 +72,11 @@ public partial class Products : ContentPage
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Image", $"Unable to upload image: {ex.Message}", "OK");
+            await DisplayAlertAsync("Image", $"Unable to upload image: {ex.Message}", "OK");
         }
     }
 
-    private async void AddProduct_Clicked(object sender, EventArgs e)
+    private async void AddProduct_Clicked(object? sender, EventArgs e)
     {
         if (!ValidateProductInputs(out string name, out string category, out decimal price, out int stock, out string? description, out string imageUrl))
             return;
@@ -93,20 +93,20 @@ public partial class Products : ContentPage
 
             await LoadProductsAsync();
             ClearEditor();
-            await DisplayAlert("Product Added", "The product was saved to the shop inventory API.", "OK");
+            await DisplayAlertAsync("Product Added", "The product was saved to the shop inventory API.", "OK");
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Product Error", ex.Message, "OK");
+            await DisplayAlertAsync("Product Error", ex.Message, "OK");
         }
     }
 
-    private async void UpdateProduct_Clicked(object sender, EventArgs e)
+    private async void UpdateProduct_Clicked(object? sender, EventArgs e)
     {
         var selected = GetSelectedProduct();
         if (selected is null)
         {
-            await DisplayAlert("Select Product", "Tap a product in the grid first.", "OK");
+            await DisplayAlertAsync("Select Product", "Tap a product in the grid first.", "OK");
             return;
         }
 
@@ -121,24 +121,53 @@ public partial class Products : ContentPage
 
             await LoadProductsAsync();
             ClearEditor();
-            await DisplayAlert("Product Updated", "The selected product was updated in the API.", "OK");
+            await DisplayAlertAsync("Product Updated", "The selected product was updated in the API.", "OK");
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Product Error", ex.Message, "OK");
+            await DisplayAlertAsync("Product Error", ex.Message, "OK");
         }
     }
 
-    private async void DeleteProduct_Clicked(object sender, EventArgs e)
+    private async void DeleteProduct_Clicked(object? sender, EventArgs e)
     {
         var selected = GetSelectedProduct();
         if (selected is null)
         {
-            await DisplayAlert("Select Product", "Tap a product in the grid first.", "OK");
+            await DisplayAlertAsync("Select Product", "Tap a product in the grid first.", "OK");
             return;
         }
 
-        bool confirm = await DisplayAlert("Delete Product", $"Delete {selected.Name}?", "Delete", "Cancel");
+        await DeleteProductAsync(selected);
+    }
+
+    private void EditProduct_Clicked(object? sender, EventArgs e)
+    {
+        if (sender is Button { CommandParameter: ProductItem product })
+        {
+            ProductsCollectionView.SelectedItem = product;
+            SelectProduct(product);
+        }
+    }
+
+    private async void DeleteProductRow_Clicked(object? sender, EventArgs e)
+    {
+        if (sender is Button { CommandParameter: ProductItem product })
+        {
+            ProductsCollectionView.SelectedItem = product;
+            SelectProduct(product);
+            await DeleteProductAsync(product);
+        }
+    }
+
+    private void ClearProductEditor_Clicked(object? sender, EventArgs e)
+    {
+        ClearEditor();
+    }
+
+    private async Task DeleteProductAsync(ProductItem selected)
+    {
+        bool confirm = await DisplayAlertAsync("Delete Product", $"Delete {selected.Name}?", "Delete", "Cancel");
         if (!confirm)
             return;
 
@@ -150,7 +179,7 @@ public partial class Products : ContentPage
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Product Error", ex.Message, "OK");
+            await DisplayAlertAsync("Product Error", ex.Message, "OK");
         }
     }
 
@@ -191,12 +220,12 @@ public partial class Products : ContentPage
         RefreshProductCategoryPicker();
     }
 
-    private async void AddProductCategory_Clicked(object sender, EventArgs e)
+    private async void AddProductCategory_Clicked(object? sender, EventArgs e)
     {
-        var typed = ProductCategorySearchBar.Text?.Trim() ?? string.Empty;
+        var typed = ProductCategoryNameEntry.Text?.Trim() ?? string.Empty;
         if (string.IsNullOrWhiteSpace(typed))
         {
-            await DisplayAlert("Product Category", "Type the category name first.", "OK");
+            await DisplayAlertAsync("Product Category", "Enter the full category name before saving.", "OK");
             return;
         }
 
@@ -205,18 +234,53 @@ public partial class Products : ContentPage
             var category = ProductCategoryStore.Add(typed);
             ReloadProductCategories();
             SetSelectedCategory(category);
-            await DisplayAlert("Product Category", $"{category} is ready to use for products.", "OK");
+            ProductCategoryNameEntry.Text = string.Empty;
+            await DisplayAlertAsync("Product Category", $"{category} is ready to use for products.", "OK");
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Product Category", ex.Message, "OK");
+            await DisplayAlertAsync("Product Category", ex.Message, "OK");
+        }
+    }
+
+    private async void DeleteProductCategory_Clicked(object? sender, EventArgs e)
+    {
+        var selectedCategory = CategoryPicker.SelectedItem?.ToString()?.Trim();
+        if (string.IsNullOrWhiteSpace(selectedCategory))
+        {
+            await DisplayAlertAsync("Product Category", "Select a category to delete.", "OK");
+            return;
+        }
+
+        if (ProductItems.Any(product => string.Equals(product.Category, selectedCategory, StringComparison.OrdinalIgnoreCase)))
+        {
+            await DisplayAlertAsync("Product Category", "This category is currently used by products and cannot be deleted.", "OK");
+            return;
+        }
+
+        var confirm = await DisplayAlertAsync("Delete Category", $"Delete {selectedCategory} from this device's category list?", "Delete", "Cancel");
+        if (!confirm)
+        {
+            return;
+        }
+
+        try
+        {
+            ProductCategoryStore.Remove(selectedCategory);
+            ReloadProductCategories();
+            ProductCategorySearchBar.Text = string.Empty;
+            await DisplayAlertAsync("Product Category", "Category removed from the available product category list.", "OK");
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlertAsync("Product Category", ex.Message, "OK");
         }
     }
 
     private bool ValidateProductInputs(out string name, out string category, out decimal price, out int stock, out string? description, out string imageUrl)
     {
         name = ProductNameEntry.Text?.Trim() ?? string.Empty;
-        category = CategoryPicker.SelectedItem?.ToString() ?? ProductCategorySearchBar.Text?.Trim() ?? string.Empty;
+        category = CategoryPicker.SelectedItem?.ToString() ?? string.Empty;
         description = DescriptionEditor.Text?.Trim();
         imageUrl = _selectedImageUrl?.Trim() ?? string.Empty;
         decimal.TryParse(PriceEntry.Text, out price);
@@ -224,7 +288,7 @@ public partial class Products : ContentPage
 
         if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(category) || price <= 0 || stock < 0 || string.IsNullOrWhiteSpace(imageUrl))
         {
-            _ = DisplayAlert("Missing Details", "Please enter product name, category, price, stock, and one product image.", "OK");
+            _ = DisplayAlertAsync("Missing Details", "Please enter product name, category, price, stock, and one product image.", "OK");
             return false;
         }
 
@@ -236,7 +300,7 @@ public partial class Products : ContentPage
         }
         catch (Exception ex)
         {
-            _ = DisplayAlert("Product Category", ex.Message, "OK");
+            _ = DisplayAlertAsync("Product Category", ex.Message, "OK");
             return false;
         }
 
@@ -273,6 +337,7 @@ public partial class Products : ContentPage
         ProductNameEntry.Text = string.Empty;
         CategoryPicker.SelectedItem = null;
         ProductCategorySearchBar.Text = string.Empty;
+        ProductCategoryNameEntry.Text = string.Empty;
         RefreshProductCategoryPicker();
         PriceEntry.Text = string.Empty;
         StockEntry.Text = string.Empty;

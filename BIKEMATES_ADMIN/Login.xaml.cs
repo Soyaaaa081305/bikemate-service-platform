@@ -22,7 +22,7 @@ public partial class Login : ContentPage
         }
     }
 
-    private async void OnLoginClicked(object sender, EventArgs e)
+    private async void OnLoginClicked(object? sender, EventArgs e)
     {
         LoginButton.IsEnabled = false;
 
@@ -56,7 +56,7 @@ public partial class Login : ContentPage
                 return;
             }
 
-            await DisplayAlert("Login Failed", ex.Message, "OK");
+            await DisplayAlertAsync("Login Failed", ex.Message, "OK");
         }
         finally
         {
@@ -64,7 +64,7 @@ public partial class Login : ContentPage
         }
     }
 
-    private async void OnCreateAccountClicked(object sender, EventArgs e)
+    private async void OnCreateAccountClicked(object? sender, EventArgs e)
     {
         await RefreshPendingApplicationStateAsync();
         if (_pendingApplication is not null)
@@ -76,14 +76,14 @@ public partial class Login : ContentPage
         await Navigation.PushAsync(new AccCreate0());
     }
 
-    private async void OnViewPendingApplicationClicked(object sender, EventArgs e)
+    private async void OnViewPendingApplicationClicked(object? sender, EventArgs e)
     {
         await RefreshPendingApplicationStateAsync();
         if (_pendingApplication is null)
         {
-            await DisplayAlert(
-                "No Pending Submission",
-                "Please log in with your shop-admin account. If login still does not work, contact BikeMate admin for help checking your application status.",
+            await DisplayAlertAsync(
+                "No pending submission",
+                "Please sign in with your shop-admin account. If sign-in still does not work, contact BikeMate admin so your application status can be checked.",
                 "OK");
             return;
         }
@@ -91,7 +91,7 @@ public partial class Login : ContentPage
         await Navigation.PushAsync(new ShopApplicationReviewPage(_pendingApplication));
     }
 
-    private async void OnForgotPasswordClicked(object sender, EventArgs e)
+    private async void OnForgotPasswordClicked(object? sender, EventArgs e)
         => await Navigation.PushAsync(new ForgotPasswordPage(EmailEntry.Text ?? string.Empty));
 
     private void OnEmailChanged(object sender, TextChangedEventArgs e)
@@ -99,10 +99,10 @@ public partial class Login : ContentPage
         RefreshPendingApplicationState();
     }
 
-    private async void OnConnectionSettingsClicked(object sender, EventArgs e)
+    private async void OnConnectionSettingsClicked(object? sender, EventArgs e)
     {
         var current = BikeMateDatabaseService.CurrentApiBaseUrl;
-        var action = await DisplayActionSheet(
+        var action = await DisplayActionSheetAsync(
             "BikeMate API connection",
             "Cancel",
             null,
@@ -127,22 +127,22 @@ public partial class Login : ContentPage
             try
             {
                 BikeMateDatabaseService.SaveApiBaseUrlOverride(entered);
-                await DisplayAlert("Connection Saved", $"BIKEMATES ADMIN will use {BikeMateDatabaseService.CurrentApiBaseUrl}", "OK");
+                await DisplayAlertAsync("Connection Saved", $"BIKEMATES ADMIN will use {BikeMateDatabaseService.CurrentApiBaseUrl}", "OK");
             }
             catch (Exception ex)
             {
-                await DisplayAlert("Invalid API URL", ex.Message, "OK");
+                await DisplayAlertAsync("Invalid API URL", ex.Message, "OK");
             }
         }
         else if (action == "Use packaged default")
         {
             BikeMateDatabaseService.ClearApiBaseUrlOverride();
-            await DisplayAlert("Connection Reset", $"BIKEMATES ADMIN will use {BikeMateDatabaseService.PackagedDefaultApiBaseUrl}", "OK");
+            await DisplayAlertAsync("Connection Reset", $"BIKEMATES ADMIN will use {BikeMateDatabaseService.PackagedDefaultApiBaseUrl}", "OK");
         }
         else if (action == "Show current URL")
         {
             var mode = BikeMateDatabaseService.HasApiBaseUrlOverride ? "Custom override" : "Packaged default";
-            await DisplayAlert("Current API URL", $"{mode}\n{BikeMateDatabaseService.CurrentApiBaseUrl}", "OK");
+            await DisplayAlertAsync("Current API URL", $"{mode}\n{BikeMateDatabaseService.CurrentApiBaseUrl}", "OK");
         }
     }
 
@@ -181,20 +181,20 @@ public partial class Login : ContentPage
         var status = string.IsNullOrWhiteSpace(_pendingApplication.ApplicationStatus)
             ? "waiting for BikeMate admin approval"
             : _pendingApplication.ApplicationStatus;
-        var otp = _pendingApplication.EmailVerified ? "email verified" : "email OTP pending";
-        PendingApplicationLabel.Text = $"{shopName} is {status}. {otp}. You can only view the submitted details until approval.";
+        var otp = _pendingApplication.EmailVerified ? "Email verified" : "Email verification still pending";
+        PendingApplicationLabel.Text = $"{shopName} is {status}. {otp}. Submitted details are view-only until BikeMate admin completes the review.";
     }
 
     private async Task PromptPendingApplicationAsync(AccountCreationDraft draft, string? message = null)
     {
         var details = string.IsNullOrWhiteSpace(message)
-            ? "This shop-admin application is already submitted and waiting for BikeMate admin approval."
+            ? "This shop-admin application has already been submitted and is waiting for BikeMate admin approval."
             : message;
 
-        await DisplayAlert(
-            "Application Pending",
-            $"{details}\n\nYou can view the submitted details here, but editing is locked until admin approval or resubmission is requested.",
-            "View Submission");
+        await DisplayAlertAsync(
+            "Application under review",
+            $"{details}\n\nYou can view the submitted details, but editing is locked until admin approval or until BikeMate asks for a corrected submission.",
+            "View details");
 
         await Navigation.PushAsync(new ShopApplicationReviewPage(draft));
     }

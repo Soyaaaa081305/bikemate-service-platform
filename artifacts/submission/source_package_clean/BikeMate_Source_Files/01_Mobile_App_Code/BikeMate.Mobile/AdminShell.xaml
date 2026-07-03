@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Shell
+    x:Class="BikeMate.AdminShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:admin="clr-namespace:BikeMate.Views.Admin"
+    Title="Admin"
+    Shell.NavBarIsVisible="False">
+
+    <ShellContent
+        Title="Dashboard"
+        Route="AdminDashboardPage"
+        ContentTemplate="{DataTemplate admin:AdminDashboardPage}" />
+</Shell>

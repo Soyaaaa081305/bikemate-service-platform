@@ -1,0 +1,101 @@
+@page "/payments"
+@rendermode InteractiveServer
+@using BikeMate.WebAdmin.DTOs
+@using BikeMate.WebAdmin.Services
+@inject AdminApiClient AdminApi
+
+<PageTitle>Admin - Payments</PageTitle>
+
+<div class="admin-page">
+    <div class="admin-page-header">
+        <div>
+            <h1 class="admin-page-title">Payments</h1>
+            <p class="admin-page-description">Review PayMongo and manual payment records tied to customer service requests.</p>
+        </div>
+
+        <div class="admin-page-actions">
+            <div class="input-group admin-search shadow-sm">
+                <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                <input type="text" class="form-control border-start-0" placeholder="Search payments" @bind="searchTerm" @bind:event="oninput" />
+            </div>
+        </div>
+    </div>
+
+    <div class="card admin-table-card">
+        <div class="card-body p-0">
+            @if (payments == null)
+            {
+                <div class="empty-state">
+                    <div class="spinner-border text-success" role="status"></div>
+                    <p class="mt-2 mb-0">Loading payments...</p>
+                </div>
+            }
+            else if (payments.Length == 0)
+            {
+                <div class="empty-state">No payments found in the system.</div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light text-muted text-uppercase">
+                            <tr>
+                                <th class="ps-4">Transaction ID</th>
+                                <th>Date</th>
+                                <th>Customer</th>
+                                <th>Amount</th>
+                                <th>Method</th>
+                                <th>Status</th>
+                                <th class="text-end pe-4">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var p in FilteredPayments)
+                            {
+                                <tr>
+                                    <td class="ps-4 fw-bold text-muted">#@p.Id</td>
+                                    <td>@p.CreatedAt.ToString("MMM dd, yyyy")</td>
+                                    <td class="fw-semibold">@p.CustomerName</td>
+                                    <td class="text-success fw-bold">PHP @p.Amount.ToString("N2")</td>
+                                    <td class="text-uppercase">@p.Method.Replace("_", " ")</td>
+                                    <td>
+                                        @if (p.Status.ToLower() == "paid")
+                                        {
+                                            <span class="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25">Paid</span>
+                                        }
+                                        else if (p.Status.ToLower() == "pending" || p.Status.ToLower() == "unpaid")
+                                        {
+                                            <span class="badge bg-warning bg-opacity-10 text-warning border border-warning border-opacity-25 text-dark">Pending</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger bg-opacity-10 text-danger border border-danger border-opacity-25">@p.Status</span>
+                                        }
+                                    </td>
+                                    <td class="text-end pe-4">
+                                        <a href="/payments/details/@p.Id" class="btn btn-sm btn-outline-success shadow-sm">View details</a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private PaymentDto[]? payments;
+    private string searchTerm = "";
+
+    private IEnumerable<PaymentDto> FilteredPayments => string.IsNullOrWhiteSpace(searchTerm)
+        ? payments ?? Array.Empty<PaymentDto>()
+        : payments!.Where(p => p.CustomerName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                               p.Id.ToString() == searchTerm);
+
+    protected override async Task OnInitializedAsync()
+    {
+        payments = await AdminApi.GetPaymentsAsync();
+    }
+}

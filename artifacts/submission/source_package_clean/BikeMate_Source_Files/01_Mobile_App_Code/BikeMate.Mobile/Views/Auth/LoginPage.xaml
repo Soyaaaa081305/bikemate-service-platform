@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    x:Class="BikeMate.Views.Auth.LoginPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    BackgroundColor="White"
+    Shell.NavBarIsVisible="False">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20,30,20,28" Spacing="18">
+            <VerticalStackLayout Spacing="8">
+                <Image
+                    Source="bikemate_logo.png"
+                    HeightRequest="88"
+                    HorizontalOptions="Center" />
+                <Label
+                    Text="BikeMate"
+                    FontFamily="Inter"
+                    FontSize="18"
+                    FontAttributes="Bold"
+                    TextColor="#242424"
+                    HorizontalTextAlignment="Center" />
+                <Label
+                    Text="Motorcycle repair and roadside support, when you need it."
+                    FontFamily="PublicSans"
+                    FontSize="13"
+                    TextColor="#6E6E6E"
+                    HorizontalTextAlignment="Center" />
+            </VerticalStackLayout>
+
+            <Border
+                BackgroundColor="White"
+                Stroke="#E6E6E6"
+                Padding="18">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="8" />
+                </Border.StrokeShape>
+                <VerticalStackLayout Spacing="14">
+                    <VerticalStackLayout Spacing="4">
+                        <Label
+                            Text="Sign in"
+                            FontFamily="Inter"
+                            FontSize="18"
+                            FontAttributes="Bold"
+                            TextColor="#242424" />
+                        <Label
+                            Text="Use your BikeMate customer account to continue."
+                            FontFamily="PublicSans"
+                            FontSize="13"
+                            TextColor="#6E6E6E" />
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Email address" FontFamily="PTSansCaptionBold" FontSize="11" TextColor="#242424" />
+                        <Border Stroke="#DCDCDC" BackgroundColor="#FAFAFA" Padding="12,2">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="8" />
+                            </Border.StrokeShape>
+                            <Entry
+                                x:Name="EmailEntry"
+                                Placeholder="Enter your email with @ and .com"
+                                Keyboard="Email"
+                                ReturnType="Next"
+                                TextColor="#242424"
+                                PlaceholderColor="#6E6E6E" />
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Spacing="5">
+                        <Label Text="Password" FontFamily="PTSansCaptionBold" FontSize="11" TextColor="#242424" />
+                        <Border Stroke="#DCDCDC" BackgroundColor="#FAFAFA" Padding="12,2">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="8" />
+                            </Border.StrokeShape>
+                            <Entry
+                                x:Name="PasswordEntry"
+                                Placeholder="Enter your password"
+                                IsPassword="True"
+                                ReturnType="Go"
+                                Completed="OnPasswordCompleted"
+                                TextColor="#242424"
+                                PlaceholderColor="#6E6E6E" />
+                        </Border>
+                        <Button
+                            Text="Forgot password?"
+                            Clicked="OnForgotPasswordClicked"
+                            HorizontalOptions="End"
+                            BackgroundColor="Transparent"
+                            TextColor="#FF6B2C"
+                            FontFamily="PTSansCaptionBold"
+                            FontSize="11"
+                            Padding="4,0"
+                            HeightRequest="30"
+                            MinimumHeightRequest="30" />
+                    </VerticalStackLayout>
+
+                    <Button
+                        x:Name="SignInButton"
+                        Text="Sign in"
+                        Clicked="OnSignInClicked"
+                        BackgroundColor="#FF6B2C"
+                        TextColor="White"
+                        CornerRadius="8"
+                        HeightRequest="48"
+                        FontFamily="Inter"
+                        FontAttributes="Bold" />
+
+                    <Grid ColumnDefinitions="*,Auto,*" ColumnSpacing="10">
+                        <BoxView HeightRequest="1" BackgroundColor="#E6E6E6" VerticalOptions="Center" />
+                        <Label
+                            Grid.Column="1"
+                            Text="or"
+                            FontFamily="PTSansCaption"
+                            FontSize="11"
+                            TextColor="#6E6E6E"
+                            VerticalTextAlignment="Center" />
+                        <BoxView Grid.Column="2" HeightRequest="1" BackgroundColor="#E6E6E6" VerticalOptions="Center" />
+                    </Grid>
+
+                    <Button
+                        x:Name="GoogleButton"
+                        Text="Continue with Google"
+                        ImageSource="google_logo.png"
+                        ContentLayout="Left,12"
+                        Clicked="OnGoogleClicked"
+                        BackgroundColor="White"
+                        TextColor="#242424"
+                        BorderColor="#DADCE0"
+                        BorderWidth="1"
+                        CornerRadius="8"
+                        HeightRequest="48"
+                        FontFamily="Inter"
+                        FontAttributes="Bold"
+                        Padding="18,0" />
+
+                    <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="8" HorizontalOptions="Center">
+                        <Label
+                            Text="New to BikeMate?"
+                            FontFamily="PublicSans"
+                            FontSize="13"
+                            TextColor="#6E6E6E"
+                            VerticalTextAlignment="Center" />
+                        <Button
+                            Grid.Column="1"
+                            Text="Create account"
+                            Clicked="OnCreateAccountClicked"
+                            BackgroundColor="Transparent"
+                            TextColor="#FF6B2C"
+                            FontFamily="Inter"
+                            FontAttributes="Bold"
+                            Padding="4,0"
+                            HeightRequest="34"
+                            MinimumHeightRequest="34" />
+                    </Grid>
+
+                    <Button
+                        Text="Connection settings"
+                        Clicked="OnConnectionSettingsClicked"
+                        BackgroundColor="Transparent"
+                        TextColor="#6E6E6E"
+                        FontFamily="PTSansCaptionBold"
+                        FontSize="11"
+                        Padding="4,0"
+                        HeightRequest="30"
+                        MinimumHeightRequest="30" />
+                </VerticalStackLayout>
+            </Border>
+
+            <ActivityIndicator
+                x:Name="BusyIndicator"
+                IsVisible="False"
+                IsRunning="False"
+                Color="#FF6B2C"
+                HorizontalOptions="Center" />
+
+            <Label
+                Text="By continuing, you agree to BikeMate's Terms and Privacy Policy."
+                FontFamily="PTSansCaption"
+                FontSize="11"
+                TextColor="#6E6E6E"
+                HorizontalTextAlignment="Center" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

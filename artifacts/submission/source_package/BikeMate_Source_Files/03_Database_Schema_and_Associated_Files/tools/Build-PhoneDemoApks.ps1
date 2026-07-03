@@ -1,0 +1,60 @@
+param(
+    [ValidateSet("Debug", "Release")]
+    [string]$Configuration = "Debug",
+    [switch]$InstallConnectedDevices
+)
+
+$ErrorActionPreference = "Stop"
+
+$repoRoot = Split-Path -Parent $PSScriptRoot
+$artifacts = Join-Path $repoRoot "artifacts\phone-demo\apk"
+$customerPackage = "com.bikemate.mobile"
+$shopAdminPackage = "com.companyname.bikemates_admin"
+
+New-Item -ItemType Directory -Force -Path $artifacts | Out-Null
+
+Push-Location $repoRoot
+try {
+    Write-Host "Building BikeMate.Mobile APK ($Configuration)..."
+    dotnet build .\BikeMate.Mobile\BikeMate.Mobile.csproj -f net10.0-android -c $Configuration -p:AndroidBuildApplicationPackage=true -p:AndroidPackageFormat=apk -p:DebugSymbols=false -p:DebugType=none
+
+    Write-Host "Building BIKEMATES_ADMIN APK ($Configuration)..."
+    dotnet build .\BIKEMATES_ADMIN\BIKEMATES_ADMIN.csproj -f net10.0-android -c $Configuration -p:AndroidBuildApplicationPackage=true -p:AndroidPackageFormat=apk -p:DebugSymbols=false -p:DebugType=none
+
+    $mobileApk = Get-ChildItem .\BikeMate.Mobile\bin\$Configuration\net10.0-android -Recurse -Filter *.apk | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+    $adminApk = Get-ChildItem .\BIKEMATES_ADMIN\bin\$Configuration\net10.0-android -Recurse -Filter *.apk | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+
+    if ($null -eq $mobileApk) { throw "BikeMate.Mobile APK was not produced." }
+    if ($null -eq $adminApk) { throw "BIKEMATES_ADMIN APK was not produced." }
+
+    $mobileOut = Join-Path $artifacts "BikeMate.Mobile.$Configuration.apk"
+    $adminOut = Join-Path $artifacts "BIKEMATES_ADMIN.$Configuration.apk"
+    Copy-Item $mobileApk.FullName $mobileOut -Force
+    Copy-Item $adminApk.FullName $adminOut -Force
+
+    Write-Host "Customer/mechanic APK: $mobileOut"
+    Write-Host "Shop-admin APK: $adminOut"
+
+    if ($InstallConnectedDevices) {
+        $adb = Join-Path $env:LOCALAPPDATA "Android\Sdk\platform-tools\adb.exe"
+        if (-not (Test-Path $adb)) {
+            throw "adb was not found at $adb"
+        }
+
+        $devices = & $adb devices | Select-String "`tdevice$" | ForEach-Object { ($_ -split "`t")[0] }
+        if ($devices.Count -eq 0) {
+            throw "No connected Android devices were found."
+        }
+
+        foreach ($device in $devices) {
+            Write-Host "Clearing old app data and installing on $device..."
+            & $adb -s $device shell pm clear $customerPackage | Out-Null
+            & $adb -s $device shell pm clear $shopAdminPackage | Out-Null
+            & $adb -s $device install -r $mobileOut
+            & $adb -s $device install -r $adminOut
+        }
+    }
+}
+finally {
+    Pop-Location
+}

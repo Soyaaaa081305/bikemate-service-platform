@@ -54,7 +54,7 @@ public partial class ShopSetupPage : ContentPage
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Services", $"Unable to load service categories: {ex.Message}", "OK");
+            await DisplayAlertAsync("Services", $"Unable to load service categories: {ex.Message}", "OK");
         }
     }
 
@@ -67,7 +67,7 @@ public partial class ShopSetupPage : ContentPage
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Shop Setup", $"Unable to refresh setup status: {ex.Message}", "OK");
+            await DisplayAlertAsync("Shop Setup", $"Unable to refresh setup status: {ex.Message}", "OK");
         }
     }
 
@@ -92,7 +92,7 @@ public partial class ShopSetupPage : ContentPage
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Shop Setup", $"Unable to load current products and services: {ex.Message}", "OK");
+            await DisplayAlertAsync("Shop Setup", $"Unable to load current products and services: {ex.Message}", "OK");
         }
     }
 
@@ -104,6 +104,8 @@ public partial class ShopSetupPage : ContentPage
 
         ApplyImage(CoverImage, CoverPlaceholder, profile.ShopImageUrl);
         ApplyImage(LogoImage, LogoPlaceholder, profile.ShopLogoUrl);
+        ApplyImage(ReviewCoverImage, ReviewCoverPlaceholder, profile.ShopImageUrl);
+        ApplyImage(ReviewLogoImage, ReviewLogoPlaceholder, profile.ShopLogoUrl);
 
         var completed = new[]
         {
@@ -145,24 +147,24 @@ public partial class ShopSetupPage : ContentPage
         return complete ? $"Done - {label}" : $"Needed - {label}";
     }
 
-    private async void ChooseCover_Clicked(object sender, EventArgs e)
+    private async void ChooseCover_Clicked(object? sender, EventArgs e)
     {
         await PickAndSaveImageAsync("shop-cover", BikeMateDatabaseService.UpdateShopCoverImageAsync);
     }
 
-    private async void ChooseLogo_Clicked(object sender, EventArgs e)
+    private async void ChooseLogo_Clicked(object? sender, EventArgs e)
     {
         await PickAndSaveImageAsync("shop-logo", BikeMateDatabaseService.UpdateShopLogoAsync);
     }
 
-    private async void ChooseProductImage_Clicked(object sender, EventArgs e)
+    private async void ChooseProductImage_Clicked(object? sender, EventArgs e)
     {
         try
         {
-            var photo = await MediaPicker.Default.PickPhotoAsync(new MediaPickerOptions
+            var photo = (await MediaPicker.Default.PickPhotosAsync(new MediaPickerOptions
             {
                 Title = "Choose product image"
-            });
+            })).FirstOrDefault();
 
             if (photo is null)
             {
@@ -175,7 +177,7 @@ public partial class ShopSetupPage : ContentPage
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Product Image", ex.Message, "OK");
+            await DisplayAlertAsync("Product Image", ex.Message, "OK");
         }
     }
 
@@ -183,10 +185,10 @@ public partial class ShopSetupPage : ContentPage
     {
         try
         {
-            var photo = await MediaPicker.Default.PickPhotoAsync(new MediaPickerOptions
+            var photo = (await MediaPicker.Default.PickPhotosAsync(new MediaPickerOptions
             {
                 Title = folder == "shop-cover" ? "Choose cover photo" : "Choose profile picture"
-            });
+            })).FirstOrDefault();
 
             if (photo is null)
             {
@@ -199,11 +201,11 @@ public partial class ShopSetupPage : ContentPage
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Image Upload", ex.Message, "OK");
+            await DisplayAlertAsync("Image Upload", ex.Message, "OK");
         }
     }
 
-    private async void SaveIdentity_Clicked(object sender, EventArgs e)
+    private async void SaveIdentity_Clicked(object? sender, EventArgs e)
         => await SaveIdentityAsync(showConfirmation: true);
 
     private async Task<bool> SaveIdentityAsync(bool showConfirmation)
@@ -211,7 +213,7 @@ public partial class ShopSetupPage : ContentPage
         var description = DescriptionEditor.Text?.Trim();
         if (string.IsNullOrWhiteSpace(description))
         {
-            await DisplayAlert("Shop Description", "Enter a short description before saving.", "OK");
+            await DisplayAlertAsync("Shop Description", "Enter a short description before saving.", "OK");
             return false;
         }
 
@@ -224,19 +226,19 @@ public partial class ShopSetupPage : ContentPage
             await RefreshStatusAsync();
             if (showConfirmation)
             {
-                await DisplayAlert("Shop Identity", "Shop details were saved.", "OK");
+                await DisplayAlertAsync("Shop Identity", "Shop details were saved.", "OK");
             }
 
             return true;
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Shop Identity", ex.Message, "OK");
+            await DisplayAlertAsync("Shop Identity", ex.Message, "OK");
             return false;
         }
     }
 
-    private async void AddProduct_Clicked(object sender, EventArgs e)
+    private async void AddProduct_Clicked(object? sender, EventArgs e)
     {
         var name = ProductNameEntry.Text?.Trim() ?? string.Empty;
         var category = ProductCategoryPicker.SelectedItem?.ToString() ?? ProductCategorySearchBar.Text?.Trim() ?? string.Empty;
@@ -247,7 +249,7 @@ public partial class ShopSetupPage : ContentPage
 
         if (string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(category) || price <= 0 || stock < 0 || string.IsNullOrWhiteSpace(productImageUrl))
         {
-            await DisplayAlert("Product", "Enter product name, category, price, stock, and one product image.", "OK");
+            await DisplayAlertAsync("Product", "Enter product name, category, price, stock, and one product image.", "OK");
             return;
         }
 
@@ -275,15 +277,44 @@ public partial class ShopSetupPage : ContentPage
 
             await RefreshStatusAsync();
             await RefreshOfferSummariesAsync();
-            await DisplayAlert("Product", "Product was added to your shop inventory.", "OK");
+            await DisplayAlertAsync("Product", "Product was added to your shop inventory.", "OK");
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Product", ex.Message, "OK");
+            await DisplayAlertAsync("Product", ex.Message, "OK");
         }
     }
 
-    private async void AddService_Clicked(object sender, EventArgs e)
+    private async void DeleteSetupProduct_Clicked(object? sender, EventArgs e)
+    {
+        if (sender is not Button { CommandParameter: ProductItem product })
+        {
+            return;
+        }
+
+        var confirm = await DisplayAlertAsync(
+            "Remove product",
+            $"Remove {product.Name} from your shop setup?",
+            "Remove",
+            "Cancel");
+        if (!confirm)
+        {
+            return;
+        }
+
+        try
+        {
+            await BikeMateDatabaseService.DeleteProductAsync(product.ProductId);
+            await RefreshStatusAsync();
+            await RefreshOfferSummariesAsync();
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlertAsync("Product", ex.Message, "OK");
+        }
+    }
+
+    private async void AddService_Clicked(object? sender, EventArgs e)
     {
         var categoryName = ServiceCategoryPicker.SelectedItem?.ToString() ?? ServiceCategorySearchBar.Text?.Trim() ?? string.Empty;
         var category = _serviceCategories.FirstOrDefault(item =>
@@ -293,14 +324,21 @@ public partial class ShopSetupPage : ContentPage
         decimal.TryParse(ServicePriceEntry.Text, out var price);
         int.TryParse(ServiceMinutesEntry.Text, out var minutes);
 
-        if (category is null || string.IsNullOrWhiteSpace(serviceName) || price <= 0 || minutes <= 0)
+        if (string.IsNullOrWhiteSpace(categoryName) || string.IsNullOrWhiteSpace(serviceName) || price <= 0 || minutes <= 0)
         {
-            await DisplayAlert("Service", "Select a service category, or add the typed category first. Then enter service name, base price, and minutes.", "OK");
+            await DisplayAlertAsync("Service", "Enter a service category, service name, base price, and minutes.", "OK");
             return;
         }
 
         try
         {
+            if (category is null)
+            {
+                category = await BikeMateDatabaseService.AddServiceCategoryAsync(new UpsertAdminServiceCategory(categoryName, null));
+                await LoadServiceCategoriesAsync();
+                SetSelectedServiceCategory(category.CategoryName);
+            }
+
             await BikeMateDatabaseService.AddShopServiceAsync(new UpsertAdminShopService(
                 category.CategoryId,
                 serviceName,
@@ -319,26 +357,26 @@ public partial class ShopSetupPage : ContentPage
 
             await RefreshStatusAsync();
             await RefreshOfferSummariesAsync();
-            await DisplayAlert("Service", "Service was added to your shop offers.", "OK");
+            await DisplayAlertAsync("Service", "Service was added to your shop offers.", "OK");
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Service", ex.Message, "OK");
+            await DisplayAlertAsync("Service", ex.Message, "OK");
         }
     }
 
-    private async void Continue_Clicked(object sender, EventArgs e)
+    private async void Continue_Clicked(object? sender, EventArgs e)
     {
         if (!_status.IsComplete)
         {
-            await DisplayAlert("Shop Setup", "Complete the required setup items first.", "OK");
+            await DisplayAlertAsync("Shop Setup", "Complete the required setup items first.", "OK");
             return;
         }
 
         BIKEMATES_ADMIN.App.SetRootPage(new AppShell());
     }
 
-    private void BackStep_Clicked(object sender, EventArgs e)
+    private void BackStep_Clicked(object? sender, EventArgs e)
     {
         if (_currentStep == SetupStep.Identity)
         {
@@ -349,7 +387,7 @@ public partial class ShopSetupPage : ContentPage
         UpdateStepPresentation();
     }
 
-    private async void NextStep_Clicked(object sender, EventArgs e)
+    private async void NextStep_Clicked(object? sender, EventArgs e)
     {
         if (!await CanLeaveCurrentStepAsync())
         {
@@ -379,7 +417,7 @@ public partial class ShopSetupPage : ContentPage
 
             if (!_status.HasCoverPhoto || !_status.HasProfilePicture || !_status.HasDescription)
             {
-                await DisplayAlert(
+                await DisplayAlertAsync(
                     "Shop Identity",
                     "Add a cover photo, profile picture, and saved shop description before continuing.",
                     "OK");
@@ -388,21 +426,21 @@ public partial class ShopSetupPage : ContentPage
         }
         else if (_currentStep == SetupStep.Products && !_status.HasProducts)
         {
-            await DisplayAlert("Products", "Add at least one product with an image before continuing.", "OK");
+            await DisplayAlertAsync("Products", "Add at least one product with an image before continuing.", "OK");
             return false;
         }
         else if (_currentStep == SetupStep.Services && !_status.HasServices)
         {
-            await DisplayAlert("Services", "Add at least one bookable service before continuing.", "OK");
+            await DisplayAlertAsync("Services", "Add at least one bookable service before continuing.", "OK");
             return false;
         }
 
         return true;
     }
 
-    private async void SignOut_Clicked(object sender, EventArgs e)
+    private async void SignOut_Clicked(object? sender, EventArgs e)
     {
-        var confirm = await DisplayAlert("Sign Out", "Return to the shop admin login screen?", "Sign out", "Stay");
+        var confirm = await DisplayAlertAsync("Sign Out", "Return to the shop admin login screen?", "Sign out", "Stay");
         if (!confirm)
         {
             return;
@@ -434,12 +472,12 @@ public partial class ShopSetupPage : ContentPage
         RefreshProductCategoryPicker();
     }
 
-    private async void AddProductCategory_Clicked(object sender, EventArgs e)
+    private async void AddProductCategory_Clicked(object? sender, EventArgs e)
     {
         var categoryName = ProductCategorySearchBar.Text?.Trim() ?? string.Empty;
         if (string.IsNullOrWhiteSpace(categoryName))
         {
-            await DisplayAlert("Product Category", "Type the product category name first.", "OK");
+            await DisplayAlertAsync("Product Category", "Type the product category name first.", "OK");
             return;
         }
 
@@ -447,11 +485,11 @@ public partial class ShopSetupPage : ContentPage
         {
             var category = ProductCategoryStore.Add(categoryName);
             LoadProductCategories(category);
-            await DisplayAlert("Product Category", $"{category} is ready to use for products.", "OK");
+            await DisplayAlertAsync("Product Category", $"{category} is ready to use for products.", "OK");
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Product Category", ex.Message, "OK");
+            await DisplayAlertAsync("Product Category", ex.Message, "OK");
         }
     }
 
@@ -465,12 +503,12 @@ public partial class ShopSetupPage : ContentPage
         RefreshServiceCategoryPicker();
     }
 
-    private async void AddServiceCategory_Clicked(object sender, EventArgs e)
+    private async void AddServiceCategory_Clicked(object? sender, EventArgs e)
     {
         var categoryName = ServiceCategorySearchBar.Text?.Trim() ?? string.Empty;
         if (string.IsNullOrWhiteSpace(categoryName))
         {
-            await DisplayAlert("Service Category", "Type the service category name first.", "OK");
+            await DisplayAlertAsync("Service Category", "Type the service category name first.", "OK");
             return;
         }
 
@@ -486,11 +524,11 @@ public partial class ShopSetupPage : ContentPage
             var category = await BikeMateDatabaseService.AddServiceCategoryAsync(new UpsertAdminServiceCategory(categoryName, description));
             await LoadServiceCategoriesAsync();
             SetSelectedServiceCategory(category.CategoryName);
-            await DisplayAlert("Service Category", $"{category.CategoryName} is ready for services and customer filters.", "OK");
+            await DisplayAlertAsync("Service Category", $"{category.CategoryName} is ready for services and customer filters.", "OK");
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Service Category", ex.Message, "OK");
+            await DisplayAlertAsync("Service Category", ex.Message, "OK");
         }
     }
 

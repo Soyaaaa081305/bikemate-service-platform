@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using BIKEMATES_ADMIN.Services;
 using Microsoft.Maui.Graphics;
 
@@ -74,13 +74,14 @@ public partial class MainPage : ContentPage
         }
     }
 
-    private async void DashboardRefreshView_Refreshing(object sender, EventArgs e) => await LoadDashboardAsync();
-    private async void Products_Clicked(object sender, EventArgs e) => await Shell.Current.GoToAsync(nameof(Products));
-    private async void Operations_Clicked(object sender, EventArgs e) => await Shell.Current.GoToAsync(nameof(Operations));
-    private async void Calendar_Clicked(object sender, EventArgs e) => await Shell.Current.GoToAsync(nameof(Calendar));
-    private async void Reports_Clicked(object sender, EventArgs e) => await Shell.Current.GoToAsync(nameof(Reports));
-    private async void Messages_Clicked(object sender, EventArgs e) => await Shell.Current.GoToAsync("//AdminTabs/MessagesTab");
-    private async void Notifications_Clicked(object sender, EventArgs e) => await Shell.Current.GoToAsync(nameof(Notifications));
+    private async void DashboardRefreshView_Refreshing(object? sender, EventArgs e) => await LoadDashboardAsync();
+    private async void Products_Clicked(object? sender, EventArgs e) => await Shell.Current.GoToAsync(nameof(Products));
+    private async void Operations_Clicked(object? sender, EventArgs e) => await Shell.Current.GoToAsync(nameof(Operations));
+    private async void Calendar_Clicked(object? sender, EventArgs e) => await Shell.Current.GoToAsync(nameof(Calendar));
+    private async void Reports_Clicked(object? sender, EventArgs e) => await Shell.Current.GoToAsync(nameof(Reports));
+    private async void Messages_Clicked(object? sender, EventArgs e) => await Shell.Current.GoToAsync("//AdminTabs/MessagesTab");
+    private async void Admins_Clicked(object? sender, EventArgs e) => await Shell.Current.GoToAsync(nameof(Admins));
+    private async void Notifications_Clicked(object? sender, EventArgs e) => await Shell.Current.GoToAsync(nameof(Notifications));
 }
 
 public sealed record MechanicStatusItem(string Initials, string Name, string Status, Color StatusColor)

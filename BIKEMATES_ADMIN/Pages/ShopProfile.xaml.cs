@@ -38,7 +38,7 @@ public partial class ShopProfile : ContentPage
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Shop Profile", $"Unable to load profile from API: {ex.Message}", "OK");
+            await DisplayAlertAsync("Shop Profile", $"Unable to load profile from API: {ex.Message}", "OK");
         }
     }
 
@@ -156,14 +156,14 @@ public partial class ShopProfile : ContentPage
             FileRow("Cover photo / shop image", draft.ShopImagePath)));
     }
 
-    private async void ApplicationDetails_Clicked(object sender, EventArgs e)
+    private async void ApplicationDetails_Clicked(object? sender, EventArgs e)
     {
         try
         {
             var draft = await LoadApplicationDraftAsync();
             if (draft is null)
             {
-                await DisplayAlert("Application Details", "No submitted application details were found for this account.", "OK");
+                await DisplayAlertAsync("Application Details", "No submitted application details were found for this account.", "OK");
                 return;
             }
 
@@ -182,19 +182,27 @@ public partial class ShopProfile : ContentPage
                 return;
             }
 
-            await DisplayAlert("Application Details", $"Unable to load the submitted application: {ex.Message}", "OK");
+            await DisplayAlertAsync("Application Details", $"Unable to load the submitted application: {ex.Message}", "OK");
         }
     }
 
-    private async void SaveProfile_Clicked(object sender, EventArgs e)
+    private async void SaveProfile_Clicked(object? sender, EventArgs e)
     {
-        await DisplayAlert(
+        var openEmail = await DisplayAlertAsync(
             "Request Changes",
-            "Registered shop details and submitted documents are locked after submission. Contact BikeMate admin or resubmit a corrected application if the admin asks for changes.",
-            "OK");
+            "Registered shop details and submitted documents are locked after submission. Email BikeMate admin to request corrections or submit updated documents.",
+            "Open Email",
+            "Cancel");
+
+        if (!openEmail)
+        {
+            return;
+        }
+
+        await OpenChangeRequestEmailAsync();
     }
 
-    private async void Reload_Clicked(object sender, EventArgs e) => await LoadProfileAsync();
+    private async void Reload_Clicked(object? sender, EventArgs e) => await LoadProfileAsync();
 
     private static View SnapshotSection(string title, params View[] rows)
     {
@@ -302,6 +310,47 @@ public partial class ShopProfile : ContentPage
         {
             await Launcher.Default.OpenAsync(uri);
         }
+    }
+
+    private async Task OpenChangeRequestEmailAsync()
+    {
+        const string supportEmail = "bikemate@gmail.com";
+        var subject = "BikeMate Shop Change Request";
+        var body = string.Join(Environment.NewLine, new[]
+        {
+            "Hello BikeMate Admin,",
+            string.Empty,
+            "I would like to request changes to my submitted shop application or registered shop details.",
+            string.Empty,
+            $"Shop: {_profile?.ShopName ?? _applicationDraft?.ShopName ?? "Not loaded"}",
+            $"Account email: {AppSession.CurrentUser?.Email ?? _applicationDraft?.Email ?? "Not loaded"}",
+            $"Current status: {_profile?.ShopStatus ?? _applicationDraft?.ApplicationStatus ?? "Not loaded"}",
+            string.Empty,
+            "Requested changes:",
+            "- ",
+            string.Empty,
+            "Thank you."
+        });
+
+        var mailto = new Uri($"mailto:{supportEmail}?subject={Uri.EscapeDataString(subject)}&body={Uri.EscapeDataString(body)}");
+
+        try
+        {
+            if (await Launcher.Default.CanOpenAsync(mailto))
+            {
+                await Launcher.Default.OpenAsync(mailto);
+                return;
+            }
+        }
+        catch
+        {
+            // Fall through to the manual fallback message below.
+        }
+
+        await DisplayAlertAsync(
+            "Email BikeMate Admin",
+            $"Your device could not open an email app. Please email {supportEmail} and include your shop name, account email, and requested changes.",
+            "OK");
     }
 
     private static string FullName(AccountCreationDraft draft)

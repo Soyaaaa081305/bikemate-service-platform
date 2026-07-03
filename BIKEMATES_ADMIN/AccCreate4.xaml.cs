@@ -5,6 +5,7 @@ namespace BIKEMATES_ADMIN.Pages.Account;
 public partial class AccCreate4 : ContentPage
 {
     private readonly AccountCreationDraft _draft;
+    private LocalIdCardScanResult? _permitScanResult;
 
     public AccCreate4()
         : this(new AccountCreationDraft())
@@ -24,7 +25,7 @@ public partial class AccCreate4 : ContentPage
         base.OnDisappearing();
     }
 
-    private async void OnCreateAccountClicked(object sender, EventArgs e)
+    private async void OnCreateAccountClicked(object? sender, EventArgs e)
     {
         SaveDraft();
 
@@ -32,13 +33,13 @@ public partial class AccCreate4 : ContentPage
             string.IsNullOrWhiteSpace(_draft.ShopImagePath) ||
             string.IsNullOrWhiteSpace(_draft.DtiRegistrationNumber))
         {
-            await DisplayAlert("Missing Requirements", "Please upload the business permit, cover photo / shop image, and DTI registration number.", "OK");
+            await DisplayAlertAsync("Missing Requirements", "Please upload the business permit, cover photo / shop image, and DTI registration number.", "OK");
             return;
         }
 
         if (!_draft.ShopTermsAccepted)
         {
-            await DisplayAlert("Terms Required", "Please read and accept the shop application terms before submitting.", "OK");
+            await DisplayAlertAsync("Terms Required", "Please read and accept the shop application terms before submitting.", "OK");
             return;
         }
 
@@ -56,7 +57,7 @@ public partial class AccCreate4 : ContentPage
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Application Failed", ex.Message, "OK");
+            await DisplayAlertAsync("Application Failed", ex.Message, "OK");
         }
         finally
         {
@@ -65,28 +66,70 @@ public partial class AccCreate4 : ContentPage
         }
     }
 
-    private async void OnPickPermitClicked(object sender, EventArgs e)
+    private async void OnPickPermitClicked(object? sender, EventArgs e)
     {
-        var file = await PickFileAsync("Select business permit");
-        if (file is null) return;
-
         try
         {
+            var scan = await new LocalIdCardScannerService().ScanAsync("Scan business permit");
+            if (!scan.IsSuccessful)
+            {
+                if (scan.WasCancelled)
+                {
+                    return;
+                }
+
+                await DisplayAlertAsync("Document Scan", scan.ErrorMessage ?? "The document scan could not be completed.", "OK");
+                return;
+            }
+
+            var processedImagePath = scan.LocalProcessedImagePath;
+            if (string.IsNullOrWhiteSpace(processedImagePath))
+            {
+                await DisplayAlertAsync("Document Scan", "BikeMate could not prepare the scanned business permit image. Please scan again.", "OK");
+                return;
+            }
+
+            var file = new FileResult(processedImagePath)
+            {
+                FileName = Path.GetFileName(processedImagePath),
+                ContentType = "image/jpeg"
+            };
             BusinessPermitLabel.Text = "Uploading business permit...";
             var uploaded = await BikeMateDatabaseService.UploadOnboardingFileAsync(file, "shop-business-permits");
             _draft.BusinessPermitPath = uploaded.Url;
             BusinessPermitLabel.Text = uploaded.FileName;
+            _permitScanResult = scan;
+            PermitScanLabel.Text = $"Scanned and uploaded for BikeMate admin review. Readability: {FormatReadability(scan.ReadabilityStatus)}.";
         }
         catch (Exception ex)
         {
             BusinessPermitLabel.Text = string.IsNullOrWhiteSpace(_draft.BusinessPermitPath)
                 ? "No file selected"
                 : Path.GetFileName(_draft.BusinessPermitPath);
-            await DisplayAlert("Upload Failed", $"Unable to upload the business permit. {ex.Message}", "OK");
+            await DisplayAlertAsync("Upload Failed", $"Unable to upload the business permit. {ex.Message}", "OK");
         }
     }
 
-    private async void OnPickShopImageClicked(object sender, EventArgs e)
+    private async void OnScanPermitClicked(object? sender, EventArgs e)
+    {
+        var result = await new LocalIdCardScannerService().ScanAsync("Scan business permit");
+        if (!result.IsSuccessful)
+        {
+            if (result.WasCancelled)
+            {
+                return;
+            }
+
+            await DisplayAlertAsync("Document Scan", result.ErrorMessage ?? "The document scan could not be completed.", "OK");
+            return;
+        }
+
+        _permitScanResult = result;
+        PermitScanLabel.Text = $"Preview scan: {FormatReadability(result.ReadabilityStatus)}. Use Upload to submit a camera scan for BikeMate admin review.";
+        await DisplayAlertAsync("Document Scan Completed", "This preview was processed on your device only. Use Upload to scan and submit the business permit for BikeMate admin approval.", "OK");
+    }
+
+    private async void OnPickShopImageClicked(object? sender, EventArgs e)
     {
         var file = await PickFileAsync("Select cover photo / shop image");
         if (file is null) return;
@@ -103,7 +146,7 @@ public partial class AccCreate4 : ContentPage
             ShopImageLabel.Text = string.IsNullOrWhiteSpace(_draft.ShopImagePath)
                 ? "No file selected"
                 : Path.GetFileName(_draft.ShopImagePath);
-            await DisplayAlert("Upload Failed", $"Unable to upload the cover photo / shop image. {ex.Message}", "OK");
+            await DisplayAlertAsync("Upload Failed", $"Unable to upload the cover photo / shop image. {ex.Message}", "OK");
         }
     }
 
@@ -120,6 +163,16 @@ public partial class AccCreate4 : ContentPage
         {
             ShopImageLabel.Text = Path.GetFileName(_draft.ShopImagePath);
         }
+    }
+
+    private static string FormatReadability(LocalIdCardReadabilityStatus status)
+    {
+        return status switch
+        {
+            LocalIdCardReadabilityStatus.Readable => "Readable",
+            LocalIdCardReadabilityStatus.Unreadable => "Could not read document clearly",
+            _ => "Needs manual review"
+        };
     }
 
     private void SaveDraft()

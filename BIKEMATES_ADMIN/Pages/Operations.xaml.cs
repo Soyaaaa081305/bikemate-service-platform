@@ -44,13 +44,14 @@ public partial class Operations : ContentPage
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Services", $"Unable to load services from API: {ex.Message}", "OK");
+            await DisplayAlertAsync("Services", $"Unable to load services from API: {ex.Message}", "OK");
         }
     }
 
-    private async void AddService_Clicked(object sender, EventArgs e)
+    private async void AddService_Clicked(object? sender, EventArgs e)
     {
-        if (!ValidateServiceInputs(out var request))
+        var request = await BuildServiceRequestAsync();
+        if (request is null)
         {
             return;
         }
@@ -60,24 +61,25 @@ public partial class Operations : ContentPage
             await BikeMateDatabaseService.AddShopServiceAsync(request);
             await LoadServicesAsync();
             ClearEditor();
-            await DisplayAlert("Service Added", "The service is now available from the shop services API.", "OK");
+            await DisplayAlertAsync("Service Added", "The service is now available from the shop services API.", "OK");
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Service Error", ex.Message, "OK");
+            await DisplayAlertAsync("Service Error", ex.Message, "OK");
         }
     }
 
-    private async void UpdateService_Clicked(object sender, EventArgs e)
+    private async void UpdateService_Clicked(object? sender, EventArgs e)
     {
         var selected = GetSelectedService();
         if (selected is null)
         {
-            await DisplayAlert("Select Service", "Tap a service below first.", "OK");
+            await DisplayAlertAsync("Select Service", "Tap a service below first.", "OK");
             return;
         }
 
-        if (!ValidateServiceInputs(out var request))
+        var request = await BuildServiceRequestAsync();
+        if (request is null)
         {
             return;
         }
@@ -87,24 +89,53 @@ public partial class Operations : ContentPage
             await BikeMateDatabaseService.UpdateShopServiceAsync(selected.ServiceId, request);
             await LoadServicesAsync();
             ClearEditor();
-            await DisplayAlert("Service Updated", "The selected service was updated in the API.", "OK");
+            await DisplayAlertAsync("Service Updated", "The selected service was updated in the API.", "OK");
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Service Error", ex.Message, "OK");
+            await DisplayAlertAsync("Service Error", ex.Message, "OK");
         }
     }
 
-    private async void DeleteService_Clicked(object sender, EventArgs e)
+    private async void DeleteService_Clicked(object? sender, EventArgs e)
     {
         var selected = GetSelectedService();
         if (selected is null)
         {
-            await DisplayAlert("Select Service", "Tap a service below first.", "OK");
+            await DisplayAlertAsync("Select Service", "Tap a service below first.", "OK");
             return;
         }
 
-        var confirm = await DisplayAlert("Deactivate Service", $"Deactivate {selected.Name}?", "Deactivate", "Cancel");
+        await DeleteServiceAsync(selected);
+    }
+
+    private void EditService_Clicked(object? sender, EventArgs e)
+    {
+        if (sender is Button { CommandParameter: ServiceItem service })
+        {
+            ServicesCollectionView.SelectedItem = service;
+            SelectService(service);
+        }
+    }
+
+    private async void DeleteServiceRow_Clicked(object? sender, EventArgs e)
+    {
+        if (sender is Button { CommandParameter: ServiceItem service })
+        {
+            ServicesCollectionView.SelectedItem = service;
+            SelectService(service);
+            await DeleteServiceAsync(service);
+        }
+    }
+
+    private void ClearServiceEditor_Clicked(object? sender, EventArgs e)
+    {
+        ClearEditor();
+    }
+
+    private async Task DeleteServiceAsync(ServiceItem selected)
+    {
+        var confirm = await DisplayAlertAsync("Deactivate Service", $"Deactivate {selected.Name}?", "Deactivate", "Cancel");
         if (!confirm)
         {
             return;
@@ -118,7 +149,7 @@ public partial class Operations : ContentPage
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Service Error", ex.Message, "OK");
+            await DisplayAlertAsync("Service Error", ex.Message, "OK");
         }
     }
 
@@ -158,12 +189,12 @@ public partial class Operations : ContentPage
         RefreshServiceCategoryPicker();
     }
 
-    private async void AddServiceCategory_Clicked(object sender, EventArgs e)
+    private async void AddServiceCategory_Clicked(object? sender, EventArgs e)
     {
-        var categoryName = ServiceCategorySearchBar.Text?.Trim() ?? string.Empty;
+        var categoryName = ServiceCategoryNameEntry.Text?.Trim() ?? string.Empty;
         if (string.IsNullOrWhiteSpace(categoryName))
         {
-            await DisplayAlert("Service Category", "Type the service category name first.", "OK");
+            await DisplayAlertAsync("Service Category", "Enter the full service category name before saving.", "OK");
             return;
         }
 
@@ -179,33 +210,87 @@ public partial class Operations : ContentPage
             var category = await BikeMateDatabaseService.AddServiceCategoryAsync(
                 new UpsertAdminServiceCategory(categoryName, description));
             await ReloadServiceCategoriesAsync(category.CategoryName);
-            await DisplayAlert("Service Category", $"{category.CategoryName} is ready for shop services and customer filters.", "OK");
+            ServiceCategoryNameEntry.Text = string.Empty;
+            await DisplayAlertAsync("Service Category", $"{category.CategoryName} is ready for shop services and customer filters.", "OK");
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Service Category", ex.Message, "OK");
+            await DisplayAlertAsync("Service Category", ex.Message, "OK");
         }
     }
 
-    private bool ValidateServiceInputs(out UpsertAdminShopService request)
+    private async void DeleteServiceCategory_Clicked(object? sender, EventArgs e)
     {
-        request = new UpsertAdminShopService(0, string.Empty, null, 0m, 0, true);
+        var selectedName = CategoryPicker.SelectedItem?.ToString()?.Trim();
+        if (string.IsNullOrWhiteSpace(selectedName))
+        {
+            await DisplayAlertAsync("Service Category", "Select a category to delete.", "OK");
+            return;
+        }
 
-        var categoryName = CategoryPicker.SelectedItem?.ToString() ?? ServiceCategorySearchBar.Text?.Trim() ?? string.Empty;
+        var selectedCategory = _categories.FirstOrDefault(category =>
+            string.Equals(category.CategoryName, selectedName, StringComparison.OrdinalIgnoreCase));
+        if (selectedCategory is null)
+        {
+            await DisplayAlertAsync("Service Category", "The selected category could not be found.", "OK");
+            return;
+        }
+
+        if (ServiceItems.Any(service => service.CategoryId == selectedCategory.CategoryId && service.IsActive))
+        {
+            await DisplayAlertAsync("Service Category", "This category is currently used by services and cannot be deleted.", "OK");
+            return;
+        }
+
+        var confirm = await DisplayAlertAsync("Delete Category", $"Delete {selectedCategory.CategoryName}?", "Delete", "Cancel");
+        if (!confirm)
+        {
+            return;
+        }
+
+        try
+        {
+            await BikeMateDatabaseService.DeleteServiceCategoryAsync(selectedCategory.CategoryId);
+            await ReloadServiceCategoriesAsync();
+            ServiceCategorySearchBar.Text = string.Empty;
+            await DisplayAlertAsync("Service Category", "Service category deleted.", "OK");
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlertAsync("Service Category", ex.Message, "OK");
+        }
+    }
+
+    private async Task<UpsertAdminShopService?> BuildServiceRequestAsync()
+    {
+        var categoryName = CategoryPicker.SelectedItem?.ToString() ?? string.Empty;
         var category = _categories.FirstOrDefault(item => string.Equals(item.CategoryName, categoryName, StringComparison.OrdinalIgnoreCase));
         var name = ServiceNameEntry.Text?.Trim() ?? string.Empty;
         var description = DescriptionEditor.Text?.Trim();
         decimal.TryParse(PriceEntry.Text, out var price);
         int.TryParse(DurationEntry.Text, out var minutes);
 
-        if (category is null || string.IsNullOrWhiteSpace(name) || price <= 0 || minutes <= 0)
+        if (string.IsNullOrWhiteSpace(categoryName) || string.IsNullOrWhiteSpace(name) || price <= 0 || minutes <= 0)
         {
-            _ = DisplayAlert("Missing Details", "Please select a service category, or add the typed category first. Then enter service name, base price, and estimated minutes.", "OK");
-            return false;
+            await DisplayAlertAsync("Missing Details", "Please enter a service category, service name, base price, and estimated minutes.", "OK");
+            return null;
         }
 
-        request = new UpsertAdminShopService(category.CategoryId, name, description, price, minutes, ActiveSwitch.IsToggled);
-        return true;
+        if (category is null)
+        {
+            try
+            {
+                category = await BikeMateDatabaseService.AddServiceCategoryAsync(new UpsertAdminServiceCategory(categoryName, null));
+                await ReloadServiceCategoriesAsync(category.CategoryName);
+            }
+            catch (Exception ex)
+            {
+                await DisplayAlertAsync("Service Category", $"Unable to create {categoryName}: {ex.Message}", "OK");
+                return null;
+            }
+        }
+
+        return new UpsertAdminShopService(category.CategoryId, name, description, price, minutes, ActiveSwitch.IsToggled);
     }
 
     private void RefreshServiceList()
@@ -236,6 +321,7 @@ public partial class Operations : ContentPage
         _selectedServiceId = null;
         CategoryPicker.SelectedItem = null;
         ServiceCategorySearchBar.Text = string.Empty;
+        ServiceCategoryNameEntry.Text = string.Empty;
         RefreshServiceCategoryPicker();
         ServiceNameEntry.Text = string.Empty;
         PriceEntry.Text = string.Empty;

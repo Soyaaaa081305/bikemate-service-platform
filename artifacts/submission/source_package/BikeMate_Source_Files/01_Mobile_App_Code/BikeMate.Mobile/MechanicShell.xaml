@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Shell
+    x:Class="BikeMate.MechanicShell"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:mechanic="clr-namespace:BikeMate.Views.Mechanic"
+    Title="Mechanic"
+    Shell.NavBarIsVisible="False">
+
+    <TabBar>
+        <ShellContent Title="Dashboard" Route="MechanicDashboardPage" ContentTemplate="{DataTemplate mechanic:MechanicDashboardPage}" />
+        <ShellContent Title="Jobs" Route="MechanicJobsPage" ContentTemplate="{DataTemplate mechanic:MechanicJobsPage}" />
+        <ShellContent Title="Messages" Route="MechanicMessagesPage" ContentTemplate="{DataTemplate mechanic:MechanicMessagesPage}" />
+        <ShellContent Title="Profile" Route="MechanicProfilePage" ContentTemplate="{DataTemplate mechanic:MechanicProfilePage}" />
+        <ShellContent Title="Logout" Route="MechanicLogoutPage" ContentTemplate="{DataTemplate mechanic:MechanicLogoutPage}" />
+    </TabBar>
+</Shell>

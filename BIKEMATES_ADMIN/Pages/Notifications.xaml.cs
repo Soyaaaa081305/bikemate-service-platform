@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 using BIKEMATES_ADMIN.Services;
 
 namespace BIKEMATES_ADMIN.Pages;
@@ -37,11 +37,11 @@ public partial class Notifications : ContentPage
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Notifications", $"Unable to load notifications from API: {ex.Message}", "OK");
+            await DisplayAlertAsync("Notifications", $"Unable to load notifications from API: {ex.Message}", "OK");
         }
     }
 
-    private async void MarkAllAsRead_Clicked(object sender, EventArgs e)
+    private async void MarkAllAsRead_Clicked(object? sender, EventArgs e)
     {
         try
         {
@@ -50,7 +50,7 @@ public partial class Notifications : ContentPage
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Notifications", ex.Message, "OK");
+            await DisplayAlertAsync("Notifications", ex.Message, "OK");
         }
     }
 

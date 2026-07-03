@@ -7,7 +7,7 @@ public partial class AccCreateShopNotFound : ContentPage
         InitializeComponent();
     }
 
-    private async void OnBackClicked(object sender, EventArgs e)
+    private async void OnBackClicked(object? sender, EventArgs e)
     {
         await Navigation.PopAsync();
     }

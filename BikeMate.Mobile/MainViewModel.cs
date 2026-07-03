@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -10,6 +10,8 @@ using BikeMate.Core.Constants;
 using BikeMate.Core.DTOs;
 using BikeMate.Helpers;
 using BikeMate.Services;
+using BikeMate.Views.Auth;
+using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Controls;
 using Microsoft.Maui.Storage;
 
@@ -247,7 +249,15 @@ namespace BikeMate
                 LoginStatus = "Opening Google sign-in...";
                 var auth = await GoogleSignInService.SignInAsync(AppRoles.Customer);
                 await GoogleSignInService.StoreAuthAsync(auth);
-                await AppNavigation.NavigateByRoleAsync(GoogleSignInService.PickPrimaryRole(auth.User.Roles));
+                var role = GoogleSignInService.PickPrimaryRole(auth.User.Roles);
+                if (role == AppRoles.Customer && await ShouldOpenGoogleCustomerSetupAsync(auth))
+                {
+                    LoginStatus = "Google sign-in complete. Opening account setup...";
+                    await NavigateToGoogleSetupAsync();
+                    return;
+                }
+
+                await AppNavigation.NavigateByRoleAsync(role);
             }
             catch (TaskCanceledException)
             {
@@ -299,7 +309,7 @@ namespace BikeMate
         private static async Task OpenConnectionSettingsAsync()
         {
             var current = ApiConfig.BaseUrl;
-            var action = await Shell.Current.DisplayActionSheet(
+            var action = await Shell.Current.DisplayActionSheetAsync(
                 "BikeMate API connection",
                 "Cancel",
                 null,
@@ -350,6 +360,78 @@ namespace BikeMate
             SecureStorage.Default.Remove("user_id");
             Preferences.Default.Remove(AppNavigation.ForceLoginPreferenceKey);
             Preferences.Default.Remove(AppNavigation.LoginMessagePreferenceKey);
+        }
+
+        private static async Task<bool> ShouldOpenGoogleCustomerSetupAsync(AuthResponseDto auth)
+        {
+            if (string.Equals(auth.User.AccountStatus, "pending", StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            try
+            {
+                var customer = await CustomerApiClient.GetCustomerAsync();
+                return IsGoogleCustomerSetupIncomplete(customer);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Google customer setup check failed: {ex}");
+                return true;
+            }
+        }
+
+        private static bool IsGoogleCustomerSetupIncomplete(CustomerMeDto customer)
+        {
+            var address = customer.Addresses.FirstOrDefault(item => item.IsDefault) ?? customer.Addresses.FirstOrDefault();
+            var motorcycle = customer.Motorcycles.FirstOrDefault();
+
+            return string.IsNullOrWhiteSpace(customer.PhoneNumber) ||
+                string.IsNullOrWhiteSpace(customer.Sex) ||
+                customer.Birthdate is null ||
+                string.IsNullOrWhiteSpace(customer.ValidIdImageUrl) ||
+                address is null ||
+                string.IsNullOrWhiteSpace(address.AddressLine) ||
+                string.IsNullOrWhiteSpace(address.City) ||
+                string.IsNullOrWhiteSpace(address.Province) ||
+                string.IsNullOrWhiteSpace(address.PostalCode) ||
+                motorcycle is null ||
+                string.IsNullOrWhiteSpace(motorcycle.Brand) ||
+                string.IsNullOrWhiteSpace(motorcycle.Model) ||
+                string.IsNullOrWhiteSpace(motorcycle.PlateNumber);
+        }
+
+        private static async Task NavigateToGoogleSetupAsync()
+        {
+            await MainThread.InvokeOnMainThreadAsync(async () =>
+            {
+                await Task.Yield();
+
+                if (Application.Current?.Windows.Count > 0)
+                {
+                    Application.Current.Windows[0].Page ??= new AppShell();
+                }
+
+                if (Shell.Current is not null)
+                {
+                    try
+                    {
+                        await Shell.Current.GoToAsync(nameof(GoogleAccountSetupPage));
+                        return;
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"Google setup route failed: {ex}");
+                        await Shell.Current.Navigation.PushAsync(new GoogleAccountSetupPage());
+                        return;
+                    }
+                }
+
+                if (Application.Current?.Windows.Count > 0)
+                {
+                    Application.Current.Windows[0].Page = new NavigationPage(new GoogleAccountSetupPage());
+                }
+            });
         }
 
         private static string PickPrimaryRole(IReadOnlyCollection<string> roles)

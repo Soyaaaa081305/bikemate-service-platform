@@ -12,12 +12,15 @@ public partial class Admins : ContentPage
     private string? _profileImageUrl;
     private string? _validIdImageUrl;
     private string? _certificationImageUrl;
+    private LocalIdCardScanResult? _validIdScanResult;
+    private LocalIdCardScanResult? _certificationScanResult;
     private IReadOnlyList<PhilippineRegion> _regions = [];
     private IReadOnlyList<PhilippineLocality> _localities = [];
     private IReadOnlyList<PhilippineBarangay> _barangays = [];
     private bool _loadingLocations;
     private bool _updatingPickers;
     private bool _formattingPhoneNumber;
+    private int _currentStep;
 
     public Admins()
     {
@@ -28,6 +31,9 @@ public partial class Admins : ContentPage
         BirthdatePicker.MaximumDate = DateTime.Today.AddYears(-18);
         BirthdatePicker.MinimumDate = DateTime.Today.AddYears(-80);
         BirthdatePicker.Date = BirthdatePicker.MaximumDate;
+        EmailEntry.Text = string.Empty;
+        OtpEmailEntry.Text = string.Empty;
+        SetStep(0);
     }
 
     protected override async void OnAppearing()
@@ -62,7 +68,7 @@ public partial class Admins : ContentPage
         }
     }
 
-    private async void OnRegionChanged(object sender, EventArgs e)
+    private async void OnRegionChanged(object? sender, EventArgs e)
     {
         if (_updatingPickers)
         {
@@ -99,7 +105,7 @@ public partial class Admins : ContentPage
         }
     }
 
-    private async void OnCityChanged(object sender, EventArgs e)
+    private async void OnCityChanged(object? sender, EventArgs e)
     {
         if (_updatingPickers)
         {
@@ -146,15 +152,15 @@ public partial class Admins : ContentPage
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Mechanic Applications", $"Unable to load mechanic applications: {ex.Message}", "OK");
+            await DisplayAlertAsync("Mechanic Applications", $"Unable to load mechanic applications: {ex.Message}", "OK");
         }
     }
 
-    private async void Submit_Clicked(object sender, EventArgs e)
+    private async void Submit_Clicked(object? sender, EventArgs e)
     {
         if (!TryBuildRequest(out var request, out var message))
         {
-            await DisplayAlert("Check Mechanic Details", message, "OK");
+            await DisplayAlertAsync("Check Mechanic Details", message, "OK");
             return;
         }
 
@@ -164,20 +170,21 @@ public partial class Admins : ContentPage
         try
         {
             var created = await BikeMateDatabaseService.CreateMechanicApplicationAsync(request);
-            OtpEmailEntry.Text = created.Email;
+            OtpEmailEntry.Text = string.Empty;
             OtpEntry.Text = string.Empty;
-            OtpStatusLabel.Text = $"OTP sent to {created.Email}. Verify it before BikeMate admin approval.";
+            OtpStatusLabel.Text = $"OTP sent to {created.Email}. Type the mechanic email here, then enter the code. The email field is kept blank to avoid wrong autofill.";
             await LoadApplicationsAsync();
-            ClearForm(keepOtpEmail: created.Email);
-            OtpEntry.Focus();
-            await DisplayAlert(
+            ClearForm(otpMessage: OtpStatusLabel.Text);
+            SetStep(3);
+            OtpEmailEntry.Focus();
+            await DisplayAlertAsync(
                 "OTP Sent",
-                "The mechanic account details were saved, but it is not approval-ready yet. Enter the email OTP to send it for BikeMate admin review.",
+                $"The mechanic account details were saved for {created.Email}, but the application is not review-ready yet. Type the same email and enter the OTP to send it for BikeMate admin review.",
                 "OK");
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Submission Failed", ex.Message, "OK");
+            await DisplayAlertAsync("Submission Failed", ex.Message, "OK");
         }
         finally
         {
@@ -186,14 +193,14 @@ public partial class Admins : ContentPage
         }
     }
 
-    private async void PickProfile_Clicked(object sender, EventArgs e)
+    private async void PickProfile_Clicked(object? sender, EventArgs e)
     {
         try
         {
-            var photo = await MediaPicker.Default.PickPhotoAsync(new MediaPickerOptions
+            var photo = (await MediaPicker.Default.PickPhotosAsync(new MediaPickerOptions
             {
                 Title = "Choose mechanic profile photo"
-            });
+            })).FirstOrDefault();
 
             if (photo is null)
             {
@@ -203,56 +210,138 @@ public partial class Admins : ContentPage
             var uploaded = await BikeMateDatabaseService.UploadShopFileAsync(photo, "mechanic-profile");
             _profileImageUrl = uploaded.Url;
             UpdateFileStatus();
+            UpdateFilePreviews();
         }
         catch (Exception ex)
         {
-            await DisplayAlert("Profile Upload", ex.Message, "OK");
+            await DisplayAlertAsync("Profile Upload", ex.Message, "OK");
         }
     }
 
-    private async void PickValidId_Clicked(object sender, EventArgs e)
+    private async void PickValidId_Clicked(object? sender, EventArgs e)
     {
-        await PickAndUploadDocumentAsync("Select mechanic valid ID", "mechanic-valid-ids", url => _validIdImageUrl = url);
+        await ScanAndUploadDocumentAsync("Scan mechanic valid ID", "mechanic-valid-ids", url => _validIdImageUrl = url, result => _validIdScanResult = result);
+        UpdateLocalScanStatus();
     }
 
-    private async void PickCertification_Clicked(object sender, EventArgs e)
+    private async void PickCertification_Clicked(object? sender, EventArgs e)
     {
-        await PickAndUploadDocumentAsync("Select mechanic license or certification", "mechanic-certifications", url => _certificationImageUrl = url);
+        await ScanAndUploadDocumentAsync("Scan mechanic license or certification", "mechanic-certifications", url => _certificationImageUrl = url, result => _certificationScanResult = result);
+        UpdateLocalScanStatus();
     }
 
-    private async Task PickAndUploadDocumentAsync(string title, string folder, Action<string> saveUrl)
+    private async void ScanValidId_Clicked(object? sender, EventArgs e)
     {
-        try
+        await ScanDocumentLocallyAsync("Scan mechanic valid ID", result => _validIdScanResult = result);
+    }
+
+    private async void ScanCertification_Clicked(object? sender, EventArgs e)
+    {
+        await ScanDocumentLocallyAsync("Scan mechanic license or certification", result => _certificationScanResult = result);
+    }
+
+    private async Task ScanDocumentLocallyAsync(string title, Action<LocalIdCardScanResult> saveResult)
+    {
+        var result = await new LocalIdCardScannerService().ScanAsync(title);
+        if (!result.IsSuccessful)
         {
-            var file = await FilePicker.Default.PickAsync(new PickOptions
-            {
-                PickerTitle = title
-            });
-
-            if (file is null)
+            if (result.WasCancelled)
             {
                 return;
             }
 
+            await DisplayAlertAsync("Document Scan", result.ErrorMessage ?? "The document scan could not be completed.", "OK");
+            return;
+        }
+
+        saveResult(result);
+        UpdateLocalScanStatus();
+        await DisplayAlertAsync("Document Scan Completed", "This scan was processed on your device for review only. It does not officially verify the document and was not uploaded.", "OK");
+    }
+
+    private async Task ScanAndUploadDocumentAsync(string title, string folder, Action<string> saveUrl, Action<LocalIdCardScanResult> saveScan)
+    {
+        try
+        {
+            var scan = await new LocalIdCardScannerService().ScanAsync(title);
+            if (!scan.IsSuccessful)
+            {
+                if (scan.WasCancelled)
+                {
+                    return;
+                }
+
+                await DisplayAlertAsync("Document Scan", scan.ErrorMessage ?? "The document scan could not be completed.", "OK");
+                return;
+            }
+
+            var processedImagePath = scan.LocalProcessedImagePath;
+            if (string.IsNullOrWhiteSpace(processedImagePath))
+            {
+                await DisplayAlertAsync("Document Scan", "BikeMate could not prepare the scanned document image. Please scan again.", "OK");
+                return;
+            }
+
+            var file = new FileResult(processedImagePath)
+            {
+                FileName = Path.GetFileName(processedImagePath),
+                ContentType = "image/jpeg"
+            };
             FileStatusLabel.Text = $"Uploading {file.FileName}...";
             var uploaded = await BikeMateDatabaseService.UploadShopFileAsync(file, folder);
             saveUrl(uploaded.Url);
+            saveScan(scan);
             UpdateFileStatus();
+            UpdateFilePreviews();
         }
         catch (Exception ex)
         {
             UpdateFileStatus();
-            await DisplayAlert("Document Upload", ex.Message, "OK");
+            UpdateFilePreviews();
+            await DisplayAlertAsync("Document Upload", ex.Message, "OK");
         }
     }
 
-    private async void VerifyOtp_Clicked(object sender, EventArgs e)
+    private async void ShowList_Clicked(object? sender, EventArgs e)
+    {
+        await LoadApplicationsAsync();
+        SetStep(4);
+    }
+
+    private void BackStep_Clicked(object? sender, EventArgs e)
+    {
+        if (_currentStep <= 0)
+        {
+            return;
+        }
+
+        SetStep(_currentStep - 1);
+    }
+
+    private async void NextStep_Clicked(object? sender, EventArgs e)
+    {
+        if (_currentStep == 4)
+        {
+            SetStep(0);
+            return;
+        }
+
+        if (!ValidateCurrentStep(out var message))
+        {
+            await DisplayAlertAsync("Check Details", message, "OK");
+            return;
+        }
+
+        SetStep(Math.Min(_currentStep + 1, 4));
+    }
+
+    private async void VerifyOtp_Clicked(object? sender, EventArgs e)
     {
         var email = OtpEmailEntry.Text?.Trim() ?? string.Empty;
         var otp = OtpEntry.Text?.Trim() ?? string.Empty;
         if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(otp))
         {
-            await DisplayAlert("OTP Required", "Enter the mechanic email and OTP code.", "OK");
+            await DisplayAlertAsync("OTP Required", "Enter the mechanic email and OTP code.", "OK");
             return;
         }
 
@@ -262,21 +351,21 @@ public partial class Admins : ContentPage
             OtpEntry.Text = string.Empty;
             OtpStatusLabel.Text = $"{email} is verified and ready for BikeMate admin approval.";
             await LoadApplicationsAsync();
-            await DisplayAlert("Email Verified", "The mechanic can now appear in the BikeMate web-admin approval queue for document review.", "OK");
+            await DisplayAlertAsync("Email Verified", "The mechanic can now appear in the BikeMate web-admin approval queue for document review.", "OK");
         }
         catch (Exception ex)
         {
             OtpStatusLabel.Text = "OTP verification failed. Check the latest code or resend a new one.";
-            await DisplayAlert("OTP Failed", ex.Message, "OK");
+            await DisplayAlertAsync("OTP Failed", ex.Message, "OK");
         }
     }
 
-    private async void ResendOtp_Clicked(object sender, EventArgs e)
+    private async void ResendOtp_Clicked(object? sender, EventArgs e)
     {
         var email = OtpEmailEntry.Text?.Trim() ?? string.Empty;
         if (string.IsNullOrWhiteSpace(email))
         {
-            await DisplayAlert("Email Required", "Enter the mechanic email address first.", "OK");
+            await DisplayAlertAsync("Email Required", "Enter the mechanic email address first.", "OK");
             return;
         }
 
@@ -285,18 +374,43 @@ public partial class Admins : ContentPage
             await BikeMateDatabaseService.ResendEmailOtpAsync(email);
             OtpEntry.Text = string.Empty;
             OtpStatusLabel.Text = $"A new OTP was sent to {email}. Use the latest code.";
-            await DisplayAlert("OTP Sent", "A new verification code was sent to the mechanic email.", "OK");
+            await DisplayAlertAsync("OTP Sent", "A new verification code was sent to the mechanic email.", "OK");
         }
         catch (Exception ex)
         {
             OtpStatusLabel.Text = "Unable to resend OTP. Check the email and API connection.";
-            await DisplayAlert("OTP Failed", ex.Message, "OK");
+            await DisplayAlertAsync("OTP Failed", ex.Message, "OK");
         }
     }
 
-    private async void Refresh_Clicked(object sender, EventArgs e)
+    private async void Refresh_Clicked(object? sender, EventArgs e)
     {
         await LoadApplicationsAsync();
+    }
+
+    private void ViewApplicationDetails_Clicked(object? sender, EventArgs e)
+    {
+        if (sender is not Button { CommandParameter: MechanicApplicationRow row })
+        {
+            return;
+        }
+
+        DetailsNameLabel.Text = row.FullName;
+        DetailsStatusLabel.Text = $"{row.StatusText} | {row.SubmittedText}";
+        DetailsContactLabel.Text = $"Email: {row.Email}\nPhone: {Fallback(row.PhoneNumber)}";
+        DetailsPersonalLabel.Text = $"Sex: {Fallback(row.Sex)}\nBirthdate: {row.BirthdateText}";
+        DetailsAddressLabel.Text = $"Address: {row.AddressText}";
+        DetailsExperienceLabel.Text = $"Experience: {row.YearsExperienceText}";
+        DetailsBioLabel.Text = $"Bio: {Fallback(row.Bio)}";
+        ApplyPreview(DetailsProfileImage, DetailsProfileLabel, row.ProfileImageUrl);
+        ApplyPreview(DetailsValidIdImage, DetailsValidIdLabel, row.ValidIdImageUrl);
+        ApplyPreview(DetailsCertificationImage, DetailsCertificationLabel, row.CertificationImageUrl);
+        ApplicationDetailsFrame.IsVisible = true;
+    }
+
+    private void CloseApplicationDetails_Clicked(object? sender, EventArgs e)
+    {
+        ApplicationDetailsFrame.IsVisible = false;
     }
 
     private void PhoneEntry_TextChanged(object sender, TextChangedEventArgs e)
@@ -399,9 +513,13 @@ public partial class Admins : ContentPage
             return false;
         }
 
-        if (string.IsNullOrWhiteSpace(_validIdImageUrl) || string.IsNullOrWhiteSpace(_certificationImageUrl))
+        if (string.IsNullOrWhiteSpace(_profileImageUrl) ||
+            string.IsNullOrWhiteSpace(_validIdImageUrl) ||
+            string.IsNullOrWhiteSpace(_certificationImageUrl))
         {
-            message = "Upload the mechanic valid ID and license/certification file.";
+            message = _validIdScanResult is not null || _certificationScanResult is not null
+                ? "Local scans are review-only and were not uploaded. Upload the mechanic profile photo, valid ID, and license/certification file."
+                : "Upload the mechanic profile photo, valid ID, and license/certification file.";
             return false;
         }
 
@@ -447,7 +565,7 @@ public partial class Admins : ContentPage
         return true;
     }
 
-    private void ClearForm(string keepOtpEmail)
+    private void ClearForm(string otpMessage)
     {
         FirstNameEntry.Text = string.Empty;
         MiddleNameEntry.Text = string.Empty;
@@ -472,11 +590,120 @@ public partial class Admins : ContentPage
         _profileImageUrl = null;
         _validIdImageUrl = null;
         _certificationImageUrl = null;
-        OtpEmailEntry.Text = keepOtpEmail;
-        OtpStatusLabel.Text = string.IsNullOrWhiteSpace(keepOtpEmail)
+        OtpEmailEntry.Text = string.Empty;
+        OtpStatusLabel.Text = string.IsNullOrWhiteSpace(otpMessage)
             ? "No mechanic OTP is pending."
-            : $"OTP sent to {keepOtpEmail}. Verify it before BikeMate admin approval.";
+            : otpMessage;
         UpdateFileStatus();
+        UpdateFilePreviews();
+    }
+
+    private void SetStep(int step)
+    {
+        _currentStep = Math.Clamp(step, 0, 4);
+
+        AccountStepFrame.IsVisible = _currentStep == 0;
+        AddressStepFrame.IsVisible = _currentStep == 1;
+        ProfileStepFrame.IsVisible = _currentStep == 2;
+        OtpStepFrame.IsVisible = _currentStep == 3;
+        ListStepFrame.IsVisible = _currentStep == 4;
+
+        StepProgressBar.Progress = _currentStep switch
+        {
+            0 => 0.2,
+            1 => 0.4,
+            2 => 0.6,
+            3 => 0.8,
+            _ => 1.0
+        };
+
+        StepSubtitleLabel.Text = _currentStep switch
+        {
+            0 => "Step 1 of 4 - Account",
+            1 => "Step 2 of 4 - Address",
+            2 => "Step 3 of 4 - Profile and documents",
+            3 => "Step 4 of 4 - Email OTP",
+            _ => "Submitted mechanic applications"
+        };
+
+        BackStepButton.IsEnabled = _currentStep > 0;
+        BackStepButton.Opacity = _currentStep > 0 ? 1 : 0.45;
+        NextStepButton.Text = _currentStep switch
+        {
+            2 => "OTP",
+            3 => "Submissions",
+            4 => "New Application",
+            _ => "Continue"
+        };
+    }
+
+    private bool ValidateCurrentStep(out string message)
+    {
+        message = string.Empty;
+
+        if (_currentStep == 0)
+        {
+            var firstName = FirstNameEntry.Text?.Trim() ?? string.Empty;
+            var lastName = LastNameEntry.Text?.Trim() ?? string.Empty;
+            var sex = SexPicker.SelectedItem?.ToString();
+            var email = EmailEntry.Text?.Trim() ?? string.Empty;
+            var password = PasswordEntry.Text ?? string.Empty;
+            var confirmPassword = ConfirmPasswordEntry.Text ?? string.Empty;
+            var birthdate = (BirthdatePicker.Date ?? DateTime.Today).Date;
+
+            if (string.IsNullOrWhiteSpace(firstName) || string.IsNullOrWhiteSpace(lastName) || string.IsNullOrWhiteSpace(sex))
+            {
+                message = "Enter first name, last name, and sex.";
+                return false;
+            }
+
+            if (CalculateAge(birthdate, DateTime.Today) < 18)
+            {
+                message = "Mechanic accounts require a technician who is at least 18 years old.";
+                return false;
+            }
+
+            if (!email.Contains('@') || !email.Contains('.'))
+            {
+                message = "Enter the mechanic email manually with @ and a domain.";
+                return false;
+            }
+
+            if (!TryNormalizePhilippineMobile(PhoneEntry.Text, out _))
+            {
+                message = "Enter the 10 Philippine mobile digits after +63, for example 9171234567.";
+                return false;
+            }
+
+            if (password.Length <= 8)
+            {
+                message = "Password must be more than 8 characters.";
+                return false;
+            }
+
+            if (!string.Equals(password, confirmPassword, StringComparison.Ordinal))
+            {
+                message = "Password and confirm password do not match.";
+                return false;
+            }
+        }
+
+        if (_currentStep == 1)
+        {
+            var zipCode = ZipCodeEntry.Text?.Trim() ?? string.Empty;
+            if (SelectedRegion() is null ||
+                SelectedLocality() is null ||
+                SelectedBarangay() is null ||
+                string.IsNullOrWhiteSpace(AddressEntry.Text) ||
+                zipCode.Length != 4 ||
+                !zipCode.All(char.IsDigit))
+            {
+                message = "Complete the mechanic address using region, city or municipality, barangay, address, and 4-digit ZIP code.";
+                return false;
+            }
+        }
+
+        return true;
     }
 
     private PhilippineRegion? SelectedRegion()
@@ -558,6 +785,83 @@ public partial class Admins : ContentPage
             : $"Uploaded: {string.Join(", ", files)}.";
     }
 
+    private void UpdateLocalScanStatus()
+    {
+        List<string> scans = [];
+        if (_validIdScanResult is not null)
+        {
+            scans.Add($"valid ID: {FormatReadability(_validIdScanResult.ReadabilityStatus)}");
+        }
+
+        if (_certificationScanResult is not null)
+        {
+            scans.Add($"license/certification: {FormatReadability(_certificationScanResult.ReadabilityStatus)}");
+        }
+
+        LocalScanStatusLabel.Text = scans.Count == 0
+            ? "Verification documents require camera scans before upload."
+            : $"Latest scan readability - {string.Join(", ", scans)}.";
+    }
+
+    private static string FormatReadability(LocalIdCardReadabilityStatus status)
+    {
+        return status switch
+        {
+            LocalIdCardReadabilityStatus.Readable => "Readable",
+            LocalIdCardReadabilityStatus.Unreadable => "Could not read clearly",
+            _ => "Needs manual review"
+        };
+    }
+
+    private void UpdateFilePreviews()
+    {
+        ApplyPreview(ProfilePreviewImage, ProfilePreviewLabel, _profileImageUrl);
+        ApplyPreview(ValidIdPreviewImage, ValidIdPreviewLabel, _validIdImageUrl);
+        ApplyPreview(CertificationPreviewImage, CertificationPreviewLabel, _certificationImageUrl);
+    }
+
+    private static void ApplyPreview(Image image, Label label, string? url)
+    {
+        if (string.IsNullOrWhiteSpace(url))
+        {
+            image.Source = null;
+            label.Text = "Not uploaded";
+            return;
+        }
+
+        label.Text = FileNameOrValue(url);
+        if (IsImage(url) && Uri.TryCreate(url, UriKind.Absolute, out var uri))
+        {
+            image.Source = ImageSource.FromUri(uri);
+        }
+        else
+        {
+            image.Source = null;
+            label.Text = $"Uploaded: {FileNameOrValue(url)}";
+        }
+    }
+
+    private static bool IsImage(string value)
+    {
+        var clean = value.Split('?', '#')[0].ToLowerInvariant();
+        return clean.EndsWith(".jpg", StringComparison.Ordinal) ||
+            clean.EndsWith(".jpeg", StringComparison.Ordinal) ||
+            clean.EndsWith(".png", StringComparison.Ordinal) ||
+            clean.EndsWith(".webp", StringComparison.Ordinal);
+    }
+
+    private static string FileNameOrValue(string value)
+    {
+        return Uri.TryCreate(value, UriKind.Absolute, out var uri)
+            ? System.IO.Path.GetFileName(uri.LocalPath)
+            : System.IO.Path.GetFileName(value);
+    }
+
+    private static string Fallback(string? value)
+    {
+        return string.IsNullOrWhiteSpace(value) ? "Not submitted" : value.Trim();
+    }
+
     private static bool TryNormalizePhilippineMobile(string? value, out string phoneNumber)
     {
         var clean = (value ?? string.Empty)
@@ -618,13 +922,39 @@ public partial class Admins : ContentPage
 public sealed record MechanicApplicationRow(
     string FullName,
     string Email,
+    string? PhoneNumber,
     string ShopName,
     string StatusText,
     Color StatusColor,
     string OtpText,
     string ApprovalText,
-    string SubmittedText)
+    string SubmittedText,
+    string? Sex,
+    DateTime? Birthdate,
+    string? AddressLine,
+    string? Barangay,
+    string? City,
+    string? Province,
+    string? ZipCode,
+    string? ProfileImageUrl,
+    string? ValidIdImageUrl,
+    string? CertificationImageUrl,
+    string? Bio,
+    int? YearsExperience)
 {
+    public string BirthdateText => Birthdate?.ToLocalTime().ToString("MMM dd, yyyy") ?? "Not submitted";
+    public string AddressText
+    {
+        get
+        {
+            var parts = new[] { AddressLine, Barangay, City, Province, ZipCode }
+                .Where(value => !string.IsNullOrWhiteSpace(value));
+            var address = string.Join(", ", parts);
+            return string.IsNullOrWhiteSpace(address) ? "Not submitted" : address;
+        }
+    }
+    public string YearsExperienceText => YearsExperience is null ? "Not submitted" : $"{YearsExperience} year(s)";
+
     public static MechanicApplicationRow FromApi(AdminMechanicApplication application)
     {
         var approved = application.IsVerified &&
@@ -638,11 +968,24 @@ public sealed record MechanicApplicationRow(
         return new MechanicApplicationRow(
             application.FullName,
             application.Email,
+            application.PhoneNumber,
             string.IsNullOrWhiteSpace(application.ShopName) ? "Current shop" : application.ShopName!,
             approved ? "APPROVED" : application.EmailVerified ? "READY FOR REVIEW" : "OTP REQUIRED",
             approved ? Color.FromArgb("#16A34A") : application.EmailVerified ? Color.FromArgb("#F97316") : Color.FromArgb("#DC2626"),
             application.EmailVerified ? "OTP verified" : "OTP pending",
             approved ? "Can receive jobs" : waiting,
-            $"Submitted {application.CreatedAt.ToLocalTime():MMM dd, yyyy h:mm tt}");
+            $"Submitted {application.CreatedAt.ToLocalTime():MMM dd, yyyy h:mm tt}",
+            application.Sex,
+            application.Birthdate,
+            application.AddressLine,
+            application.Barangay,
+            application.City,
+            application.Province,
+            application.ZipCode,
+            application.ProfileImageUrl,
+            application.ValidIdImageUrl,
+            application.CertificationImageUrl,
+            application.Bio,
+            application.YearsExperience);
     }
 }

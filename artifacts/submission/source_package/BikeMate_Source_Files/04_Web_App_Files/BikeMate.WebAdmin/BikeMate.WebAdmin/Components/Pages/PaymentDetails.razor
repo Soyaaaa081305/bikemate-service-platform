@@ -1,0 +1,127 @@
+@page "/payments/details/{Id:int}"
+@rendermode InteractiveServer
+@using BikeMate.WebAdmin.DTOs
+@using BikeMate.WebAdmin.Services
+@inject AdminApiClient AdminApi
+
+<PageTitle>Payment Details #@Id</PageTitle>
+
+<div class="mb-4 mt-3">
+    <a href="/payments" class="btn btn-sm btn-outline-secondary mb-3 shadow-sm">
+        <i class="bi bi-arrow-left"></i> Back to Payments
+    </a>
+    <h2 class="fw-bold text-dark mb-0">Transaction #@Id</h2>
+</div>
+
+@if (payment == null)
+{
+    <div class="p-5 text-center">
+        <div class="spinner-border text-success" role="status"></div>
+    </div>
+}
+else
+{
+    <div class="row g-4">
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white pt-4 pb-0 border-bottom-0">
+                    <h5 class="fw-bold mb-0">Payment Breakdown</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row bg-light p-3 rounded-3 mb-4 mt-2">
+                        <div class="col-sm-6 mb-3 mb-sm-0">
+                            <h6 class="text-muted mb-1 text-uppercase small">Total Amount</h6>
+                            <h3 class="text-success fw-bold mb-0">@payment.Currency @payment.Amount.ToString("N2")</h3>
+                        </div>
+                        <div class="col-sm-6">
+                            <h6 class="text-muted mb-1 text-uppercase small">Current Status</h6>
+                            <h4 class="text-dark fw-bold mb-0 text-uppercase">@payment.Status</h4>
+                        </div>
+                    </div>
+
+                    <h6 class="fw-bold text-uppercase text-muted mb-3">Customer Information</h6>
+                    <p class="mb-1"><strong>Name:</strong> @payment.CustomerName</p>
+                    @if (!string.IsNullOrWhiteSpace(payment.CustomerPhone))
+                    {
+                        <p class="mb-1"><strong>Phone:</strong> @payment.CustomerPhone</p>
+                    }
+                    <p class="mb-4"><strong>Linked Service Request:</strong> <a href="/requests/details/@payment.RequestId">View Request #@payment.RequestId</a></p>
+
+                    <h6 class="fw-bold text-uppercase text-muted mb-3">Gateway Details</h6>
+                    <p class="mb-1"><strong>Provider:</strong> <span class="text-capitalize">@payment.ProviderName</span></p>
+                    <p class="mb-1"><strong>Payment Method:</strong> <span class="text-uppercase">@payment.Method.Replace("_", " ")</span></p>
+                    @if (!string.IsNullOrWhiteSpace(payment.ReferenceNumber))
+                    {
+                        <p class="mb-0"><strong>Reference / Session ID:</strong> @payment.ReferenceNumber</p>
+                    }
+
+                    @if (!string.IsNullOrWhiteSpace(payment.CheckoutUrl))
+                    {
+                        <p class="mt-3 mb-0 small"><strong>Checkout Link:</strong> <a href="@payment.CheckoutUrl" target="_blank" class="text-break">@payment.CheckoutUrl</a></p>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 h-100 bg-light">
+                <div class="card-body pt-4">
+                    <h5 class="fw-bold text-dark mb-4"><i class="bi bi-clock-history me-2"></i>Timeline</h5>
+
+                    <div class="d-flex mb-4">
+                        <div class="me-3">
+                            <div class="bg-secondary rounded-circle text-white d-flex align-items-center justify-content-center timeline-dot">
+                                <i class="bi bi-receipt"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <p class="mb-0 fw-bold">Invoice Created</p>
+                            <small class="text-muted">@payment.CreatedAt.ToString("MMM dd, yyyy - hh:mm tt")</small>
+                        </div>
+                    </div>
+
+                    @if (payment.PaidAt.HasValue)
+                    {
+                        <div class="d-flex">
+                            <div class="me-3">
+                                <div class="bg-success rounded-circle text-white d-flex align-items-center justify-content-center timeline-dot">
+                                    <i class="bi bi-check-lg"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <p class="mb-0 fw-bold text-success">Payment Confirmed</p>
+                                <small class="text-muted">@payment.PaidAt.Value.ToString("MMM dd, yyyy - hh:mm tt")</small>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="d-flex opacity-50">
+                            <div class="me-3">
+                                <div class="bg-warning rounded-circle text-white d-flex align-items-center justify-content-center timeline-dot">
+                                    <i class="bi bi-hourglass-split"></i>
+                                </div>
+                            </div>
+                            <div>
+                                <p class="mb-0 fw-bold">Awaiting Payment</p>
+                                <small class="text-muted">Customer has not paid yet</small>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public int Id { get; set; }
+
+    private PaymentDetailsDto? payment;
+
+    protected override async Task OnInitializedAsync()
+    {
+        payment = await AdminApi.GetPaymentDetailsAsync(Id);
+    }
+}

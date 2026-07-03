@@ -62,7 +62,7 @@ public partial class AccCreate3 : ContentPage
         }
     }
 
-    private async void OnRegionChanged(object sender, EventArgs e)
+    private async void OnRegionChanged(object? sender, EventArgs e)
     {
         if (_updatingPickers)
         {
@@ -98,7 +98,7 @@ public partial class AccCreate3 : ContentPage
         }
     }
 
-    private async void OnCityChanged(object sender, EventArgs e)
+    private async void OnCityChanged(object? sender, EventArgs e)
     {
         if (_updatingPickers)
         {
@@ -132,7 +132,7 @@ public partial class AccCreate3 : ContentPage
         }
     }
 
-    private async void OnContinueClicked(object sender, EventArgs e)
+    private async void OnContinueClicked(object? sender, EventArgs e)
     {
         SaveDraft();
         var region = SelectedRegion();
@@ -146,13 +146,13 @@ public partial class AccCreate3 : ContentPage
             string.IsNullOrWhiteSpace(_draft.ShopAddress) ||
             string.IsNullOrWhiteSpace(_draft.ShopZipCode))
         {
-            await DisplayAlert("Missing Information", "Please complete all required shop details.", "OK");
+            await DisplayAlertAsync("Missing Information", "Please complete all required shop details.", "OK");
             return;
         }
 
         if (!Regex.IsMatch(_draft.ShopZipCode.Trim(), @"^\d{4}$"))
         {
-            await DisplayAlert("Invalid Zip Code", "Enter a 4-digit Philippine zip code.", "OK");
+            await DisplayAlertAsync("Invalid Zip Code", "Enter a 4-digit Philippine zip code.", "OK");
             return;
         }
 

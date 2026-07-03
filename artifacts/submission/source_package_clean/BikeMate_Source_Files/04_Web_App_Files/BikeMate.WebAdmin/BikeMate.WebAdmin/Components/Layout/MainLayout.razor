@@ -1,0 +1,85 @@
+@inherits LayoutComponentBase
+
+<AuthorizeView>
+    <Authorized Context="auth">
+        <div class="admin-shell @(sidebarCollapsed ? "sidebar-collapsed" : null)">
+            <aside class="admin-sidebar">
+                <NavMenu Collapsed="@sidebarCollapsed" />
+            </aside>
+
+            <main class="admin-main">
+                <header class="admin-topbar">
+                    <div class="admin-topbar-start">
+                        <button class="btn btn-icon admin-sidebar-toggle"
+                                type="button"
+                                title="@SidebarToggleLabel"
+                                aria-label="@SidebarToggleLabel"
+                                aria-expanded="@(!sidebarCollapsed)"
+                                @onclick="ToggleSidebar">
+                            <i class="bi @(sidebarCollapsed ? "bi-layout-sidebar-inset" : "bi-layout-sidebar-inset-reverse")"></i>
+                        </button>
+                        <div class="admin-topbar-title">
+                            <span class="admin-eyebrow">BikeMate Admin</span>
+                            <strong>Operations Console</strong>
+                        </div>
+                    </div>
+
+                    <div class="admin-topbar-actions">
+                        <span class="admin-name">@auth.User.Identity?.Name</span>
+                        <a class="btn btn-outline-danger btn-sm" href="/api/admin/logout">
+                            <i class="bi bi-box-arrow-right me-1"></i> Logout
+                        </a>
+                    </div>
+                </header>
+
+                <article class="admin-content">
+                    <ErrorBoundary @ref="errorBoundary">
+                        <ChildContent>
+                            @Body
+                        </ChildContent>
+                        <ErrorContent>
+                            <div class="alert alert-danger shadow-sm mt-3" role="alert">
+                                <div class="fw-bold mb-1">Something went wrong on this page.</div>
+                                <div class="small mb-3">The admin console is still running. Refresh this page or return to the dashboard.</div>
+                                <button class="btn btn-sm btn-outline-danger me-2" @onclick="RecoverPage">Try again</button>
+                                <a class="btn btn-sm btn-primary" href="/">Dashboard</a>
+                            </div>
+                        </ErrorContent>
+                    </ErrorBoundary>
+                </article>
+            </main>
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <main class="admin-auth-shell">
+            @Body
+        </main>
+
+        <div id="blazor-error-ui">
+            An unhandled error has occurred.
+            <a href="" class="reload">Reload</a>
+            <a class="dismiss">x</a>
+        </div>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private ErrorBoundary? errorBoundary;
+    private bool sidebarCollapsed;
+    private string SidebarToggleLabel => sidebarCollapsed ? "Expand navigation" : "Collapse navigation";
+
+    protected override void OnParametersSet()
+    {
+        errorBoundary?.Recover();
+    }
+
+    private void ToggleSidebar()
+    {
+        sidebarCollapsed = !sidebarCollapsed;
+    }
+
+    private void RecoverPage()
+    {
+        errorBoundary?.Recover();
+    }
+}
