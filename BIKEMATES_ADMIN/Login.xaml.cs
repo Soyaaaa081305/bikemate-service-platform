@@ -94,7 +94,7 @@ public partial class Login : ContentPage
     private async void OnForgotPasswordClicked(object? sender, EventArgs e)
         => await Navigation.PushAsync(new ForgotPasswordPage(EmailEntry.Text ?? string.Empty));
 
-    private void OnEmailChanged(object sender, TextChangedEventArgs e)
+    private void OnEmailChanged(object? sender, TextChangedEventArgs e)
     {
         RefreshPendingApplicationState();
     }

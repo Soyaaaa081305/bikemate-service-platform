@@ -181,7 +181,7 @@ public partial class AccCreate4 : ContentPage
         _draft.ShopTermsAccepted = TermsCheckBox.IsChecked;
     }
 
-    private void OnTermsChanged(object sender, CheckedChangedEventArgs e)
+    private void OnTermsChanged(object? sender, CheckedChangedEventArgs e)
     {
         _draft.ShopTermsAccepted = e.Value;
     }

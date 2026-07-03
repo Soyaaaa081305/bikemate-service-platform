@@ -165,16 +165,17 @@ public sealed class AuthServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task LoginAsync_ThrowsForPendingCustomerApproval()
+    public async Task LoginAsync_AllowsPendingCustomerToFinishSetup()
     {
         var registerDto = new RegisterRequestDto("Jane", "Smith", "pending-login@test.com", "Pass1234!", "Pass1234!", null, "Customer", AdultBirthdate);
         await _sut.RegisterAsync(registerDto, CancellationToken.None);
 
         var loginDto = new LoginRequestDto("pending-login@test.com", "Pass1234!");
-        var ex = await Assert.ThrowsAsync<InvalidOperationException>(
-            () => _sut.LoginAsync(loginDto, CancellationToken.None));
+        var result = await _sut.LoginAsync(loginDto, CancellationToken.None);
 
-        Assert.Contains("pending BikeMate admin approval", ex.Message);
+        Assert.NotNull(result);
+        Assert.Equal("test-token", result.AccessToken);
+        Assert.Equal("pending", result.User.AccountStatus);
     }
 
     [Fact]

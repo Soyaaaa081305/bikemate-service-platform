@@ -153,7 +153,7 @@ public partial class Operations : ContentPage
         }
     }
 
-    private void ServicesCollectionView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    private void ServicesCollectionView_SelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
         SelectService(e.CurrentSelection.FirstOrDefault() as ServiceItem);
     }
@@ -177,9 +177,9 @@ public partial class Operations : ContentPage
         ServiceEditorStatusLabel.Text = $"Editing {service.Name}";
     }
 
-    private void ServiceSearchBar_TextChanged(object sender, TextChangedEventArgs e) => RefreshServiceList();
+    private void ServiceSearchBar_TextChanged(object? sender, TextChangedEventArgs e) => RefreshServiceList();
 
-    private void ServiceCategorySearchBar_TextChanged(object sender, TextChangedEventArgs e)
+    private void ServiceCategorySearchBar_TextChanged(object? sender, TextChangedEventArgs e)
     {
         if (_updatingCategorySearch)
         {

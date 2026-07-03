@@ -79,7 +79,7 @@ public partial class Messages : ContentPage
         button.BorderColor = selected ? Color.FromArgb("#FF6B2C") : Color.FromArgb("#D1D5DB");
     }
 
-    private void SearchBar_TextChanged(object sender, TextChangedEventArgs e)
+    private void SearchBar_TextChanged(object? sender, TextChangedEventArgs e)
     {
         _searchText = e.NewTextValue?.Trim() ?? string.Empty;
         FilterConversations(_searchText);
@@ -103,7 +103,7 @@ public partial class Messages : ContentPage
         }
     }
 
-    private async void ConversationCollectionView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    private async void ConversationCollectionView_SelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
         _selectedConversation = e.CurrentSelection.FirstOrDefault() as ConversationItem;
         if (_selectedConversation is null)

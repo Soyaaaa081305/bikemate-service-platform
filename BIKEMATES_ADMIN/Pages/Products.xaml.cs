@@ -183,7 +183,7 @@ public partial class Products : ContentPage
         }
     }
 
-    private void ProductsCollectionView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    private void ProductsCollectionView_SelectionChanged(object? sender, SelectionChangedEventArgs e)
     {
         SelectProduct(e.CurrentSelection.FirstOrDefault() as ProductItem);
     }
@@ -208,9 +208,9 @@ public partial class Products : ContentPage
         ProductEditorStatusLabel.Text = $"Editing {product.Name}";
     }
 
-    private void ProductSearchBar_TextChanged(object sender, TextChangedEventArgs e) => RefreshProductGrid();
+    private void ProductSearchBar_TextChanged(object? sender, TextChangedEventArgs e) => RefreshProductGrid();
 
-    private void ProductCategorySearchBar_TextChanged(object sender, TextChangedEventArgs e)
+    private void ProductCategorySearchBar_TextChanged(object? sender, TextChangedEventArgs e)
     {
         if (_updatingCategorySearch)
         {

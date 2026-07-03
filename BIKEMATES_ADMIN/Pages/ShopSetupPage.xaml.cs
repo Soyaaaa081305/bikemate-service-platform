@@ -462,7 +462,7 @@ public partial class ShopSetupPage : ContentPage
             : $"Category: {category}\n{description}";
     }
 
-    private void ProductCategorySearchBar_TextChanged(object sender, TextChangedEventArgs e)
+    private void ProductCategorySearchBar_TextChanged(object? sender, TextChangedEventArgs e)
     {
         if (_updatingProductCategorySearch)
         {
@@ -493,7 +493,7 @@ public partial class ShopSetupPage : ContentPage
         }
     }
 
-    private void ServiceCategorySearchBar_TextChanged(object sender, TextChangedEventArgs e)
+    private void ServiceCategorySearchBar_TextChanged(object? sender, TextChangedEventArgs e)
     {
         if (_updatingServiceCategorySearch)
         {

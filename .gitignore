@@ -10,9 +10,20 @@ obj/
 *.userosscache
 *.sln.docstates
 *.local.md
+*.log
+*.tmp
+*.bak
+*.zip
+*.apk
+*.aab
 
 *.nupkg
 TestResults/
+publish/
+artifacts/
+node_modules/
+.vscode/*
+!.vscode/settings.json
 
 BikeMate.Api/wwwroot/uploads/*
 !BikeMate.Api/wwwroot/uploads/.gitkeep

@@ -413,7 +413,7 @@ public partial class Admins : ContentPage
         ApplicationDetailsFrame.IsVisible = false;
     }
 
-    private void PhoneEntry_TextChanged(object sender, TextChangedEventArgs e)
+    private void PhoneEntry_TextChanged(object? sender, TextChangedEventArgs e)
     {
         if (_formattingPhoneNumber)
         {
