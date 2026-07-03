@@ -34,12 +34,22 @@ public partial class Notifications : ContentPage
             {
                 NotificationItems.Add(NotificationItem.FromApi(notification));
             }
+
+            NotificationStatusLabel.Text = NotificationItems.Count == 0
+                ? "No new alerts returned by the API."
+                : $"{NotificationItems.Count} alert(s) loaded from the API.";
+            MarkAllButton.IsEnabled = NotificationItems.Any(item => !item.IsRead);
+            MarkAllButton.Opacity = MarkAllButton.IsEnabled ? 1 : 0.55;
         }
         catch (Exception ex)
         {
-            await DisplayAlertAsync("Notifications", $"Unable to load notifications from API: {ex.Message}", "OK");
+            NotificationStatusLabel.Text = $"Unable to load notifications: {ex.Message}";
+            MarkAllButton.IsEnabled = false;
+            MarkAllButton.Opacity = 0.55;
         }
     }
+
+    private async void Reload_Clicked(object? sender, EventArgs e) => await LoadNotificationsAsync();
 
     private async void MarkAllAsRead_Clicked(object? sender, EventArgs e)
     {

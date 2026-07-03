@@ -9,7 +9,10 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: true);
+if (builder.Environment.IsDevelopment())
+{
+    builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: true);
+}
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
@@ -79,7 +82,16 @@ builder.Services.AddScoped<IOtpService, OtpService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IGoogleAuthService, GoogleAuthService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IFileStorageService, FileStorageService>();
+builder.Services.AddScoped<FileStorageService>();
+builder.Services.AddScoped<CloudinaryFileStorageService>();
+builder.Services.AddScoped<IFileStorageService>(services =>
+{
+    var configuration = services.GetRequiredService<IConfiguration>();
+    var provider = configuration["Storage:Provider"];
+    return string.Equals(provider, "Cloudinary", StringComparison.OrdinalIgnoreCase)
+        ? services.GetRequiredService<CloudinaryFileStorageService>()
+        : services.GetRequiredService<FileStorageService>();
+});
 builder.Services.AddScoped<IServiceRequestService, ServiceRequestService>();
 builder.Services.AddScoped<IMessageService, MessageService>();
 builder.Services.AddScoped<IBookingConversationService, BookingConversationService>();

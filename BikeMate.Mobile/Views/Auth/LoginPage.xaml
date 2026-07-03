@@ -10,7 +10,7 @@
         <VerticalStackLayout Padding="20,30,20,28" Spacing="18">
             <VerticalStackLayout Spacing="8">
                 <Image
-                    Source="bikemate_logo.png"
+                    Source="bikemate_logo"
                     HeightRequest="88"
                     HorizontalOptions="Center" />
                 <Label
@@ -120,7 +120,7 @@
                     <Button
                         x:Name="GoogleButton"
                         Text="Continue with Google"
-                        ImageSource="google_logo.png"
+                        ImageSource="google_logo"
                         ContentLayout="Left,12"
                         Clicked="OnGoogleClicked"
                         BackgroundColor="White"

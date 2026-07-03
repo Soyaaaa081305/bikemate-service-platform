@@ -24,7 +24,7 @@
                             <VerticalStackLayout Spacing="3">
                                 <Label Text="Service Editor" Style="{StaticResource SectionLabel}" />
                                 <Label x:Name="ServiceEditorStatusLabel"
-                                       Text="Add a service or choose one below to edit."
+                                       Text="Add a bookable service, or choose one below to edit price, duration, and availability."
                                        Style="{StaticResource SmallMuted}" />
                             </VerticalStackLayout>
                             <Button Grid.Column="1" Text="Clear" Style="{StaticResource OutlineButton}" Clicked="ClearServiceEditor_Clicked" VerticalOptions="Center" />
@@ -93,7 +93,7 @@
                         <Label Text="Services customers can choose after selecting your shop." Style="{StaticResource SmallMuted}" />
                     </VerticalStackLayout>
                     <Label Grid.Column="1"
-                           Text="{Binding ServiceItems.Count, StringFormat='{0} services'}"
+                           Text="{Binding VisibleServices.Count, StringFormat='{0} shown'}"
                            Style="{StaticResource Pill}"
                            VerticalOptions="Center" />
                 </Grid>
@@ -109,7 +109,16 @@
                                 SelectionChanged="ServicesCollectionView_SelectionChanged">
                     <CollectionView.EmptyView>
                         <Frame Style="{StaticResource CardFrame}">
-                            <Label Text="No services found." Style="{StaticResource SmallMuted}" />
+                            <VerticalStackLayout Spacing="8">
+                                <Label Text="No services in this view" Style="{StaticResource ItemTitle}" HorizontalTextAlignment="Center" />
+                                <Label Text="Clear search or add a service customers can book after selecting your shop."
+                                       Style="{StaticResource SmallMuted}"
+                                       HorizontalTextAlignment="Center"
+                                       LineBreakMode="WordWrap" />
+                                <Button Text="Clear search"
+                                        Style="{StaticResource OutlineButton}"
+                                        Clicked="ClearServiceSearch_Clicked" />
+                            </VerticalStackLayout>
                         </Frame>
                     </CollectionView.EmptyView>
                     <CollectionView.ItemTemplate>

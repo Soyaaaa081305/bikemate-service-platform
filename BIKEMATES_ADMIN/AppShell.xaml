@@ -17,10 +17,13 @@
         <ShellContent Title="Home"
                       Route="Home"
                       ContentTemplate="{DataTemplate pages:MainPage}" />
+        <ShellContent Title="Bookings"
+                      Route="Bookings"
+                      ContentTemplate="{DataTemplate pages:Calendar}" />
         <ShellContent Title="Messages"
                       Route="MessagesTab"
                       ContentTemplate="{DataTemplate pages:Messages}" />
-        <ShellContent Title="Profile"
+        <ShellContent Title="Shop"
                       Route="Profile"
                       ContentTemplate="{DataTemplate pages:ShopProfile}" />
         <ShellContent Title="Menu"

@@ -30,6 +30,8 @@ BikeMate.Api/wwwroot/uploads/*
 
 .env
 *.local.json
+**/appsettings.Local.json
+**/google-services.json
 BikeMate.Api/appsettings.Local.json
 BikeMate.Api/firebase-service-account*.json
 BikeMate.Mobile/Platforms/Android/google-services.json

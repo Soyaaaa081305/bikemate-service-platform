@@ -34,7 +34,7 @@ public partial class MenuPage : ContentPage
     private async void ShopProfile_Clicked(object? sender, EventArgs e) => await GoToTabAsync("Profile");
     private async void Products_Clicked(object? sender, EventArgs e) => await Shell.Current.GoToAsync(nameof(Products));
     private async void Logistics_Clicked(object? sender, EventArgs e) => await Shell.Current.GoToAsync(nameof(Logistics));
-    private async void Calendar_Clicked(object? sender, EventArgs e) => await Shell.Current.GoToAsync(nameof(Calendar));
+    private async void Calendar_Clicked(object? sender, EventArgs e) => await GoToTabAsync("Bookings");
     private async void Operations_Clicked(object? sender, EventArgs e) => await Shell.Current.GoToAsync(nameof(Operations));
     private async void Admins_Clicked(object? sender, EventArgs e) => await Shell.Current.GoToAsync(nameof(Admins));
     private async void Messages_Clicked(object? sender, EventArgs e) => await GoToTabAsync("MessagesTab");

@@ -103,6 +103,23 @@ powershell -ExecutionPolicy Bypass -File .\tools\Prepare-DemoDatabase.ps1 -SqlSe
 powershell -ExecutionPolicy Bypass -File .\tools\Deploy-PhoneDemo.ps1 -SqlServer "<server>.database.windows.net" -SqlDatabase "BikeMatesDB_Demo" -SqlUser "<sql-user>" -SqlPassword "<sql-password>"
 
 powershell -ExecutionPolicy Bypass -File .\tools\Build-PhoneDemoApks.ps1
+
+powershell -ExecutionPolicy Bypass -File .\tools\Run-AndroidDemo.ps1 -App Mobile
+
+powershell -ExecutionPolicy Bypass -File .\tools\Test-CloudDeployment.ps1
+```
+
+To store uploads in Cloudinary instead of the App Service filesystem, pass Cloudinary credentials when deploying:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\tools\Deploy-PhoneDemo.ps1 `
+  -SqlServer "<server>.database.windows.net" `
+  -SqlDatabase "BikeMatesDB_Demo" `
+  -SqlUser "<sql-user>" `
+  -SqlPassword "<sql-password>" `
+  -CloudinaryCloudName "<cloud-name>" `
+  -CloudinaryApiKey "<api-key>" `
+  -CloudinaryApiSecret "<api-secret>"
 ```
 
 Clean old app data on test phones before a demo so previous API URL overrides do not survive.
@@ -111,10 +128,10 @@ Clean old app data on test phones before a demo so previous API URL overrides do
 
 | Role | Email | Password |
 | --- | --- | --- |
-| Customer | `customer@bikemate.test` | `Password123!` |
-| Mechanic | `mechanic@bikemate.test` | `Password123!` |
-| ShopAdmin | `shop@bikemate.test` | `Password123!` |
-| SystemAdmin | `admin@bikemate.test` | `Password123!` |
+| Customer | `customer1@bikemate.test` | `Demo123!` |
+| Mechanic | `mechanic1@bikemate.test` | `Demo123!` |
+| ShopAdmin | `shop1@bikemate.test` | `Demo123!` |
+| SystemAdmin | `admin1@bikemate.test` | `Demo123!` |
 
 ## Configuration And Secrets
 
@@ -134,6 +151,11 @@ Ignored local config files include:
 - `BikeMate.WebAdmin/BikeMate.WebAdmin/appsettings.Local.json`
 - `BikeMate.Api/firebase-service-account*.json`
 - `BikeMate.Mobile/Platforms/Android/google-services.json`
+
+If GitHub reports a leaked Google API key, create a new restricted key in
+Google Cloud Console, update Azure or your ignored local config with the new
+value, then delete the leaked key. Do not reuse a key after it has appeared in a
+public commit or generated artifact.
 
 ## Repository Hygiene
 

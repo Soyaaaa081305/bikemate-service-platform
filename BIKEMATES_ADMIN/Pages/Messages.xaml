@@ -21,7 +21,7 @@
                        FontFamily="Inter"
                        FontSize="18"
                        FontAttributes="Bold" />
-                <Label Text="Customer and mechanic conversations"
+                <Label Text="Customer, BikeMate admin, and mechanic conversations"
                        TextColor="#CBD5E1"
                        FontFamily="PublicSans"
                        FontSize="11" />
@@ -49,7 +49,7 @@
                             Clicked="CustomerTab_Clicked" />
                     <Button x:Name="AdminTabButton"
                             Grid.Column="1"
-                            Text="Admins"
+                            Text="BikeMate"
                             Style="{StaticResource MessengerTab}"
                             Clicked="AdminTab_Clicked" />
                     <Button x:Name="MechanicTabButton"
@@ -85,10 +85,10 @@
                                     SelectionChanged="ConversationCollectionView_SelectionChanged">
                         <CollectionView.EmptyView>
                             <VerticalStackLayout Padding="18" Spacing="4">
-                                <Label Text="No conversations found"
+                                <Label Text="No conversations in this view"
                                        Style="{StaticResource ItemTitle}"
                                        HorizontalTextAlignment="Center" />
-                                <Label Text="Live conversations will appear here once the API returns them."
+                                <Label Text="Try another tab, clear search, or reload. Booking messages appear after customers start a request."
                                        Style="{StaticResource SmallMuted}"
                                        HorizontalTextAlignment="Center"
                                        LineBreakMode="WordWrap" />
@@ -221,11 +221,14 @@
             <Entry x:Name="ReplyEntry"
                    Placeholder="Type a reply"
                    Style="{StaticResource InputEntry}"
-                   Margin="0" />
+                   Margin="0"
+                   IsEnabled="False" />
             <Button Grid.Column="1"
+                    x:Name="SendButton"
                     Text="Send"
                     Style="{StaticResource PrimaryButton}"
                     WidthRequest="86"
+                    IsEnabled="False"
                     Clicked="SendReply_Clicked" />
         </Grid>
     </Grid>

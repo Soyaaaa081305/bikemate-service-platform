@@ -97,7 +97,7 @@ namespace BikeMate
                 {
                     Title = "BikeMate",
                     Description = "Book trusted motorcycle repair and roadside support from one place.",
-                    ImageSource = "bikemate_logo.png",
+                    ImageSource = "bikemate_logo",
                     ButtonText = "Continue"
                 },
                 new OnboardingItem

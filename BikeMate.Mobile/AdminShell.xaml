@@ -7,8 +7,11 @@
     Title="Admin"
     Shell.NavBarIsVisible="False">
 
-    <ShellContent
-        Title="Dashboard"
-        Route="AdminDashboardPage"
-        ContentTemplate="{DataTemplate admin:AdminDashboardPage}" />
+    <TabBar Route="AdminArea">
+        <ShellContent Title="Dashboard" Route="AdminDashboardPage" ContentTemplate="{DataTemplate admin:AdminDashboardPage}" />
+        <ShellContent Title="Emergency" Route="AdminEmergencyRequestsPage" ContentTemplate="{DataTemplate admin:AdminEmergencyRequestsPage}" />
+        <ShellContent Title="Requests" Route="AdminRequestsPage" ContentTemplate="{DataTemplate admin:AdminRequestsPage}" />
+        <ShellContent Title="Reports" Route="AdminReportsPage" ContentTemplate="{DataTemplate admin:AdminReportsPage}" />
+        <ShellContent Title="Audit" Route="AdminAuditLogsPage" ContentTemplate="{DataTemplate admin:AdminAuditLogsPage}" />
+    </TabBar>
 </Shell>

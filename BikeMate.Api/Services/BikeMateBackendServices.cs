@@ -17,6 +17,8 @@ using BikeMate.Core.DTOs;
 using BikeMate.Core.Entities;
 using BikeMate.Core.Helpers;
 using BikeMate.Infrastructure.Data;
+using CloudinaryDotNet;
+using CloudinaryDotNet.Actions;
 using Google.Apis.Auth;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -184,7 +186,7 @@ public sealed class EmailService(
 
         var fromEmail = configuration["SendGrid:FromEmail"] ?? configuration["Email:From"] ?? "noreply@bikemate.local";
         var fromName = configuration["SendGrid:FromName"] ?? "BikeMate";
-        using var request = new HttpRequestMessage(HttpMethod.Post, "https://api.sendgrid.com/v3/mail/send");
+        using var request = new HttpRequestMessage(System.Net.Http.HttpMethod.Post, "https://api.sendgrid.com/v3/mail/send");
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
         request.Content = JsonContent.Create(new
         {
@@ -894,6 +896,148 @@ public sealed class FileStorageService(
     IWebHostEnvironment environment,
     IHttpContextAccessor httpContextAccessor) : IFileStorageService
 {
+    public async Task<UploadedFileDto> SaveFileAsync(IFormFile file, string folder, CancellationToken cancellationToken)
+    {
+        var upload = UploadFileRules.Validate(file, folder, configuration);
+        var dayFolder = DateTime.UtcNow.ToString("yyyyMMdd");
+        var storedFileName = $"{Guid.NewGuid():N}{upload.Extension.ToLowerInvariant()}";
+        var webRoot = string.IsNullOrWhiteSpace(environment.WebRootPath)
+            ? Path.Combine(environment.ContentRootPath, "wwwroot")
+            : environment.WebRootPath;
+        var targetDirectory = Path.Combine(webRoot, "uploads", upload.SafeFolder, dayFolder);
+        Directory.CreateDirectory(targetDirectory);
+
+        var targetPath = Path.Combine(targetDirectory, storedFileName);
+        await using (var stream = File.Create(targetPath))
+        {
+            await file.CopyToAsync(stream, cancellationToken);
+        }
+
+        var publicUrl = $"{UploadBaseUrl().TrimEnd('/')}/{upload.SafeFolder}/{dayFolder}/{storedFileName}";
+        return new UploadedFileDto(publicUrl, upload.OriginalFileName, upload.ContentType, file.Length);
+    }
+
+    private string UploadBaseUrl()
+    {
+        var configured = configuration["Storage:BaseUrl"];
+        var request = httpContextAccessor.HttpContext?.Request;
+        if (!string.IsNullOrWhiteSpace(configured) &&
+            (!IsLoopbackUrl(configured) || request is null || IsLoopbackHost(request.Host.Host)))
+        {
+            return configured;
+        }
+
+        return request is null
+            ? "https://localhost:5001/uploads"
+            : $"{request.Scheme}://{request.Host}/uploads";
+    }
+
+    private static bool IsLoopbackUrl(string value)
+    {
+        return Uri.TryCreate(value, UriKind.Absolute, out var uri) && IsLoopbackHost(uri.Host);
+    }
+
+    private static bool IsLoopbackHost(string host)
+    {
+        return string.Equals(host, "localhost", StringComparison.OrdinalIgnoreCase) ||
+               string.Equals(host, "127.0.0.1", StringComparison.OrdinalIgnoreCase) ||
+               string.Equals(host, "::1", StringComparison.OrdinalIgnoreCase);
+    }
+
+}
+
+public sealed class CloudinaryFileStorageService(IConfiguration configuration) : IFileStorageService
+{
+    public async Task<UploadedFileDto> SaveFileAsync(IFormFile file, string folder, CancellationToken cancellationToken)
+    {
+        var upload = UploadFileRules.Validate(file, folder, configuration);
+        var cloudinary = CreateCloudinaryClient();
+        await using var stream = file.OpenReadStream();
+
+        var publicId = $"{DateTime.UtcNow:yyyyMMdd}/{Guid.NewGuid():N}";
+        var folderName = CloudinaryFolder(upload.SafeFolder);
+        var fileDescription = new FileDescription(upload.OriginalFileName, stream);
+        RawUploadResult result;
+
+        if (upload.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
+        {
+            result = await cloudinary.UploadAsync(new ImageUploadParams
+            {
+                File = fileDescription,
+                Folder = folderName,
+                PublicId = publicId,
+                UseFilename = false,
+                UniqueFilename = false,
+                Overwrite = false
+            }, cancellationToken);
+        }
+        else if (upload.ContentType.StartsWith("video/", StringComparison.OrdinalIgnoreCase))
+        {
+            result = await cloudinary.UploadAsync(new VideoUploadParams
+            {
+                File = fileDescription,
+                Folder = folderName,
+                PublicId = publicId,
+                UseFilename = false,
+                UniqueFilename = false,
+                Overwrite = false
+            }, cancellationToken);
+        }
+        else
+        {
+            result = await cloudinary.UploadAsync(new RawUploadParams
+            {
+                File = fileDescription,
+                Folder = folderName,
+                PublicId = $"{publicId}{upload.Extension.ToLowerInvariant()}",
+                UseFilename = false,
+                UniqueFilename = false,
+                Overwrite = false
+            }, "raw", cancellationToken);
+        }
+
+        if (result.Error is not null)
+        {
+            throw new InvalidOperationException($"Cloudinary upload failed: {result.Error.Message}");
+        }
+
+        var publicUrl = result.SecureUrl?.ToString();
+        if (string.IsNullOrWhiteSpace(publicUrl))
+        {
+            throw new InvalidOperationException("Cloudinary upload completed without a public URL.");
+        }
+
+        return new UploadedFileDto(publicUrl, upload.OriginalFileName, upload.ContentType, file.Length);
+    }
+
+    private Cloudinary CreateCloudinaryClient()
+    {
+        var cloudName = configuration["Cloudinary:CloudName"] ?? configuration["Storage:Cloudinary:CloudName"];
+        var apiKey = configuration["Cloudinary:ApiKey"] ?? configuration["Storage:Cloudinary:ApiKey"];
+        var apiSecret = configuration["Cloudinary:ApiSecret"] ?? configuration["Storage:Cloudinary:ApiSecret"];
+
+        if (string.IsNullOrWhiteSpace(cloudName) ||
+            string.IsNullOrWhiteSpace(apiKey) ||
+            string.IsNullOrWhiteSpace(apiSecret))
+        {
+            throw new InvalidOperationException("Cloudinary storage is enabled, but Cloudinary:CloudName, Cloudinary:ApiKey, and Cloudinary:ApiSecret are not configured.");
+        }
+
+        return new Cloudinary(new Account(cloudName, apiKey, apiSecret))
+        {
+            Api = { Secure = true }
+        };
+    }
+
+    private string CloudinaryFolder(string safeFolder)
+    {
+        var root = UploadFileRules.SanitizePathSegment(configuration["Cloudinary:Folder"] ?? configuration["Storage:Cloudinary:Folder"] ?? "bikemate");
+        return $"{root}/{safeFolder}";
+    }
+}
+
+internal static class UploadFileRules
+{
     private static readonly HashSet<string> AllowedContentTypes = new(StringComparer.OrdinalIgnoreCase)
     {
         "image/jpeg",
@@ -925,7 +1069,7 @@ public sealed class FileStorageService(
         ".3gp"
     };
 
-    public async Task<UploadedFileDto> SaveFileAsync(IFormFile file, string folder, CancellationToken cancellationToken)
+    public static UploadFileInfo Validate(IFormFile file, string folder, IConfiguration configuration)
     {
         if (file.Length <= 0)
         {
@@ -948,53 +1092,14 @@ public sealed class FileStorageService(
             throw new InvalidOperationException("BikeMate accepts JPG, PNG, WEBP, PDF, TXT, DOC, DOCX, MP4, WEBM, MOV, and 3GP files.");
         }
 
-        var safeFolder = SanitizePathSegment(folder);
-        var dayFolder = DateTime.UtcNow.ToString("yyyyMMdd");
-        var storedFileName = $"{Guid.NewGuid():N}{extension.ToLowerInvariant()}";
-        var webRoot = string.IsNullOrWhiteSpace(environment.WebRootPath)
-            ? Path.Combine(environment.ContentRootPath, "wwwroot")
-            : environment.WebRootPath;
-        var targetDirectory = Path.Combine(webRoot, "uploads", safeFolder, dayFolder);
-        Directory.CreateDirectory(targetDirectory);
-
-        var targetPath = Path.Combine(targetDirectory, storedFileName);
-        await using (var stream = File.Create(targetPath))
-        {
-            await file.CopyToAsync(stream, cancellationToken);
-        }
-
-        var publicUrl = $"{UploadBaseUrl().TrimEnd('/')}/{safeFolder}/{dayFolder}/{storedFileName}";
-        return new UploadedFileDto(publicUrl, Path.GetFileName(file.FileName), contentType, file.Length);
+        return new UploadFileInfo(
+            SanitizePathSegment(folder),
+            Path.GetFileName(file.FileName),
+            extension,
+            contentType);
     }
 
-    private string UploadBaseUrl()
-    {
-        var configured = configuration["Storage:BaseUrl"];
-        var request = httpContextAccessor.HttpContext?.Request;
-        if (!string.IsNullOrWhiteSpace(configured) &&
-            (!IsLoopbackUrl(configured) || request is null || IsLoopbackHost(request.Host.Host)))
-        {
-            return configured;
-        }
-
-        return request is null
-            ? "https://localhost:5001/uploads"
-            : $"{request.Scheme}://{request.Host}/uploads";
-    }
-
-    private static bool IsLoopbackUrl(string value)
-    {
-        return Uri.TryCreate(value, UriKind.Absolute, out var uri) && IsLoopbackHost(uri.Host);
-    }
-
-    private static bool IsLoopbackHost(string host)
-    {
-        return string.Equals(host, "localhost", StringComparison.OrdinalIgnoreCase) ||
-               string.Equals(host, "127.0.0.1", StringComparison.OrdinalIgnoreCase) ||
-               string.Equals(host, "::1", StringComparison.OrdinalIgnoreCase);
-    }
-
-    private static string SanitizePathSegment(string? value)
+    public static string SanitizePathSegment(string? value)
     {
         var source = string.IsNullOrWhiteSpace(value) ? "general" : value.Trim().ToLowerInvariant();
         var safe = new string(source.Select(ch => char.IsLetterOrDigit(ch) || ch is '-' or '_' ? ch : '-').ToArray());
@@ -1006,6 +1111,12 @@ public sealed class FileStorageService(
         return ContentTypeHelper.GuessFromExtension(extension);
     }
 }
+
+internal sealed record UploadFileInfo(
+    string SafeFolder,
+    string OriginalFileName,
+    string Extension,
+    string ContentType);
 
 public interface IServiceRequestService
 {
@@ -1857,7 +1968,7 @@ public sealed class PayMongoService(
         }
 
         var amountInCentavos = Convert.ToInt32(Math.Round(amount * 100m, MidpointRounding.AwayFromZero));
-        using var request = new HttpRequestMessage(HttpMethod.Post, "https://api.paymongo.com/v1/checkout_sessions");
+        using var request = new HttpRequestMessage(System.Net.Http.HttpMethod.Post, "https://api.paymongo.com/v1/checkout_sessions");
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         request.Headers.Authorization = new AuthenticationHeaderValue(
             "Basic",
@@ -1937,7 +2048,7 @@ public sealed class PayMongoService(
 
         foreach (var endpoint in endpoints)
         {
-            using var request = CreatePayMongoRequest(HttpMethod.Get, endpoint, secretKey);
+            using var request = CreatePayMongoRequest(System.Net.Http.HttpMethod.Get, endpoint, secretKey);
             using var response = await client.SendAsync(request, cancellationToken);
             var payload = await response.Content.ReadAsStringAsync(cancellationToken);
             if (response.StatusCode == HttpStatusCode.NotFound)
@@ -1959,7 +2070,7 @@ public sealed class PayMongoService(
         return new PayMongoCheckoutStatus(false, "not_found", null, string.IsNullOrWhiteSpace(lastNotFoundPayload) ? "{}" : lastNotFoundPayload);
     }
 
-    private static HttpRequestMessage CreatePayMongoRequest(HttpMethod method, string url, string secretKey)
+    private static HttpRequestMessage CreatePayMongoRequest(System.Net.Http.HttpMethod method, string url, string secretKey)
     {
         var request = new HttpRequestMessage(method, url);
         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));

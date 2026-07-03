@@ -22,15 +22,24 @@
                 <Frame Style="{StaticResource CardFrame}">
                     <VerticalStackLayout Spacing="12">
                         <Grid ColumnDefinitions="*,Auto">
-                            <Label Text="Accept service bookings" Style="{StaticResource BodyText}" />
+                            <VerticalStackLayout Spacing="2">
+                                <Label Text="Accept service bookings" Style="{StaticResource BodyText}" />
+                                <Label Text="Show the shop as available for customer requests." Style="{StaticResource TinyMuted}" />
+                            </VerticalStackLayout>
                             <Switch Grid.Column="1" IsToggled="True" />
                         </Grid>
                         <Grid ColumnDefinitions="*,Auto">
-                            <Label Text="Show services in customer search" Style="{StaticResource BodyText}" />
+                            <VerticalStackLayout Spacing="2">
+                                <Label Text="Show services in customer search" Style="{StaticResource BodyText}" />
+                                <Label Text="Published services stay visible in customer booking flow." Style="{StaticResource TinyMuted}" />
+                            </VerticalStackLayout>
                             <Switch Grid.Column="1" IsToggled="True" />
                         </Grid>
                         <Grid ColumnDefinitions="*,Auto">
-                            <Label Text="Notify on low stock" Style="{StaticResource BodyText}" />
+                            <VerticalStackLayout Spacing="2">
+                                <Label Text="Notify on low stock" Style="{StaticResource BodyText}" />
+                                <Label Text="Use product stock levels to trigger inventory alerts." Style="{StaticResource TinyMuted}" />
+                            </VerticalStackLayout>
                             <Switch Grid.Column="1" IsToggled="True" />
                         </Grid>
                     </VerticalStackLayout>
@@ -39,14 +48,16 @@
                 <Frame Style="{StaticResource CardFrame}">
                     <VerticalStackLayout Spacing="8">
                         <Label Text="PayMongo: Connected" TextColor="{StaticResource Green}" FontAttributes="Bold" />
-                        <Button Text="Update Payment Settings" Style="{StaticResource OutlineButton}" />
+                        <Label Text="Payment keys and webhooks are controlled by BikeMate backend deployment settings." Style="{StaticResource SmallMuted}" />
+                        <Button Text="Open Reports" Style="{StaticResource OutlineButton}" Clicked="Reports_Clicked" />
                     </VerticalStackLayout>
                 </Frame>
                 <Label Text="SECURITY" Style="{StaticResource SectionLabel}" />
                 <Frame Style="{StaticResource CardFrame}">
                     <VerticalStackLayout Spacing="8">
-                        <Button Text="Change Password" Style="{StaticResource OutlineButton}" />
-                        <Button Text="Manage Login Sessions" Style="{StaticResource OutlineButton}" />
+                        <Button Text="Change Password" Style="{StaticResource OutlineButton}" Clicked="ChangePassword_Clicked" />
+                        <Button Text="Manage Login Sessions" Style="{StaticResource OutlineButton}" Clicked="Sessions_Clicked" />
+                        <Button Text="Sign Out" Style="{StaticResource DangerButton}" Clicked="SignOut_Clicked" />
                     </VerticalStackLayout>
                 </Frame>
             </VerticalStackLayout>

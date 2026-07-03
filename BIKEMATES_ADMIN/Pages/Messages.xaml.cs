@@ -48,7 +48,7 @@ public partial class Messages : ContentPage
         }
         catch (Exception ex)
         {
-            await DisplayAlertAsync("Messages", $"Unable to load conversations from API: {ex.Message}", "OK");
+            ShowEmptyThread($"Unable to load conversations from API: {ex.Message}");
         }
     }
 
@@ -118,6 +118,9 @@ public partial class Messages : ContentPage
         ChatBadgeLabel.Text = _selectedConversation.BadgeText;
         ChatBadgeLabel.TextColor = _selectedConversation.BadgeTextColor;
         ChatBadgeLabel.BackgroundColor = _selectedConversation.BadgeColor;
+        ReplyEntry.IsEnabled = true;
+        SendButton.IsEnabled = true;
+        ReplyEntry.Placeholder = $"Reply to {_selectedConversation.Name}";
         await LoadMessagesAsync(_selectedConversation.ConversationId);
     }
 
@@ -150,11 +153,11 @@ public partial class Messages : ContentPage
         }
         catch (Exception ex)
         {
-            await DisplayAlertAsync("Messages", $"Unable to load messages from API: {ex.Message}", "OK");
+            ChatThreadLayout.Children.Add(EmptyThreadCard($"Unable to load messages from API: {ex.Message}"));
         }
     }
 
-    private void ShowEmptyThread()
+    private void ShowEmptyThread(string? message = null)
     {
         ChatAvatarLabel.Text = "BM";
         ChatNameLabel.Text = "No conversation selected";
@@ -162,8 +165,12 @@ public partial class Messages : ContentPage
         ChatBadgeLabel.Text = "CHAT";
         ChatBadgeLabel.TextColor = Color.FromArgb("#F97316");
         ChatBadgeLabel.BackgroundColor = Color.FromArgb("#FFF3E8");
+        ReplyEntry.Text = string.Empty;
+        ReplyEntry.IsEnabled = false;
+        ReplyEntry.Placeholder = "Select a thread first";
+        SendButton.IsEnabled = false;
         ChatThreadLayout.Children.Clear();
-        ChatThreadLayout.Children.Add(EmptyThreadCard("Select a conversation to view messages from the API."));
+        ChatThreadLayout.Children.Add(EmptyThreadCard(message ?? "Select a conversation to view messages from the API."));
     }
 
     private void AddBubble(AdminMessage message)

@@ -53,7 +53,7 @@
                                 BackgroundColor="White"
                                 Clicked="Notifications_Clicked" />
                         <Button Grid.Column="3"
-                                Text="Out"
+                                Text="Sign out"
                                 Style="{StaticResource MiniButton}"
                                 BackgroundColor="White"
                                 Clicked="SignOut_Clicked" />
@@ -155,9 +155,9 @@
                         <VerticalStackLayout Spacing="12">
                             <Grid ColumnDefinitions="*,Auto">
                                 <VerticalStackLayout Spacing="2">
-                                    <Label Text="Run the Shop" Style="{StaticResource ItemTitle}" />
-                                    <Label Text="Fast access to the work you do most."
-                                           Style="{StaticResource SmallMuted}" />
+                                <Label Text="Next Actions" Style="{StaticResource ItemTitle}" />
+                                <Label Text="Jump into the work that usually needs attention first."
+                                       Style="{StaticResource SmallMuted}" />
                                 </VerticalStackLayout>
                                 <Button Grid.Column="1"
                                         Text="Messages"
@@ -207,9 +207,10 @@
                                             ItemsLayout="HorizontalList">
                                 <CollectionView.EmptyView>
                                     <Grid Padding="0,10">
-                                        <Label Text="No mechanics returned by the API yet."
+                                        <Label Text="No mechanics returned yet. Add mechanic applications from Menu > Mechanics, then refresh after approval."
                                                Style="{StaticResource SmallMuted}"
-                                               HorizontalTextAlignment="Center" />
+                                               HorizontalTextAlignment="Center"
+                                               LineBreakMode="WordWrap" />
                                     </Grid>
                                 </CollectionView.EmptyView>
                                 <CollectionView.ItemTemplate>
@@ -273,7 +274,7 @@
                                        VerticalOptions="Center" />
                             </Frame>
                             <VerticalStackLayout Grid.Column="1" Spacing="3">
-                                <Label Text="Latest Shop Update" Style="{StaticResource ItemTitle}" />
+                                <Label Text="Shop Flow Status" Style="{StaticResource ItemTitle}" />
                                 <Label x:Name="ActivityLabel"
                                        Text="Recent activity will appear when the API returns bookings, service changes, messages, and inventory events."
                                        Style="{StaticResource SmallMuted}"

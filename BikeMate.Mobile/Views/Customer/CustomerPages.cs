@@ -262,6 +262,103 @@ public abstract class CustomerPageBase : ContentPage
         };
     }
 
+    protected static View NoticeCard(string message, Color? accent = null)
+    {
+        var color = accent ?? CustomerUi.Orange;
+        var grid = new Grid
+        {
+            ColumnDefinitions =
+            {
+                new ColumnDefinition(GridLength.Auto),
+                new ColumnDefinition(GridLength.Star)
+            },
+            ColumnSpacing = 10
+        };
+        grid.Add(new BoxView
+        {
+            WidthRequest = 4,
+            CornerRadius = 2,
+            Color = color,
+            VerticalOptions = LayoutOptions.Fill
+        }, 0, 0);
+        grid.Add(Label(message, 11, CustomerUi.Muted), 1, 0);
+        return Card(grid, Colors.White, 8, new Thickness(12));
+    }
+
+    protected static View EmptyState(
+        string title,
+        string message,
+        string? primaryText = null,
+        ICommand? primaryCommand = null,
+        string? secondaryText = null,
+        ICommand? secondaryCommand = null)
+    {
+        var stack = new VerticalStackLayout
+        {
+            Spacing = 10,
+            Padding = new Thickness(4, 6)
+        };
+        stack.Add(Label(title, 14, CustomerUi.Dark, FontAttributes.Bold));
+        stack.Add(Label(message, 11, CustomerUi.Muted));
+
+        if (!string.IsNullOrWhiteSpace(primaryText) && primaryCommand is not null)
+        {
+            stack.Add(OrangeButton(primaryText, primaryCommand));
+        }
+
+        if (!string.IsNullOrWhiteSpace(secondaryText) && secondaryCommand is not null)
+        {
+            stack.Add(GhostButton(secondaryText, secondaryCommand));
+        }
+
+        return Card(stack, Colors.White, 8, new Thickness(14));
+    }
+
+    protected static View SectionHeader(string title, string? actionText = null, ICommand? actionCommand = null)
+    {
+        var grid = new Grid
+        {
+            ColumnDefinitions =
+            {
+                new ColumnDefinition(GridLength.Star),
+                new ColumnDefinition(GridLength.Auto)
+            },
+            ColumnSpacing = 10
+        };
+        grid.Add(Label(title, 14, CustomerUi.Dark, FontAttributes.Bold), 0, 0);
+
+        if (!string.IsNullOrWhiteSpace(actionText) && actionCommand is not null)
+        {
+            grid.Add(new Button
+            {
+                Text = actionText,
+                Command = actionCommand,
+                BackgroundColor = Colors.Transparent,
+                TextColor = CustomerUi.Orange,
+                FontAttributes = FontAttributes.Bold,
+                FontFamily = CustomerUi.FontDisplay,
+                FontSize = 12,
+                HeightRequest = 36,
+                MinimumHeightRequest = 36,
+                Padding = new Thickness(10, 0)
+            }, 1, 0);
+        }
+
+        return grid;
+    }
+
+    protected static View StatusChip(string text, Color? background = null, Color? textColor = null)
+    {
+        return new Border
+        {
+            Stroke = Colors.Transparent,
+            StrokeShape = new RoundRectangle { CornerRadius = 8 },
+            BackgroundColor = background ?? CustomerUi.LightOrange,
+            Padding = new Thickness(8, 4),
+            Content = Label(text, 10, textColor ?? CustomerUi.Orange, FontAttributes.Bold)
+        };
+    }
+
     protected static View Row(string left, string right = "", ICommand? command = null)
     {
         var grid = new Grid
@@ -302,8 +399,8 @@ public abstract class CustomerPageBase : ContentPage
 
         AddNav(grid, 0, "Home", CustomerUi.HomeIcon, "CustomerHomePage", activeTab == "Home");
         AddNav(grid, 1, "Schedule", CustomerUi.ScheduleIcon, "CustomerSchedulePage", activeTab == "Schedule");
-        AddNav(grid, 2, "Payments", CustomerUi.PaymentsIcon, "CustomerPaymentsPage", activeTab == "Payments");
-        AddNav(grid, 3, "Messages", CustomerUi.MessagesIcon, "CustomerMessagesPage", activeTab == "Messages");
+        AddNav(grid, 2, "Messages", CustomerUi.MessagesIcon, "CustomerMessagesPage", activeTab == "Messages");
+        AddNav(grid, 3, "Payments", CustomerUi.PaymentsIcon, "CustomerPaymentsPage", activeTab == "Payments");
 
         return new Border
         {
@@ -335,7 +432,13 @@ public abstract class CustomerPageBase : ContentPage
         };
         stack.GestureRecognizers.Add(new TapGestureRecognizer
         {
-            Command = new Command(async () => await Shell.Current.GoToAsync($"//{route}"))
+            Command = new Command(async () =>
+            {
+                if (!active)
+                {
+                    await Shell.Current.GoToAsync($"//{route}");
+                }
+            })
         });
 
         grid.Add(stack, column, 0);
@@ -638,30 +741,35 @@ public sealed class CustomerHomePage : CustomerPageBase
         var body = new VerticalStackLayout { Padding = new Thickness(18, 0, 18, 20), Spacing = 18 };
         if (!string.IsNullOrWhiteSpace(banner))
         {
-            body.Add(Card(Label(banner, 11, CustomerUi.Muted), Colors.White, 8, new Thickness(12)));
+            body.Add(NoticeCard(banner));
         }
 
-        body.Add(Label("Your BikeMate", 14, CustomerUi.Dark, FontAttributes.Bold));
+        body.Add(NextStepCard(requests));
+        body.Add(SectionHeader("Your BikeMate"));
         body.Add(IdentityStatusCard(_customer));
 
         var scroller = new ScrollView { Orientation = ScrollOrientation.Horizontal };
         var cards = new HorizontalStackLayout { Spacing = 10 };
         cards.Add(HomeShortcut("Scheduled", CustomerUi.ScheduleIcon, new Command(async () => await Shell.Current.GoToAsync("//CustomerSchedulePage"))));
-        cards.Add(HomeShortcut("Payments", CustomerUi.PaymentsIcon, new Command(async () => await Shell.Current.GoToAsync("//CustomerPaymentsPage"))));
         cards.Add(HomeShortcut("Messages", CustomerUi.MessagesIcon, new Command(async () => await Shell.Current.GoToAsync("//CustomerMessagesPage"))));
+        cards.Add(HomeShortcut("Payments", CustomerUi.PaymentsIcon, new Command(async () => await Shell.Current.GoToAsync("//CustomerPaymentsPage"))));
         cards.Add(HomeShortcut("Alerts", CustomerUi.HomeIcon, new Command(async () => await Shell.Current.GoToAsync(nameof(CustomerNotificationsPage)))));
         cards.Add(HomeShortcut("Help Desk", CustomerUi.HomeIcon, new Command(async () => await Shell.Current.GoToAsync(nameof(CustomerHelpDeskPage)))));
         scroller.Content = cards;
         body.Add(scroller);
 
-        var bookedRepairsTitle = Label("Booked Repairs", 14, CustomerUi.Dark, FontAttributes.Bold);
-        bookedRepairsTitle.HorizontalOptions = LayoutOptions.Fill;
-        bookedRepairsTitle.HorizontalTextAlignment = TextAlignment.Center;
-        body.Add(bookedRepairsTitle);
+        body.Add(SectionHeader(
+            "Booked Repairs",
+            "View all",
+            new Command(async () => await Shell.Current.GoToAsync("//CustomerSchedulePage"))));
         var visibleRequests = requests.OrderByDescending(x => x.CreatedAt).Take(3).ToArray();
         if (visibleRequests.Length == 0)
         {
-            body.Add(Card(Label("No bookings yet. Tap Book now to create your first repair request.", 12, CustomerUi.Muted)));
+            body.Add(EmptyState(
+                "No bookings yet",
+                "Start with your service address, vehicle details, and preferred repair shop. BikeMate will guide you step by step.",
+                "Book a repair",
+                new Command(async () => await OpenBookingAsync())));
         }
         else
         {
@@ -683,6 +791,52 @@ public sealed class CustomerHomePage : CustomerPageBase
         });
 
         return body;
+    }
+
+    private View NextStepCard(IReadOnlyList<ServiceRequestDto> requests)
+    {
+        if (!CustomerRequestRules.IsApproved(_customer))
+        {
+            return EmptyState(
+                "Finish account setup",
+                _customer?.EmailVerified == false
+                    ? "Verify your email OTP so BikeMate can review and approve your customer account."
+                    : CustomerRequestRules.BookingBlockedMessage(_customer),
+                _customer?.EmailVerified == false ? "Send OTP" : "Open profile",
+                new Command(async () =>
+                {
+                    if (_customer?.EmailVerified == false)
+                    {
+                        await SendEmailOtpAndOpenVerificationAsync(_customer);
+                        return;
+                    }
+
+                    await Shell.Current.GoToAsync(nameof(CustomerProfilePage));
+                }));
+        }
+
+        var active = requests
+            .Where(request => !CustomerRequestRules.IsClosed(request))
+            .OrderByDescending(request => request.CreatedAt)
+            .FirstOrDefault();
+        if (active is not null)
+        {
+            return EmptyState(
+                "Continue your active booking",
+                $"{active.ServiceName ?? "Bike repair"} is {FormatStatus(active.CurrentStatus).ToLowerInvariant()}. Open the booking to see payment, shop, and tracking next steps.",
+                "View booking",
+                new Command(async () => await Shell.Current.GoToAsync($"{nameof(BookingDetailsPage)}?requestId={active.RequestId}")),
+                "Messages",
+                new Command(async () => await Shell.Current.GoToAsync("//CustomerMessagesPage")));
+        }
+
+        return EmptyState(
+            "Ready when your bike needs help",
+            "Book a repair, request emergency roadside help, or review past work from your dashboard.",
+            "Book a repair",
+            new Command(async () => await OpenBookingAsync()),
+            "Emergency help",
+            new Command(async () => await OpenEmergencyAsync()));
     }
 
     private async Task OpenEmergencyAsync()
@@ -795,7 +949,7 @@ public sealed class CustomerHomePage : CustomerPageBase
         text.Add(Label(Money(request.FinalTotal > 0 ? request.FinalTotal : request.EstimatedTotal), 11, CustomerUi.Dark));
         grid.Add(text, 1, 0);
 
-        grid.Add(Label(FormatStatus(request.CurrentStatus), 11, CustomerUi.Orange), 2, 0);
+        grid.Add(StatusChip(FormatStatus(request.CurrentStatus)), 2, 0);
 
         var border = Card(grid, Colors.White, 8, new Thickness(12));
         border.GestureRecognizers.Add(new TapGestureRecognizer
@@ -855,14 +1009,18 @@ public sealed class CustomerNotificationsPage : CustomerPageBase
         body.Add(Header("Notifications"));
         if (!string.IsNullOrWhiteSpace(banner))
         {
-            body.Add(Card(Label(banner, 11, CustomerUi.Muted), Colors.White, 8, new Thickness(12)));
+            body.Add(NoticeCard(banner));
         }
 
         body.Add(GhostButton(_isLoading ? "Refreshing..." : "Refresh status", new Command(async () => await LoadAsync())));
 
         if (_notifications.Count == 0 && !_isLoading)
         {
-            body.Add(Card(Label("No notifications yet. Booking, payment, chat, and emergency alerts will appear here.", 12, CustomerUi.Muted)));
+            body.Add(EmptyState(
+                "No notifications yet",
+                "Booking, payment, chat, and emergency alerts will appear here as soon as there is something new.",
+                "View schedule",
+                new Command(async () => await Shell.Current.GoToAsync("//CustomerSchedulePage"))));
         }
         else
         {
@@ -992,7 +1150,7 @@ public sealed class CustomerProfilePage : CustomerPageBase
         body.Add(Header("Account Details", true, _isSaving ? "Saving" : "Save", new Command(async () => await SaveProfileAsync())));
         if (!string.IsNullOrWhiteSpace(banner))
         {
-            body.Add(Card(Label(banner, 11, CustomerUi.Muted), Colors.White, 8, new Thickness(12)));
+            body.Add(NoticeCard(banner));
         }
 
         body.Add(ProfileHeaderCard(customer));
@@ -2075,7 +2233,7 @@ public sealed class CustomerSchedulePage : CustomerPageBase
         body.Add(Header("Booked Repairs", false));
         if (!string.IsNullOrWhiteSpace(banner))
         {
-            body.Add(Card(Label(banner, 11, CustomerUi.Muted), Colors.White, 8, new Thickness(12)));
+            body.Add(NoticeCard(banner));
         }
 
         body.Add(Tabs());
@@ -2086,12 +2244,21 @@ public sealed class CustomerSchedulePage : CustomerPageBase
             .ToArray();
         if (visibleRequests.Length == 0)
         {
-            body.Add(Card(Label(
+            body.Add(EmptyState(
+                _showHistory ? "No repair history yet" : "No active repairs right now",
                 _showHistory
-                    ? "No completed or cancelled repairs yet."
-                    : "No upcoming or active repairs right now.",
-                12,
-                CustomerUi.Muted)));
+                    ? "Completed, cancelled, and rejected bookings will appear here after your first service cycle."
+                    : "When you book a repair or request emergency help, the live status will appear here.",
+                _showHistory ? "View active repairs" : "Book a repair",
+                _showHistory
+                    ? new Command(() =>
+                    {
+                        _showHistory = false;
+                        Render();
+                    })
+                    : new Command(async () => await Shell.Current.GoToAsync(nameof(BookServicePage))),
+                _showHistory ? null : "Emergency help",
+                _showHistory ? null : new Command(async () => await Shell.Current.GoToAsync(nameof(EmergencySosPage)))));
         }
         else
         {
@@ -2194,7 +2361,7 @@ public sealed class CustomerSchedulePage : CustomerPageBase
             11,
             CustomerUi.Dark));
         grid.Add(text, 1, 0);
-        grid.Add(Label(FormatStatus(request.CurrentStatus), 11, CustomerUi.Orange), 2, 0);
+        grid.Add(StatusChip(FormatStatus(request.CurrentStatus)), 2, 0);
 
         var card = Card(grid, Colors.White, 8, new Thickness(12));
         card.GestureRecognizers.Add(new TapGestureRecognizer
@@ -2289,12 +2456,21 @@ public sealed class CustomerMessagesPage : CustomerPageBase
             .ToArray();
         if (visibleConversations.Length == 0)
         {
-            body.Add(Card(Label(
+            body.Add(EmptyState(
+                string.IsNullOrWhiteSpace(_searchText) ? "No conversations yet" : "No matching conversations",
                 string.IsNullOrWhiteSpace(_searchText)
-                    ? "No booking conversations are available in this view yet."
-                    : "No conversations match your search.",
-                12,
-                CustomerUi.Muted)));
+                    ? "Messages open automatically when a shop, mechanic, or BikeMate emergency responder is connected to your booking."
+                    : "Try a booking ID, shop name, mechanic name, or clear the search to see all conversations.",
+                string.IsNullOrWhiteSpace(_searchText) ? "Book a repair" : "Clear search",
+                string.IsNullOrWhiteSpace(_searchText)
+                    ? new Command(async () => await Shell.Current.GoToAsync(nameof(BookServicePage)))
+                    : new Command(() =>
+                    {
+                        _searchText = string.Empty;
+                        Render();
+                    }),
+                string.IsNullOrWhiteSpace(_searchText) ? "View schedule" : null,
+                string.IsNullOrWhiteSpace(_searchText) ? new Command(async () => await Shell.Current.GoToAsync("//CustomerSchedulePage")) : null));
         }
         else
         {
@@ -2344,8 +2520,9 @@ public sealed class CustomerMessagesPage : CustomerPageBase
             TextColor = selected ? Colors.White : CustomerUi.Dark,
             FontFamily = CustomerUi.FontDisplay,
             FontAttributes = FontAttributes.Bold,
-            FontSize = CustomerUi.BodySize,
+            FontSize = CustomerUi.CaptionSize,
             CornerRadius = 7,
+            Padding = new Thickness(4, 0),
             Command = new Command(() =>
             {
                 _filter = value;
@@ -3127,7 +3304,7 @@ public sealed class CustomerPaymentsPage : CustomerPageBase
         body.Add(Header("Payments", false));
         if (!string.IsNullOrWhiteSpace(banner))
         {
-            body.Add(Card(Label(banner, 11, CustomerUi.Muted), Colors.White, 8, new Thickness(12)));
+            body.Add(NoticeCard(banner));
         }
 
         body.Add(PaymentTabs());
@@ -3138,12 +3315,21 @@ public sealed class CustomerPaymentsPage : CustomerPageBase
             .ToArray();
         if (visiblePayments.Length == 0)
         {
-            body.Add(Card(Label(
+            body.Add(EmptyState(
+                _showHistory ? "No payment history yet" : "No payment due",
                 _showHistory
-                    ? "No completed, cancelled, failed, or refunded payments yet."
-                    : "No payments are currently awaiting completion.",
-                12,
-                CustomerUi.Muted)));
+                    ? "Paid, cancelled, failed, and refunded payments will appear here once a checkout has been processed."
+                    : "When a shop confirms pricing for a booking, the secure PayMongo checkout will appear here.",
+                _showHistory ? "View ongoing" : "Book a repair",
+                _showHistory
+                    ? new Command(() =>
+                    {
+                        _showHistory = false;
+                        Render();
+                    })
+                    : new Command(async () => await Shell.Current.GoToAsync(nameof(BookServicePage))),
+                _showHistory ? null : "View schedule",
+                _showHistory ? null : new Command(async () => await Shell.Current.GoToAsync("//CustomerSchedulePage"))));
         }
         else
         {
@@ -3231,16 +3417,27 @@ public sealed class CustomerPaymentsPage : CustomerPageBase
         grid.Add(new Image { Source = ImageSource.FromUri(new Uri(CustomerUi.OnlineBikeRepairImage)), WidthRequest = 64, HeightRequest = 64, Aspect = Aspect.AspectFill }, 0, 0);
 
         var text = new VerticalStackLayout { Spacing = 6, Margin = new Thickness(8, 0, 0, 0) };
-        text.Add(Label(request?.ServiceName ?? $"Request #{payment.RequestId}", 11, CustomerUi.Dark));
-        text.Add(Label($"Total 1 Item: {Money(payment.Amount)}", 10, CustomerUi.Dark));
-        text.Add(Label("View full specifications", 10, CustomerUi.Dark));
+        text.Add(Label(request?.ServiceName ?? $"Request #{payment.RequestId}", 12, CustomerUi.Dark, FontAttributes.Bold));
+        text.Add(Label($"Amount: {Money(payment.Amount)}", 10, CustomerUi.Dark));
+        text.Add(Label(
+            string.Equals(payment.Status, "paid", StringComparison.OrdinalIgnoreCase)
+                ? "Tap to view receipt and invoice."
+                : "Tap to review or continue secure checkout.",
+            10,
+            CustomerUi.Muted));
         grid.Add(text, 1, 0);
-        grid.Add(Label(FormatStatus(payment.Status), 10, CustomerUi.Orange), 2, 0);
+        grid.Add(StatusChip(FormatStatus(payment.Status)), 2, 0);
 
-        var row = Card(grid, Colors.White, 0, new Thickness(8));
+        var row = Card(grid, Colors.White, 8, new Thickness(10));
         row.GestureRecognizers.Add(new TapGestureRecognizer
         {
-            Command = new Command(async () => await Shell.Current.GoToAsync($"{nameof(PaymentCheckoutPage)}?paymentId={payment.PaymentId}"))
+            Command = new Command(async () =>
+            {
+                var route = string.Equals(payment.Status, "paid", StringComparison.OrdinalIgnoreCase)
+                    ? $"{nameof(PaymentReceiptPage)}?paymentId={payment.PaymentId}"
+                    : $"{nameof(PaymentCheckoutPage)}?paymentId={payment.PaymentId}";
+                await Shell.Current.GoToAsync(route);
+            })
         });
         return row;
     }
@@ -3893,7 +4090,7 @@ public sealed class PaymentReceiptPage : CustomerPageBase, IQueryAttributable
         }
 
         var receipt = new VerticalStackLayout { Spacing = 14 };
-        receipt.Add(new Image { Source = "bikemate_logo.png", HeightRequest = 64, HorizontalOptions = LayoutOptions.Center });
+        receipt.Add(new Image { Source = "bikemate_logo", HeightRequest = 64, HorizontalOptions = LayoutOptions.Center });
         var title = Label("Payment confirmed", 18, CustomerUi.Dark, FontAttributes.Bold);
         title.HorizontalTextAlignment = TextAlignment.Center;
         receipt.Add(title);

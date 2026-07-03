@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" Version="4.2.0" />
+    <PackageReference Include="CloudinaryDotNet" Version="1.29.2" />
     <PackageReference Include="Google.Apis.Auth" Version="1.75.0" />
     <PackageReference Include="MailKit" Version="4.17.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.8" />
@@ -23,6 +24,11 @@
   <ItemGroup>
     <ProjectReference Include="..\BikeMate.Infrastructure\BikeMate.Infrastructure.csproj" />
     <ProjectReference Include="..\BikeMate.Core\BikeMate.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Remove="appsettings.Local.json" />
+    <None Include="appsettings.Local.json" CopyToOutputDirectory="Never" CopyToPublishDirectory="Never" />
   </ItemGroup>
 
 </Project>

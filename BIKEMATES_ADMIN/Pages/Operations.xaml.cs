@@ -41,10 +41,13 @@ public partial class Operations : ContentPage
             }
 
             RefreshServiceList();
+            ServiceEditorStatusLabel.Text = ServiceItems.Count == 0
+                ? "No services yet. Add a category, service name, base price, and estimated duration."
+                : "Services loaded. Select a service to edit, or complete the editor to add a new one.";
         }
         catch (Exception ex)
         {
-            await DisplayAlertAsync("Services", $"Unable to load services from API: {ex.Message}", "OK");
+            ServiceEditorStatusLabel.Text = $"Unable to load services from API: {ex.Message}";
         }
     }
 
@@ -164,7 +167,7 @@ public partial class Operations : ContentPage
         _selectedServiceId = service?.ServiceId;
         if (service is null)
         {
-            ServiceEditorStatusLabel.Text = "Select a service below to update it, or enter new details to add a shop service.";
+            ServiceEditorStatusLabel.Text = "No service selected. Complete the editor to add a shop service.";
             return;
         }
 
@@ -178,6 +181,12 @@ public partial class Operations : ContentPage
     }
 
     private void ServiceSearchBar_TextChanged(object? sender, TextChangedEventArgs e) => RefreshServiceList();
+
+    private void ClearServiceSearch_Clicked(object? sender, EventArgs e)
+    {
+        ServiceSearchBar.Text = string.Empty;
+        RefreshServiceList();
+    }
 
     private void ServiceCategorySearchBar_TextChanged(object? sender, TextChangedEventArgs e)
     {
@@ -329,7 +338,7 @@ public partial class Operations : ContentPage
         DescriptionEditor.Text = string.Empty;
         ActiveSwitch.IsToggled = true;
         ServicesCollectionView.SelectedItem = null;
-        ServiceEditorStatusLabel.Text = "Select a service below to update it, or enter new details to add a shop service.";
+        ServiceEditorStatusLabel.Text = "Editor cleared. Add a service or select one from the list.";
     }
 
     private ServiceItem? GetSelectedService()

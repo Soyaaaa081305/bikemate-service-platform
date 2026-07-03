@@ -42,7 +42,7 @@
                 </VerticalStackLayout>
 
                 <Button Grid.Column="2"
-                        Text="Out"
+                        Text="Sign out"
                         Style="{StaticResource MiniButton}"
                         BackgroundColor="White"
                         Clicked="SignOut_Clicked" />
@@ -54,7 +54,7 @@
                 <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
                     <VerticalStackLayout Spacing="3">
                         <Label Text="Shop Admin Menu" Style="{StaticResource PageTitle}" />
-                        <Label Text="Manage your shop, bookings, mechanics, and account."
+                        <Label Text="Your command center for booking flow, catalog readiness, mechanics, and account support."
                                Style="{StaticResource SmallMuted}"
                                LineBreakMode="WordWrap" />
                     </VerticalStackLayout>
@@ -78,7 +78,7 @@
                 <Frame Style="{StaticResource CardFrame}">
                     <VerticalStackLayout Spacing="10">
                         <Label Text="OPERATIONS" Style="{StaticResource SectionLabel}" Margin="0" />
-                        <Button Text="Bookings" Style="{StaticResource OutlineButton}" Clicked="Calendar_Clicked" />
+                        <Button Text="Bookings Queue" Style="{StaticResource OutlineButton}" Clicked="Calendar_Clicked" />
                         <Button Text="Mechanics" Style="{StaticResource OutlineButton}" Clicked="Admins_Clicked" />
                         <Button Text="Messages" Style="{StaticResource OutlineButton}" Clicked="Messages_Clicked" />
                     </VerticalStackLayout>

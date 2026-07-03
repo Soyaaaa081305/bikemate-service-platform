@@ -7,12 +7,19 @@
 
     <Grid RowDefinitions="Auto,*">
         <VerticalStackLayout Grid.Row="0" BackgroundColor="{StaticResource Navy}" Padding="18,16,18,18" Spacing="4">
-            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
-                <VerticalStackLayout Spacing="2">
+            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                <Button Text="&lt;" Style="{StaticResource BackButton}" Clicked="Exit_Clicked" VerticalOptions="Center" />
+                <VerticalStackLayout Grid.Column="1" Spacing="2">
                     <Label Text="Notifications" Style="{StaticResource HeaderTitle}" />
-                    <Label Text="Orders, requests, payments, and system alerts." Style="{StaticResource HeaderSubtitle}" />
+                    <Label x:Name="NotificationStatusLabel"
+                           Text="Orders, requests, payments, and system alerts."
+                           Style="{StaticResource HeaderSubtitle}" />
                 </VerticalStackLayout>
-                <Button Grid.Column="1" Text="&lt;" Style="{StaticResource BackButton}" Clicked="Exit_Clicked" VerticalOptions="Center" />
+                <Button Grid.Column="2"
+                        Text="Reload"
+                        Style="{StaticResource MiniButton}"
+                        Clicked="Reload_Clicked"
+                        VerticalOptions="Center" />
             </Grid>
         </VerticalStackLayout>
         <ScrollView Grid.Row="1">
@@ -20,7 +27,13 @@
                 <CollectionView ItemsSource="{Binding NotificationItems}">
                     <CollectionView.EmptyView>
                         <Frame Style="{StaticResource CardFrame}">
-                            <Label Text="No notifications returned by the API yet." Style="{StaticResource SmallMuted}" />
+                            <VerticalStackLayout Spacing="8">
+                                <Label Text="No notifications yet" Style="{StaticResource ItemTitle}" HorizontalTextAlignment="Center" />
+                                <Label Text="Booking, payment, mechanic, and approval alerts will appear here after the API returns them."
+                                       Style="{StaticResource SmallMuted}"
+                                       HorizontalTextAlignment="Center"
+                                       LineBreakMode="WordWrap" />
+                            </VerticalStackLayout>
                         </Frame>
                     </CollectionView.EmptyView>
                     <CollectionView.ItemTemplate>
@@ -35,7 +48,10 @@
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
                 </CollectionView>
-                <Button Text="Mark All As Read" Style="{StaticResource PrimaryButton}" Clicked="MarkAllAsRead_Clicked" />
+                <Button x:Name="MarkAllButton"
+                        Text="Mark All As Read"
+                        Style="{StaticResource PrimaryButton}"
+                        Clicked="MarkAllAsRead_Clicked" />
             </VerticalStackLayout>
         </ScrollView>
     </Grid>

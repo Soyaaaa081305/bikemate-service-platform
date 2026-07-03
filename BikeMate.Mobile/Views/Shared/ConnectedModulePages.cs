@@ -26,6 +26,7 @@ public abstract class ConnectedModulePage : ContentPage
     private readonly IReadOnlyList<ModuleAction> _actions;
     private bool _isLoading;
     private string? _banner;
+    private string? _searchText;
     private IReadOnlyList<ModuleCard> _cards = [];
 
     protected ConnectedModulePage(
@@ -93,6 +94,8 @@ public abstract class ConnectedModulePage : ContentPage
 
     private void Render(string? banner = null)
     {
+        var visibleCards = FilterCards();
+
         var root = new Grid
         {
             RowDefinitions =
@@ -115,6 +118,11 @@ public abstract class ConnectedModulePage : ContentPage
             body.Add(ActionRow());
         }
 
+        if (_cards.Count > 0 || !string.IsNullOrWhiteSpace(_searchText))
+        {
+            body.Add(SearchRow());
+        }
+
         if (!string.IsNullOrWhiteSpace(banner))
         {
             body.Add(StateCard(banner, Colors.White));
@@ -127,11 +135,15 @@ public abstract class ConnectedModulePage : ContentPage
 
         if (_cards.Count == 0 && !_isLoading)
         {
-            body.Add(StateCard(_emptyMessage, Colors.White));
+            body.Add(EmptyState(_emptyMessage));
+        }
+        else if (visibleCards.Count == 0 && !_isLoading)
+        {
+            body.Add(EmptyState($"No records match \"{_searchText}\". Clear the search to return to the full list."));
         }
         else
         {
-            foreach (var card in _cards)
+            foreach (var card in visibleCards)
             {
                 body.Add(DataCard(card));
             }
@@ -151,6 +163,7 @@ public abstract class ConnectedModulePage : ContentPage
             ColumnDefinitions =
             {
                 new ColumnDefinition(GridLength.Star),
+                new ColumnDefinition(GridLength.Auto),
                 new ColumnDefinition(GridLength.Auto),
                 new ColumnDefinition(GridLength.Auto)
             }
@@ -174,6 +187,19 @@ public abstract class ConnectedModulePage : ContentPage
         grid.Add(text, 0, 0);
         grid.Add(new Button
         {
+            Text = "Dashboard",
+            BackgroundColor = Colors.White,
+            TextColor = Dark,
+            BorderColor = BorderColor,
+            BorderWidth = 1,
+            CornerRadius = 8,
+            HeightRequest = 40,
+            Padding = new Thickness(12, 0),
+            FontSize = 13,
+            Command = new Command(async () => await Shell.Current.GoToAsync("//AdminDashboardPage"))
+        }, 1, 0);
+        grid.Add(new Button
+        {
             Text = _isLoading ? "..." : "Refresh",
             IsEnabled = !_isLoading,
             BackgroundColor = Orange,
@@ -182,7 +208,7 @@ public abstract class ConnectedModulePage : ContentPage
             HeightRequest = 40,
             Padding = new Thickness(14, 0),
             Command = new Command(async () => await LoadAsync())
-        }, 1, 0);
+        }, 2, 0);
         grid.Add(new Button
         {
             Text = "Log out",
@@ -195,7 +221,7 @@ public abstract class ConnectedModulePage : ContentPage
             Padding = new Thickness(12, 0),
             FontSize = 13,
             Command = new Command(async () => await AppNavigation.ConfirmAndSignOutAsync(this))
-        }, 2, 0);
+        }, 3, 0);
 
         return grid;
     }
@@ -221,6 +247,62 @@ public abstract class ConnectedModulePage : ContentPage
         }
 
         return new ScrollView { Orientation = ScrollOrientation.Horizontal, Content = row };
+    }
+
+    private View SearchRow()
+    {
+        var search = new SearchBar
+        {
+            Text = _searchText ?? string.Empty,
+            Placeholder = $"Search {_pageTitle.ToLowerInvariant()}",
+            BackgroundColor = Colors.White,
+            TextColor = Dark,
+            PlaceholderColor = Muted,
+            FontSize = 13,
+            HeightRequest = 44
+        };
+        search.TextChanged += (_, args) =>
+        {
+            var nextSearch = string.IsNullOrWhiteSpace(args.NewTextValue) ? null : args.NewTextValue;
+            if (string.Equals(_searchText, nextSearch, StringComparison.Ordinal))
+            {
+                return;
+            }
+
+            _searchText = nextSearch;
+            Render(_banner);
+        };
+
+        var grid = new Grid
+        {
+            ColumnSpacing = 8,
+            ColumnDefinitions =
+            {
+                new ColumnDefinition(GridLength.Star),
+                new ColumnDefinition(GridLength.Auto)
+            }
+        };
+        grid.Add(search, 0, 0);
+        grid.Add(new Button
+        {
+            Text = "Clear",
+            IsEnabled = !string.IsNullOrWhiteSpace(_searchText),
+            BackgroundColor = Colors.White,
+            TextColor = Muted,
+            BorderColor = BorderColor,
+            BorderWidth = 1,
+            CornerRadius = 8,
+            HeightRequest = 40,
+            Padding = new Thickness(12, 0),
+            FontSize = 13,
+            Command = new Command(() =>
+            {
+                _searchText = null;
+                Render(_banner);
+            })
+        }, 1, 0);
+
+        return grid;
     }
 
     private static View DataCard(ModuleCard card)
@@ -268,6 +350,50 @@ public abstract class ConnectedModulePage : ContentPage
                 LineBreakMode = LineBreakMode.WordWrap
             }
         };
+    }
+
+    private static View EmptyState(string text)
+    {
+        var stack = new VerticalStackLayout { Spacing = 8 };
+        stack.Add(new Label
+        {
+            Text = text,
+            TextColor = Dark,
+            FontSize = 14,
+            FontAttributes = FontAttributes.Bold,
+            LineBreakMode = LineBreakMode.WordWrap
+        });
+        stack.Add(new Label
+        {
+            Text = "Use the tabs, quick actions, or refresh once backend data changes.",
+            TextColor = Muted,
+            FontSize = 13,
+            LineBreakMode = LineBreakMode.WordWrap
+        });
+
+        return new Border
+        {
+            Stroke = BorderColor,
+            StrokeShape = new RoundRectangle { CornerRadius = 8 },
+            BackgroundColor = Colors.White,
+            Padding = new Thickness(14),
+            Content = stack
+        };
+    }
+
+    private IReadOnlyList<ModuleCard> FilterCards()
+    {
+        if (string.IsNullOrWhiteSpace(_searchText))
+        {
+            return _cards;
+        }
+
+        var query = _searchText.Trim();
+        return _cards
+            .Where(card =>
+                card.Title.Contains(query, StringComparison.OrdinalIgnoreCase) ||
+                card.Body.Contains(query, StringComparison.OrdinalIgnoreCase))
+            .ToArray();
     }
 
     private static IEnumerable<ModuleCard> ToCards(JsonElement root)
@@ -422,8 +548,13 @@ public sealed class AdminDashboardPage : ContentPage
                 emergencies,
                 BuildWeeklyCustomerCounts(customers));
 
+            var pendingMechanics = mechanics.Count(x => !x.IsVerified);
+            var pendingShops = shops.Count(x => !string.Equals(x.ShopStatus, "verified", StringComparison.OrdinalIgnoreCase));
+
             _banner = emergencies.Length > 0
                 ? $"{emergencies.Length} active emergency request{(emergencies.Length == 1 ? string.Empty : "s")} need monitoring."
+                : pendingMechanics + pendingShops > 0
+                    ? $"{pendingMechanics + pendingShops} verification item{(pendingMechanics + pendingShops == 1 ? string.Empty : "s")} are waiting for admin review."
                 : null;
         }
         catch (Exception ex)
@@ -439,19 +570,6 @@ public sealed class AdminDashboardPage : ContentPage
 
     private void Render()
     {
-        var root = new Grid
-        {
-            ColumnSpacing = 0,
-            RowSpacing = 0,
-            ColumnDefinitions =
-            {
-                new ColumnDefinition { Width = new GridLength(224) },
-                new ColumnDefinition(GridLength.Star)
-            }
-        };
-
-        root.Add(BuildSidebar(), 0, 0);
-
         var content = new Grid
         {
             RowSpacing = 14,
@@ -472,7 +590,27 @@ public sealed class AdminDashboardPage : ContentPage
         content.Add(BuildMetricsGrid(), 0, 3);
         content.Add(BuildRequestsSection(), 0, 4);
 
-        root.Add(new ScrollView { Content = content }, 1, 0);
+        var root = new Grid
+        {
+            ColumnSpacing = 0,
+            RowSpacing = 0
+        };
+
+        if (_isCompact)
+        {
+            root.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
+            root.RowDefinitions.Add(new RowDefinition(GridLength.Star));
+            root.Add(BuildCompactNav(), 0, 0);
+            root.Add(new ScrollView { Content = content }, 0, 1);
+        }
+        else
+        {
+            root.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(224) });
+            root.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));
+            root.Add(BuildSidebar(), 0, 0);
+            root.Add(new ScrollView { Content = content }, 1, 0);
+        }
+
         Content = root;
     }
 
@@ -498,7 +636,7 @@ public sealed class AdminDashboardPage : ContentPage
                     HeightRequest = 36,
                     Content = new Image
                     {
-                        Source = "bikemate_logo.png",
+                        Source = "bikemate_logo",
                         Aspect = Aspect.AspectFit,
                         Margin = new Thickness(5)
                     }
@@ -540,6 +678,11 @@ public sealed class AdminDashboardPage : ContentPage
         stack.Add(SidebarButton("Requests", nameof(AdminRequestsPage)));
         stack.Add(SidebarButton("Payments", nameof(AdminPaymentsPage)));
 
+        stack.Add(SectionLabel("Insights"));
+        stack.Add(SidebarButton("Reports", nameof(AdminReportsPage)));
+        stack.Add(SidebarButton("Revenue", nameof(AdminRevenueReportPage)));
+        stack.Add(SidebarButton("Audit Logs", nameof(AdminAuditLogsPage)));
+
         stack.Add(new BoxView { HeightRequest = 1, BackgroundColor = Color.FromArgb("#2D3138"), Margin = new Thickness(0, 6) });
         stack.Add(SidebarButton("Logout", null, false, true));
 
@@ -549,6 +692,72 @@ public sealed class AdminDashboardPage : ContentPage
             Stroke = Colors.Transparent,
             Content = new ScrollView { Content = stack }
         };
+    }
+
+    private View BuildCompactNav()
+    {
+        var row = new HorizontalStackLayout
+        {
+            Spacing = 8,
+            Padding = new Thickness(14, 10)
+        };
+
+        row.Add(new Label
+        {
+            Text = "Admin",
+            TextColor = Colors.White,
+            FontFamily = "Inter",
+            FontSize = AppTypography.BodySize,
+            FontAttributes = FontAttributes.Bold,
+            VerticalTextAlignment = TextAlignment.Center,
+            Margin = new Thickness(0, 0, 4, 0)
+        });
+
+        row.Add(CompactNavButton("Dashboard", "//AdminDashboardPage", true));
+        row.Add(CompactNavButton("Emergency", nameof(AdminEmergencyRequestsPage)));
+        row.Add(CompactNavButton("Users", nameof(AdminUsersPage)));
+        row.Add(CompactNavButton("Requests", nameof(AdminRequestsPage)));
+        row.Add(CompactNavButton("Reports", nameof(AdminReportsPage)));
+        row.Add(CompactNavButton("Audit", nameof(AdminAuditLogsPage)));
+        row.Add(CompactNavButton("Logout", null, false, true));
+
+        return new Border
+        {
+            BackgroundColor = SidebarBackground,
+            Stroke = Colors.Transparent,
+            Content = new ScrollView
+            {
+                Orientation = ScrollOrientation.Horizontal,
+                Content = row
+            }
+        };
+    }
+
+    private View CompactNavButton(string text, string? route, bool active = false, bool danger = false)
+    {
+        var button = new Button
+        {
+            Text = text,
+            FontFamily = "PublicSans",
+            FontSize = 12,
+            HeightRequest = 34,
+            CornerRadius = 8,
+            Padding = new Thickness(12, 0),
+            BackgroundColor = active ? SidebarActive : Color.FromArgb("#1A1D22"),
+            TextColor = danger ? Color.FromArgb("#FFB6BE") : (active ? Colors.White : SidebarMuted),
+            BorderWidth = 0
+        };
+
+        if (danger)
+        {
+            button.Command = new Command(async () => await AppNavigation.SignOutAsync());
+        }
+        else if (!string.IsNullOrWhiteSpace(route))
+        {
+            button.Command = new Command(async () => await Shell.Current.GoToAsync(route));
+        }
+
+        return button;
     }
 
     private View SectionLabel(string text)
@@ -771,7 +980,7 @@ public sealed class AdminDashboardPage : ContentPage
 
         grid.Add(new Button
         {
-            Text = "Open Emergency Window",
+            Text = _isCompact ? "Review" : "Open Emergency Window",
             BackgroundColor = Red,
             TextColor = Colors.White,
             FontFamily = "Inter",
@@ -798,16 +1007,25 @@ public sealed class AdminDashboardPage : ContentPage
         var grid = new Grid
         {
             ColumnSpacing = 12,
-            RowSpacing = 12,
-            ColumnDefinitions =
-            {
-                new ColumnDefinition(new GridLength(1.2, GridUnitType.Star)),
-                new ColumnDefinition(GridLength.Star)
-            }
+            RowSpacing = 12
         };
 
-        grid.Add(BuildWeeklyGrowthCard(), 0, 0);
-        grid.Add(BuildNetworkHealthCard(), 1, 0);
+        if (_isCompact)
+        {
+            grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));
+            grid.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
+            grid.RowDefinitions.Add(new RowDefinition(GridLength.Auto));
+            grid.Add(BuildWeeklyGrowthCard(), 0, 0);
+            grid.Add(BuildNetworkHealthCard(), 0, 1);
+        }
+        else
+        {
+            grid.ColumnDefinitions.Add(new ColumnDefinition(new GridLength(1.2, GridUnitType.Star)));
+            grid.ColumnDefinitions.Add(new ColumnDefinition(GridLength.Star));
+            grid.Add(BuildWeeklyGrowthCard(), 0, 0);
+            grid.Add(BuildNetworkHealthCard(), 1, 0);
+        }
+
         return grid;
     }
 
@@ -1332,60 +1550,76 @@ public sealed class AdminDashboardPage : ContentPage
 
 public sealed class AdminUsersPage() : ConnectedModulePage(
     "Users",
-    "Users, roles, account status, and verification state.",
+    "Review accounts, roles, account status, and verification state.",
     "admin/users",
-    "No users were returned yet.",
+    "No user accounts were returned yet.",
     new ModuleAction("Mechanics", nameof(AdminMechanicsVerificationPage)),
-    new ModuleAction("Shops", nameof(AdminShopsVerificationPage)));
+    new ModuleAction("Shops", nameof(AdminShopsVerificationPage)),
+    new ModuleAction("Payments", nameof(AdminPaymentsPage)));
 
 public sealed class AdminEmergencyRequestsPage() : ConnectedModulePage(
     "Emergency Monitoring",
-    "Emergency service requests across the platform.",
+    "Monitor urgent service requests across the platform.",
     "admin/emergency-requests",
-    "No emergency requests are active right now.");
+    "No emergency requests are active right now.",
+    new ModuleAction("All Requests", nameof(AdminRequestsPage)),
+    new ModuleAction("Audit Logs", nameof(AdminAuditLogsPage)));
 
 public sealed class AdminMechanicsVerificationPage() : ConnectedModulePage(
     "Mechanic Verification",
-    "Mechanic applications awaiting admin review.",
+    "Review mechanic applications that are awaiting admin approval.",
     "admin/mechanics/pending",
-    "No mechanic verification requests are pending.");
+    "No mechanic verification requests are pending.",
+    new ModuleAction("Users", nameof(AdminUsersPage)),
+    new ModuleAction("Shops", nameof(AdminShopsVerificationPage)));
 
 public sealed class AdminShopsVerificationPage() : ConnectedModulePage(
     "Shop Verification",
-    "Shop applications awaiting admin review.",
+    "Review partner shop applications that are awaiting admin approval.",
     "admin/shops/pending",
-    "No shop verification requests are pending.");
+    "No shop verification requests are pending.",
+    new ModuleAction("Users", nameof(AdminUsersPage)),
+    new ModuleAction("Mechanics", nameof(AdminMechanicsVerificationPage)));
 
 public sealed class AdminRequestsPage() : ConnectedModulePage(
-    "Requests",
-    "All service requests with live status and assignments.",
+    "Service Requests",
+    "Track customer requests, live status, assignments, and totals.",
     "admin/service-requests",
     "No service requests were returned.",
-    new ModuleAction("Emergency", nameof(AdminEmergencyRequestsPage)));
+    new ModuleAction("Emergency", nameof(AdminEmergencyRequestsPage)),
+    new ModuleAction("Payments", nameof(AdminPaymentsPage)),
+    new ModuleAction("Audit Logs", nameof(AdminAuditLogsPage)));
 
 public sealed class AdminPaymentsPage() : ConnectedModulePage(
     "Payments",
-    "Payment records, provider status, amounts, and references.",
+    "Review payment records, provider status, amounts, and references.",
     "admin/payments",
-    "No payments were returned.");
+    "No payments were returned.",
+    new ModuleAction("Requests", nameof(AdminRequestsPage)),
+    new ModuleAction("Revenue", nameof(AdminRevenueReportPage)));
 
 public sealed class AdminReportsPage() : ConnectedModulePage(
     "Reports",
-    "Top services and platform reporting from backend queries.",
+    "Review top services and platform reporting from backend queries.",
     "admin/reports/top-services",
     "No report rows were returned.",
-    new ModuleAction("Revenue", nameof(AdminRevenueReportPage)));
+    new ModuleAction("Revenue", nameof(AdminRevenueReportPage)),
+    new ModuleAction("Audit Logs", nameof(AdminAuditLogsPage)));
 
 public sealed class AdminRevenueReportPage() : ConnectedModulePage(
     "Revenue Report",
-    "Revenue and paid payment count for the configured report range.",
+    "Review revenue and paid payment count for the configured report range.",
     "admin/reports/revenue",
-    "No revenue report data was returned.");
+    "No revenue report data was returned.",
+    new ModuleAction("Payments", nameof(AdminPaymentsPage)),
+    new ModuleAction("Reports", nameof(AdminReportsPage)));
 
 public sealed class AdminAuditLogsPage() : ConnectedModulePage(
     "Audit Logs",
-    "Recent system actions and traceable admin changes.",
+    "Review recent system actions and traceable admin changes.",
     "admin/audit-logs",
-    "No audit logs were returned.");
+    "No audit logs were returned.",
+    new ModuleAction("Users", nameof(AdminUsersPage)),
+    new ModuleAction("Reports", nameof(AdminReportsPage)));
 
 }

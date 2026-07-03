@@ -48,10 +48,10 @@
             Routing.RegisterRoute(nameof(Views.Mechanic.MechanicRatingsPage), typeof(Views.Mechanic.MechanicRatingsPage));
             Routing.RegisterRoute(nameof(Views.Mechanic.MechanicHistoryPage), typeof(Views.Mechanic.MechanicHistoryPage));
             Routing.RegisterRoute(nameof(Views.Mechanic.MechanicHistoryDetailsPage), typeof(Views.Mechanic.MechanicHistoryDetailsPage));
+            Routing.RegisterRoute(nameof(Views.Admin.AdminUsersPage), typeof(Views.Admin.AdminUsersPage));
             Routing.RegisterRoute(nameof(Views.Admin.AdminMechanicsVerificationPage), typeof(Views.Admin.AdminMechanicsVerificationPage));
             Routing.RegisterRoute(nameof(Views.Admin.AdminShopsVerificationPage), typeof(Views.Admin.AdminShopsVerificationPage));
-            Routing.RegisterRoute(nameof(Views.Admin.AdminAuditLogsPage), typeof(Views.Admin.AdminAuditLogsPage));
-            Routing.RegisterRoute(nameof(Views.Admin.AdminEmergencyRequestsPage), typeof(Views.Admin.AdminEmergencyRequestsPage));
+            Routing.RegisterRoute(nameof(Views.Admin.AdminPaymentsPage), typeof(Views.Admin.AdminPaymentsPage));
             Routing.RegisterRoute(nameof(Views.Admin.AdminRevenueReportPage), typeof(Views.Admin.AdminRevenueReportPage));
         }
     }

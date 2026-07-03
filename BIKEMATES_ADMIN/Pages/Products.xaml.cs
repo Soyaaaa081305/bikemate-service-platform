@@ -45,10 +45,13 @@ public partial class Products : ContentPage
 
             ReloadProductCategories();
             RefreshProductGrid();
+            ProductEditorStatusLabel.Text = ProductItems.Count == 0
+                ? "Inventory is empty. Add the first product with image, category, price, and stock."
+                : "Inventory loaded. Select a product to edit, or complete the editor to add a new one.";
         }
         catch (Exception ex)
         {
-            await DisplayAlertAsync("Products", $"Unable to load products from API: {ex.Message}", "OK");
+            ProductEditorStatusLabel.Text = $"Unable to load products from API: {ex.Message}";
         }
     }
 
@@ -194,7 +197,7 @@ public partial class Products : ContentPage
         _selectedProductId = product?.ProductId;
         if (product is null)
         {
-            ProductEditorStatusLabel.Text = "Select an item below to update it, or enter new details to add a product.";
+            ProductEditorStatusLabel.Text = "No product selected. Complete the editor to add a new product.";
             return;
         }
 
@@ -209,6 +212,12 @@ public partial class Products : ContentPage
     }
 
     private void ProductSearchBar_TextChanged(object? sender, TextChangedEventArgs e) => RefreshProductGrid();
+
+    private void ClearProductSearch_Clicked(object? sender, EventArgs e)
+    {
+        ProductSearchBar.Text = string.Empty;
+        RefreshProductGrid();
+    }
 
     private void ProductCategorySearchBar_TextChanged(object? sender, TextChangedEventArgs e)
     {
@@ -345,7 +354,7 @@ public partial class Products : ContentPage
         ProductPreviewImage.Source = null;
         ProductPreviewLabel.IsVisible = true;
         ProductsCollectionView.SelectedItem = null;
-        ProductEditorStatusLabel.Text = "Select an item below to update it, or enter new details to add a product.";
+        ProductEditorStatusLabel.Text = "Editor cleared. Add a product or select one from inventory.";
     }
 
     private void ApplyProductPreview(string? imageUrl)

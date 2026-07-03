@@ -7,12 +7,20 @@
 
     <Grid RowDefinitions="Auto,*">
         <VerticalStackLayout Grid.Row="0" BackgroundColor="{StaticResource Navy}" Padding="18,16,18,18" Spacing="4">
-            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
-                <VerticalStackLayout Spacing="2">
-                    <Label Text="Calendar" Style="{StaticResource HeaderTitle}" />
-                    <Label Text="Bookings and mechanic schedules." Style="{StaticResource HeaderSubtitle}" />
+            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                <Button Text="&lt;" Style="{StaticResource BackButton}" Clicked="Exit_Clicked" VerticalOptions="Center" />
+                <VerticalStackLayout Grid.Column="1" Spacing="2">
+                    <Label Text="Bookings" Style="{StaticResource HeaderTitle}" />
+                    <Label x:Name="BookingsSubtitleLabel"
+                           Text="Active customer requests and reservation schedule."
+                           Style="{StaticResource HeaderSubtitle}" />
                 </VerticalStackLayout>
-                <Button Grid.Column="1" Text="&lt;" Style="{StaticResource BackButton}" Clicked="Exit_Clicked" VerticalOptions="Center" />
+                <Button Grid.Column="2"
+                        x:Name="ReloadButton"
+                        Text="Reload"
+                        Style="{StaticResource MiniButton}"
+                        Clicked="Reload_Clicked"
+                        VerticalOptions="Center" />
             </Grid>
         </VerticalStackLayout>
 
@@ -20,21 +28,106 @@
             <VerticalStackLayout Padding="14,12,14,30" Spacing="14">
                 <Frame Style="{StaticResource CardFrame}">
                     <VerticalStackLayout Spacing="10">
-                        <Grid ColumnDefinitions="Auto,*,Auto">
-                            <Button Text="Prev" Style="{StaticResource MiniButton}" />
-                            <Label Grid.Column="1" Text="Bookings Calendar" Style="{StaticResource PageTitle}" HorizontalTextAlignment="Center" />
-                            <Button Grid.Column="2" Text="Next" Style="{StaticResource MiniButton}" />
+                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                            <VerticalStackLayout Spacing="2">
+                                <Label Text="Booking Work Queue" Style="{StaticResource PageTitle}" />
+                                <Label x:Name="BookingStatusLabel"
+                                       Text="Loading customer bookings..."
+                                       Style="{StaticResource SmallMuted}" />
+                            </VerticalStackLayout>
+                            <Label Grid.Column="1"
+                                   Text="{Binding VisibleBookings.Count, StringFormat='{0} shown'}"
+                                   Style="{StaticResource Pill}"
+                                   VerticalOptions="Center" />
                         </Grid>
-                        <Label Text="Calendar data will be populated from customer bookings and mechanic schedules once those API fields are available." Style="{StaticResource SmallMuted}" />
+
+                        <Grid ColumnDefinitions="*,*,*" ColumnSpacing="6">
+                            <Button x:Name="ActiveFilterButton"
+                                    Text="Active"
+                                    Style="{StaticResource MessengerTab}"
+                                    Clicked="ActiveFilter_Clicked" />
+                            <Button x:Name="TodayFilterButton"
+                                    Grid.Column="1"
+                                    Text="Today"
+                                    Style="{StaticResource MessengerTab}"
+                                    Clicked="TodayFilter_Clicked" />
+                            <Button x:Name="HistoryFilterButton"
+                                    Grid.Column="2"
+                                    Text="History"
+                                    Style="{StaticResource MessengerTab}"
+                                    Clicked="HistoryFilter_Clicked" />
+                        </Grid>
+
+                        <SearchBar x:Name="BookingSearchBar"
+                                   Placeholder="Search booking, customer, mechanic, or service"
+                                   Style="{StaticResource SearchInput}"
+                                   TextChanged="BookingSearchBar_TextChanged" />
                     </VerticalStackLayout>
                 </Frame>
 
-                <Label Text="Today&apos;s Bookings" Style="{StaticResource SectionLabel}" />
-                <Frame Style="{StaticResource CardFrame}">
-                    <Label Text="No bookings returned by the API for today yet." Style="{StaticResource SmallMuted}" />
-                </Frame>
+                <CollectionView x:Name="BookingsCollectionView"
+                                ItemsSource="{Binding VisibleBookings}"
+                                SelectionMode="None">
+                    <CollectionView.EmptyView>
+                        <Frame Style="{StaticResource CardFrame}">
+                            <VerticalStackLayout Spacing="8">
+                                <Label Text="No bookings in this view" Style="{StaticResource ItemTitle}" HorizontalTextAlignment="Center" />
+                                <Label Text="Try another filter or reload. New customer bookings appear here when the API returns shop requests."
+                                       Style="{StaticResource SmallMuted}"
+                                       HorizontalTextAlignment="Center"
+                                       LineBreakMode="WordWrap" />
+                                <Button Text="Reload bookings"
+                                        Style="{StaticResource PrimaryButton}"
+                                        Clicked="Reload_Clicked" />
+                            </VerticalStackLayout>
+                        </Frame>
+                    </CollectionView.EmptyView>
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate>
+                            <Frame Margin="0,4" Style="{StaticResource SmallCardFrame}">
+                                <VerticalStackLayout Spacing="9">
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                                        <VerticalStackLayout Spacing="2">
+                                            <Label Text="{Binding ServiceName}" Style="{StaticResource ItemTitle}" />
+                                            <Label Text="{Binding CustomerLine}" Style="{StaticResource TinyMuted}" />
+                                        </VerticalStackLayout>
+                                        <Label Grid.Column="1"
+                                               Text="{Binding StatusText}"
+                                               TextColor="White"
+                                               BackgroundColor="{Binding StatusColor}"
+                                               FontSize="10"
+                                               FontAttributes="Bold"
+                                               FontFamily="PTSansCaptionBold"
+                                               Padding="8,4" />
+                                    </Grid>
 
-                <Button Text="Refresh From API" Style="{StaticResource PrimaryButton}" IsEnabled="False" />
+                                    <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
+                                        <Label Text="{Binding TimingText}" Style="{StaticResource SmallMuted}" />
+                                        <Label Grid.Column="1"
+                                               Text="{Binding TotalText}"
+                                               TextColor="{StaticResource Orange}"
+                                               FontAttributes="Bold"
+                                               HorizontalTextAlignment="End" />
+                                    </Grid>
+                                    <Label Text="{Binding LocationText}" Style="{StaticResource SmallMuted}" LineBreakMode="TailTruncation" />
+                                    <Label Text="{Binding IssuePreview}" Style="{StaticResource TinyMuted}" MaxLines="2" />
+
+                                    <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                                        <Button Text="Message"
+                                                Style="{StaticResource OutlineButton}"
+                                                CommandParameter="{Binding .}"
+                                                Clicked="MessageBooking_Clicked" />
+                                        <Button Grid.Column="1"
+                                                Text="{Binding PrimaryActionText}"
+                                                Style="{StaticResource PrimaryButton}"
+                                                CommandParameter="{Binding .}"
+                                                Clicked="PrimaryBookingAction_Clicked" />
+                                    </Grid>
+                                </VerticalStackLayout>
+                            </Frame>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                </CollectionView>
             </VerticalStackLayout>
         </ScrollView>
     </Grid>

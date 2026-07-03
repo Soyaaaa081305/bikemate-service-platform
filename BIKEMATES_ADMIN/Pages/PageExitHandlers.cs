@@ -15,6 +15,11 @@ internal static class ShopAdminNavigation
 
         await Shell.Current.GoToAsync("//AdminTabs/Menu");
     }
+
+    public static Task GoToBookingsAsync()
+    {
+        return Shell.Current.GoToAsync("//AdminTabs/Bookings");
+    }
 }
 
 public partial class Admins { private async void Exit_Clicked(object? sender, EventArgs e) => await ShopAdminNavigation.BackOrMenuAsync(); }

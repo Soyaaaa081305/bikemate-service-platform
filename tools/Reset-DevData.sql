@@ -1,4 +1,4 @@
-USE [BikeMatesDB_Dev];
+﻿USE [BikeMatesDB_Dev];
 GO
 
 SET XACT_ABORT ON;
@@ -79,29 +79,29 @@ SET IDENTITY_INSERT dbo.users ON;
 INSERT INTO dbo.users
     (UserId, FirstName, LastName, Email, PhoneNumber, PasswordHash, ProfileImageUrl, EmailVerified, PhoneVerified, AccountStatus, CreatedAt, UpdatedAt)
 VALUES
-    (1, N'Admin', N'One', N'admin1@bikemate.test', N'+639170000001', @PasswordHash, N'https://placehold.co/160x160/1f2937/ffffff?text=A1', 1, 1, N'active', DATEADD(day, -30, @Now), @Now),
-    (2, N'Admin', N'Two', N'admin2@bikemate.test', N'+639170000002', @PasswordHash, N'https://placehold.co/160x160/374151/ffffff?text=A2', 1, 1, N'active', DATEADD(day, -29, @Now), @Now),
-    (3, N'Admin', N'Pending', N'admin3@bikemate.test', N'+639170000003', @PasswordHash, N'https://placehold.co/160x160/f59e0b/111827?text=AP', 1, 1, N'pending', DATEADD(day, -28, @Now), @Now),
-    (4, N'Admin', N'Suspended', N'admin4@bikemate.test', N'+639170000004', @PasswordHash, N'https://placehold.co/160x160/dc2626/ffffff?text=AS', 1, 1, N'suspended', DATEADD(day, -27, @Now), @Now),
-    (5, N'Admin', N'Ops', N'admin5@bikemate.test', N'+639170000005', @PasswordHash, N'https://placehold.co/160x160/0f766e/ffffff?text=A5', 1, 1, N'active', DATEADD(day, -26, @Now), @Now),
+    (1, N'Admin', N'One', N'admin1@bikemate.test', N'+639170000001', @PasswordHash, N'https://placehold.co/160x160/1f2937/ffffff.png?text=A1', 1, 1, N'active', DATEADD(day, -30, @Now), @Now),
+    (2, N'Admin', N'Two', N'admin2@bikemate.test', N'+639170000002', @PasswordHash, N'https://placehold.co/160x160/374151/ffffff.png?text=A2', 1, 1, N'active', DATEADD(day, -29, @Now), @Now),
+    (3, N'Admin', N'Pending', N'admin3@bikemate.test', N'+639170000003', @PasswordHash, N'https://placehold.co/160x160/f59e0b/111827.png?text=AP', 1, 1, N'pending', DATEADD(day, -28, @Now), @Now),
+    (4, N'Admin', N'Suspended', N'admin4@bikemate.test', N'+639170000004', @PasswordHash, N'https://placehold.co/160x160/dc2626/ffffff.png?text=AS', 1, 1, N'suspended', DATEADD(day, -27, @Now), @Now),
+    (5, N'Admin', N'Ops', N'admin5@bikemate.test', N'+639170000005', @PasswordHash, N'https://placehold.co/160x160/0f766e/ffffff.png?text=A5', 1, 1, N'active', DATEADD(day, -26, @Now), @Now),
 
-    (101, N'Cora', N'Active', N'customer1@bikemate.test', N'+639181000001', @PasswordHash, N'https://placehold.co/160x160/2563eb/ffffff?text=C1', 1, 1, N'active', DATEADD(day, -20, @Now), @Now),
-    (102, N'Pia', N'Pending', N'customer2@bikemate.test', N'+639181000002', @PasswordHash, N'https://placehold.co/160x160/f59e0b/111827?text=C2', 0, 1, N'pending', DATEADD(day, -19, @Now), @Now),
-    (103, N'Rena', N'Rejected', N'customer3@bikemate.test', N'+639181000003', @PasswordHash, N'https://placehold.co/160x160/dc2626/ffffff?text=C3', 1, 1, N'rejected', DATEADD(day, -18, @Now), @Now),
-    (104, N'Sam', N'Suspended', N'customer4@bikemate.test', N'+639181000004', @PasswordHash, N'https://placehold.co/160x160/7f1d1d/ffffff?text=C4', 1, 1, N'suspended', DATEADD(day, -17, @Now), @Now),
-    (105, N'Lia', N'Approved', N'customer5@bikemate.test', N'+639181000005', @PasswordHash, N'https://placehold.co/160x160/16a34a/ffffff?text=C5', 1, 1, N'active', DATEADD(day, -16, @Now), @Now),
+    (101, N'Cora', N'Active', N'customer1@bikemate.test', N'+639181000001', @PasswordHash, N'https://placehold.co/160x160/2563eb/ffffff.png?text=C1', 1, 1, N'active', DATEADD(day, -20, @Now), @Now),
+    (102, N'Pia', N'Pending', N'customer2@bikemate.test', N'+639181000002', @PasswordHash, N'https://placehold.co/160x160/f59e0b/111827.png?text=C2', 0, 1, N'pending', DATEADD(day, -19, @Now), @Now),
+    (103, N'Rena', N'Rejected', N'customer3@bikemate.test', N'+639181000003', @PasswordHash, N'https://placehold.co/160x160/dc2626/ffffff.png?text=C3', 1, 1, N'rejected', DATEADD(day, -18, @Now), @Now),
+    (104, N'Sam', N'Suspended', N'customer4@bikemate.test', N'+639181000004', @PasswordHash, N'https://placehold.co/160x160/7f1d1d/ffffff.png?text=C4', 1, 1, N'suspended', DATEADD(day, -17, @Now), @Now),
+    (105, N'Lia', N'Approved', N'customer5@bikemate.test', N'+639181000005', @PasswordHash, N'https://placehold.co/160x160/16a34a/ffffff.png?text=C5', 1, 1, N'active', DATEADD(day, -16, @Now), @Now),
 
-    (201, N'Omar', N'Budget', N'shop1@bikemate.test', N'+639191000001', @PasswordHash, N'https://placehold.co/160x160/f97316/ffffff?text=S1', 1, 1, N'active', DATEADD(day, -15, @Now), @Now),
-    (202, N'Maya', N'Standard', N'shop2@bikemate.test', N'+639191000002', @PasswordHash, N'https://placehold.co/160x160/0891b2/ffffff?text=S2', 1, 1, N'active', DATEADD(day, -14, @Now), @Now),
-    (203, N'Noel', N'Pro', N'shop3@bikemate.test', N'+639191000003', @PasswordHash, N'https://placehold.co/160x160/4f46e5/ffffff?text=S3', 1, 1, N'active', DATEADD(day, -13, @Now), @Now),
-    (204, N'Gina', N'Rapid', N'shop4@bikemate.test', N'+639191000004', @PasswordHash, N'https://placehold.co/160x160/15803d/ffffff?text=S4', 1, 1, N'active', DATEADD(day, -12, @Now), @Now),
-    (205, N'Tony', N'Premium', N'shop5@bikemate.test', N'+639191000005', @PasswordHash, N'https://placehold.co/160x160/be123c/ffffff?text=S5', 1, 1, N'active', DATEADD(day, -11, @Now), @Now),
+    (201, N'Omar', N'Budget', N'shop1@bikemate.test', N'+639191000001', @PasswordHash, N'https://placehold.co/160x160/f97316/ffffff.png?text=S1', 1, 1, N'active', DATEADD(day, -15, @Now), @Now),
+    (202, N'Maya', N'Standard', N'shop2@bikemate.test', N'+639191000002', @PasswordHash, N'https://placehold.co/160x160/0891b2/ffffff.png?text=S2', 1, 1, N'active', DATEADD(day, -14, @Now), @Now),
+    (203, N'Noel', N'Pro', N'shop3@bikemate.test', N'+639191000003', @PasswordHash, N'https://placehold.co/160x160/4f46e5/ffffff.png?text=S3', 1, 1, N'active', DATEADD(day, -13, @Now), @Now),
+    (204, N'Gina', N'Rapid', N'shop4@bikemate.test', N'+639191000004', @PasswordHash, N'https://placehold.co/160x160/15803d/ffffff.png?text=S4', 1, 1, N'active', DATEADD(day, -12, @Now), @Now),
+    (205, N'Tony', N'Premium', N'shop5@bikemate.test', N'+639191000005', @PasswordHash, N'https://placehold.co/160x160/be123c/ffffff.png?text=S5', 1, 1, N'active', DATEADD(day, -11, @Now), @Now),
 
-    (301, N'Miko', N'Junior', N'mechanic1@bikemate.test', N'+639201000001', @PasswordHash, N'https://placehold.co/160x160/0ea5e9/ffffff?text=M1', 1, 1, N'active', DATEADD(day, -10, @Now), @Now),
-    (302, N'Bea', N'Skilled', N'mechanic2@bikemate.test', N'+639201000002', @PasswordHash, N'https://placehold.co/160x160/14b8a6/ffffff?text=M2', 1, 1, N'active', DATEADD(day, -9, @Now), @Now),
-    (303, N'Rico', N'Senior', N'mechanic3@bikemate.test', N'+639201000003', @PasswordHash, N'https://placehold.co/160x160/8b5cf6/ffffff?text=M3', 1, 1, N'active', DATEADD(day, -8, @Now), @Now),
-    (304, N'Ella', N'Expert', N'mechanic4@bikemate.test', N'+639201000004', @PasswordHash, N'https://placehold.co/160x160/ec4899/ffffff?text=M4', 1, 1, N'active', DATEADD(day, -7, @Now), @Now),
-    (305, N'Dan', N'Master', N'mechanic5@bikemate.test', N'+639201000005', @PasswordHash, N'https://placehold.co/160x160/ea580c/ffffff?text=M5', 1, 1, N'active', DATEADD(day, -6, @Now), @Now);
+    (301, N'Miko', N'Junior', N'mechanic1@bikemate.test', N'+639201000001', @PasswordHash, N'https://placehold.co/160x160/0ea5e9/ffffff.png?text=M1', 1, 1, N'active', DATEADD(day, -10, @Now), @Now),
+    (302, N'Bea', N'Skilled', N'mechanic2@bikemate.test', N'+639201000002', @PasswordHash, N'https://placehold.co/160x160/14b8a6/ffffff.png?text=M2', 1, 1, N'active', DATEADD(day, -9, @Now), @Now),
+    (303, N'Rico', N'Senior', N'mechanic3@bikemate.test', N'+639201000003', @PasswordHash, N'https://placehold.co/160x160/8b5cf6/ffffff.png?text=M3', 1, 1, N'active', DATEADD(day, -8, @Now), @Now),
+    (304, N'Ella', N'Expert', N'mechanic4@bikemate.test', N'+639201000004', @PasswordHash, N'https://placehold.co/160x160/ec4899/ffffff.png?text=M4', 1, 1, N'active', DATEADD(day, -7, @Now), @Now),
+    (305, N'Dan', N'Master', N'mechanic5@bikemate.test', N'+639201000005', @PasswordHash, N'https://placehold.co/160x160/ea580c/ffffff.png?text=M5', 1, 1, N'active', DATEADD(day, -6, @Now), @Now);
 SET IDENTITY_INSERT dbo.users OFF;
 
 INSERT INTO dbo.user_roles (UserId, RoleId, AssignedAt)
@@ -113,11 +113,11 @@ UNION ALL SELECT UserId, 2, @Now FROM dbo.users WHERE UserId BETWEEN 301 AND 305
 SET IDENTITY_INSERT dbo.clients ON;
 INSERT INTO dbo.clients (ClientId, UserId, MiddleName, Sex, Birthdate, ValidIdImageUrl, CreatedAt)
 VALUES
-    (101, 101, N'Demo', N'Female', '1996-01-15', N'https://placehold.co/480x300/e0f2fe/075985?text=ID+C1', DATEADD(day, -20, @Now)),
-    (102, 102, N'Demo', N'Female', '1997-02-16', N'https://placehold.co/480x300/fef3c7/92400e?text=ID+C2', DATEADD(day, -19, @Now)),
-    (103, 103, N'Demo', N'Female', '1998-03-17', N'https://placehold.co/480x300/fee2e2/991b1b?text=ID+C3', DATEADD(day, -18, @Now)),
-    (104, 104, N'Demo', N'Male', '1995-04-18', N'https://placehold.co/480x300/f3f4f6/374151?text=ID+C4', DATEADD(day, -17, @Now)),
-    (105, 105, N'Demo', N'Female', '1999-05-19', N'https://placehold.co/480x300/dcfce7/166534?text=ID+C5', DATEADD(day, -16, @Now));
+    (101, 101, N'Demo', N'Female', '1996-01-15', N'https://placehold.co/480x300/e0f2fe/075985.png?text=ID+C1', DATEADD(day, -20, @Now)),
+    (102, 102, N'Demo', N'Female', '1997-02-16', N'https://placehold.co/480x300/fef3c7/92400e.png?text=ID+C2', DATEADD(day, -19, @Now)),
+    (103, 103, N'Demo', N'Female', '1998-03-17', N'https://placehold.co/480x300/fee2e2/991b1b.png?text=ID+C3', DATEADD(day, -18, @Now)),
+    (104, 104, N'Demo', N'Male', '1995-04-18', N'https://placehold.co/480x300/f3f4f6/374151.png?text=ID+C4', DATEADD(day, -17, @Now)),
+    (105, 105, N'Demo', N'Female', '1999-05-19', N'https://placehold.co/480x300/dcfce7/166534.png?text=ID+C5', DATEADD(day, -16, @Now));
 SET IDENTITY_INSERT dbo.clients OFF;
 
 SET IDENTITY_INSERT dbo.client_addresses ON;
@@ -133,22 +133,22 @@ SET IDENTITY_INSERT dbo.client_addresses OFF;
 SET IDENTITY_INSERT dbo.motorcycles ON;
 INSERT INTO dbo.motorcycles (MotorcycleId, ClientId, Brand, Model, YearModel, PlateNumber, EngineType, Color, MotorcycleImageUrl, CreatedAt)
 VALUES
-    (101, 101, N'Honda', N'Click 125i', 2021, N'ABC-1101', N'125cc Scooter', N'Red', N'https://placehold.co/640x420/fef2f2/991b1b?text=Honda+Click', @Now),
-    (102, 102, N'Yamaha', N'Mio i125', 2020, N'BCD-2202', N'125cc Scooter', N'Blue', N'https://placehold.co/640x420/eff6ff/1d4ed8?text=Yamaha+Mio', @Now),
-    (103, 103, N'Suzuki', N'Raider 150', 2022, N'CDE-3303', N'150cc Underbone', N'Black', N'https://placehold.co/640x420/f3f4f6/111827?text=Raider+150', @Now),
-    (104, 104, N'Kawasaki', N'Rouser NS160', 2019, N'DEF-4404', N'160cc Manual', N'Gray', N'https://placehold.co/640x420/e5e7eb/374151?text=Rouser', @Now),
-    (105, 105, N'Honda', N'Beat', 2023, N'EFG-5505', N'110cc Scooter', N'White', N'https://placehold.co/640x420/f8fafc/0f172a?text=Honda+Beat', @Now);
+    (101, 101, N'Honda', N'Click 125i', 2021, N'ABC-1101', N'125cc Scooter', N'Red', N'https://placehold.co/640x420/fef2f2/991b1b.png?text=Honda+Click', @Now),
+    (102, 102, N'Yamaha', N'Mio i125', 2020, N'BCD-2202', N'125cc Scooter', N'Blue', N'https://placehold.co/640x420/eff6ff/1d4ed8.png?text=Yamaha+Mio', @Now),
+    (103, 103, N'Suzuki', N'Raider 150', 2022, N'CDE-3303', N'150cc Underbone', N'Black', N'https://placehold.co/640x420/f3f4f6/111827.png?text=Raider+150', @Now),
+    (104, 104, N'Kawasaki', N'Rouser NS160', 2019, N'DEF-4404', N'160cc Manual', N'Gray', N'https://placehold.co/640x420/e5e7eb/374151.png?text=Rouser', @Now),
+    (105, 105, N'Honda', N'Beat', 2023, N'EFG-5505', N'110cc Scooter', N'White', N'https://placehold.co/640x420/f8fafc/0f172a.png?text=Honda+Beat', @Now);
 SET IDENTITY_INSERT dbo.motorcycles OFF;
 
 SET IDENTITY_INSERT dbo.mechanics ON;
 INSERT INTO dbo.mechanics
     (MechanicId, UserId, MiddleName, Sex, Birthdate, ValidIdImageUrl, AddressLine, Barangay, City, Province, ZipCode, Bio, YearsExperience, CertificationImageUrl, IsVerified, AvailabilityStatus, CurrentLatitude, CurrentLongitude, AverageRating, TotalCompletedJobs, CreatedAt, UpdatedAt)
 VALUES
-    (301, 301, N'Demo', N'Male', '2001-01-11', N'https://placehold.co/480x300/e0f2fe/075985?text=ID+M1', N'Pacita Complex', N'Pacita 1', N'San Pedro', N'Laguna', N'4023', N'Level 1 junior mechanic for quick tire and chain service.', 1, N'https://placehold.co/480x300/ecfeff/155e75?text=NCII+M1', 1, N'online', 14.34410000, 121.06140000, 3.80, 4, DATEADD(day, -10, @Now), @Now),
-    (302, 302, N'Demo', N'Female', '1999-02-12', N'https://placehold.co/480x300/ccfbf1/115e59?text=ID+M2', N'Magsaysay Road', N'Magsaysay', N'San Pedro', N'Laguna', N'4023', N'Level 2 skilled mechanic for brakes and preventive maintenance.', 3, N'https://placehold.co/480x300/ccfbf1/115e59?text=NCII+M2', 1, N'online', 14.35130000, 121.05480000, 4.20, 11, DATEADD(day, -9, @Now), @Now),
-    (303, 303, N'Demo', N'Male', '1995-03-13', N'https://placehold.co/480x300/ede9fe/5b21b6?text=ID+M3', N'United Bayanihan', N'United Bayanihan', N'San Pedro', N'Laguna', N'4023', N'Level 3 senior mechanic for engine and drivetrain diagnostics.', 6, N'https://placehold.co/480x300/ede9fe/5b21b6?text=NCII+M3', 1, N'busy', 14.34820000, 121.06640000, 4.60, 24, DATEADD(day, -8, @Now), @Now),
-    (304, 304, N'Demo', N'Female', '1993-04-14', N'https://placehold.co/480x300/fce7f3/9d174d?text=ID+M4', N'Southwoods Avenue', N'San Francisco', N'Binan', N'Laguna', N'4024', N'Level 4 expert mechanic for electrical and modification work.', 9, N'https://placehold.co/480x300/fce7f3/9d174d?text=NCII+M4', 1, N'offline', 14.32980000, 121.07280000, 4.80, 37, DATEADD(day, -7, @Now), @Now),
-    (305, 305, N'Demo', N'Male', '1989-05-15', N'https://placehold.co/480x300/ffedd5/9a3412?text=ID+M5', N'Calendola Village', N'Calendola', N'San Pedro', N'Laguna', N'4023', N'Level 5 master mechanic for full workshop repair and rescue jobs.', 14, N'https://placehold.co/480x300/ffedd5/9a3412?text=NCII+M5', 1, N'online', 14.33450000, 121.04960000, 5.00, 58, DATEADD(day, -6, @Now), @Now);
+    (301, 301, N'Demo', N'Male', '2001-01-11', N'https://placehold.co/480x300/e0f2fe/075985.png?text=ID+M1', N'Pacita Complex', N'Pacita 1', N'San Pedro', N'Laguna', N'4023', N'Level 1 junior mechanic for quick tire and chain service.', 1, N'https://placehold.co/480x300/ecfeff/155e75.png?text=NCII+M1', 1, N'online', 14.34410000, 121.06140000, 3.80, 4, DATEADD(day, -10, @Now), @Now),
+    (302, 302, N'Demo', N'Female', '1999-02-12', N'https://placehold.co/480x300/ccfbf1/115e59.png?text=ID+M2', N'Magsaysay Road', N'Magsaysay', N'San Pedro', N'Laguna', N'4023', N'Level 2 skilled mechanic for brakes and preventive maintenance.', 3, N'https://placehold.co/480x300/ccfbf1/115e59.png?text=NCII+M2', 1, N'online', 14.35130000, 121.05480000, 4.20, 11, DATEADD(day, -9, @Now), @Now),
+    (303, 303, N'Demo', N'Male', '1995-03-13', N'https://placehold.co/480x300/ede9fe/5b21b6.png?text=ID+M3', N'United Bayanihan', N'United Bayanihan', N'San Pedro', N'Laguna', N'4023', N'Level 3 senior mechanic for engine and drivetrain diagnostics.', 6, N'https://placehold.co/480x300/ede9fe/5b21b6.png?text=NCII+M3', 1, N'busy', 14.34820000, 121.06640000, 4.60, 24, DATEADD(day, -8, @Now), @Now),
+    (304, 304, N'Demo', N'Female', '1993-04-14', N'https://placehold.co/480x300/fce7f3/9d174d.png?text=ID+M4', N'Southwoods Avenue', N'San Francisco', N'Binan', N'Laguna', N'4024', N'Level 4 expert mechanic for electrical and modification work.', 9, N'https://placehold.co/480x300/fce7f3/9d174d.png?text=NCII+M4', 1, N'offline', 14.32980000, 121.07280000, 4.80, 37, DATEADD(day, -7, @Now), @Now),
+    (305, 305, N'Demo', N'Male', '1989-05-15', N'https://placehold.co/480x300/ffedd5/9a3412.png?text=ID+M5', N'Calendola Village', N'Calendola', N'San Pedro', N'Laguna', N'4023', N'Level 5 master mechanic for full workshop repair and rescue jobs.', 14, N'https://placehold.co/480x300/ffedd5/9a3412.png?text=NCII+M5', 1, N'online', 14.33450000, 121.04960000, 5.00, 58, DATEADD(day, -6, @Now), @Now);
 SET IDENTITY_INSERT dbo.mechanics OFF;
 
 SET IDENTITY_INSERT dbo.mechanic_availability ON;
@@ -162,11 +162,11 @@ SET IDENTITY_INSERT dbo.shops ON;
 INSERT INTO dbo.shops
     (ShopId, OwnerUserId, ShopName, ShopDescription, AddressLine, City, Province, Latitude, Longitude, BusinessPermitUrl, ShopImageUrl, ShopLogoUrl, OwnerValidIdUrl, OwnerMiddleName, OwnerSex, OwnerBirthdate, OwnerAddressLine, OwnerBarangay, OwnerCity, OwnerProvince, OwnerZipCode, ContactNumber, ShopStatus, CreatedAt, UpdatedAt)
 VALUES
-    (201, 201, N'Level 1 Budget Bike Care', N'Budget-friendly verified shop for simple repairs and commuter scooters.', N'Pacita Avenue', N'San Pedro', N'Laguna', 14.34360000, 121.06070000, N'https://placehold.co/480x300/fff7ed/9a3412?text=Permit+S1', N'https://placehold.co/900x540/fff7ed/9a3412?text=Budget+Bike+Care', N'https://placehold.co/240x240/f97316/ffffff?text=L1', N'https://placehold.co/480x300/fff7ed/9a3412?text=Owner+ID+S1', N'Demo', N'Male', '1988-06-10', N'Pacita Avenue', N'Pacita 1', N'San Pedro', N'Laguna', N'4023', N'+639191000001', N'verified', DATEADD(day, -15, @Now), @Now),
-    (202, 202, N'Level 2 Standard Moto Hub', N'Standard repair shop with balanced pricing, parts, and roadside support.', N'Magsaysay Road', N'San Pedro', N'Laguna', 14.35100000, 121.05520000, N'https://placehold.co/480x300/ecfeff/155e75?text=Permit+S2', N'https://placehold.co/900x540/ecfeff/155e75?text=Standard+Moto+Hub', N'https://placehold.co/240x240/0891b2/ffffff?text=L2', N'https://placehold.co/480x300/ecfeff/155e75?text=Owner+ID+S2', N'Demo', N'Female', '1990-07-11', N'Magsaysay Road', N'Magsaysay', N'San Pedro', N'Laguna', N'4023', N'+639191000002', N'verified', DATEADD(day, -14, @Now), @Now),
-    (203, 203, N'Level 3 Pro Performance Garage', N'Pro-level diagnostics, engine work, and performance tuning.', N'United Bayanihan', N'San Pedro', N'Laguna', 14.34860000, 121.06590000, N'https://placehold.co/480x300/e0e7ff/3730a3?text=Permit+S3', N'https://placehold.co/900x540/e0e7ff/3730a3?text=Pro+Garage', N'https://placehold.co/240x240/4f46e5/ffffff?text=L3', N'https://placehold.co/480x300/e0e7ff/3730a3?text=Owner+ID+S3', N'Demo', N'Male', '1986-08-12', N'United Bayanihan', N'United Bayanihan', N'San Pedro', N'Laguna', N'4023', N'+639191000003', N'verified', DATEADD(day, -13, @Now), @Now),
-    (204, 204, N'Level 4 Rapid Roadside Works', N'Rapid-response shop focused on urgent roadside help and pickup repairs.', N'Calendola Village', N'San Pedro', N'Laguna', 14.33390000, 121.04920000, N'https://placehold.co/480x300/dcfce7/166534?text=Permit+S4', N'https://placehold.co/900x540/dcfce7/166534?text=Rapid+Roadside', N'https://placehold.co/240x240/15803d/ffffff?text=L4', N'https://placehold.co/480x300/dcfce7/166534?text=Owner+ID+S4', N'Demo', N'Female', '1991-09-13', N'Calendola Village', N'Calendola', N'San Pedro', N'Laguna', N'4023', N'+639191000004', N'verified', DATEADD(day, -12, @Now), @Now),
-    (205, 205, N'Level 5 Premium Cycle Lab', N'Premium workshop for full service, electrical upgrades, and custom modifications.', N'Southwoods Avenue', N'Binan', N'Laguna', 14.32890000, 121.07350000, N'https://placehold.co/480x300/fce7f3/9d174d?text=Permit+S5', N'https://placehold.co/900x540/fce7f3/9d174d?text=Premium+Cycle+Lab', N'https://placehold.co/240x240/be123c/ffffff?text=L5', N'https://placehold.co/480x300/fce7f3/9d174d?text=Owner+ID+S5', N'Demo', N'Male', '1984-10-14', N'Southwoods Avenue', N'San Francisco', N'Binan', N'Laguna', N'4024', N'+639191000005', N'verified', DATEADD(day, -11, @Now), @Now);
+    (201, 201, N'Level 1 Budget Bike Care', N'Budget-friendly verified shop for simple repairs and commuter scooters.', N'Pacita Avenue', N'San Pedro', N'Laguna', 14.34360000, 121.06070000, N'https://placehold.co/480x300/fff7ed/9a3412.png?text=Permit+S1', N'https://placehold.co/900x540/fff7ed/9a3412.png?text=Budget+Bike+Care', N'https://placehold.co/240x240/f97316/ffffff.png?text=L1', N'https://placehold.co/480x300/fff7ed/9a3412.png?text=Owner+ID+S1', N'Demo', N'Male', '1988-06-10', N'Pacita Avenue', N'Pacita 1', N'San Pedro', N'Laguna', N'4023', N'+639191000001', N'verified', DATEADD(day, -15, @Now), @Now),
+    (202, 202, N'Level 2 Standard Moto Hub', N'Standard repair shop with balanced pricing, parts, and roadside support.', N'Magsaysay Road', N'San Pedro', N'Laguna', 14.35100000, 121.05520000, N'https://placehold.co/480x300/ecfeff/155e75.png?text=Permit+S2', N'https://placehold.co/900x540/ecfeff/155e75.png?text=Standard+Moto+Hub', N'https://placehold.co/240x240/0891b2/ffffff.png?text=L2', N'https://placehold.co/480x300/ecfeff/155e75.png?text=Owner+ID+S2', N'Demo', N'Female', '1990-07-11', N'Magsaysay Road', N'Magsaysay', N'San Pedro', N'Laguna', N'4023', N'+639191000002', N'verified', DATEADD(day, -14, @Now), @Now),
+    (203, 203, N'Level 3 Pro Performance Garage', N'Pro-level diagnostics, engine work, and performance tuning.', N'United Bayanihan', N'San Pedro', N'Laguna', 14.34860000, 121.06590000, N'https://placehold.co/480x300/e0e7ff/3730a3.png?text=Permit+S3', N'https://placehold.co/900x540/e0e7ff/3730a3.png?text=Pro+Garage', N'https://placehold.co/240x240/4f46e5/ffffff.png?text=L3', N'https://placehold.co/480x300/e0e7ff/3730a3.png?text=Owner+ID+S3', N'Demo', N'Male', '1986-08-12', N'United Bayanihan', N'United Bayanihan', N'San Pedro', N'Laguna', N'4023', N'+639191000003', N'verified', DATEADD(day, -13, @Now), @Now),
+    (204, 204, N'Level 4 Rapid Roadside Works', N'Rapid-response shop focused on urgent roadside help and pickup repairs.', N'Calendola Village', N'San Pedro', N'Laguna', 14.33390000, 121.04920000, N'https://placehold.co/480x300/dcfce7/166534.png?text=Permit+S4', N'https://placehold.co/900x540/dcfce7/166534.png?text=Rapid+Roadside', N'https://placehold.co/240x240/15803d/ffffff.png?text=L4', N'https://placehold.co/480x300/dcfce7/166534.png?text=Owner+ID+S4', N'Demo', N'Female', '1991-09-13', N'Calendola Village', N'Calendola', N'San Pedro', N'Laguna', N'4023', N'+639191000004', N'verified', DATEADD(day, -12, @Now), @Now),
+    (205, 205, N'Level 5 Premium Cycle Lab', N'Premium workshop for full service, electrical upgrades, and custom modifications.', N'Southwoods Avenue', N'Binan', N'Laguna', 14.32890000, 121.07350000, N'https://placehold.co/480x300/fce7f3/9d174d.png?text=Permit+S5', N'https://placehold.co/900x540/fce7f3/9d174d.png?text=Premium+Cycle+Lab', N'https://placehold.co/240x240/be123c/ffffff.png?text=L5', N'https://placehold.co/480x300/fce7f3/9d174d.png?text=Owner+ID+S5', N'Demo', N'Male', '1984-10-14', N'Southwoods Avenue', N'San Francisco', N'Binan', N'Laguna', N'4024', N'+639191000005', N'verified', DATEADD(day, -11, @Now), @Now);
 SET IDENTITY_INSERT dbo.shops OFF;
 
 SET IDENTITY_INSERT dbo.shop_operating_hours ON;
@@ -229,13 +229,13 @@ SET IDENTITY_INSERT dbo.products OFF;
 
 SET IDENTITY_INSERT dbo.product_images ON;
 INSERT INTO dbo.product_images (ProductImageId, ProductId, ImageUrl, CreatedAt)
-SELECT ProductId, ProductId, CONCAT(N'https://placehold.co/640x420/f8fafc/0f172a?text=Product+', ProductId), @Now
+SELECT ProductId, ProductId, CONCAT(N'https://placehold.co/640x420/f8fafc/0f172a.png?text=Product+', ProductId), @Now
 FROM dbo.products;
 SET IDENTITY_INSERT dbo.product_images OFF;
 
 SET IDENTITY_INSERT dbo.service_images ON;
 INSERT INTO dbo.service_images (ServiceImageId, ShopServiceId, ImageUrl, CreatedAt)
-SELECT ShopServiceId, ShopServiceId, CONCAT(N'https://placehold.co/640x420/fff7ed/9a3412?text=Service+', ShopServiceId), @Now
+SELECT ShopServiceId, ShopServiceId, CONCAT(N'https://placehold.co/640x420/fff7ed/9a3412.png?text=Service+', ShopServiceId), @Now
 FROM dbo.shop_services;
 SET IDENTITY_INSERT dbo.service_images OFF;
 
@@ -243,16 +243,16 @@ SET IDENTITY_INSERT dbo.service_requests ON;
 INSERT INTO dbo.service_requests
     (RequestId, ClientId, ShopId, ShopServiceId, MechanicId, CurrentStatusId, MotorcycleId, IssueDescription, ServiceLocationAddress, ServiceLatitude, ServiceLongitude, ScheduledAt, CreatedAt, AcceptedAt, CompletedAt, CancelledAt, EstimatedTotal, FinalTotal)
 VALUES
-    (1, 101, 201, 21, 301, 12, 101, N'Booking type: Repair. Tire keeps losing pressure. Assistance method: On-site Repair.', N'Pacita Avenue, San Pedro', 14.34290000, 121.06010000, NULL, DATEADD(hour, -10, @Now), NULL, NULL, NULL, 180.00, 180.00),
+    (1, 101, 201, 11, 301, 12, 101, N'Booking type: Repair. Tire keeps losing pressure. Assistance method: On-site Repair.', N'Pacita Avenue, San Pedro', 14.34290000, 121.06010000, NULL, DATEADD(hour, -10, @Now), NULL, NULL, NULL, 180.00, 180.00),
     (2, 102, 202, 22, 302, 1, 102, N'Booking type: Repair. Brake lever feels loose. Assistance method: Pick-up Repair.', N'United Bayanihan, San Pedro', 14.34920000, 121.06550000, NULL, DATEADD(hour, -8, @Now), NULL, NULL, NULL, 340.00, 340.00),
-    (3, 103, 203, 23, 303, 2, 103, N'Booking type: Reservation. Oil change and inspection appointment.', N'Magsaysay Road, San Pedro', 14.35180000, 121.05360000, DATEADD(day, 1, @Now), DATEADD(hour, -6, @Now), DATEADD(hour, -5, @Now), NULL, NULL, 550.00, 550.00),
-    (4, 104, 204, 24, 304, 4, 104, N'Booking type: Repair. Chain noise during acceleration. Assistance method: On-site Repair.', N'Calendola Village, San Pedro', 14.33370000, 121.04890000, NULL, DATEADD(hour, -4, @Now), DATEADD(hour, -3, @Now), NULL, NULL, 720.00, 720.00),
-    (5, 105, 205, 25, 305, 6, 105, N'Booking type: Modification. Install auxiliary light kit. Assistance method: Reservation.', N'Southwoods Avenue, Binan', 14.32840000, 121.07420000, DATEADD(day, 2, @Now), DATEADD(hour, -2, @Now), DATEADD(hour, -2, @Now), NULL, NULL, 940.00, 1920.00),
-    (6, 101, 201, 21, 301, 7, 101, N'Completed tire patch demo review level 1.', N'Pacita Avenue, San Pedro', 14.34290000, 121.06010000, DATEADD(day, -5, @Now), DATEADD(day, -6, @Now), DATEADD(day, -6, @Now), DATEADD(day, -5, @Now), NULL, 180.00, 180.00),
+    (3, 103, 203, 33, 303, 2, 103, N'Booking type: Reservation. Oil change and inspection appointment.', N'Magsaysay Road, San Pedro', 14.35180000, 121.05360000, DATEADD(day, 1, @Now), DATEADD(hour, -6, @Now), DATEADD(hour, -5, @Now), NULL, NULL, 550.00, 550.00),
+    (4, 104, 204, 44, 304, 4, 104, N'Booking type: Repair. Chain noise during acceleration. Assistance method: On-site Repair.', N'Calendola Village, San Pedro', 14.33370000, 121.04890000, NULL, DATEADD(hour, -4, @Now), DATEADD(hour, -3, @Now), NULL, NULL, 720.00, 720.00),
+    (5, 105, 205, 55, 305, 6, 105, N'Booking type: Modification. Install auxiliary light kit. Assistance method: Reservation.', N'Southwoods Avenue, Binan', 14.32840000, 121.07420000, DATEADD(day, 2, @Now), DATEADD(hour, -2, @Now), DATEADD(hour, -2, @Now), NULL, NULL, 940.00, 1920.00),
+    (6, 101, 201, 11, 301, 7, 101, N'Completed tire patch demo review level 1.', N'Pacita Avenue, San Pedro', 14.34290000, 121.06010000, DATEADD(day, -5, @Now), DATEADD(day, -6, @Now), DATEADD(day, -6, @Now), DATEADD(day, -5, @Now), NULL, 180.00, 180.00),
     (7, 102, 202, 22, 302, 7, 102, N'Completed brake service demo review level 2.', N'United Bayanihan, San Pedro', 14.34920000, 121.06550000, DATEADD(day, -4, @Now), DATEADD(day, -5, @Now), DATEADD(day, -5, @Now), DATEADD(day, -4, @Now), NULL, 340.00, 340.00),
-    (8, 103, 203, 23, 303, 7, 103, N'Completed oil change demo review level 3.', N'Magsaysay Road, San Pedro', 14.35180000, 121.05360000, DATEADD(day, -3, @Now), DATEADD(day, -4, @Now), DATEADD(day, -4, @Now), DATEADD(day, -3, @Now), NULL, 550.00, 550.00),
-    (9, 104, 204, 24, 304, 7, 104, N'Completed chain service demo review level 4.', N'Calendola Village, San Pedro', 14.33370000, 121.04890000, DATEADD(day, -2, @Now), DATEADD(day, -3, @Now), DATEADD(day, -3, @Now), DATEADD(day, -2, @Now), NULL, 720.00, 720.00),
-    (10, 105, 205, 25, 305, 7, 105, N'Completed electrical install demo review level 5.', N'Southwoods Avenue, Binan', 14.32840000, 121.07420000, DATEADD(day, -1, @Now), DATEADD(day, -2, @Now), DATEADD(day, -2, @Now), DATEADD(day, -1, @Now), NULL, 940.00, 1920.00);
+    (8, 103, 203, 33, 303, 7, 103, N'Completed oil change demo review level 3.', N'Magsaysay Road, San Pedro', 14.35180000, 121.05360000, DATEADD(day, -3, @Now), DATEADD(day, -4, @Now), DATEADD(day, -4, @Now), DATEADD(day, -3, @Now), NULL, 550.00, 550.00),
+    (9, 104, 204, 44, 304, 7, 104, N'Completed chain service demo review level 4.', N'Calendola Village, San Pedro', 14.33370000, 121.04890000, DATEADD(day, -2, @Now), DATEADD(day, -3, @Now), DATEADD(day, -3, @Now), DATEADD(day, -2, @Now), NULL, 720.00, 720.00),
+    (10, 105, 205, 55, 305, 7, 105, N'Completed electrical install demo review level 5.', N'Southwoods Avenue, Binan', 14.32840000, 121.07420000, DATEADD(day, -1, @Now), DATEADD(day, -2, @Now), DATEADD(day, -2, @Now), DATEADD(day, -1, @Now), NULL, 940.00, 1920.00);
 SET IDENTITY_INSERT dbo.service_requests OFF;
 
 SET IDENTITY_INSERT dbo.request_status_history ON;
@@ -263,7 +263,7 @@ SET IDENTITY_INSERT dbo.request_status_history OFF;
 
 SET IDENTITY_INSERT dbo.request_media ON;
 INSERT INTO dbo.request_media (RequestMediaId, RequestId, MediaUrl, MediaType, Caption, CreatedAt)
-SELECT RequestId, RequestId, CONCAT(N'https://placehold.co/800x520/e5e7eb/111827?text=Request+', RequestId), N'image', N'Demo request photo', CreatedAt
+SELECT RequestId, RequestId, CONCAT(N'https://placehold.co/800x520/e5e7eb/111827.png?text=Request+', RequestId), N'image', N'Demo request photo', CreatedAt
 FROM dbo.service_requests;
 SET IDENTITY_INSERT dbo.request_media OFF;
 
@@ -281,11 +281,9 @@ SET IDENTITY_INSERT dbo.payments ON;
 INSERT INTO dbo.payments
     (PaymentId, RequestId, ClientId, PaymentStatusId, PaymentMethodId, Amount, Currency, ProviderName, ProviderCheckoutSessionId, ProviderPaymentId, ProviderReferenceNumber, CheckoutUrl, PaidAt, CreatedAt, UpdatedAt)
 VALUES
-    (1, 1, 101, 2, 1, 180.00, N'PHP', N'paymongo', N'demo_checkout_001', NULL, N'BM-PAY-001', N'https://checkout.test/001', NULL, DATEADD(hour, -10, @Now), @Now),
     (2, 2, 102, 3, 2, 340.00, N'PHP', N'paymongo', N'demo_checkout_002', N'demo_payment_002', N'BM-PAY-002', N'https://checkout.test/002', DATEADD(hour, -7, @Now), DATEADD(hour, -8, @Now), @Now),
     (3, 3, 103, 3, 3, 550.00, N'PHP', N'paymongo', N'demo_checkout_003', N'demo_payment_003', N'BM-PAY-003', N'https://checkout.test/003', DATEADD(hour, -5, @Now), DATEADD(hour, -6, @Now), @Now),
     (4, 4, 104, 3, 1, 720.00, N'PHP', N'paymongo', N'demo_checkout_004', N'demo_payment_004', N'BM-PAY-004', N'https://checkout.test/004', DATEADD(hour, -3, @Now), DATEADD(hour, -4, @Now), @Now),
-    (5, 5, 105, 2, 4, 1920.00, N'PHP', N'paymongo', N'demo_checkout_005', NULL, N'BM-PAY-005', N'https://checkout.test/005', NULL, DATEADD(hour, -2, @Now), @Now),
     (6, 6, 101, 3, 1, 180.00, N'PHP', N'paymongo', N'demo_checkout_006', N'demo_payment_006', N'BM-PAY-006', N'https://checkout.test/006', DATEADD(day, -5, @Now), DATEADD(day, -6, @Now), @Now),
     (7, 7, 102, 3, 2, 340.00, N'PHP', N'paymongo', N'demo_checkout_007', N'demo_payment_007', N'BM-PAY-007', N'https://checkout.test/007', DATEADD(day, -4, @Now), DATEADD(day, -5, @Now), @Now),
     (8, 8, 103, 3, 3, 550.00, N'PHP', N'paymongo', N'demo_checkout_008', N'demo_payment_008', N'BM-PAY-008', N'https://checkout.test/008', DATEADD(day, -3, @Now), DATEADD(day, -4, @Now), @Now),
@@ -353,3 +351,4 @@ UNION ALL SELECT 'reviews', COUNT(*) FROM dbo.reviews
 UNION ALL SELECT 'payments', COUNT(*) FROM dbo.payments;
 
 SELECT Email, AccountStatus FROM dbo.users ORDER BY UserId;
+

@@ -59,8 +59,8 @@ public partial class MainPage : ContentPage
             }
 
             ActivityLabel.Text = dashboard.ActiveBookings == 0
-                ? "No active bookings yet. Customer service requests will appear here after the customer app creates them."
-                : $"{dashboard.ActiveBookings} active booking(s) require monitoring.";
+                ? "No active bookings yet. Keep products, services, and mechanic availability ready so customers can book smoothly."
+                : $"{dashboard.ActiveBookings} active booking(s) need review in the Bookings tab.";
             ApiStatusLabel.Text = "LIVE";
         }
         catch (Exception ex)
@@ -77,7 +77,7 @@ public partial class MainPage : ContentPage
     private async void DashboardRefreshView_Refreshing(object? sender, EventArgs e) => await LoadDashboardAsync();
     private async void Products_Clicked(object? sender, EventArgs e) => await Shell.Current.GoToAsync(nameof(Products));
     private async void Operations_Clicked(object? sender, EventArgs e) => await Shell.Current.GoToAsync(nameof(Operations));
-    private async void Calendar_Clicked(object? sender, EventArgs e) => await Shell.Current.GoToAsync(nameof(Calendar));
+    private async void Calendar_Clicked(object? sender, EventArgs e) => await ShopAdminNavigation.GoToBookingsAsync();
     private async void Reports_Clicked(object? sender, EventArgs e) => await Shell.Current.GoToAsync(nameof(Reports));
     private async void Messages_Clicked(object? sender, EventArgs e) => await Shell.Current.GoToAsync("//AdminTabs/MessagesTab");
     private async void Admins_Clicked(object? sender, EventArgs e) => await Shell.Current.GoToAsync(nameof(Admins));

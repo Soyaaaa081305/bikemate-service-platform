@@ -9,7 +9,7 @@
     <Grid>
         <Grid IsVisible="{Binding IsStartupVisible}" Padding="20" BackgroundColor="White">
             <VerticalStackLayout Spacing="14" VerticalOptions="Center" HorizontalOptions="Center">
-                <Image Source="bikemate_logo.png" HeightRequest="104" WidthRequest="104" />
+                <Image Source="bikemate_logo" HeightRequest="104" WidthRequest="104" />
                 <Label
                     Text="BikeMate"
                     FontFamily="Inter"
@@ -103,7 +103,7 @@
         <ScrollView IsVisible="{Binding IsLoginVisible}" BackgroundColor="White">
             <VerticalStackLayout Padding="20,30,20,28" Spacing="18">
                 <VerticalStackLayout Spacing="8">
-                    <Image Source="bikemate_logo.png" HeightRequest="88" HorizontalOptions="Center" />
+                    <Image Source="bikemate_logo" HeightRequest="88" HorizontalOptions="Center" />
                     <Label
                         Text="BikeMate"
                         FontFamily="Inter"
@@ -192,7 +192,7 @@
                         <Button
                             Text="Continue with Google"
                             Command="{Binding GoogleLoginCommand}"
-                            ImageSource="google_logo.png"
+                            ImageSource="google_logo"
                             ContentLayout="Left,12"
                             TextColor="#242424"
                             BackgroundColor="White"

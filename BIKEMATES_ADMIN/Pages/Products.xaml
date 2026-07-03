@@ -24,7 +24,7 @@
                             <VerticalStackLayout Spacing="3">
                                 <Label Text="Product Editor" Style="{StaticResource SectionLabel}" />
                                 <Label x:Name="ProductEditorStatusLabel"
-                                       Text="Add a product or choose one from inventory to edit."
+                                       Text="Add a product, or choose one from inventory to edit price, stock, category, and image."
                                        Style="{StaticResource SmallMuted}" />
                             </VerticalStackLayout>
                             <Button Grid.Column="1" Text="Clear" Style="{StaticResource OutlineButton}" Clicked="ClearProductEditor_Clicked" VerticalOptions="Center" />
@@ -81,7 +81,7 @@
                         <Label Text="Inventory" Style="{StaticResource SectionLabel}" />
                         <Label Text="Products customers can view from your shop." Style="{StaticResource SmallMuted}" />
                     </VerticalStackLayout>
-                    <Label Grid.Column="1" Text="{Binding ProductItems.Count, StringFormat='{0} items'}" Style="{StaticResource Pill}" VerticalOptions="Center" />
+                    <Label Grid.Column="1" Text="{Binding VisibleProducts.Count, StringFormat='{0} shown'}" Style="{StaticResource Pill}" VerticalOptions="Center" />
                 </Grid>
 
                 <SearchBar x:Name="ProductSearchBar" Placeholder="Search products" Style="{StaticResource SearchInput}" TextChanged="ProductSearchBar_TextChanged" />
@@ -92,7 +92,16 @@
                                 SelectionChanged="ProductsCollectionView_SelectionChanged">
                     <CollectionView.EmptyView>
                         <Frame Style="{StaticResource CardFrame}">
-                            <Label Text="No products found." Style="{StaticResource SmallMuted}" />
+                            <VerticalStackLayout Spacing="8">
+                                <Label Text="No products in this view" Style="{StaticResource ItemTitle}" HorizontalTextAlignment="Center" />
+                                <Label Text="Clear search or add your first customer-visible product with an image, price, and stock count."
+                                       Style="{StaticResource SmallMuted}"
+                                       HorizontalTextAlignment="Center"
+                                       LineBreakMode="WordWrap" />
+                                <Button Text="Clear search"
+                                        Style="{StaticResource OutlineButton}"
+                                        Clicked="ClearProductSearch_Clicked" />
+                            </VerticalStackLayout>
                         </Frame>
                     </CollectionView.EmptyView>
                     <CollectionView.ItemsLayout>

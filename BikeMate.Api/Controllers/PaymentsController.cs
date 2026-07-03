@@ -300,22 +300,41 @@ public sealed class PaymentsController(
             return false;
         }
 
+        var signatures = ParsePayMongoSignature(signatureHeader);
+        if (!signatures.TryGetValue("t", out var timestamp) || string.IsNullOrWhiteSpace(timestamp))
+        {
+            return false;
+        }
+
+        var modeSignature = signatures.TryGetValue("te", out var testSignature) && !string.IsNullOrWhiteSpace(testSignature)
+            ? testSignature
+            : signatures.TryGetValue("li", out var liveSignature) && !string.IsNullOrWhiteSpace(liveSignature)
+                ? liveSignature
+                : null;
+        if (string.IsNullOrWhiteSpace(modeSignature))
+        {
+            return false;
+        }
+
+        var signedPayload = $"{timestamp}.{payloadJson}";
         using var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(secret));
-        var expected = Convert.ToHexString(hmac.ComputeHash(Encoding.UTF8.GetBytes(payloadJson))).ToLowerInvariant();
-        return CandidateSignatures(signatureHeader).Any(candidate => FixedTimeEquals(expected, candidate));
+        var expected = Convert.ToHexString(hmac.ComputeHash(Encoding.UTF8.GetBytes(signedPayload))).ToLowerInvariant();
+        return FixedTimeEquals(expected, modeSignature);
     }
 
-    private static IEnumerable<string> CandidateSignatures(string signatureHeader)
+    private static Dictionary<string, string> ParsePayMongoSignature(string signatureHeader)
     {
+        var values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
         foreach (var piece in signatureHeader.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
         {
-            yield return piece;
             var equalsIndex = piece.IndexOf('=', StringComparison.Ordinal);
             if (equalsIndex >= 0 && equalsIndex < piece.Length - 1)
             {
-                yield return piece[(equalsIndex + 1)..];
+                values[piece[..equalsIndex]] = piece[(equalsIndex + 1)..];
             }
         }
+
+        return values;
     }
 
     private static bool FixedTimeEquals(string left, string right)
