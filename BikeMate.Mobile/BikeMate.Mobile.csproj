@@ -33,11 +33,12 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<MauiIcon Update="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#FF6B00" />
-		<MauiSplashScreen Update="Resources\Splash\splash.svg" Color="#FF6B00" BaseSize="128,128" />
+		<MauiIcon Include="Resources\AppIcon\bikemate_appicon.png" Color="#FF6B00" />
+		<MauiSplashScreen Include="Resources\AppIcon\bikemate_appicon.png" Color="#FF6B00" BaseSize="128,128" />
 		<MauiImage Include="Resources\Images\bikemate_logo.png" />
 		<MauiImage Include="Resources\Images\bike_wrench.png" />
 		<MauiImage Include="Resources\Images\google_logo.svg" />
+		<MauiImage Include="Resources\Images\location_pin.svg" />
 		<MauiImage Include="Resources\Images\mechanic_door.png" />
 		<MauiImage Include="Resources\Images\running_man.png" />
 	</ItemGroup>

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="BIKEMATES_ADMIN.Pages.Account.Login"
@@ -7,7 +7,7 @@
     <ScrollView>
         <VerticalStackLayout Padding="20,30,20,28" Spacing="18">
             <VerticalStackLayout Spacing="8">
-                <Image Source="bikemate_logo.png" HeightRequest="88" HorizontalOptions="Center" />
+                <Image Source="bikemate_logo" HeightRequest="88" HorizontalOptions="Center" />
                 <Label Text="BIKEMATES ADMIN"
                        FontFamily="Inter"
                        FontSize="18"
@@ -97,7 +97,7 @@
                         </Border>
                         <Button Text="Forgot password?"
                                 BackgroundColor="Transparent"
-                                TextColor="#FF6B2C"
+                                TextColor="#FF6B00"
                                 FontAttributes="Bold"
                                 HorizontalOptions="End"
                                 HeightRequest="34"
@@ -108,7 +108,7 @@
 
                     <Button x:Name="LoginButton"
                             Text="Sign in"
-                            BackgroundColor="#FF6B2C"
+                            BackgroundColor="#FF6B00"
                             TextColor="White"
                             FontAttributes="Bold"
                             CornerRadius="8"
@@ -130,15 +130,6 @@
                             HeightRequest="48"
                             Clicked="OnCreateAccountClicked" />
 
-                    <Button Text="Connection settings"
-                            BackgroundColor="Transparent"
-                            TextColor="#6E6E6E"
-                            FontAttributes="Bold"
-                            FontSize="11"
-                            HeightRequest="30"
-                            MinimumHeightRequest="30"
-                            Padding="0"
-                            Clicked="OnConnectionSettingsClicked" />
                 </VerticalStackLayout>
             </Border>
         </VerticalStackLayout>

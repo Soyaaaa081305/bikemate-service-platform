@@ -9,6 +9,8 @@ public static class AppTypography
     public const double CaptionSize = 11;
     public const double BodySize = 13;
     public const double TitleSize = 18;
+    private static readonly Color TextDark = Color.FromArgb("#242424");
+    private static readonly Color MutedText = Color.FromArgb("#6E6E6E");
 
     public const string CaptionFont = "PTSansCaption";
     public const string CaptionBoldFont = "PTSansCaptionBold";
@@ -85,6 +87,9 @@ public static class AppTypography
         ApplyTypography(entry.FontSize, entry.FontAttributes, out var size, out var font);
         entry.FontSize = size;
         entry.FontFamily = font;
+        entry.TextColor = TextDark;
+        entry.PlaceholderColor = MutedText;
+        entry.BackgroundColor = Colors.Transparent;
     }
 
     private static void Apply(Editor? editor)
@@ -97,6 +102,9 @@ public static class AppTypography
         ApplyTypography(editor.FontSize, editor.FontAttributes, out var size, out var font);
         editor.FontSize = size;
         editor.FontFamily = font;
+        editor.TextColor = TextDark;
+        editor.PlaceholderColor = MutedText;
+        editor.BackgroundColor = Colors.Transparent;
     }
 
     private static void Apply(Picker? picker)
@@ -109,6 +117,9 @@ public static class AppTypography
         ApplyTypography(picker.FontSize, picker.FontAttributes, out var size, out var font);
         picker.FontSize = size;
         picker.FontFamily = font;
+        picker.TextColor = TextDark;
+        picker.TitleColor = MutedText;
+        picker.BackgroundColor = Colors.Transparent;
     }
 
     private static void Apply(SearchBar? searchBar)
@@ -121,6 +132,8 @@ public static class AppTypography
         ApplyTypography(searchBar.FontSize, searchBar.FontAttributes, out var size, out var font);
         searchBar.FontSize = size;
         searchBar.FontFamily = font;
+        searchBar.TextColor = TextDark;
+        searchBar.PlaceholderColor = MutedText;
     }
 
     private static void Apply(DatePicker? datePicker)
@@ -133,6 +146,8 @@ public static class AppTypography
         ApplyTypography(datePicker.FontSize, datePicker.FontAttributes, out var size, out var font);
         datePicker.FontSize = size;
         datePicker.FontFamily = font;
+        datePicker.TextColor = TextDark;
+        datePicker.BackgroundColor = Colors.Transparent;
     }
 
     private static void Apply(TimePicker? timePicker)
@@ -145,6 +160,8 @@ public static class AppTypography
         ApplyTypography(timePicker.FontSize, timePicker.FontAttributes, out var size, out var font);
         timePicker.FontSize = size;
         timePicker.FontFamily = font;
+        timePicker.TextColor = TextDark;
+        timePicker.BackgroundColor = Colors.Transparent;
     }
 
     private static void Apply(RadioButton? radioButton)
@@ -157,6 +174,7 @@ public static class AppTypography
         ApplyTypography(radioButton.FontSize, radioButton.FontAttributes, out var size, out var font);
         radioButton.FontSize = size;
         radioButton.FontFamily = font;
+        radioButton.TextColor = TextDark;
     }
 
     private static void ApplyTypography(

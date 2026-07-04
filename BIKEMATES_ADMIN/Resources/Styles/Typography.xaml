@@ -7,15 +7,15 @@
          Keep typography on the BikeMate three-size scale:
          11 caption, 13 body, 18 title. Fonts: PT Sans Caption, Public Sans, Inter. -->
 
-    <Color x:Key="Navy">#21313F</Color>
+    <Color x:Key="Navy">#22303D</Color>
     <Color x:Key="NavySoft">#2B3E4E</Color>
-    <Color x:Key="Orange">#FF8A3D</Color>
-    <Color x:Key="OrangeDark">#F97316</Color>
-    <Color x:Key="PageBg">#F3F4F6</Color>
+    <Color x:Key="Orange">#FF6B00</Color>
+    <Color x:Key="OrangeDark">#C45500</Color>
+    <Color x:Key="PageBg">#F6F7F9</Color>
     <Color x:Key="CardBg">#FFFFFF</Color>
-    <Color x:Key="TextDark">#1F2937</Color>
-    <Color x:Key="MutedText">#8A94A6</Color>
-    <Color x:Key="LineColor">#E5E7EB</Color>
+    <Color x:Key="TextDark">#242424</Color>
+    <Color x:Key="MutedText">#6E6E6E</Color>
+    <Color x:Key="LineColor">#E1E5EA</Color>
 
     <Color x:Key="Green">#16A34A</Color>
     <Color x:Key="Red">#DC2626</Color>

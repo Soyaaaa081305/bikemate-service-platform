@@ -306,7 +306,7 @@ public sealed class EmailService(
     {
         var body = new StringBuilder();
         body.Append("<div style=\"font-family:Arial,sans-serif;color:#242424;line-height:1.5;max-width:560px\">");
-        body.Append("<h2 style=\"color:#ff6b2c;margin-bottom:8px\">").Append(WebUtility.HtmlEncode(title)).Append("</h2>");
+        body.Append("<h2 style=\"color:#ff6b00;margin-bottom:8px\">").Append(WebUtility.HtmlEncode(title)).Append("</h2>");
         body.Append("<p>Hi ").Append(WebUtility.HtmlEncode(firstName)).Append(",</p>");
         body.Append("<p>").Append(WebUtility.HtmlEncode(context)).Append("</p>");
         body.Append("<p style=\"font-size:14px;color:#6e6e6e;margin-bottom:6px\">Your BikeMate code is</p>");
@@ -1135,7 +1135,8 @@ public sealed class ServiceRequestService(BikeMateDbContext db) : IServiceReques
             .Include(x => x.Client).ThenInclude(x => x!.User)
             .Include(x => x.Mechanic).ThenInclude(x => x!.User)
             .Include(x => x.Shop)
-            .Include(x => x.ShopService);
+            .Include(x => x.ShopService)
+            .Include(x => x.LineItems);
     }
 
     public IQueryable<ServiceRequest> QueryForDto()
@@ -1154,25 +1155,56 @@ public sealed class ServiceRequestService(BikeMateDbContext db) : IServiceReques
         }
 
         var pendingStatusId = await db.RequestStatuses.Where(x => x.StatusName == "pending").Select(x => x.StatusId).SingleAsync(cancellationToken);
-        var selectedService = dto.ShopServiceId is null
-            ? null
-            : await db.ShopServices.SingleOrDefaultAsync(x => x.ShopServiceId == dto.ShopServiceId && x.IsActive, cancellationToken)
-                ?? throw new InvalidOperationException("Select an available service before booking.");
-        if (selectedService is not null && dto.ShopId is not null && selectedService.ShopId != dto.ShopId)
+        var serviceIds = MergeIds(dto.ShopServiceId, dto.ShopServiceIds);
+        var selectedServices = serviceIds.Count == 0
+            ? []
+            : await db.ShopServices
+                .Where(x => serviceIds.Contains(x.ShopServiceId) && x.IsActive)
+                .OrderBy(x => x.ServiceName)
+                .ToListAsync(cancellationToken);
+        if (selectedServices.Count != serviceIds.Count)
         {
-            throw new InvalidOperationException("Selected service does not belong to the selected shop.");
+            throw new InvalidOperationException("Select available services before booking.");
+        }
+
+        if (dto.ShopId is not null && selectedServices.Any(x => x.ShopId != dto.ShopId))
+        {
+            throw new InvalidOperationException("Selected services do not belong to the selected shop.");
         }
 
         ValidateScheduledAt(dto.ScheduledAt);
 
-        var selectedShopId = dto.ShopId ?? selectedService?.ShopId;
-        var estimatedTotal = selectedService?.BasePrice ?? 0m;
+        var selectedShopId = dto.ShopId ?? selectedServices.Select(x => (int?)x.ShopId).Distinct().SingleOrDefault();
+        if (selectedShopId is not null && selectedServices.Select(x => x.ShopId).Distinct().Count() > 1)
+        {
+            throw new InvalidOperationException("Selected services must come from one shop.");
+        }
+
+        var productIds = MergeIds(null, dto.ProductIds);
+        var selectedProducts = productIds.Count == 0 || selectedShopId is null
+            ? []
+            : await db.Products
+                .Where(x => productIds.Contains(x.ProductId) && x.ShopId == selectedShopId && x.IsActive)
+                .OrderBy(x => x.ProductName)
+                .ToListAsync(cancellationToken);
+        if (productIds.Count > 0 && selectedProducts.Count != productIds.Count)
+        {
+            throw new InvalidOperationException("Select available products from the selected shop.");
+        }
+
+        if (selectedProducts.Any(x => x.StockQuantity <= 0))
+        {
+            throw new InvalidOperationException("One or more selected products are out of stock.");
+        }
+
+        var estimatedTotal = selectedServices.Sum(x => x.BasePrice) + selectedProducts.Sum(x => x.Price);
+        var primaryService = selectedServices.FirstOrDefault();
 
         var request = new ServiceRequest
         {
             ClientId = client.ClientId,
             ShopId = selectedShopId,
-            ShopServiceId = selectedService?.ShopServiceId,
+            ShopServiceId = primaryService?.ShopServiceId,
             MotorcycleId = dto.MotorcycleId,
             CurrentStatusId = pendingStatusId,
             IssueDescription = dto.IssueDescription,
@@ -1184,9 +1216,53 @@ public sealed class ServiceRequestService(BikeMateDbContext db) : IServiceReques
             CreatedAt = DateTime.UtcNow
         };
 
+        foreach (var service in selectedServices)
+        {
+            request.LineItems.Add(new ServiceRequestLineItem
+            {
+                ItemType = "service",
+                ShopServiceId = service.ShopServiceId,
+                ItemName = service.ServiceName,
+                Quantity = 1,
+                UnitPrice = service.BasePrice,
+                LineTotal = service.BasePrice,
+                CreatedAt = DateTime.UtcNow
+            });
+        }
+
+        foreach (var product in selectedProducts)
+        {
+            request.LineItems.Add(new ServiceRequestLineItem
+            {
+                ItemType = "product",
+                ProductId = product.ProductId,
+                ItemName = product.ProductName,
+                Quantity = 1,
+                UnitPrice = product.Price,
+                LineTotal = product.Price,
+                CreatedAt = DateTime.UtcNow
+            });
+        }
+
         db.ServiceRequests.Add(request);
         await db.SaveChangesAsync(cancellationToken);
         return await Query().Where(x => x.RequestId == request.RequestId).Select(ToDtoExpression()).SingleAsync(cancellationToken);
+    }
+
+    public static IReadOnlyCollection<int> MergeIds(int? singleId, IReadOnlyCollection<int>? ids)
+    {
+        var merged = new List<int>();
+        if (ids is not null)
+        {
+            merged.AddRange(ids.Where(id => id > 0));
+        }
+
+        if (singleId is > 0)
+        {
+            merged.Add(singleId.Value);
+        }
+
+        return merged.Distinct().ToArray();
     }
 
     private static void ValidateScheduledAt(DateTime? scheduledAt)
@@ -1301,7 +1377,19 @@ public sealed class ServiceRequestService(BikeMateDbContext db) : IServiceReques
             null,
             x.Shop == null ? null : x.Shop.ShopImageUrl,
             x.Shop == null ? null : x.Shop.ShopLogoUrl,
-            x.CompletedAt);
+            x.CompletedAt,
+            x.LineItems
+                .OrderBy(item => item.LineItemId)
+                .Select(item => new ServiceRequestLineItemDto(
+                    item.LineItemId,
+                    item.ItemType,
+                    item.ShopServiceId,
+                    item.ProductId,
+                    item.ItemName,
+                    item.Quantity,
+                    item.UnitPrice,
+                    item.LineTotal))
+                .ToList());
     }
 }
 
@@ -1638,7 +1726,7 @@ public sealed class BookingConversationService(BikeMateDbContext db) : IBookingC
             $"Schedule: {Schedule(request)}\n" +
             $"Location: {request.ServiceLocationAddress ?? "To be confirmed"}\n" +
             $"Concern: {request.IssueDescription}\n" +
-            $"Estimated total: PHP {request.EstimatedTotal:N0}\n\n" +
+            $"Estimated total: PHP {request.EstimatedTotal:N2}\n\n" +
             $"{request.Shop!.ShopName} will use this chat for service updates, pricing questions, and preparation details.";
     }
 
@@ -2174,6 +2262,7 @@ public sealed class PaymentService(BikeMateDbContext db, IPayMongoService payMon
             .Include(x => x.Client)
             .Include(x => x.CurrentStatus)
             .Include(x => x.ShopService)
+            .Include(x => x.LineItems)
             .Include(x => x.Payments).ThenInclude(x => x.PaymentStatus)
             .SingleAsync(x => x.RequestId == dto.RequestId, cancellationToken);
         if (request.Client!.UserId != userId)
@@ -2186,18 +2275,24 @@ public sealed class PaymentService(BikeMateDbContext db, IPayMongoService payMon
             throw new InvalidOperationException("Emergency roadside help does not require checkout.");
         }
 
-        if (request.ShopId is null || request.ShopServiceId is null || request.ShopService is null)
+        var hasLineItems = request.LineItems.Count > 0;
+        if (request.ShopId is null || (!hasLineItems && (request.ShopServiceId is null || request.ShopService is null)))
         {
             throw new InvalidOperationException("Select a repair shop and service before secure payment.");
         }
 
-        if (request.ShopService.ShopId != request.ShopId || !request.ShopService.IsActive)
+        if (!hasLineItems && (request.ShopService!.ShopId != request.ShopId || !request.ShopService.IsActive))
         {
             throw new InvalidOperationException("The selected shop service is no longer available. Choose another service before payment.");
         }
 
-        var amount = request.FinalTotal > 0 ? request.FinalTotal : request.ShopService.BasePrice;
-        request.EstimatedTotal = request.ShopService.BasePrice;
+        var lineItemTotal = request.LineItems.Sum(x => x.LineTotal);
+        var amount = request.FinalTotal > 0
+            ? request.FinalTotal
+            : lineItemTotal > 0
+                ? lineItemTotal
+                : request.ShopService!.BasePrice;
+        request.EstimatedTotal = amount;
         var pendingStatusId = await db.PaymentStatuses.Where(x => x.StatusName == "pending").Select(x => x.PaymentStatusId).SingleAsync(cancellationToken);
         var existingPending = request.Payments
             .Where(x => x.PaymentStatus?.StatusName == PaymentStatuses.Pending &&

@@ -38,19 +38,42 @@ public sealed class AuthController(
         [FromQuery] string? phone,
         CancellationToken cancellationToken)
     {
-        var normalizedEmail = string.IsNullOrWhiteSpace(email)
-            ? string.Empty
-            : AuthService.NormalizeEmail(email);
-        var normalizedPhone = AuthService.NormalizePhilippineMobile(phone);
+        var emailIsValid = true;
+        var normalizedEmail = string.Empty;
+        if (!string.IsNullOrWhiteSpace(email))
+        {
+            try
+            {
+                normalizedEmail = AuthService.NormalizeEmail(email);
+            }
+            catch (InvalidOperationException)
+            {
+                emailIsValid = false;
+            }
+        }
 
-        var emailAvailable = string.IsNullOrWhiteSpace(normalizedEmail) ||
+        var phoneIsValid = true;
+        string? normalizedPhone = null;
+        if (!string.IsNullOrWhiteSpace(phone))
+        {
+            try
+            {
+                normalizedPhone = AuthService.NormalizePhilippineMobile(phone);
+            }
+            catch (InvalidOperationException)
+            {
+                phoneIsValid = false;
+            }
+        }
+
+        var emailAvailable = emailIsValid && (string.IsNullOrWhiteSpace(normalizedEmail) ||
             !await db.Users.AnyAsync(
                 x => x.Email == normalizedEmail && x.AccountStatus != "deleted",
-                cancellationToken);
-        var phoneAvailable = string.IsNullOrWhiteSpace(normalizedPhone) ||
+                cancellationToken));
+        var phoneAvailable = phoneIsValid && (string.IsNullOrWhiteSpace(normalizedPhone) ||
             !await db.Users.AnyAsync(
                 x => x.PhoneNumber == normalizedPhone && x.AccountStatus != "deleted",
-                cancellationToken);
+                cancellationToken));
 
         return Ok(new AuthAvailabilityDto(emailAvailable, phoneAvailable));
     }

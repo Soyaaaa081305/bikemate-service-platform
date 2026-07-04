@@ -10,8 +10,8 @@
 <div class="dashboard-page">
     <div class="admin-page-header">
         <div>
-            <h1 class="admin-page-title">System Overview</h1>
-            <p class="admin-page-description">Monitor approval work, service activity, mechanics, shops, and emergency requests from one console.</p>
+            <h1 class="admin-page-title">Dashboard</h1>
+            <p class="admin-page-description">Track requests, approvals, shops, and service activity.</p>
         </div>
 
         <button class="btn btn-outline-primary shadow-sm" @onclick="LoadDashboard" disabled="@(dashboardData == null && string.IsNullOrWhiteSpace(loadError))">
@@ -44,21 +44,21 @@
                     <i class="bi bi-exclamation-octagon-fill"></i>
                 </div>
                 <div>
-                    <h2 class="dashboard-card-title mb-0">Emergency Window</h2>
-                    <p class="dashboard-muted">@emergencyCount active emergency request@(emergencyCount == 1 ? "" : "s") need monitoring.</p>
+                    <h2 class="dashboard-card-title mb-0">Emergencies</h2>
+                    <p class="dashboard-muted">@emergencyCount active request@(emergencyCount == 1 ? "" : "s").</p>
                 </div>
             </div>
 
             <a href="/emergency" class="btn btn-danger shadow-sm text-nowrap">
-                Open Emergency Window
+                Open
             </a>
         </section>
 
         <details class="dashboard-panel" open>
             <summary>
                 <div>
-                    <h2 class="dashboard-card-title mb-0">Platform Summary</h2>
-                    <p class="dashboard-muted">Customer growth and partner readiness.</p>
+                    <h2 class="dashboard-card-title mb-0">Platform</h2>
+                    <p class="dashboard-muted">Users, shops, and mechanic availability.</p>
                 </div>
                 <i class="bi bi-chevron-down dashboard-panel-chevron"></i>
             </summary>
@@ -68,7 +68,7 @@
                     <section class="dashboard-card">
                         <div class="dashboard-card-head">
                             <h3 class="dashboard-card-title text-primary mb-0">
-                                <i class="bi bi-graph-up me-2"></i>Weekly User Growth
+                                <i class="bi bi-graph-up me-2"></i>User Growth
                             </h3>
                             <a href="/users" class="btn btn-sm btn-outline-primary">Users</a>
                         </div>
@@ -97,7 +97,7 @@
                     </section>
 
                     <section class="dashboard-card">
-                        <h3 class="dashboard-card-title">Network Health</h3>
+                        <h3 class="dashboard-card-title">Network</h3>
 
                         <div class="dashboard-health-block">
                             <div class="dashboard-health-head">
@@ -135,15 +135,15 @@
             <summary>
                 <div>
                     <h2 class="dashboard-card-title mb-0">Service Activity</h2>
-                    <p class="dashboard-muted">@dashboardData.PendingServiceRequests active request@(dashboardData.PendingServiceRequests == 1 ? "" : "s") currently need tracking.</p>
+                    <p class="dashboard-muted">@dashboardData.PendingServiceRequests active request@(dashboardData.PendingServiceRequests == 1 ? "" : "s").</p>
                 </div>
                 <i class="bi bi-chevron-down dashboard-panel-chevron"></i>
             </summary>
 
             <div class="dashboard-panel-body">
                 <div class="dashboard-card-head mb-2">
-                    <h3 class="dashboard-card-title text-dark mb-0">Live Service Requests</h3>
-                    <a href="/requests" class="btn btn-sm btn-outline-warning text-dark">Open requests</a>
+                    <h3 class="dashboard-card-title text-dark mb-0">Live Requests</h3>
+                    <a href="/requests" class="btn btn-sm btn-outline-warning text-dark">View</a>
                 </div>
 
                 @if (dashboardData.RecentActiveRequests.Count == 0)

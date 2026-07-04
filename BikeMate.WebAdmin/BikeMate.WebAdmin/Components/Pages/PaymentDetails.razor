@@ -6,22 +6,30 @@
 
 <PageTitle>Payment Details #@Id</PageTitle>
 
-<div class="mb-4 mt-3">
-    <a href="/payments" class="btn btn-sm btn-outline-secondary mb-3 shadow-sm">
-        <i class="bi bi-arrow-left"></i> Back to Payments
-    </a>
-    <h2 class="fw-bold text-dark mb-0">Transaction #@Id</h2>
-</div>
+<div class="admin-page">
+    <div class="admin-page-header">
+        <div>
+            <h1 class="admin-page-title">Transaction #@Id</h1>
+            <p class="admin-page-description">Payment status, customer reference, and gateway details.</p>
+        </div>
 
-@if (payment == null)
-{
-    <div class="p-5 text-center">
-        <div class="spinner-border text-success" role="status"></div>
+        <div class="admin-page-actions">
+            <a href="/payments" class="btn btn-outline-secondary shadow-sm">
+                <i class="bi bi-arrow-left"></i> Back
+            </a>
+        </div>
     </div>
-}
-else
-{
-    <div class="row g-4">
+
+    @if (payment == null)
+    {
+        <div class="empty-state">
+            <div class="spinner-border text-success" role="status"></div>
+            <p class="mt-2 mb-0">Loading payment details...</p>
+        </div>
+    }
+    else
+    {
+        <div class="row g-4">
         <div class="col-md-8">
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-header bg-white pt-4 pb-0 border-bottom-0">
@@ -111,8 +119,9 @@ else
                 </div>
             </div>
         </div>
-    </div>
-}
+        </div>
+    }
+</div>
 
 @code {
     [Parameter]

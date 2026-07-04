@@ -106,6 +106,8 @@ powershell -ExecutionPolicy Bypass -File .\tools\Build-PhoneDemoApks.ps1
 
 powershell -ExecutionPolicy Bypass -File .\tools\Run-AndroidDemo.ps1 -App Mobile
 
+powershell -ExecutionPolicy Bypass -File .\tools\Test-SecretHygiene.ps1 -IncludeUntracked
+
 powershell -ExecutionPolicy Bypass -File .\tools\Test-CloudDeployment.ps1
 ```
 
@@ -123,6 +125,190 @@ powershell -ExecutionPolicy Bypass -File .\tools\Deploy-PhoneDemo.ps1 `
 ```
 
 Clean old app data on test phones before a demo so previous API URL overrides do not survive.
+
+## Operations Quick Sheet
+
+Use these commands from the repository root:
+
+```powershell
+cd C:\Users\Admin\Documents\PROJECTSSS\BikeMate
+```
+
+### Turn The Cloud Demo On Or Off
+
+Start the Azure API and WebAdmin only when you are testing or demoing:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\Start-BikeMateAzureDemo.ps1
+```
+
+Verify the deployed API/admin setup:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\Test-CloudDeployment.ps1
+```
+
+Stop the cloud apps again to reduce spend:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\Stop-BikeMateAzureDemo.ps1
+```
+
+Check current Azure state:
+
+```powershell
+az webapp list --resource-group BikeMateDemoRG --query "[].{name:name,state:state,host:defaultHostName}" -o table
+az sql db show --resource-group BikeMateDemoRG1 --server bikemate-demo-sql-noda --name BikeMatesDB_Demo --query "{name:name,status:status,sku:sku.name,autoPauseDelay:autoPauseDelay}" -o table
+```
+
+### Build APKs
+
+Build fresh APKs:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\Build-PhoneDemoApks.ps1 -Configuration Debug
+```
+
+Fresh APK output:
+
+- `artifacts\phone-demo\apk\BikeMate.Mobile.Debug.apk`
+- `artifacts\phone-demo\apk\BIKEMATES_ADMIN.Debug.apk`
+
+The build script also refreshes install-friendly copies here:
+
+- `artifacts\BikeMate.apk`
+- `artifacts\BikeMate.Shop.apk`
+
+The Android package IDs are:
+
+- Customer/mechanic app: `com.bikemate.mobile`
+- Shop/admin app: `com.bikemate.shop`
+
+### Install, Clear, Launch, Or Uninstall On Android
+
+If `adb` is not on PATH, use the SDK path directly:
+
+```powershell
+$adb = "$env:LOCALAPPDATA\Android\Sdk\platform-tools\adb.exe"
+& $adb devices
+```
+
+Install the stable copied APKs:
+
+```powershell
+& $adb install -r ".\artifacts\BikeMate.apk"
+& $adb install -r ".\artifacts\BikeMate.Shop.apk"
+```
+
+Install fresh APKs from the build script:
+
+```powershell
+& $adb install -r ".\artifacts\phone-demo\apk\BikeMate.Mobile.Debug.apk"
+& $adb install -r ".\artifacts\phone-demo\apk\BIKEMATES_ADMIN.Debug.apk"
+```
+
+Clear app data without uninstalling:
+
+```powershell
+& $adb shell pm clear com.bikemate.mobile
+& $adb shell pm clear com.bikemate.shop
+```
+
+Launch the apps:
+
+```powershell
+& $adb shell monkey -p com.bikemate.mobile 1
+& $adb shell monkey -p com.bikemate.shop 1
+```
+
+Uninstall both apps:
+
+```powershell
+& $adb uninstall com.bikemate.mobile
+& $adb uninstall com.bikemate.shop
+```
+
+Remove the old shop/admin package if it was installed from an earlier build:
+
+```powershell
+& $adb uninstall com.companyname.bikemates_admin
+```
+
+Build, install, and launch through the helper script:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\Run-AndroidDemo.ps1 -App Both
+```
+
+### Updating Rotated Credentials
+
+Never paste real keys into tracked files. Put rotated credentials in Azure App Settings, ignored local config, provider dashboards, or environment variables.
+
+Update API app settings in Azure:
+
+```powershell
+az webapp config appsettings set `
+  --resource-group BikeMateDemoRG `
+  --name bikemate-api-demo `
+  --settings `
+    "GoogleMaps__ApiKey=<google-maps-api-key>" `
+    "GoogleAuth__WebClientId=<google-web-client-id>" `
+    "GoogleAuth__WebClientSecret=<google-web-client-secret>" `
+    "GoogleAuth__AndroidClientId=<google-android-client-id>" `
+    "SendGrid__ApiKey=<sendgrid-api-key>" `
+    "SendGrid__FromEmail=<verified-sender-email>" `
+    "PayMongo__PublicKey=<paymongo-public-key>" `
+    "PayMongo__SecretKey=<paymongo-secret-key>" `
+    "PayMongo__WebhookSecret=<paymongo-webhook-secret>" `
+    "Cloudinary__CloudName=<cloudinary-cloud-name>" `
+    "Cloudinary__ApiKey=<cloudinary-api-key>" `
+    "Cloudinary__ApiSecret=<cloudinary-api-secret>" `
+    "Agora__AppId=<agora-app-id>" `
+    "Agora__PrimaryCertificate=<agora-primary-certificate>"
+```
+
+Update WebAdmin Agora settings if web emergency calls are enabled:
+
+```powershell
+az webapp config appsettings set `
+  --resource-group BikeMateDemoRG `
+  --name bikemate-webadmin-demo `
+  --settings `
+    "Agora__AppId=<agora-app-id>" `
+    "Agora__PrimaryCertificate=<agora-primary-certificate>"
+```
+
+After changing credentials, restart and smoke-test:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\Start-BikeMateAzureDemo.ps1
+az webapp restart --resource-group BikeMateDemoRG --name bikemate-api-demo
+az webapp restart --resource-group BikeMateDemoRG --name bikemate-webadmin-demo
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\Test-CloudDeployment.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\Stop-BikeMateAzureDemo.ps1
+```
+
+### Before Pushing To GitHub
+
+Run the full local verification pass:
+
+```powershell
+dotnet build .\BikeMate.WebAdmin\BikeMate.WebAdmin\BikeMate.WebAdmin.csproj
+dotnet build .\BikeMate.Mobile\BikeMate.Mobile.csproj -f net10.0-android
+dotnet build .\BIKEMATES_ADMIN\BIKEMATES_ADMIN.csproj -f net10.0-android
+dotnet test .\BikeMate.Tests\BikeMate.Tests.csproj
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\Test-SecretHygiene.ps1 -IncludeUntracked
+git diff --check
+```
+
+Check that ignored local secret files are not tracked:
+
+```powershell
+git check-ignore -v .env BikeMate.Api/appsettings.Local.json BikeMate.WebAdmin/BikeMate.WebAdmin/appsettings.Local.json BikeMate.Mobile/Platforms/Android/google-services.json artifacts/BikeMate.apk artifacts/BikeMate.Shop.apk
+git ls-files .env BikeMate.Api/appsettings.Local.json BikeMate.WebAdmin/BikeMate.WebAdmin/appsettings.Local.json BikeMate.Mobile/Platforms/Android/google-services.json artifacts/BikeMate.apk artifacts/BikeMate.Shop.apk
+```
+
+The second command should print nothing.
 
 ## Test Accounts
 

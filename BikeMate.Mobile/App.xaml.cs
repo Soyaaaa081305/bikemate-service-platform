@@ -6,6 +6,7 @@ namespace BikeMate
     {
         public App()
         {
+            Services.CrashLogService.Install("BikeMate");
             InitializeComponent();
         }
 

@@ -6,53 +6,57 @@
 @inject IJSRuntime JS
 @inject NavigationManager Navigation
 
-<div class="mb-4 mt-3 d-flex justify-content-between align-items-center">
-    <h2 class="fw-bold text-dark mb-0">Mechanic Profile</h2>
-
-    <div class="d-flex gap-2 align-items-center">
-        @if (profile != null)
-        {
-            <a href="/mechanics/edit/@profile.MechanicId" class="btn btn-outline-primary shadow-sm">
-                <i class="bi bi-pencil-square me-1"></i> Edit
-            </a>
-            <button class="btn btn-outline-danger shadow-sm" @onclick="SuspendMechanic" disabled="@isProcessing">
-                <i class="bi bi-slash-circle me-1"></i> Suspend
-            </button>
-            <button class="btn btn-danger shadow-sm" @onclick="DeleteMechanic" disabled="@isProcessing">
-                <i class="bi bi-trash me-1"></i> Delete
-            </button>
-        }
-        <a href="/mechanics" class="btn btn-outline-secondary shadow-sm ms-2">
-            <i class="bi bi-arrow-left"></i> Back
-        </a>
-    </div>
-</div>
-
-<ActionMessage Message="@statusMessage" AlertType="@statusType" OnMessageCleared="() => statusMessage = null" />
-
-@if (profile == null)
-{
-    @if (!string.IsNullOrWhiteSpace(statusMessage))
-    {
-        <div class="card border-0 shadow-sm">
-            <div class="card-body p-5 text-center">
-                <h5 class="fw-bold">Mechanic profile unavailable</h5>
-                <p class="text-muted">@statusMessage</p>
-                <button class="btn btn-outline-primary" @onclick="LoadMechanic">Retry</button>
-            </div>
+<div class="admin-page">
+    <div class="admin-page-header">
+        <div>
+            <h1 class="admin-page-title">Mechanic Profile</h1>
+            <p class="admin-page-description">Account status, assigned shop, service history, and customer feedback.</p>
         </div>
+
+        <div class="admin-page-actions">
+            @if (profile != null)
+            {
+                <a href="/mechanics/edit/@profile.MechanicId" class="btn btn-outline-primary shadow-sm">
+                    <i class="bi bi-pencil-square me-1"></i> Edit
+                </a>
+                <button class="btn btn-outline-danger shadow-sm" @onclick="SuspendMechanic" disabled="@isProcessing">
+                    <i class="bi bi-slash-circle me-1"></i> Suspend
+                </button>
+                <button class="btn btn-danger shadow-sm" @onclick="DeleteMechanic" disabled="@isProcessing">
+                    <i class="bi bi-trash me-1"></i> Delete
+                </button>
+            }
+            <a href="/mechanics" class="btn btn-outline-secondary shadow-sm">
+                <i class="bi bi-arrow-left"></i> Back
+            </a>
+        </div>
+    </div>
+
+    <ActionMessage Message="@statusMessage" AlertType="@statusType" OnMessageCleared="() => statusMessage = null" />
+
+    @if (profile == null)
+    {
+        @if (!string.IsNullOrWhiteSpace(statusMessage))
+        {
+            <div class="card admin-table-card">
+                <div class="card-body empty-state">
+                    <h2 class="admin-page-title">Mechanic profile unavailable</h2>
+                    <p>@statusMessage</p>
+                    <button class="btn btn-outline-primary" @onclick="LoadMechanic">Retry</button>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="empty-state">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2 mb-0">Loading mechanic profile...</p>
+            </div>
+        }
     }
     else
     {
-        <div class="p-5 text-center">
-            <div class="spinner-border text-primary" role="status"></div>
-            <p class="mt-2 text-muted">Loading complete mechanic profile...</p>
-        </div>
-    }
-}
-else
-{
-    <div class="row g-4">
+        <div class="row g-4">
         <div class="col-md-4">
             <div class="card shadow-sm border-0 text-center pt-4 pb-3 h-100">
                 <div class="card-body">
@@ -194,7 +198,8 @@ else
             </div>
         </div>
     </div>
-}
+    }
+</div>
 
 @code {
     [Parameter]

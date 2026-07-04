@@ -13,7 +13,7 @@ public sealed record ModuleAction(string Text, string Route);
 
 public abstract class ConnectedModulePage : ContentPage
 {
-    private static readonly Color Orange = Color.FromArgb("#FF6B2C");
+    private static readonly Color Orange = Color.FromArgb("#FF6B00");
     private static readonly Color Dark = Color.FromArgb("#1F2933");
     private static readonly Color Muted = Color.FromArgb("#6E6E6E");
     private static readonly Color BorderColor = Color.FromArgb("#E6E6E6");
@@ -465,15 +465,15 @@ using BikeMate.Views.Shared;
 
 public sealed class AdminDashboardPage : ContentPage
 {
-    private static readonly Color PageBackground = Color.FromArgb("#F4F5F7");
+    private static readonly Color PageBackground = Color.FromArgb("#F6F7F9");
     private static readonly Color SidebarBackground = Color.FromArgb("#121418");
     private static readonly Color SidebarMuted = Color.FromArgb("#9CA3AF");
     private static readonly Color SidebarActive = Color.FromArgb("#262A31");
-    private static readonly Color CardBorder = Color.FromArgb("#E7E7E7");
-    private static readonly Color DarkText = Color.FromArgb("#1F2933");
-    private static readonly Color MutedText = Color.FromArgb("#6B7280");
-    private static readonly Color Orange = Color.FromArgb("#D97706");
-    private static readonly Color OrangeSoft = Color.FromArgb("#FFF4E5");
+    private static readonly Color CardBorder = Color.FromArgb("#E1E5EA");
+    private static readonly Color DarkText = Color.FromArgb("#242424");
+    private static readonly Color MutedText = Color.FromArgb("#6E6E6E");
+    private static readonly Color Orange = Color.FromArgb("#FF6B00");
+    private static readonly Color OrangeSoft = Color.FromArgb("#FFF3EA");
     private static readonly Color Green = Color.FromArgb("#1C8C5A");
     private static readonly Color Blue = Color.FromArgb("#1EA7D8");
     private static readonly Color Red = Color.FromArgb("#D63C4E");

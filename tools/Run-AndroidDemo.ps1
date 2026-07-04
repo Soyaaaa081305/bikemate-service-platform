@@ -16,7 +16,7 @@ $adb = Join-Path $androidSdk "platform-tools\adb.exe"
 $emulator = Join-Path $androidSdk "emulator\emulator.exe"
 
 $mobilePackage = "com.bikemate.mobile"
-$adminPackage = "com.companyname.bikemates_admin"
+$adminPackage = "com.bikemate.shop"
 
 function Require-File {
     param(

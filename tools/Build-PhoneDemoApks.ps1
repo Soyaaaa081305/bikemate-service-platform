@@ -7,10 +7,12 @@ param(
 $ErrorActionPreference = "Stop"
 
 $repoRoot = Split-Path -Parent $PSScriptRoot
+$rootArtifacts = Join-Path $repoRoot "artifacts"
 $artifacts = Join-Path $repoRoot "artifacts\phone-demo\apk"
 $customerPackage = "com.bikemate.mobile"
-$shopAdminPackage = "com.companyname.bikemates_admin"
+$shopAdminPackage = "com.bikemate.shop"
 
+New-Item -ItemType Directory -Force -Path $rootArtifacts | Out-Null
 New-Item -ItemType Directory -Force -Path $artifacts | Out-Null
 
 Push-Location $repoRoot
@@ -29,11 +31,21 @@ try {
 
     $mobileOut = Join-Path $artifacts "BikeMate.Mobile.$Configuration.apk"
     $adminOut = Join-Path $artifacts "BIKEMATES_ADMIN.$Configuration.apk"
+    $mobileDemoOut = Join-Path $artifacts "BikeMate.apk"
+    $adminDemoOut = Join-Path $artifacts "BikeMate.Shop.apk"
+    $mobileRootOut = Join-Path $rootArtifacts "BikeMate.apk"
+    $adminRootOut = Join-Path $rootArtifacts "BikeMate.Shop.apk"
     Copy-Item $mobileApk.FullName $mobileOut -Force
     Copy-Item $adminApk.FullName $adminOut -Force
+    Copy-Item $mobileApk.FullName $mobileDemoOut -Force
+    Copy-Item $adminApk.FullName $adminDemoOut -Force
+    Copy-Item $mobileApk.FullName $mobileRootOut -Force
+    Copy-Item $adminApk.FullName $adminRootOut -Force
 
     Write-Host "Customer/mechanic APK: $mobileOut"
     Write-Host "Shop-admin APK: $adminOut"
+    Write-Host "Install-friendly customer APK: $mobileRootOut"
+    Write-Host "Install-friendly shop APK: $adminRootOut"
 
     if ($InstallConnectedDevices) {
         $adb = Join-Path $env:LOCALAPPDATA "Android\Sdk\platform-tools\adb.exe"

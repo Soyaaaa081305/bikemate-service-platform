@@ -8,7 +8,7 @@ public static class AppNavigation
 {
     public const string ForceLoginPreferenceKey = "bikemate_force_login_after_logout";
     public const string LoginMessagePreferenceKey = "bikemate_login_message";
-    private const string ShopAdminAppPackageName = "com.companyname.bikemates_admin";
+    private const string ShopAdminAppPackageName = "com.bikemate.shop";
     private static int _handlingUnauthorized;
 
     public static async Task NavigateByRoleAsync(string? role)
@@ -55,7 +55,7 @@ public static class AppNavigation
 
     public static async Task OpenShopAdminAppAsync()
     {
-        ClearSavedSession("Shop admin accounts use the separate BIKEMATES_ADMIN app.");
+        ClearSavedSession("Shop admin accounts use the separate BikeMate Shop app.");
 
         await MainThread.InvokeOnMainThreadAsync(async () =>
         {
@@ -70,8 +70,8 @@ public static class AppNavigation
             if (page is not null)
             {
                 await page.DisplayAlertAsync(
-                    "Open BIKEMATES_ADMIN",
-                    "Shop admin accounts now use the separate BIKEMATES_ADMIN app. Install or run that app, then sign in with the shop owner account you created.",
+                    "Open BikeMate Shop",
+                    "Shop admin accounts now use the separate BikeMate Shop app. Install or run that app, then sign in with the shop owner account you created.",
                     "OK");
             }
         });

@@ -67,7 +67,7 @@
             </VerticalStackLayout>
         </ScrollView>
 
-        <Button Grid.Row="2" Text="Continue" BackgroundColor="#FF6B2C" TextColor="White"
+        <Button Grid.Row="2" Text="Continue" BackgroundColor="#FF6B00" TextColor="White"
                 FontAttributes="Bold" CornerRadius="8" HeightRequest="50" Margin="20,10,20,24"
                 Clicked="OnContinueClicked" />
     </Grid>

@@ -91,7 +91,7 @@
         <Button x:Name="ContinueButton"
                 Grid.Row="2"
                 Text="Continue"
-                BackgroundColor="#FF6B2C"
+                BackgroundColor="#FF6B00"
                 TextColor="White"
                 FontAttributes="Bold"
                 CornerRadius="8"

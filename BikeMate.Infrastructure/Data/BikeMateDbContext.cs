@@ -27,6 +27,7 @@ public sealed class BikeMateDbContext(DbContextOptions<BikeMateDbContext> option
     public DbSet<ShopMechanic> ShopMechanics => Set<ShopMechanic>();
     public DbSet<RequestStatus> RequestStatuses => Set<RequestStatus>();
     public DbSet<ServiceRequest> ServiceRequests => Set<ServiceRequest>();
+    public DbSet<ServiceRequestLineItem> ServiceRequestLineItems => Set<ServiceRequestLineItem>();
     public DbSet<RequestStatusHistory> RequestStatusHistory => Set<RequestStatusHistory>();
     public DbSet<RequestMedia> RequestMedia => Set<RequestMedia>();
     public DbSet<LiveLocation> LiveLocations => Set<LiveLocation>();
@@ -335,6 +336,21 @@ public sealed class BikeMateDbContext(DbContextOptions<BikeMateDbContext> option
             entity.HasOne(x => x.Mechanic).WithMany(x => x.AssignedRequests).HasForeignKey(x => x.MechanicId).OnDelete(DeleteBehavior.Restrict);
             entity.HasOne(x => x.CurrentStatus).WithMany(x => x.ServiceRequests).HasForeignKey(x => x.CurrentStatusId).OnDelete(DeleteBehavior.Restrict);
             entity.HasOne(x => x.Motorcycle).WithMany().HasForeignKey(x => x.MotorcycleId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<ServiceRequestLineItem>(entity =>
+        {
+            entity.ToTable("service_request_line_items");
+            entity.HasKey(x => x.LineItemId);
+            entity.Property(x => x.ItemType).HasMaxLength(30).IsRequired();
+            entity.Property(x => x.ItemName).HasMaxLength(255).IsRequired();
+            entity.Property(x => x.Quantity).HasDefaultValue(1);
+            entity.Property(x => x.UnitPrice).HasPrecision(10, 2);
+            entity.Property(x => x.LineTotal).HasPrecision(10, 2);
+            entity.Property(x => x.CreatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
+            entity.HasOne(x => x.Request).WithMany(x => x.LineItems).HasForeignKey(x => x.RequestId).OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(x => x.ShopService).WithMany().HasForeignKey(x => x.ShopServiceId).OnDelete(DeleteBehavior.Restrict);
+            entity.HasOne(x => x.Product).WithMany(x => x.RequestLineItems).HasForeignKey(x => x.ProductId).OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<RequestStatusHistory>(entity =>

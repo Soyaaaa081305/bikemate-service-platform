@@ -62,7 +62,7 @@ public partial class AccCreate5 : ContentPage
             ResendButton.IsVisible = false;
             ProceedButton.Text = "Proceed to Login";
             ProceedButton.IsEnabled = true;
-            ProceedButton.BackgroundColor = Color.FromArgb("#FF6B2C");
+            ProceedButton.BackgroundColor = Color.FromArgb("#FF6B00");
             ProceedButton.TextColor = Colors.White;
             await DisplayAlertAsync("Email verified", "Your shop-admin email was verified. BikeMate admin will review the submitted shop details next.", "OK");
         }

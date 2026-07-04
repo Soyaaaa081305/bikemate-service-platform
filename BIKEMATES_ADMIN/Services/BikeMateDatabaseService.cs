@@ -323,27 +323,6 @@ public static class BikeMateDatabaseService
 
     public static string CurrentApiBaseUrl => LoadApiBaseUrl();
 
-    public static string PackagedDefaultApiBaseUrl => EnsureApiPath(LoadPackagedOrDefaultApiBaseUrl());
-
-    public static bool HasApiBaseUrlOverride =>
-        !string.IsNullOrWhiteSpace(Preferences.Get(ApiBaseUrlPreferenceKey, string.Empty));
-
-    public static void SaveApiBaseUrlOverride(string baseUrl)
-    {
-        var normalized = EnsureApiPath(baseUrl);
-        if (!Uri.TryCreate(normalized, UriKind.Absolute, out _))
-        {
-            throw new InvalidOperationException("Enter a valid BikeMate API URL, for example https://bikemate-api-demo.azurewebsites.net/api/ or http://127.0.0.1:5000/api/ when using adb reverse.");
-        }
-
-        Preferences.Set(ApiBaseUrlPreferenceKey, normalized);
-    }
-
-    public static void ClearApiBaseUrlOverride()
-    {
-        Preferences.Remove(ApiBaseUrlPreferenceKey);
-    }
-
     public static async Task<AuthenticatedUser> LoginAsync(string email, string password)
     {
         var normalizedEmail = NormalizeEmail(email);
@@ -363,7 +342,7 @@ public static class BikeMateDatabaseService
         var isSystemAdmin = auth.User.Roles.Any(role => string.Equals(role, SystemAdminRole, StringComparison.OrdinalIgnoreCase));
         if (!isShopAdmin && !isSystemAdmin)
         {
-            throw new InvalidOperationException("Use a ShopAdmin or SystemAdmin account for BIKEMATES_ADMIN. Customer and mechanic accounts cannot open shop inventory/profile pages.");
+            throw new InvalidOperationException("Use a ShopAdmin or SystemAdmin account for BikeMate Shop. Customer and mechanic accounts cannot open shop inventory/profile pages.");
         }
 
         var shop = await TryLoadOwnedShopAsync(http, auth.AccessToken);
@@ -1027,11 +1006,7 @@ public static class BikeMateDatabaseService
 
     private static string LoadApiBaseUrl()
     {
-        var saved = Preferences.Get(ApiBaseUrlPreferenceKey, string.Empty);
-        if (!string.IsNullOrWhiteSpace(saved))
-        {
-            return EnsureApiPath(saved);
-        }
+        Preferences.Remove(ApiBaseUrlPreferenceKey);
 
         var environmentValue = Environment.GetEnvironmentVariable(ApiBaseUrlEnvironmentVariable);
         return EnsureApiPath(string.IsNullOrWhiteSpace(environmentValue)

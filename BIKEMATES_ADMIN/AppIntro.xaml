@@ -6,7 +6,7 @@
 
     <Grid Padding="20,34,20,28" RowDefinitions="*,Auto">
         <VerticalStackLayout Grid.Row="0" Spacing="14" VerticalOptions="Center">
-            <Image Source="bikemate_logo.png" HeightRequest="116" HorizontalOptions="Center" />
+            <Image Source="bikemate_logo" HeightRequest="116" HorizontalOptions="Center" />
             <Label Text="BIKEMATES ADMIN"
                    FontFamily="Inter"
                    FontSize="18"
@@ -21,7 +21,7 @@
 
         <Button Grid.Row="1"
                 Text="Let's Go"
-                BackgroundColor="#FF6B2C"
+                BackgroundColor="#FF6B00"
                 TextColor="White"
                 FontAttributes="Bold"
                 CornerRadius="8"

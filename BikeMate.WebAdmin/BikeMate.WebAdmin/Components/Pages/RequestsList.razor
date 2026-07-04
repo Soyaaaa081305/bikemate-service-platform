@@ -10,7 +10,7 @@
     <div class="admin-page-header">
         <div>
             <h1 class="admin-page-title">Active Services</h1>
-            <p class="admin-page-description">Track booked repairs that still need assignment, payment confirmation, or completion.</p>
+            <p class="admin-page-description">Track active bookings that still need assignment, payment confirmation, or completion.</p>
         </div>
 
         <div class="admin-page-actions">
@@ -21,6 +21,33 @@
             </div>
         </div>
     </div>
+
+    @if (requests != null)
+    {
+        <div class="admin-summary-strip">
+            <div class="admin-summary-chip">
+                <i class="bi bi-clipboard2-pulse"></i>
+                <div>
+                    <small>Active</small>
+                    <strong>@requests.Length</strong>
+                </div>
+            </div>
+            <div class="admin-summary-chip">
+                <i class="bi bi-hourglass-split"></i>
+                <div>
+                    <small>Pending</small>
+                    <strong>@PendingCount</strong>
+                </div>
+            </div>
+            <div class="admin-summary-chip">
+                <i class="bi bi-tools"></i>
+                <div>
+                    <small>In progress</small>
+                    <strong>@InProgressCount</strong>
+                </div>
+            </div>
+        </div>
+    }
 
     <div class="card admin-table-card">
         <div class="card-body p-0">
@@ -87,6 +114,8 @@
 @code {
     private ServiceRequestDto[]? requests;
     private string searchTerm = "";
+    private int PendingCount => requests?.Count(r => string.Equals(r.Status, "pending", StringComparison.OrdinalIgnoreCase)) ?? 0;
+    private int InProgressCount => requests?.Count(r => r.Status.Contains("progress", StringComparison.OrdinalIgnoreCase)) ?? 0;
 
     private IEnumerable<ServiceRequestDto> FilteredRequests => string.IsNullOrWhiteSpace(searchTerm)
         ? requests ?? Array.Empty<ServiceRequestDto>()

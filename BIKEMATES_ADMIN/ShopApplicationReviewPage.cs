@@ -279,7 +279,7 @@ public sealed class ShopApplicationReviewPage : ContentPage
         var button = new Button
         {
             Text = string.IsNullOrWhiteSpace(url) ? "No file submitted" : "Open file",
-            BackgroundColor = string.IsNullOrWhiteSpace(url) ? Color.FromArgb("#DCDCDC") : Color.FromArgb("#FF6B2C"),
+            BackgroundColor = string.IsNullOrWhiteSpace(url) ? Color.FromArgb("#DCDCDC") : Color.FromArgb("#FF6B00"),
             TextColor = string.IsNullOrWhiteSpace(url) ? Color.FromArgb("#6E6E6E") : Colors.White,
             FontAttributes = FontAttributes.Bold,
             CornerRadius = 8,

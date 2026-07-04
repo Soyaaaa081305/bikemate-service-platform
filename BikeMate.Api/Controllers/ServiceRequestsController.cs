@@ -178,6 +178,7 @@ public sealed class ServiceRequestsController(
         var userId = User.GetUserId();
         var request = await db.ServiceRequests
             .Include(x => x.Client)
+            .Include(x => x.LineItems)
             .SingleAsync(x => x.RequestId == id && x.Client!.UserId == userId, cancellationToken);
         var shopExists = await db.Shops.AnyAsync(x => x.ShopId == dto.ShopId && x.ShopStatus == "verified", cancellationToken);
         if (!shopExists)
@@ -185,45 +186,80 @@ public sealed class ServiceRequestsController(
             return BadRequest(new { error = "Select an available repair shop." });
         }
 
-        var service = await db.ShopServices
-            .Where(x => x.ShopId == dto.ShopId && x.IsActive && (dto.ShopServiceId == null || x.ShopServiceId == dto.ShopServiceId))
+        var serviceIds = ServiceRequestService.MergeIds(dto.ShopServiceId, dto.ShopServiceIds);
+        var servicesQuery = db.ShopServices
+            .Where(x => x.ShopId == dto.ShopId && x.IsActive);
+        if (serviceIds.Count > 0)
+        {
+            servicesQuery = servicesQuery.Where(x => serviceIds.Contains(x.ShopServiceId));
+        }
+
+        var services = await servicesQuery
             .OrderBy(x => x.ServiceName)
-            .FirstOrDefaultAsync(cancellationToken);
-        if (service is null)
+            .ToListAsync(cancellationToken);
+        if (services.Count == 0)
         {
             return BadRequest(new { error = "Select an available service from this shop." });
         }
 
-        Product? selectedProduct = null;
-        if (dto.ProductId is not null)
+        if (serviceIds.Count > 0 && services.Count != serviceIds.Count)
         {
-            selectedProduct = await db.Products
-                .Where(x =>
-                    x.ProductId == dto.ProductId &&
-                    x.ShopId == dto.ShopId &&
-                    x.IsActive)
-                .FirstOrDefaultAsync(cancellationToken);
-            if (selectedProduct is null)
-            {
-                return BadRequest(new { error = "Select an available product from this shop." });
-            }
-
-            if (selectedProduct.StockQuantity <= 0)
-            {
-                return BadRequest(new { error = "The selected product is currently out of stock." });
-            }
+            return BadRequest(new { error = "One or more selected services are no longer available from this shop." });
         }
 
-        request.ShopId = dto.ShopId;
-        request.ShopServiceId = service.ShopServiceId;
-        request.EstimatedTotal = service.BasePrice + (selectedProduct?.Price ?? 0m);
-        if (selectedProduct is not null &&
-            !request.IssueDescription.Contains("Selected product:", StringComparison.OrdinalIgnoreCase))
+        var productIds = ServiceRequestService.MergeIds(dto.ProductId, dto.ProductIds);
+        var selectedProducts = productIds.Count == 0
+            ? []
+            : await db.Products
+                .Where(x => productIds.Contains(x.ProductId) && x.ShopId == dto.ShopId && x.IsActive)
+                .OrderBy(x => x.ProductName)
+                .ToListAsync(cancellationToken);
+        if (productIds.Count > 0 && selectedProducts.Count != productIds.Count)
         {
-            request.IssueDescription = string.Join(
-                Environment.NewLine,
-                request.IssueDescription,
-                $"Selected product: {selectedProduct.ProductName} (PHP {selectedProduct.Price:0.00})");
+            return BadRequest(new { error = "One or more selected products are no longer available from this shop." });
+        }
+
+        if (selectedProducts.Any(x => x.StockQuantity <= 0))
+        {
+            return BadRequest(new { error = "One or more selected products are currently out of stock." });
+        }
+
+        var primaryService = services.First();
+        request.ShopId = dto.ShopId;
+        request.ShopServiceId = primaryService.ShopServiceId;
+        request.EstimatedTotal = services.Sum(x => x.BasePrice) + selectedProducts.Sum(x => x.Price);
+        if (request.LineItems.Count > 0)
+        {
+            db.ServiceRequestLineItems.RemoveRange(request.LineItems);
+            request.LineItems.Clear();
+        }
+
+        foreach (var service in services)
+        {
+            request.LineItems.Add(new ServiceRequestLineItem
+            {
+                ItemType = "service",
+                ShopServiceId = service.ShopServiceId,
+                ItemName = service.ServiceName,
+                Quantity = 1,
+                UnitPrice = service.BasePrice,
+                LineTotal = service.BasePrice,
+                CreatedAt = DateTime.UtcNow
+            });
+        }
+
+        foreach (var product in selectedProducts)
+        {
+            request.LineItems.Add(new ServiceRequestLineItem
+            {
+                ItemType = "product",
+                ProductId = product.ProductId,
+                ItemName = product.ProductName,
+                Quantity = 1,
+                UnitPrice = product.Price,
+                LineTotal = product.Price,
+                CreatedAt = DateTime.UtcNow
+            });
         }
 
         var mechanicId = await db.ShopMechanics

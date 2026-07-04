@@ -27,18 +27,21 @@
     --bm-font-body: "PublicSans", system-ui, sans-serif;
     --bm-font-display: "Inter", "PublicSans", system-ui, sans-serif;
     --bm-text-caption: 11px;
+    --bm-text-small: 12px;
     --bm-text-body: 13px;
     --bm-text-title: 18px;
-    --bm-orange: #ff6b2c;
-    --bm-orange-dark: #e85d21;
-    --bm-navy: #21313f;
-    --bm-nav-bg: #111827;
-    --bm-page-bg: #f3f4f6;
+    --bm-orange: #ff6b00;
+    --bm-orange-dark: #c45500;
+    --bm-navy: #22303d;
+    --bm-ink: #242424;
+    --bm-nav-bg: #131c26;
+    --bm-page-bg: #f6f7f9;
     --bm-card: #ffffff;
-    --bm-text: #1f2937;
-    --bm-muted: #6b7280;
-    --bm-soft-muted: #8a94a6;
-    --bm-border: #e5e7eb;
+    --bm-text: #242424;
+    --bm-muted: #6e6e6e;
+    --bm-soft-muted: #6e6e6e;
+    --bm-border: #e1e5ea;
+    --bm-shadow: 0 1px 2px rgba(16, 24, 40, .04), 0 8px 20px rgba(16, 24, 40, .05);
     --bm-soft-orange: #fff3e8;
     --bm-soft-blue: #eff6ff;
     --bm-soft-green: #f0fdf4;
@@ -52,7 +55,7 @@
     --bikemate-surface: var(--bm-card);
     --bikemate-slate: var(--bm-muted);
     --bs-primary: var(--bm-orange);
-    --bs-primary-rgb: 255, 107, 44;
+    --bs-primary-rgb: 255, 107, 0;
     --bs-dark: var(--bm-navy);
     --bs-body-bg: var(--bm-page-bg);
 }
@@ -66,6 +69,7 @@ body {
     color: var(--bm-text);
     background: var(--bm-page-bg);
     letter-spacing: 0;
+    line-height: 1.45;
 }
 
 a,
@@ -117,6 +121,7 @@ label {
 .btn {
     border-radius: 7px;
     font-weight: 700;
+    min-height: 36px;
 }
 
 .emergency-call-shell {
@@ -277,10 +282,12 @@ label {
 .admin-card {
     border: 1px solid var(--bm-border);
     border-radius: 8px;
-    box-shadow: 0 10px 24px rgba(20, 32, 45, .06);
+    box-shadow: var(--bm-shadow);
 }
 
 .card-header {
+    background: #fff;
+    border-bottom-color: var(--bm-border);
     border-radius: 8px 8px 0 0 !important;
 }
 
@@ -291,6 +298,8 @@ label {
 .table thead th {
     color: var(--bm-muted);
     font-weight: 700;
+    padding-top: .75rem;
+    padding-bottom: .75rem;
     white-space: nowrap;
 }
 
@@ -364,7 +373,7 @@ h1:focus {
 .admin-page {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 1.1rem;
 }
 
 .admin-page-header {
@@ -381,11 +390,12 @@ h1:focus {
     font-family: var(--bm-font-display);
     font-size: var(--bm-text-title);
     font-weight: 800;
+    line-height: 1.2;
 }
 
 .admin-page-description {
     color: var(--bm-muted);
-    margin: .2rem 0 0;
+    margin: .28rem 0 0;
     max-width: 680px;
 }
 
@@ -402,8 +412,57 @@ h1:focus {
     width: 100%;
 }
 
+.admin-summary-strip {
+    display: grid;
+    gap: .75rem;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+.admin-summary-chip {
+    align-items: center;
+    background: #fff;
+    border: 1px solid var(--bm-border);
+    border-radius: 8px;
+    box-shadow: var(--bm-shadow);
+    display: flex;
+    gap: .75rem;
+    min-height: 74px;
+    padding: .9rem 1rem;
+}
+
+.admin-summary-chip i {
+    align-items: center;
+    background: var(--bm-soft-orange);
+    border-radius: 8px;
+    color: var(--bm-orange);
+    display: inline-flex;
+    font-size: var(--bm-text-title);
+    height: 34px;
+    justify-content: center;
+    width: 34px;
+}
+
+.admin-summary-chip small {
+    color: var(--bm-muted);
+    display: block;
+    margin-bottom: .1rem;
+    text-transform: uppercase;
+}
+
+.admin-summary-chip strong {
+    color: var(--bm-text);
+    display: block;
+    font-family: var(--bm-font-display);
+    font-size: var(--bm-text-title);
+    line-height: 1.1;
+}
+
 .admin-table-card {
     overflow: hidden;
+}
+
+.admin-table-card .table-light th {
+    background: #f9fafb;
 }
 
 .admin-form-card {
@@ -608,7 +667,7 @@ h1:focus {
     border: 1px solid var(--bm-border);
     border-radius: 8px;
     padding: 1rem;
-    box-shadow: 0 6px 18px rgba(20, 32, 45, .04);
+    box-shadow: var(--bm-shadow);
 }
 
 .approval-card-heading,
@@ -715,7 +774,7 @@ h1:focus {
     background: #f8fafc;
     border: 1px solid var(--bm-border);
     border-radius: 8px;
-    height: 260px;
+    height: 236px;
     margin-top: 1rem;
     width: 100%;
 }
@@ -797,14 +856,14 @@ h1:focus {
     place-items: center;
     padding: 1.5rem;
     background:
-        linear-gradient(180deg, rgba(17, 24, 39, .92), rgba(17, 24, 39, .98)),
+        linear-gradient(180deg, rgba(19, 28, 38, .94), rgba(19, 28, 38, .985)),
         url("/Images/bikematelogo.png") center/280px no-repeat;
 }
 
 .auth-card {
     width: 100%;
     max-width: 430px;
-    background: #1f2937;
+    background: #1d2733;
     border: 1px solid rgba(255, 255, 255, .08);
     color: #fff;
 }
@@ -870,7 +929,7 @@ h1:focus {
 .admin-shell {
     min-height: 100vh;
     display: grid;
-    grid-template-columns: 224px minmax(0, 1fr);
+    grid-template-columns: 216px minmax(0, 1fr);
     grid-template-areas: "sidebar main";
     background: var(--bm-page-bg);
 }
@@ -881,10 +940,10 @@ h1:focus {
 
 .admin-sidebar {
     grid-area: sidebar;
-    width: 224px;
+    width: 216px;
     background: var(--bm-nav-bg);
     color: #fff;
-    box-shadow: 8px 0 22px rgba(17, 19, 24, .12);
+    box-shadow: 6px 0 18px rgba(17, 19, 24, .12);
     position: sticky;
     top: 0;
     height: 100vh;
@@ -906,15 +965,15 @@ h1:focus {
 }
 
 .admin-topbar {
-    min-height: 58px;
-    background: rgba(255, 255, 255, .95);
-    backdrop-filter: blur(10px);
+    min-height: 56px;
+    background: rgba(255, 255, 255, .98);
+    backdrop-filter: blur(8px);
     border-bottom: 1px solid var(--bm-border);
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 1rem;
-    padding: 0 1.35rem;
+    padding: 0 1.25rem;
     position: sticky;
     top: 0;
     z-index: 20;
@@ -961,7 +1020,7 @@ h1:focus {
 }
 
 .admin-content {
-    padding: 1.1rem 1.35rem 1.5rem;
+    padding: 1.15rem 1.25rem 1.5rem;
 }
 
 .sidebar-inner {
@@ -971,7 +1030,7 @@ h1:focus {
 }
 
 .sidebar-brand {
-    padding: .85rem .85rem .75rem;
+    padding: .8rem .8rem .72rem;
     border-bottom: 1px solid rgba(255, 255, 255, .08);
 }
 
@@ -989,8 +1048,8 @@ h1:focus {
 }
 
 .sidebar-brand-logo {
-    width: 34px;
-    height: 34px;
+    width: 32px;
+    height: 32px;
     object-fit: contain;
     flex: 0 0 auto;
 }
@@ -1026,15 +1085,15 @@ h1:focus {
 }
 
 .sidebar-nav {
-    padding: .75rem 0 1rem;
+    padding: .7rem 0 1rem;
     overflow-y: auto;
     flex: 1;
 }
 
 .sidebar-group {
-    color: #7b8492;
+    color: #8290a1;
     font-weight: 700;
-    margin: .9rem .9rem .35rem;
+    margin: .9rem .85rem .3rem;
     text-transform: uppercase;
 }
 
@@ -1042,18 +1101,18 @@ h1:focus {
     align-items: center;
     color: #c8ced7 !important;
     display: flex;
-    gap: .7rem;
+    gap: .68rem;
     border-radius: 8px;
-    margin: 4px .65rem;
-    min-height: 44px;
-    padding: .48rem .65rem;
+    margin: 3px .6rem;
+    min-height: 40px;
+    padding: .42rem .62rem;
     transition: background-color .18s ease, color .18s ease;
     position: relative;
 }
 
 .admin-sidebar .sidebar-link:hover,
 .admin-sidebar .sidebar-link.active {
-    background-color: #242a32;
+    background-color: #202a35;
     color: var(--bm-orange) !important;
 }
 
@@ -1071,7 +1130,7 @@ h1:focus {
 .admin-sidebar .sidebar-link i {
     width: 1.05rem;
     text-align: center;
-    font-size: 17px;
+    font-size: var(--bm-text-title);
     flex: 0 0 auto;
     color: inherit;
 }
@@ -1150,11 +1209,11 @@ h1:focus {
     background: #fff;
     border: 1px solid var(--bm-border);
     border-radius: 8px;
-    box-shadow: 0 6px 18px rgba(20, 32, 45, .05);
+    box-shadow: var(--bm-shadow);
 }
 
 .dashboard-card {
-    padding: 1rem;
+    padding: .95rem;
 }
 
 .dashboard-panel {
@@ -1200,12 +1259,12 @@ h1:focus {
 }
 
 .dashboard-banner {
-    padding: 1rem;
+    padding: .95rem;
     background: #fff;
     border: 1px solid var(--bm-border);
     border-left: 3px solid #dc2626;
     border-radius: 8px;
-    box-shadow: 0 6px 18px rgba(20, 32, 45, .05);
+    box-shadow: var(--bm-shadow);
 }
 
 .dashboard-banner-copy {
@@ -1218,8 +1277,8 @@ h1:focus {
 .dashboard-banner-icon,
 .dashboard-request-icon,
 .metric-icon {
-    width: 42px;
-    height: 42px;
+    width: 38px;
+    height: 38px;
     border-radius: 8px;
     display: inline-flex;
     align-items: center;
@@ -1249,7 +1308,7 @@ h1:focus {
     display: flex;
     align-items: baseline;
     gap: .5rem;
-    margin: 1rem 0;
+    margin: .9rem 0;
 }
 
 .dashboard-stat-value,
@@ -1270,7 +1329,7 @@ h1:focus {
     grid-template-columns: repeat(7, minmax(0, 1fr));
     gap: .55rem;
     align-items: end;
-    min-height: 110px;
+    min-height: 104px;
 }
 
 .dashboard-bar-item {
@@ -1298,7 +1357,7 @@ h1:focus {
     width: 100%;
     min-height: 4px;
     border-radius: 4px 4px 0 0;
-    background: linear-gradient(180deg, #ff8a4c, var(--bm-orange));
+    background: linear-gradient(180deg, #ff6b00, var(--bm-orange));
 }
 
 .dashboard-health-block + .dashboard-health-block {
@@ -1396,9 +1455,9 @@ h1:focus {
     grid-template-columns: 22px minmax(0, 1fr) !important;
     align-items: center !important;
     gap: 10px !important;
-    min-height: 44px !important;
-    margin: 4px 10px !important;
-    padding: 8px 10px !important;
+    min-height: 40px !important;
+    margin: 3px 9px !important;
+    padding: 8px 9px !important;
     border-radius: 8px !important;
     background: transparent !important;
     color: #cbd5e1 !important;
@@ -1407,8 +1466,8 @@ h1:focus {
 
 .admin-sidebar a.admin-nav-link:hover,
 .admin-sidebar a.admin-nav-link.active {
-    background: #1f2937 !important;
-    color: #ff8a4c !important;
+    background: #202a35 !important;
+    color: #ff6b00 !important;
     text-decoration: none !important;
 }
 
@@ -1434,7 +1493,7 @@ h1:focus {
 .admin-sidebar a.admin-nav-link i {
     width: 22px !important;
     color: inherit !important;
-    font-size: 17px !important;
+    font-size: var(--bm-text-title) !important;
     line-height: 1 !important;
     text-align: center !important;
 }
@@ -1455,7 +1514,7 @@ h1:focus {
 .admin-sidebar .admin-nav-title {
     color: inherit !important;
     font-family: var(--bm-font-body) !important;
-    font-size: 13px !important;
+    font-size: var(--bm-text-body) !important;
     font-weight: 800 !important;
     line-height: 1.15 !important;
 }

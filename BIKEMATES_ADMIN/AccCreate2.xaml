@@ -65,9 +65,9 @@
                             <VerticalStackLayout Spacing="8">
                                 <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
                                     <Label x:Name="ValidIdLabel" Text="No file selected" VerticalOptions="Center" TextColor="#6E6E6E" />
-                                    <Button Grid.Column="1" Text="Scan &amp; upload" BackgroundColor="#FF6B2C" TextColor="White" CornerRadius="8" Clicked="OnPickValidIdClicked" />
+                                    <Button Grid.Column="1" Text="Scan &amp; upload" BackgroundColor="#FF6B00" TextColor="White" CornerRadius="8" Clicked="OnPickValidIdClicked" />
                                 </Grid>
-                                <Button Text="Preview scan only" BackgroundColor="#FFF2EA" TextColor="#242424" CornerRadius="8" Clicked="OnScanValidIdClicked" />
+                                <Button Text="Preview scan only" BackgroundColor="#FFF3EA" TextColor="#242424" CornerRadius="8" Clicked="OnScanValidIdClicked" />
                                 <Label x:Name="ValidIdScanLabel"
                                        Text="This scan is processed on your device for review only. The ID image is not uploaded."
                                        FontSize="11"
@@ -79,7 +79,7 @@
             </VerticalStackLayout>
         </ScrollView>
 
-        <Button Grid.Row="2" Text="Continue" BackgroundColor="#FF6B2C" TextColor="White"
+        <Button Grid.Row="2" Text="Continue" BackgroundColor="#FF6B00" TextColor="White"
                 FontAttributes="Bold" CornerRadius="8" HeightRequest="50" Margin="20,10,20,24"
                 Clicked="OnContinueClicked" />
     </Grid>

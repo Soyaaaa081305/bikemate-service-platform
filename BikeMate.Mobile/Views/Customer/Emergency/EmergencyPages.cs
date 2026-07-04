@@ -4,6 +4,7 @@ using System.Windows.Input;
 using BikeMate.Core.DTOs;
 using BikeMate.Services;
 using BikeMate.ViewModels.Customer.Emergency;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Maui.Controls.Shapes;
 using Microsoft.Maui.Devices.Sensors;
 
@@ -565,9 +566,13 @@ public sealed class CallingEmergencyPage : CustomerPageBase, IQueryAttributable
 public sealed class EmergencyLiveCallPage : CustomerPageBase, IQueryAttributable
 {
     private readonly EmergencyLiveCallViewModel _viewModel = new();
-    private readonly IEmergencyCallService _callService = new EmergencyCallService();
+    private readonly IEmergencyCallService _callService =
+        Application.Current?.Handler?.MauiContext?.Services.GetService<IEmergencyCallService>() ?? new EmergencyCallService();
     private int _requestId;
     private bool _started;
+    private Button? _cameraButton;
+    private Button? _muteButton;
+    private Button? _speakerButton;
 
     public EmergencyLiveCallPage()
     {
@@ -588,6 +593,15 @@ public sealed class EmergencyLiveCallPage : CustomerPageBase, IQueryAttributable
     protected override async void OnAppearing()
     {
         base.OnAppearing();
+        if (_callService.IsCallActive && _callService.ActiveRequestId == _requestId)
+        {
+            _started = true;
+            _viewModel.IsBusy = false;
+            _viewModel.StatusMessage = "Emergency call is active. Keep this screen open or use Track to check responder location.";
+            Render();
+            return;
+        }
+
         if (_started || _requestId <= 0)
         {
             return;
@@ -619,7 +633,7 @@ public sealed class EmergencyLiveCallPage : CustomerPageBase, IQueryAttributable
 
     protected override bool OnBackButtonPressed()
     {
-        _ = ConfirmLeaveAsync();
+        _ = ShowCallExitOptionsAsync();
         return true;
     }
 
@@ -648,8 +662,8 @@ public sealed class EmergencyLiveCallPage : CustomerPageBase, IQueryAttributable
         };
         header.Add(new Button
         {
-            Text = "Back",
-            Command = new Command(async () => await ConfirmLeaveAsync()),
+            Text = "Track",
+            Command = new Command(async () => await MinimizeToTrackingAsync()),
             BackgroundColor = Colors.Transparent,
             TextColor = Colors.White,
             WidthRequest = 64
@@ -685,7 +699,7 @@ public sealed class EmergencyLiveCallPage : CustomerPageBase, IQueryAttributable
             BackgroundColor = Color.FromArgb("#333333"),
             Stroke = Color.FromArgb("#555555"),
             StrokeShape = new RoundRectangle { CornerRadius = 24 },
-            Content = new VerticalStackLayout
+            Content = _callService.CallView ?? new VerticalStackLayout
             {
                 Spacing = 12,
                 VerticalOptions = LayoutOptions.Center,
@@ -722,29 +736,53 @@ public sealed class EmergencyLiveCallPage : CustomerPageBase, IQueryAttributable
 
         var controls = new HorizontalStackLayout
         {
-            Padding = new Thickness(18, 0, 18, 26),
-            Spacing = 12,
+            Padding = new Thickness(10, 0, 10, 26),
+            Spacing = 8,
             HorizontalOptions = LayoutOptions.Center
         };
-        controls.Add(CallButton(_viewModel.IsCameraEnabled ? "Cam" : "Cam Off", Colors.White, CustomerUi.Dark, async () =>
+        _cameraButton = (Button)CallButton(_viewModel.IsCameraEnabled ? "Cam" : "Cam Off", Colors.White, CustomerUi.Dark, async () =>
         {
             _viewModel.IsCameraEnabled = await _callService.ToggleCameraAsync();
-            Render();
-        }, !_viewModel.IsBusy));
-        controls.Add(CallButton(_viewModel.IsMuted ? "Muted" : "Mic", Colors.White, CustomerUi.Dark, async () =>
+            UpdateCallButtons();
+        }, !_viewModel.IsBusy);
+        controls.Add(_cameraButton);
+
+        _muteButton = (Button)CallButton(_viewModel.IsMuted ? "Muted" : "Mic", Colors.White, CustomerUi.Dark, async () =>
         {
             _viewModel.IsMuted = await _callService.ToggleMuteAsync();
-            Render();
-        }, !_viewModel.IsBusy));
-        controls.Add(CallButton(_viewModel.IsSpeakerEnabled ? "Speaker" : "Phone", Colors.White, CustomerUi.Dark, async () =>
+            UpdateCallButtons();
+        }, !_viewModel.IsBusy);
+        controls.Add(_muteButton);
+
+        _speakerButton = (Button)CallButton(_viewModel.IsSpeakerEnabled ? "Speaker" : "Phone", Colors.White, CustomerUi.Dark, async () =>
         {
             _viewModel.IsSpeakerEnabled = await _callService.ToggleSpeakerAsync();
-            Render();
-        }, !_viewModel.IsBusy));
+            UpdateCallButtons();
+        }, !_viewModel.IsBusy);
+        controls.Add(_speakerButton);
+        controls.Add(CallButton("Track", Colors.White, CustomerUi.Dark, MinimizeToTrackingAsync));
         controls.Add(CallButton("End", Color.FromArgb("#FF3B30"), Colors.White, ConfirmLeaveAsync));
         root.Add(controls, 0, 2);
 
         SetScaffold(root, "Home", false);
+    }
+
+    private void UpdateCallButtons()
+    {
+        if (_cameraButton is not null)
+        {
+            _cameraButton.Text = _viewModel.IsCameraEnabled ? "Cam" : "Cam Off";
+        }
+
+        if (_muteButton is not null)
+        {
+            _muteButton.Text = _viewModel.IsMuted ? "Muted" : "Mic";
+        }
+
+        if (_speakerButton is not null)
+        {
+            _speakerButton.Text = _viewModel.IsSpeakerEnabled ? "Speaker" : "Phone";
+        }
     }
 
     private static View CallButton(string text, Color background, Color textColor, Func<Task> action, bool isEnabled = true)
@@ -754,9 +792,9 @@ public sealed class EmergencyLiveCallPage : CustomerPageBase, IQueryAttributable
             Text = text,
             BackgroundColor = background,
             TextColor = textColor,
-            WidthRequest = 72,
-            HeightRequest = 58,
-            CornerRadius = 29,
+            WidthRequest = 58,
+            HeightRequest = 54,
+            CornerRadius = 27,
             Padding = new Thickness(8, 0),
             FontSize = CustomerUi.CaptionSize,
             FontAttributes = FontAttributes.Bold,
@@ -797,6 +835,38 @@ public sealed class EmergencyLiveCallPage : CustomerPageBase, IQueryAttributable
         if (CustomerRequestRules.IsClosedStatus(status.Status))
         {
             await DisplayAlertAsync("Emergency completed", "Responder tracking is no longer available after emergency roadside help is completed.", "OK");
+            await Shell.Current.GoToAsync("//CustomerHomePage");
+            return;
+        }
+
+        await Shell.Current.GoToAsync($"{nameof(ActiveEmergencyTrackingPage)}?requestId={_requestId}");
+    }
+
+    private async Task ShowCallExitOptionsAsync()
+    {
+        var action = await DisplayActionSheetAsync(
+            "Emergency call",
+            "Stay",
+            null,
+            "Keep call active and view tracking",
+            "End call");
+
+        if (action == "Keep call active and view tracking")
+        {
+            await MinimizeToTrackingAsync();
+            return;
+        }
+
+        if (action == "End call")
+        {
+            await ConfirmLeaveAsync();
+        }
+    }
+
+    private async Task MinimizeToTrackingAsync()
+    {
+        if (_requestId <= 0)
+        {
             await Shell.Current.GoToAsync("//CustomerHomePage");
             return;
         }
@@ -978,8 +1048,11 @@ public sealed class EmergencyLocationPickerPage : CustomerPageBase
 public sealed class ActiveEmergencyTrackingPage : CustomerPageBase, IQueryAttributable
 {
     private readonly ActiveEmergencyTrackingViewModel _viewModel = new();
+    private readonly IEmergencyCallService _callService =
+        Application.Current?.Handler?.MauiContext?.Services.GetService<IEmergencyCallService>() ?? new EmergencyCallService();
     private IDispatcherTimer? _timer;
     private int _requestId;
+    private bool _timerAttached;
 
     public ActiveEmergencyTrackingPage()
     {
@@ -1019,11 +1092,16 @@ public sealed class ActiveEmergencyTrackingPage : CustomerPageBase, IQueryAttrib
     {
         _timer ??= Dispatcher.CreateTimer();
         _timer.Interval = TimeSpan.FromSeconds(5);
-        if (!_timer.IsRunning)
+        if (!_timerAttached)
         {
             _timer.Tick += async (_, _) => await PollAsync();
+            _timerAttached = true;
         }
-        _timer.Start();
+
+        if (!_timer.IsRunning)
+        {
+            _timer.Start();
+        }
         _ = PollAsync();
     }
 
@@ -1122,6 +1200,11 @@ public sealed class ActiveEmergencyTrackingPage : CustomerPageBase, IQueryAttrib
 
         if (!isClosed && status?.Status is "EmergencyPending" or "SearchingResponder" or "CallConnecting" or "CallConnected")
         {
+            if (_callService.IsCallActive && _callService.ActiveRequestId == _requestId)
+            {
+                body.Add(OrangeButton("Return to emergency call", new Command(async () => await ReturnToCallAsync())));
+            }
+
             body.Add(new Button
             {
                 Text = "Cancel Emergency Request",
@@ -1134,6 +1217,23 @@ public sealed class ActiveEmergencyTrackingPage : CustomerPageBase, IQueryAttrib
         }
 
         SetScaffold(new ScrollView { Content = body }, "Home", false);
+    }
+
+    private async Task ReturnToCallAsync()
+    {
+        var stack = Shell.Current.Navigation.NavigationStack;
+        var callPage = stack.LastOrDefault(page => page is EmergencyLiveCallPage);
+        if (callPage is not null)
+        {
+            while (Shell.Current.Navigation.NavigationStack.LastOrDefault() != callPage)
+            {
+                await Shell.Current.Navigation.PopAsync(false);
+            }
+
+            return;
+        }
+
+        await Shell.Current.GoToAsync($"{nameof(EmergencyLiveCallPage)}?requestId={_requestId}");
     }
 
     private static View ClosedStatusCard(EmergencyRequestStatusDto? status)

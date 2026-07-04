@@ -1,5 +1,4 @@
 using BIKEMATES_ADMIN.Helpers;
-using BIKEMATES_ADMIN.Services;
 using Microsoft.Extensions.Logging;
 
 namespace BIKEMATES_ADMIN;
@@ -19,8 +18,6 @@ public static class MauiProgram
                 fonts.AddFont("PTSansCaption-Bold.ttf", "PTSansCaptionBold");
             })
             .ConfigureMauiHandlers(AppTypography.ConfigureHandlers);
-
-        builder.Services.AddSingleton<ILocalIdCardScannerService, LocalIdCardScannerService>();
 
 #if DEBUG
         builder.Logging.AddDebug();

@@ -10,7 +10,7 @@
     <div class="admin-page-header">
         <div>
             <h1 class="admin-page-title">Payments</h1>
-            <p class="admin-page-description">Review PayMongo and manual payment records tied to customer service requests.</p>
+            <p class="admin-page-description">Review payment records tied to customer service requests.</p>
         </div>
 
         <div class="admin-page-actions">
@@ -20,6 +20,33 @@
             </div>
         </div>
     </div>
+
+    @if (payments != null)
+    {
+        <div class="admin-summary-strip">
+            <div class="admin-summary-chip">
+                <i class="bi bi-receipt"></i>
+                <div>
+                    <small>Total records</small>
+                    <strong>@payments.Length</strong>
+                </div>
+            </div>
+            <div class="admin-summary-chip">
+                <i class="bi bi-check2-circle"></i>
+                <div>
+                    <small>Paid</small>
+                    <strong>@PaidCount</strong>
+                </div>
+            </div>
+            <div class="admin-summary-chip">
+                <i class="bi bi-clock"></i>
+                <div>
+                    <small>Pending</small>
+                    <strong>@PendingCount</strong>
+                </div>
+            </div>
+        </div>
+    }
 
     <div class="card admin-table-card">
         <div class="card-body p-0">
@@ -88,6 +115,8 @@
 @code {
     private PaymentDto[]? payments;
     private string searchTerm = "";
+    private int PaidCount => payments?.Count(p => string.Equals(p.Status, "paid", StringComparison.OrdinalIgnoreCase)) ?? 0;
+    private int PendingCount => payments?.Count(p => p.Status.Equals("pending", StringComparison.OrdinalIgnoreCase) || p.Status.Equals("unpaid", StringComparison.OrdinalIgnoreCase)) ?? 0;
 
     private IEnumerable<PaymentDto> FilteredPayments => string.IsNullOrWhiteSpace(searchTerm)
         ? payments ?? Array.Empty<PaymentDto>()

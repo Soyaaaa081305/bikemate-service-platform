@@ -17,7 +17,7 @@
                     FontAttributes="Bold"
                     TextColor="#242424"
                     HorizontalTextAlignment="Center" />
-                <ActivityIndicator IsRunning="True" Color="#FF6B2C" HeightRequest="32" WidthRequest="32" />
+                <ActivityIndicator IsRunning="True" Color="#FF6B00" HeightRequest="32" WidthRequest="32" />
                 <Label
                     Text="Checking your session..."
                     FontFamily="PTSansCaption"
@@ -84,7 +84,7 @@
                 HorizontalOptions="Center"
                 Margin="0,0,0,18"
                 IndicatorColor="#DCDCDC"
-                SelectedIndicatorColor="#FF6B2C"
+                SelectedIndicatorColor="#FF6B00"
                 ItemsSource="{Binding BoardingItems}"
                 Position="{Binding CurrentPosition}" />
 
@@ -92,7 +92,7 @@
                 Grid.Row="3"
                 Text="{Binding CurrentButtonText}"
                 Command="{Binding NextCommand}"
-                BackgroundColor="#FF6B2C"
+                BackgroundColor="#FF6B00"
                 TextColor="White"
                 CornerRadius="8"
                 HeightRequest="48"
@@ -162,14 +162,14 @@
                                 Command="{Binding ForgotPasswordCommand}"
                                 HorizontalOptions="End"
                                 BackgroundColor="Transparent"
-                                TextColor="#FF6B2C"
+                                TextColor="#FF6B00"
                                 Padding="4,0" />
                         </VerticalStackLayout>
 
                         <Button
                             Text="Sign in"
                             Command="{Binding SignInCommand}"
-                            BackgroundColor="#FF6B2C"
+                            BackgroundColor="#FF6B00"
                             TextColor="White"
                             CornerRadius="8"
                             HeightRequest="48"
@@ -215,7 +215,7 @@
                                 Text="Create account"
                                 Command="{Binding CreateAccountCommand}"
                                 BackgroundColor="Transparent"
-                                TextColor="#FF6B2C"
+                                TextColor="#FF6B00"
                                 FontFamily="Inter"
                                 FontAttributes="Bold"
                                 Padding="4,0"
@@ -223,16 +223,6 @@
                                 MinimumHeightRequest="34" />
                         </Grid>
 
-                        <Button
-                            Text="Connection settings"
-                            Command="{Binding ConnectionSettingsCommand}"
-                            BackgroundColor="Transparent"
-                            TextColor="#6E6E6E"
-                            FontFamily="PTSansCaptionBold"
-                            FontSize="11"
-                            Padding="4,0"
-                            HeightRequest="30"
-                            MinimumHeightRequest="30" />
                     </VerticalStackLayout>
                 </Border>
             </VerticalStackLayout>

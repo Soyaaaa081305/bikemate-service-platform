@@ -74,9 +74,9 @@ public partial class Messages : ContentPage
 
     private static void ApplyTab(Button button, bool selected)
     {
-        button.BackgroundColor = selected ? Color.FromArgb("#FF6B2C") : Colors.White;
+        button.BackgroundColor = selected ? Color.FromArgb("#FF6B00") : Colors.White;
         button.TextColor = selected ? Colors.White : Color.FromArgb("#242424");
-        button.BorderColor = selected ? Color.FromArgb("#FF6B2C") : Color.FromArgb("#D1D5DB");
+        button.BorderColor = selected ? Color.FromArgb("#FF6B00") : Color.FromArgb("#D1D5DB");
     }
 
     private void SearchBar_TextChanged(object? sender, TextChangedEventArgs e)
@@ -163,7 +163,7 @@ public partial class Messages : ContentPage
         ChatNameLabel.Text = "No conversation selected";
         ChatStatusLabel.Text = "Select a thread to view messages from the API.";
         ChatBadgeLabel.Text = "CHAT";
-        ChatBadgeLabel.TextColor = Color.FromArgb("#F97316");
+        ChatBadgeLabel.TextColor = Color.FromArgb("#C45500");
         ChatBadgeLabel.BackgroundColor = Color.FromArgb("#FFF3E8");
         ReplyEntry.Text = string.Empty;
         ReplyEntry.IsEnabled = false;
@@ -176,7 +176,7 @@ public partial class Messages : ContentPage
     private void AddBubble(AdminMessage message)
     {
         bool isMine = message.SenderUserId == AppSession.CurrentUser?.UserId;
-        Color background = isMine ? Color.FromArgb("#FF8A3D") : Colors.White;
+        Color background = isMine ? Color.FromArgb("#FF6B00") : Colors.White;
         Color textColor = isMine ? Colors.White : Color.FromArgb("#1F2937");
 
         var stack = new VerticalStackLayout { Spacing = 6 };
@@ -185,7 +185,7 @@ public partial class Messages : ContentPage
             stack.Add(new Label
             {
                 Text = "AUTOMATED UPDATE",
-                TextColor = Color.FromArgb("#F97316"),
+                TextColor = Color.FromArgb("#C45500"),
                 FontSize = 11,
                 FontFamily = "PTSansCaptionBold",
                 FontAttributes = FontAttributes.Bold
@@ -206,7 +206,7 @@ public partial class Messages : ContentPage
             stack.Add(new Label
             {
                 Text = $"Attachment: {FileNameOrValue(message.AttachmentUrl)}",
-                TextColor = isMine ? Color.FromArgb("#FFF2EA") : Color.FromArgb("#6B7280"),
+                TextColor = isMine ? Color.FromArgb("#FFF3EA") : Color.FromArgb("#6B7280"),
                 FontSize = 11,
                 FontFamily = "PTSansCaption",
                 LineBreakMode = LineBreakMode.TailTruncation
@@ -216,7 +216,7 @@ public partial class Messages : ContentPage
         stack.Add(new Label
         {
             Text = message.CreatedAt.ToLocalTime().ToString("h:mm tt", CultureInfo.InvariantCulture),
-            TextColor = isMine ? Color.FromArgb("#FFF2EA") : Color.FromArgb("#8A94A6"),
+            TextColor = isMine ? Color.FromArgb("#FFF3EA") : Color.FromArgb("#8A94A6"),
             FontSize = 11,
             FontFamily = "PTSansCaption",
             HorizontalTextAlignment = isMine ? TextAlignment.End : TextAlignment.Start
@@ -341,7 +341,7 @@ public sealed record ConversationItem(
     };
     public Color BadgeTextColor => Section switch
     {
-        "Customer" => Color.FromArgb("#F97316"),
+        "Customer" => Color.FromArgb("#C45500"),
         "Mechanic" => Color.FromArgb("#2563EB"),
         _ => Color.FromArgb("#16A34A")
     };
@@ -367,7 +367,7 @@ public sealed record ConversationItem(
             conversation.BookingStatus ?? "pending",
             section switch
             {
-                "Customer" => Color.FromArgb("#FF8A3D"),
+                "Customer" => Color.FromArgb("#FF6B00"),
                 "Mechanic" => Color.FromArgb("#2563EB"),
                 _ => Color.FromArgb("#16A34A")
             });

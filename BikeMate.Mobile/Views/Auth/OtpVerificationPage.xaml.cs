@@ -11,7 +11,7 @@ namespace BikeMate.Views.Auth;
 [QueryProperty(nameof(FromProfile), "fromProfile")]
 public partial class OtpVerificationPage : ContentPage
 {
-    private const string Orange = "#FF6B2C";
+    private const string Orange = "#FF6B00";
     private const string Dark = "#222222";
     private const string Muted = "#777777";
 
@@ -146,7 +146,7 @@ public partial class OtpVerificationPage : ContentPage
         {
             WidthRequest = 72,
             HeightRequest = 72,
-            BackgroundColor = Color.FromArgb("#FFF2EA"),
+            BackgroundColor = Color.FromArgb("#FFF3EA"),
             Stroke = Colors.Transparent,
             StrokeShape = new RoundRectangle { CornerRadius = 8 },
             HorizontalOptions = LayoutOptions.Center,

@@ -637,7 +637,7 @@ public partial class ShopSetupPage : ContentPage
     private void ApplyStepIndicator(Label label, SetupStep step, bool complete)
     {
         label.TextColor = step == _currentStep
-            ? Color.FromArgb("#FF6B2C")
+            ? Color.FromArgb("#FF6B00")
             : complete
                 ? Color.FromArgb("#147A3D")
                 : Color.FromArgb("#6B7280");

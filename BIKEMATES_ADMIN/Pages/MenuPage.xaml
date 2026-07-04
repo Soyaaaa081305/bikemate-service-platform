@@ -37,7 +37,7 @@
                     <Label x:Name="AdminShopLabel"
                            Text="No assigned bike shop yet"
                            Style="{StaticResource HeaderSubtitle}"
-                           TextColor="#FFF2EA"
+                           TextColor="#FFF3EA"
                            LineBreakMode="TailTruncation" />
                 </VerticalStackLayout>
 

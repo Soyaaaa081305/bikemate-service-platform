@@ -268,6 +268,10 @@ namespace BikeMate.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MechanicId"));
 
+                    b.Property<string>("AddressLine")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<string>("AvailabilityStatus")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
@@ -279,19 +283,15 @@ namespace BikeMate.Infrastructure.Migrations
                         .HasPrecision(3, 2)
                         .HasColumnType("decimal(3,2)");
 
-                    b.Property<string>("AddressLine")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
                     b.Property<string>("Barangay")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<DateTime?>("Birthdate")
-                        .HasColumnType("datetime2");
-
                     b.Property<string>("Bio")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("Birthdate")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("CertificationImageUrl")
                         .HasMaxLength(500)
@@ -1373,6 +1373,62 @@ namespace BikeMate.Infrastructure.Migrations
                     b.HasAnnotation("SqlServer:UseSqlOutputClause", false);
                 });
 
+            modelBuilder.Entity("BikeMate.Core.Entities.ServiceRequestLineItem", b =>
+                {
+                    b.Property<int>("LineItemId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LineItemId"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime2")
+                        .HasDefaultValueSql("SYSUTCDATETIME()");
+
+                    b.Property<string>("ItemName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<string>("ItemType")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<decimal>("LineTotal")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<int?>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
+
+                    b.Property<int>("RequestId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("ShopServiceId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("decimal(10,2)");
+
+                    b.HasKey("LineItemId");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("RequestId");
+
+                    b.HasIndex("ShopServiceId");
+
+                    b.ToTable("service_request_line_items", "dbo");
+                });
+
             modelBuilder.Entity("BikeMate.Core.Entities.Shop", b =>
                 {
                     b.Property<int>("ShopId")
@@ -2107,6 +2163,31 @@ namespace BikeMate.Infrastructure.Migrations
                     b.Navigation("ShopService");
                 });
 
+            modelBuilder.Entity("BikeMate.Core.Entities.ServiceRequestLineItem", b =>
+                {
+                    b.HasOne("BikeMate.Core.Entities.Product", "Product")
+                        .WithMany("RequestLineItems")
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("BikeMate.Core.Entities.ServiceRequest", "Request")
+                        .WithMany("LineItems")
+                        .HasForeignKey("RequestId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BikeMate.Core.Entities.ShopService", "ShopService")
+                        .WithMany()
+                        .HasForeignKey("ShopServiceId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Product");
+
+                    b.Navigation("Request");
+
+                    b.Navigation("ShopService");
+                });
+
             modelBuilder.Entity("BikeMate.Core.Entities.Shop", b =>
                 {
                     b.HasOne("BikeMate.Core.Entities.User", "Owner")
@@ -2257,6 +2338,8 @@ namespace BikeMate.Infrastructure.Migrations
             modelBuilder.Entity("BikeMate.Core.Entities.Product", b =>
                 {
                     b.Navigation("Images");
+
+                    b.Navigation("RequestLineItems");
                 });
 
             modelBuilder.Entity("BikeMate.Core.Entities.RequestStatus", b =>
@@ -2276,6 +2359,8 @@ namespace BikeMate.Infrastructure.Migrations
 
             modelBuilder.Entity("BikeMate.Core.Entities.ServiceRequest", b =>
                 {
+                    b.Navigation("LineItems");
+
                     b.Navigation("LiveLocations");
 
                     b.Navigation("Media");

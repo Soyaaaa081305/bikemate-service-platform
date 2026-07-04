@@ -63,53 +63,6 @@ public partial class LoginPage : ContentPage
         await Shell.Current.GoToAsync($"{nameof(PasswordResetPage)}?email={email}");
     }
 
-    private async void OnConnectionSettingsClicked(object? sender, EventArgs e)
-    {
-        var current = ApiConfig.BaseUrl;
-        var action = await DisplayActionSheetAsync(
-            "BikeMate API connection",
-            "Cancel",
-            null,
-            "Set API URL",
-            "Use packaged default",
-            "Show current URL");
-
-        if (action == "Set API URL")
-        {
-            var entered = await DisplayPromptAsync(
-                "API URL",
-                "Enter the API base URL. Examples: https://your-domain.com/api/ or http://192.168.1.10:5000/api/.",
-                "Save",
-                "Cancel",
-                current);
-
-            if (string.IsNullOrWhiteSpace(entered))
-            {
-                return;
-            }
-
-            try
-            {
-                ApiConfig.SaveBaseUrlOverride(entered);
-                await DisplayAlertAsync("Connection saved", $"BikeMate will use {ApiConfig.BaseUrl}", "OK");
-            }
-            catch (Exception ex)
-            {
-                await DisplayAlertAsync("Invalid API URL", ex.Message, "OK");
-            }
-        }
-        else if (action == "Use packaged default")
-        {
-            ApiConfig.ClearBaseUrlOverride();
-            await DisplayAlertAsync("Connection reset", $"BikeMate will use {ApiConfig.DeviceDefaultBaseUrl}", "OK");
-        }
-        else if (action == "Show current URL")
-        {
-            var mode = ApiConfig.HasBaseUrlOverride ? "Custom override" : "Packaged default";
-            await DisplayAlertAsync("Current API URL", $"{mode}\n{ApiConfig.BaseUrl}", "OK");
-        }
-    }
-
     private async void OnPasswordCompleted(object? sender, EventArgs e)
     {
         await SignInAsync();
@@ -146,7 +99,7 @@ public partial class LoginPage : ContentPage
         catch (Exception ex)
         {
             System.Diagnostics.Debug.WriteLine($"Sign in failed: {ex}");
-            await DisplayAlertAsync("Sign in unavailable", $"Could not reach the BikeMate API at {ApiConfig.BaseUrl}. Check connection settings and try again.", "OK");
+            await DisplayAlertAsync("Sign in unavailable", "Could not reach BikeMate right now. Check your internet connection and try again.", "OK");
         }
         finally
         {

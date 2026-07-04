@@ -35,7 +35,7 @@
         <Button Grid.Row="1"
                 Text="Return"
                 BackgroundColor="Transparent"
-                TextColor="#FF6B2C"
+                TextColor="#FF6B00"
                 FontAttributes="Bold"
                 Clicked="OnReturnClicked" />
     </Grid>

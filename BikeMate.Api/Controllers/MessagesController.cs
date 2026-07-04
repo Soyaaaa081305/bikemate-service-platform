@@ -78,6 +78,53 @@ public sealed class MessagesController(
         return Ok(new ConversationDto(conversation.ConversationId, conversation.RequestId, conversation.ConversationType, conversation.LastMessageAt));
     }
 
+    [HttpPost("shop-inquiry/{shopId:int}")]
+    public async Task<ActionResult<ConversationDto>> StartShopInquiry(int shopId, CancellationToken cancellationToken)
+    {
+        var userId = User.GetUserId();
+        var shop = await db.Shops
+            .Where(x => x.ShopId == shopId && x.ShopStatus == "verified")
+            .Select(x => new { x.ShopId, x.OwnerUserId })
+            .SingleOrDefaultAsync(cancellationToken);
+        if (shop is null)
+        {
+            return NotFound(new { error = "Verified repair shop not found." });
+        }
+
+        if (shop.OwnerUserId == userId)
+        {
+            return BadRequest(new { error = "You cannot message your own shop from the customer app." });
+        }
+
+        var conversation = await db.Conversations
+            .Include(x => x.Participants)
+            .Where(x =>
+                x.RequestId == null &&
+                x.ConversationType == "shop_inquiry" &&
+                x.Participants.Any(p => p.UserId == userId) &&
+                x.Participants.Any(p => p.UserId == shop.OwnerUserId))
+            .OrderByDescending(x => x.LastMessageAt ?? x.CreatedAt)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (conversation is null)
+        {
+            conversation = new Conversation
+            {
+                ConversationType = "shop_inquiry",
+                CreatedAt = DateTime.UtcNow,
+                Participants =
+                [
+                    new ConversationParticipant { UserId = userId, JoinedAt = DateTime.UtcNow },
+                    new ConversationParticipant { UserId = shop.OwnerUserId, JoinedAt = DateTime.UtcNow }
+                ]
+            };
+            db.Conversations.Add(conversation);
+            await db.SaveChangesAsync(cancellationToken);
+        }
+
+        return Ok(new ConversationDto(conversation.ConversationId, conversation.RequestId, conversation.ConversationType, conversation.LastMessageAt));
+    }
+
     [HttpGet("{conversationId:int}")]
     public async Task<ActionResult<ConversationSummaryDto>> GetConversation(int conversationId, CancellationToken cancellationToken)
     {
@@ -161,6 +208,7 @@ public sealed class MessagesController(
         var lastMessage = conversation.Messages.OrderByDescending(m => m.CreatedAt).FirstOrDefault();
         var isEmergency = conversation.ConversationType is "emergency_support" or "emergency_request";
         var isShop = conversation.ConversationType == "booking_shop";
+        var isShopInquiry = conversation.ConversationType == "shop_inquiry";
         var isMechanic = conversation.ConversationType == "booking_mechanic";
         var isShopOwner = isShop && conversation.Request?.Shop?.OwnerUserId == userId;
         var isAssignedMechanic = isMechanic && conversation.Request?.Mechanic?.UserId == userId;
@@ -168,6 +216,8 @@ public sealed class MessagesController(
             ? "BikeMate Emergency"
             : isShop
             ? isShopOwner ? FullName(otherUser) : conversation.Request?.Shop?.ShopName
+            : isShopInquiry
+                ? FullName(otherUser)
             : isMechanic
                 ? isAssignedMechanic ? FullName(otherUser) : FullName(conversation.Request?.Mechanic?.User ?? otherUser)
                 : FullName(otherUser);
@@ -175,6 +225,8 @@ public sealed class MessagesController(
             ? "Emergency support"
             : isShop
                 ? isShopOwner ? "Customer" : "Shop"
+                : isShopInquiry
+                    ? "Shop"
                 : isMechanic
                     ? isAssignedMechanic ? "Customer" : "Assigned mechanic"
                     : "BikeMate contact";
@@ -187,7 +239,7 @@ public sealed class MessagesController(
         }
         var bookingReference = conversation.RequestId is null ? null : $"BM-{conversation.RequestId:000000}";
         var subtitle = bookingReference is null
-            ? otherUser?.PhoneNumber ?? otherUser?.Email
+            ? isShopInquiry ? "Shop inquiry" : otherUser?.PhoneNumber ?? otherUser?.Email
             : $"{partnerType} | {service} | {bookingReference}";
 
         return new ConversationSummaryDto(

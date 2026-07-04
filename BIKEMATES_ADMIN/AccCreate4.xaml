@@ -31,9 +31,9 @@
                             <VerticalStackLayout Spacing="8">
                                 <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
                                     <Label x:Name="BusinessPermitLabel" Text="No file selected" VerticalOptions="Center" TextColor="#6E6E6E" />
-                                    <Button Grid.Column="1" Text="Scan &amp; upload" BackgroundColor="#FF6B2C" TextColor="White" CornerRadius="8" Clicked="OnPickPermitClicked" />
+                                    <Button Grid.Column="1" Text="Scan &amp; upload" BackgroundColor="#FF6B00" TextColor="White" CornerRadius="8" Clicked="OnPickPermitClicked" />
                                 </Grid>
-                                <Button Text="Preview scan only" BackgroundColor="#FFF2EA" TextColor="#242424" CornerRadius="8" Clicked="OnScanPermitClicked" />
+                                <Button Text="Preview scan only" BackgroundColor="#FFF3EA" TextColor="#242424" CornerRadius="8" Clicked="OnScanPermitClicked" />
                                 <Label x:Name="PermitScanLabel"
                                        Text="Business permit uploads require a fresh camera scan. Preview scans stay on this device until you scan and upload."
                                        FontSize="11"
@@ -46,7 +46,7 @@
                             <Border.StrokeShape><RoundRectangle CornerRadius="8" /></Border.StrokeShape>
                             <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
                                 <Label x:Name="ShopImageLabel" Text="No file selected" VerticalOptions="Center" TextColor="#6E6E6E" />
-                                <Button Grid.Column="1" Text="Upload" BackgroundColor="#FF6B2C" TextColor="White" CornerRadius="8" Clicked="OnPickShopImageClicked" />
+                                <Button Grid.Column="1" Text="Upload" BackgroundColor="#FF6B00" TextColor="White" CornerRadius="8" Clicked="OnPickShopImageClicked" />
                             </Grid>
                         </Border>
 
@@ -116,7 +116,7 @@
         <Button x:Name="CreateAccountButton"
                 Grid.Row="2"
                 Text="Submit for Approval"
-                BackgroundColor="#FF6B2C"
+                BackgroundColor="#FF6B00"
                 TextColor="White"
                 FontAttributes="Bold"
                 CornerRadius="8"

@@ -4,6 +4,7 @@ public partial class App : Application
 {
     public App()
     {
+        Services.CrashLogService.Install("BikeMate Shop");
         InitializeComponent();
         UserAppTheme = AppTheme.Light;
     }

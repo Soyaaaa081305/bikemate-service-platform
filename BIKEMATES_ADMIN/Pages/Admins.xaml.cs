@@ -971,7 +971,7 @@ public sealed record MechanicApplicationRow(
             application.PhoneNumber,
             string.IsNullOrWhiteSpace(application.ShopName) ? "Current shop" : application.ShopName!,
             approved ? "APPROVED" : application.EmailVerified ? "READY FOR REVIEW" : "OTP REQUIRED",
-            approved ? Color.FromArgb("#16A34A") : application.EmailVerified ? Color.FromArgb("#F97316") : Color.FromArgb("#DC2626"),
+            approved ? Color.FromArgb("#16A34A") : application.EmailVerified ? Color.FromArgb("#C45500") : Color.FromArgb("#DC2626"),
             application.EmailVerified ? "OTP verified" : "OTP pending",
             approved ? "Can receive jobs" : waiting,
             $"Submitted {application.CreatedAt.ToLocalTime():MMM dd, yyyy h:mm tt}",

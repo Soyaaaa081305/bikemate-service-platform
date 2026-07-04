@@ -33,6 +33,29 @@ function Invoke-Check {
     }
 }
 
+function Invoke-OptionalCheck {
+    param(
+        [string]$Name,
+        [scriptblock]$Script,
+        [string]$SkipMessage = "Optional check skipped."
+    )
+
+    try {
+        $result = & $Script
+        Write-Host "[OK] $Name"
+        if ($null -ne $result -and $result -is [string] -and $result.Length -gt 0) {
+            Write-Host "     $result"
+        }
+        return $result
+    }
+    catch {
+        Write-Host "[WARN] $Name"
+        Write-Host "       $SkipMessage"
+        Write-Host "       $($_.Exception.Message)"
+        return $null
+    }
+}
+
 function Invoke-Json {
     param(
         [string]$Method = "GET",
@@ -107,12 +130,20 @@ Invoke-Check "public shops" {
 $admin = Invoke-Check "admin login" { Login-DemoUser "admin1@bikemate.test" }
 $customer = Invoke-Check "customer login" { Login-DemoUser "customer1@bikemate.test" }
 $shop = Invoke-Check "shop login" { Login-DemoUser "shop1@bikemate.test" }
-$mechanic = Invoke-Check "mechanic login" { Login-DemoUser "mechanic1@bikemate.test" }
+$mechanic = Invoke-OptionalCheck "mechanic demo login" `
+    { Login-DemoUser "mechanic1@bikemate.test" } `
+    "mechanic1@bikemate.test is not required because mechanic demo accounts can be rotated by approvals/reset data."
 
 if ($admin) {
     Invoke-Check "admin dashboard" {
         $dashboard = Invoke-Json -Path "admin/dashboard" -Token $admin.accessToken
         if ($null -eq $dashboard) { throw "No dashboard payload." }
+    } | Out-Null
+
+    Invoke-Check "admin mechanics" {
+        $mechanics = Invoke-Json -Path "admin/mechanics" -Token $admin.accessToken
+        if ($null -eq $mechanics) { throw "No mechanics payload." }
+        "count=$($mechanics.Count)"
     } | Out-Null
 }
 

@@ -29,11 +29,6 @@ public static class ApiConfig
 
     public static string BaseUrl => ResolveBaseUrl();
 
-    public static string DeviceDefaultBaseUrl => EnsureApiPath(DefaultBaseUrl);
-
-    public static bool HasBaseUrlOverride =>
-        !string.IsNullOrWhiteSpace(Preferences.Default.Get(ApiBaseUrlPreferenceKey, string.Empty));
-
     public static bool UsesLocalDevelopmentCertificate =>
         BaseUrl.Contains("10.0.2.2", StringComparison.OrdinalIgnoreCase) ||
         BaseUrl.Contains("localhost", StringComparison.OrdinalIgnoreCase) ||
@@ -75,22 +70,6 @@ public static class ApiConfig
         {
             http.DefaultRequestHeaders.TryAddWithoutValidation("ngrok-skip-browser-warning", "true");
         }
-    }
-
-    public static void SaveBaseUrlOverride(string baseUrl)
-    {
-        var normalized = EnsureApiPath(baseUrl);
-        if (!Uri.TryCreate(normalized, UriKind.Absolute, out _))
-        {
-            throw new InvalidOperationException("Enter a valid BikeMate API URL, for example https://bikemate-api-demo.azurewebsites.net/api/ or http://127.0.0.1:5000/api/ when using adb reverse.");
-        }
-
-        Preferences.Default.Set(ApiBaseUrlPreferenceKey, normalized);
-    }
-
-    public static void ClearBaseUrlOverride()
-    {
-        Preferences.Default.Remove(ApiBaseUrlPreferenceKey);
     }
 
     public static HttpClient CreateHttpClient()
@@ -192,11 +171,7 @@ public static class ApiConfig
 
     private static string ResolveBaseUrl()
     {
-        var stored = Preferences.Default.Get(ApiBaseUrlPreferenceKey, string.Empty);
-        if (!string.IsNullOrWhiteSpace(stored))
-        {
-            return EnsureApiPath(stored);
-        }
+        Preferences.Default.Remove(ApiBaseUrlPreferenceKey);
 
         var environmentValue = Environment.GetEnvironmentVariable(ApiBaseUrlEnvironmentVariable);
         return EnsureApiPath(string.IsNullOrWhiteSpace(environmentValue) ? DefaultBaseUrl : environmentValue);

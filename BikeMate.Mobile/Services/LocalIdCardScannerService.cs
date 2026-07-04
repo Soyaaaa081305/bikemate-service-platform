@@ -1,6 +1,6 @@
 namespace BikeMate.Services;
 
-public sealed class LocalIdCardScannerService : ILocalIdCardScannerService
+public sealed class LocalIdCardScannerService
 {
     public async Task<LocalIdCardScanResult> ScanAsync(string title = "Scan your ID card", CancellationToken cancellationToken = default)
     {

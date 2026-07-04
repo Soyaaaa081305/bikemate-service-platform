@@ -177,7 +177,19 @@ public sealed record CreateServiceRequestDto(
     string? ServiceLocationAddress,
     decimal? ServiceLatitude,
     decimal? ServiceLongitude,
-    DateTime? ScheduledAt);
+    DateTime? ScheduledAt,
+    IReadOnlyCollection<int>? ShopServiceIds = null,
+    IReadOnlyCollection<int>? ProductIds = null);
+
+public sealed record ServiceRequestLineItemDto(
+    int LineItemId,
+    string ItemType,
+    int? ShopServiceId,
+    int? ProductId,
+    string ItemName,
+    int Quantity,
+    decimal UnitPrice,
+    decimal LineTotal);
 
 public sealed record ServiceRequestDto(
     int RequestId,
@@ -197,13 +209,19 @@ public sealed record ServiceRequestDto(
     decimal? DistanceKm = null,
     string? ShopImageUrl = null,
     string? ShopLogoUrl = null,
-    DateTime? CompletedAt = null);
+    DateTime? CompletedAt = null,
+    IReadOnlyCollection<ServiceRequestLineItemDto>? LineItems = null);
 
 public sealed record UpdateRequestStatusDto(string Status, string? Notes);
 public sealed record AssignMechanicDto(int MechanicId);
 public sealed record UploadMediaDto(string MediaUrl, string MediaType, string? Caption);
 public sealed record UploadedFileDto(string Url, string FileName, string ContentType, long SizeBytes);
-public sealed record SelectShopDto(int ShopId, int? ShopServiceId, int? ProductId = null);
+public sealed record SelectShopDto(
+    int ShopId,
+    int? ShopServiceId,
+    int? ProductId = null,
+    IReadOnlyCollection<int>? ShopServiceIds = null,
+    IReadOnlyCollection<int>? ProductIds = null);
 
 public sealed record CustomerMeDto(
     int ClientId,

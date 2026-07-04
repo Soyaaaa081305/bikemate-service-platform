@@ -10,8 +10,8 @@
 <div class="admin-page">
     <div class="admin-page-header">
         <div>
-            <h1 class="admin-page-title">Account Approvals</h1>
-            <p class="admin-page-description">Review submitted identity files, business records, OTP status, and profile details before activating BikeMate accounts.</p>
+            <h1 class="admin-page-title">Approvals</h1>
+            <p class="admin-page-description">Review documents, OTP status, and profile details before activation.</p>
         </div>
         <div class="admin-page-actions">
             <button class="btn btn-outline-primary shadow-sm" disabled="@isProcessing" @onclick="LoadApprovals">
@@ -38,21 +38,21 @@
                 <div class="approval-review-card h-100">
                     <div class="section-label mb-1">Shops</div>
                     <h3 class="mb-1">@PendingShopCount waiting</h3>
-                    <p class="dashboard-muted mb-0">Business, DTI, owner ID, and shop profile review.</p>
+                    <p class="dashboard-muted mb-0">Business files and owner ID.</p>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="approval-review-card h-100">
                     <div class="section-label mb-1">Customers</div>
                     <h3 class="mb-1">@PendingCustomerCount waiting</h3>
-                    <p class="dashboard-muted mb-0">Customer identity and email verification review.</p>
+                    <p class="dashboard-muted mb-0">Identity and email check.</p>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="approval-review-card h-100">
                     <div class="section-label mb-1">Mechanics</div>
                     <h3 class="mb-1">@PendingMechanicCount waiting</h3>
-                    <p class="dashboard-muted mb-0">Technician identity, license, shop assignment, and OTP review.</p>
+                    <p class="dashboard-muted mb-0">ID, license, and shop link.</p>
                 </div>
             </div>
         </div>
@@ -60,7 +60,7 @@
         <section class="vstack gap-3 mb-4">
             <div>
                 <h2 class="admin-page-title">Shop Applications</h2>
-                <p class="dashboard-muted">Owner accounts activate only after business documents and email OTP are verified.</p>
+                <p class="dashboard-muted">Approve after documents and email OTP are verified.</p>
             </div>
 
             @if (PendingShopCount == 0)
@@ -92,7 +92,7 @@
                             <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
                                 <div>
                                     <div class="section-label mb-1">Decision</div>
-                                    <p class="text-muted mb-0">Approve only after the permit, owner ID, DTI number, and shop profile are correct.</p>
+                                    <p class="text-muted mb-0">Check permit, owner ID, DTI, and profile.</p>
                                 </div>
                                 <div class="d-flex gap-2">
                                     <button class="btn btn-success shadow-sm"
@@ -182,7 +182,7 @@
         <section class="vstack gap-3 mb-4">
             <div>
                 <h2 class="admin-page-title">Customer Accounts</h2>
-                <p class="dashboard-muted">Customers can sign up and verify email, but booking stays locked until admin approval.</p>
+                <p class="dashboard-muted">Booking unlocks after admin approval.</p>
             </div>
 
             @if (PendingCustomerCount == 0)
@@ -214,7 +214,7 @@
                             <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
                                 <div>
                                     <div class="section-label mb-1">Decision</div>
-                                    <p class="text-muted mb-0">Approve only after email OTP and valid ID review are complete.</p>
+                                    <p class="text-muted mb-0">Check email OTP and valid ID.</p>
                                 </div>
                                 <div class="d-flex gap-2">
                                     <button class="btn btn-success shadow-sm"
@@ -285,7 +285,7 @@
         <section class="vstack gap-3">
             <div>
                 <h2 class="admin-page-title">Mechanic Accounts</h2>
-                <p class="dashboard-muted">Shop owners submit mechanic accounts, but technicians are activated only after system admin review.</p>
+                <p class="dashboard-muted">Technicians activate after admin review.</p>
             </div>
 
             @if (PendingMechanicCount == 0)
@@ -317,7 +317,7 @@
                             <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap mb-3">
                                 <div>
                                     <div class="section-label mb-1">Decision</div>
-                                    <p class="text-muted mb-0">Approve only after email OTP, valid ID, mechanic certification/license, and shop assignment are correct.</p>
+                                    <p class="text-muted mb-0">Check OTP, ID, license, and shop assignment.</p>
                                 </div>
                                 <div class="d-flex gap-2">
                                     <button class="btn btn-success shadow-sm"

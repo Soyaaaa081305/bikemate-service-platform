@@ -86,7 +86,7 @@
                             Clicked="OnForgotPasswordClicked"
                             HorizontalOptions="End"
                             BackgroundColor="Transparent"
-                            TextColor="#FF6B2C"
+                            TextColor="#FF6B00"
                             FontFamily="PTSansCaptionBold"
                             FontSize="11"
                             Padding="4,0"
@@ -98,7 +98,7 @@
                         x:Name="SignInButton"
                         Text="Sign in"
                         Clicked="OnSignInClicked"
-                        BackgroundColor="#FF6B2C"
+                        BackgroundColor="#FF6B00"
                         TextColor="White"
                         CornerRadius="8"
                         HeightRequest="48"
@@ -145,7 +145,7 @@
                             Text="Create account"
                             Clicked="OnCreateAccountClicked"
                             BackgroundColor="Transparent"
-                            TextColor="#FF6B2C"
+                            TextColor="#FF6B00"
                             FontFamily="Inter"
                             FontAttributes="Bold"
                             Padding="4,0"
@@ -153,16 +153,6 @@
                             MinimumHeightRequest="34" />
                     </Grid>
 
-                    <Button
-                        Text="Connection settings"
-                        Clicked="OnConnectionSettingsClicked"
-                        BackgroundColor="Transparent"
-                        TextColor="#6E6E6E"
-                        FontFamily="PTSansCaptionBold"
-                        FontSize="11"
-                        Padding="4,0"
-                        HeightRequest="30"
-                        MinimumHeightRequest="30" />
                 </VerticalStackLayout>
             </Border>
 
@@ -170,7 +160,7 @@
                 x:Name="BusyIndicator"
                 IsVisible="False"
                 IsRunning="False"
-                Color="#FF6B2C"
+                Color="#FF6B00"
                 HorizontalOptions="Center" />
 
             <Label

@@ -5,7 +5,7 @@ namespace BIKEMATES_ADMIN.Pages.Account;
 
 public sealed class ForgotPasswordPage : ContentPage
 {
-    private const string Orange = "#FF6B2C";
+    private const string Orange = "#FF6B00";
     private const string LightOrange = "#FFF3EA";
     private const string Dark = "#242424";
     private const string Muted = "#6E6E6E";
@@ -35,7 +35,7 @@ public sealed class ForgotPasswordPage : ContentPage
             BackgroundColor = Colors.White
         };
 
-        body.Add(new Image { Source = "bikemate_logo.png", HeightRequest = 82, HorizontalOptions = LayoutOptions.Center });
+        body.Add(new Image { Source = "bikemate_logo", HeightRequest = 82, HorizontalOptions = LayoutOptions.Center });
         body.Add(Label("Reset password", 18, Dark, FontAttributes.Bold, TextAlignment.Center));
         body.Add(Label("We will send a six-digit code before changing the shop-admin password.", 13, Muted, FontAttributes.None, TextAlignment.Center));
         body.Add(StepRow());

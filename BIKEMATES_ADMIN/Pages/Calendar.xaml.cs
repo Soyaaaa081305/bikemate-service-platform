@@ -105,9 +105,9 @@ public partial class Calendar : ContentPage
 
     private static void ApplyFilterButton(Button button, bool selected)
     {
-        button.BackgroundColor = selected ? Color.FromArgb("#FF6B2C") : Colors.White;
+        button.BackgroundColor = selected ? Color.FromArgb("#FF6B00") : Colors.White;
         button.TextColor = selected ? Colors.White : Color.FromArgb("#242424");
-        button.BorderColor = selected ? Color.FromArgb("#FF6B2C") : Color.FromArgb("#D1D5DB");
+        button.BorderColor = selected ? Color.FromArgb("#FF6B00") : Color.FromArgb("#D1D5DB");
     }
 
     private async void Reload_Clicked(object? sender, EventArgs e) => await LoadBookingsAsync();
@@ -193,13 +193,13 @@ public sealed record BookingItem(
         : $"Customer: {CustomerName} | Mechanic: {MechanicName}";
     public string TimingText => ScheduledAt?.ToLocalTime().ToString("MMM d, h:mm tt", CultureInfo.InvariantCulture) ??
         $"Requested {CreatedAt.ToLocalTime():MMM d, h:mm tt}";
-    public string TotalText => string.Format(CultureInfo.GetCultureInfo("en-PH"), "PHP {0:N0}", FinalTotal > 0 ? FinalTotal : EstimatedTotal);
+    public string TotalText => string.Format(CultureInfo.GetCultureInfo("en-PH"), "PHP {0:N2}", FinalTotal > 0 ? FinalTotal : EstimatedTotal);
     public string LocationText => string.IsNullOrWhiteSpace(ServiceLocationAddress) ? "Location not provided" : ServiceLocationAddress;
     public string IssuePreview => CleanIssue(IssueDescription);
     public string SearchText => $"{RequestId} {Status} {CustomerName} {MechanicName} {ServiceName} {IssueDescription} {ServiceLocationAddress}";
     public Color StatusColor => Status.Trim().ToLowerInvariant() switch
     {
-        "pending" or "submitted" => Color.FromArgb("#F97316"),
+        "pending" or "submitted" => Color.FromArgb("#C45500"),
         "accepted" or "assigned" or "confirmed" => Color.FromArgb("#2563EB"),
         "en_route" or "arrived" or "in_progress" => Color.FromArgb("#7C3AED"),
         "completed" or "servicecompleted" or "paid" => Color.FromArgb("#16A34A"),

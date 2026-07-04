@@ -9,8 +9,8 @@
 <div class="admin-page">
     <div class="admin-page-header">
         <div>
-            <h1 class="admin-page-title">Emergency Window</h1>
-            <p class="admin-page-description">Monitor urgent breakdown, accident, stranded, and no-start service requests.</p>
+            <h1 class="admin-page-title">Emergency Requests</h1>
+            <p class="admin-page-description">Monitor urgent roadside requests and open support calls when needed.</p>
         </div>
 
         <div class="admin-page-actions">
@@ -22,10 +22,27 @@
 
     <ActionMessage Message="@statusMessage" AlertType="danger" OnMessageCleared="() => statusMessage = null" />
 
+    <div class="admin-summary-strip">
+        <div class="admin-summary-chip">
+            <i class="bi bi-exclamation-octagon"></i>
+            <div>
+                <small>Open emergencies</small>
+                <strong>@EmergencyCount</strong>
+            </div>
+        </div>
+        <div class="admin-summary-chip">
+            <i class="bi bi-camera-video"></i>
+            <div>
+                <small>Call-ready</small>
+                <strong>@EmergencyCount</strong>
+            </div>
+        </div>
+    </div>
+
     <div class="card admin-table-card emergency-card">
         <div class="card-header bg-white border-0 pt-4 pb-3 d-flex justify-content-between align-items-center">
             <div>
-                <h2 class="admin-page-title text-danger mb-0"><i class="bi bi-exclamation-octagon-fill me-2"></i>Emergency Queue</h2>
+                <h2 class="admin-page-title text-danger mb-0"><i class="bi bi-exclamation-octagon-fill me-2"></i>Queue</h2>
                 <small class="text-muted">@EmergencyCount active emergency request@(EmergencyCount == 1 ? "" : "s")</small>
             </div>
             <span class="badge bg-danger px-3 py-2">@EmergencyCount Open</span>

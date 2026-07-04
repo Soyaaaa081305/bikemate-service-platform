@@ -43,7 +43,6 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 // Use AddAuthorization (Do NOT use AddAuthorizationCore with AddAuthentication)
 builder.Services.AddAuthorization();
 builder.Services.AddCascadingAuthenticationState();
-//builder.Services.AddScoped<AuthenticationStateProvider, AdminAuthStateProvider>();
 
 var app = builder.Build();
 

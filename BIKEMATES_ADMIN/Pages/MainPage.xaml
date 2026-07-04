@@ -21,7 +21,7 @@
                                Padding="0"
                                BackgroundColor="White"
                                HasShadow="False">
-                            <Image Source="bikemate_logo.png"
+                            <Image Source="bikemate_logo"
                                    Aspect="AspectFit"
                                    Margin="5" />
                         </Frame>
@@ -42,7 +42,7 @@
                             <Label x:Name="ShopNameLabel"
                                    Text="Loading assigned bike shop..."
                                    Style="{StaticResource HeaderSubtitle}"
-                                   TextColor="#FFF2EA"
+                                   TextColor="#FFF3EA"
                                    LineBreakMode="TailTruncation" />
                         </VerticalStackLayout>
 
@@ -66,7 +66,7 @@
                                Style="{StaticResource HeaderTitle}" />
                         <Label Text="Monitor bookings, mechanics, services, inventory, and customer updates."
                                Style="{StaticResource HeaderSubtitle}"
-                               TextColor="#FFF2EA"
+                               TextColor="#FFF3EA"
                                LineBreakMode="WordWrap" />
                     </VerticalStackLayout>
                 </Grid>

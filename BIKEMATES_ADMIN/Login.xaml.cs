@@ -99,53 +99,6 @@ public partial class Login : ContentPage
         RefreshPendingApplicationState();
     }
 
-    private async void OnConnectionSettingsClicked(object? sender, EventArgs e)
-    {
-        var current = BikeMateDatabaseService.CurrentApiBaseUrl;
-        var action = await DisplayActionSheetAsync(
-            "BikeMate API connection",
-            "Cancel",
-            null,
-            "Set API URL",
-            "Use packaged default",
-            "Show current URL");
-
-        if (action == "Set API URL")
-        {
-            var entered = await DisplayPromptAsync(
-                "API URL",
-                "Enter the API base URL. Examples: https://your-domain.com/api/ or http://192.168.1.10:5000/api/.",
-                "Save",
-                "Cancel",
-                current);
-
-            if (string.IsNullOrWhiteSpace(entered))
-            {
-                return;
-            }
-
-            try
-            {
-                BikeMateDatabaseService.SaveApiBaseUrlOverride(entered);
-                await DisplayAlertAsync("Connection Saved", $"BIKEMATES ADMIN will use {BikeMateDatabaseService.CurrentApiBaseUrl}", "OK");
-            }
-            catch (Exception ex)
-            {
-                await DisplayAlertAsync("Invalid API URL", ex.Message, "OK");
-            }
-        }
-        else if (action == "Use packaged default")
-        {
-            BikeMateDatabaseService.ClearApiBaseUrlOverride();
-            await DisplayAlertAsync("Connection Reset", $"BIKEMATES ADMIN will use {BikeMateDatabaseService.PackagedDefaultApiBaseUrl}", "OK");
-        }
-        else if (action == "Show current URL")
-        {
-            var mode = BikeMateDatabaseService.HasApiBaseUrlOverride ? "Custom override" : "Packaged default";
-            await DisplayAlertAsync("Current API URL", $"{mode}\n{BikeMateDatabaseService.CurrentApiBaseUrl}", "OK");
-        }
-    }
-
     private void RefreshPendingApplicationState()
     {
         var typedEmail = EmailEntry.Text;

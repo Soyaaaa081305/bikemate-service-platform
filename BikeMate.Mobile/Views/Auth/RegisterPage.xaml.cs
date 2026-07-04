@@ -71,7 +71,7 @@ internal static class CustomerRegistrationDraft
 
 public partial class RegisterPage : ContentPage
 {
-    private const string Orange = "#FF6B2C";
+    private const string Orange = "#FF6B00";
     private const string Dark = "#222222";
     private const string Muted = "#777777";
     private const string BorderColor = "#DCDCDC";

@@ -174,6 +174,13 @@ internal static class CustomerApiClient
         return await ReadAsync<MessageDto>(response, cancellationToken);
     }
 
+    public static async Task<ConversationDto> StartShopInquiryAsync(int shopId, CancellationToken cancellationToken = default)
+    {
+        using var http = await ApiConfig.CreateAuthorizedHttpClientAsync();
+        using var response = await http.PostAsync($"conversations/shop-inquiry/{shopId}", null, cancellationToken);
+        return await ReadAsync<ConversationDto>(response, cancellationToken);
+    }
+
     public static async Task<IReadOnlyList<ShopSummaryDto>> GetShopsAsync(
         decimal? latitude = null,
         decimal? longitude = null,
@@ -223,10 +230,22 @@ internal static class CustomerApiClient
         return await GetAsync<IReadOnlyList<ProductDto>>(http, $"products/shop/{shopId}", cancellationToken);
     }
 
-    public static async Task<IReadOnlyList<ShopServiceDto>> SearchServicesAsync(CancellationToken cancellationToken = default)
+    public static async Task<IReadOnlyList<ShopServiceDto>> SearchServicesAsync(string? query = null, CancellationToken cancellationToken = default)
     {
         using var http = ApiConfig.CreateHttpClient();
-        return await GetAsync<IReadOnlyList<ShopServiceDto>>(http, "services/search", cancellationToken);
+        var endpoint = string.IsNullOrWhiteSpace(query)
+            ? "services/search"
+            : $"services/search?q={Uri.EscapeDataString(query)}";
+        return await GetAsync<IReadOnlyList<ShopServiceDto>>(http, endpoint, cancellationToken);
+    }
+
+    public static async Task<IReadOnlyList<ProductDto>> SearchProductsAsync(string? query = null, CancellationToken cancellationToken = default)
+    {
+        using var http = ApiConfig.CreateHttpClient();
+        var endpoint = string.IsNullOrWhiteSpace(query)
+            ? "products/search"
+            : $"products/search?q={Uri.EscapeDataString(query)}";
+        return await GetAsync<IReadOnlyList<ProductDto>>(http, endpoint, cancellationToken);
     }
 
     public static async Task<ServiceRequestDto> CreateRequestAsync(CreateServiceRequestDto dto, CancellationToken cancellationToken = default)

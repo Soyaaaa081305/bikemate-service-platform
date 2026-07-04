@@ -39,12 +39,14 @@ internal static class BookingDraft
     public static int PaymentId { get; set; }
     public static int? SelectedShopId { get; set; }
     public static int? SelectedShopServiceId { get; set; }
+    public static List<int> SelectedShopServiceIds { get; } = [];
     public static string SelectedShopName { get; set; } = "";
     public static string? SelectedShopImageUrl { get; set; }
     public static string? SelectedShopLogoUrl { get; set; }
     public static int? SelectedProductId { get; set; }
     public static string SelectedProductName { get; set; } = "";
     public static decimal? SelectedProductPrice { get; set; }
+    public static List<ProductDto> SelectedProducts { get; } = [];
     public static string? RegionCode { get; set; }
     public static string Region { get; set; } = "";
     public static string? LocalityCode { get; set; }
@@ -78,12 +80,14 @@ internal static class BookingDraft
         PaymentId = 0;
         SelectedShopId = null;
         SelectedShopServiceId = null;
+        SelectedShopServiceIds.Clear();
         SelectedShopName = "";
         SelectedShopImageUrl = null;
         SelectedShopLogoUrl = null;
         SelectedProductId = null;
         SelectedProductName = "";
         SelectedProductPrice = null;
+        SelectedProducts.Clear();
         ImageMediaUrl = null;
         VideoMediaUrl = null;
         ImagePreviewPath = null;
@@ -184,8 +188,8 @@ internal static class BookingDraft
             concern = $"{concern}: {OtherDetails.Trim()}";
         }
 
-        var product = IsModification && !string.IsNullOrWhiteSpace(SelectedProductName)
-            ? $"\nSelected product: {SelectedProductName}{(SelectedProductPrice is null ? "" : $" ({BookingVisuals.Money(SelectedProductPrice.Value)})")}"
+        var product = SelectedProducts.Count > 0
+            ? $"\nSelected products: {SelectedProductsSummary()}"
             : "";
         var method = string.IsNullOrWhiteSpace(AssistanceMethod)
             ? ""
@@ -248,6 +252,39 @@ internal static class BookingDraft
             IsRelevantService(x));
     }
 
+    public static IReadOnlyList<ShopServiceDto> SelectedServices()
+    {
+        var selected = Services
+            .Where(x => SelectedShopServiceIds.Contains(x.ShopServiceId) && x.IsActive)
+            .OrderBy(x => SelectedShopServiceIds.IndexOf(x.ShopServiceId))
+            .ToArray();
+        if (selected.Length > 0)
+        {
+            return selected;
+        }
+
+        var fallback = SelectedService();
+        return fallback is null ? [] : [fallback];
+    }
+
+    public static string SelectedServicesSummary()
+    {
+        var names = SelectedServices().Select(x => x.ServiceName).Where(x => !string.IsNullOrWhiteSpace(x)).ToArray();
+        return names.Length == 0 ? "Choose services" : string.Join(", ", names);
+    }
+
+    public static string SelectedProductsSummary()
+    {
+        return SelectedProducts.Count == 0
+            ? "No products selected"
+            : string.Join(", ", SelectedProducts.Select(x => $"{x.ProductName} ({BookingVisuals.Money(x.Price)})"));
+    }
+
+    public static decimal SelectedItemsTotal()
+    {
+        return SelectedServices().Sum(x => x.BasePrice) + SelectedProducts.Sum(x => x.Price);
+    }
+
     public static bool IsRelevantService(ShopServiceDto service)
     {
         if (!service.IsActive)
@@ -288,6 +325,7 @@ internal static class BookingDraft
         SelectedProductId = null;
         SelectedProductName = "";
         SelectedProductPrice = null;
+        SelectedProducts.Clear();
         if (IsModification)
         {
             ProblemCategory = "Modification";
@@ -303,6 +341,8 @@ internal static class BookingDraft
         if (SelectedShopId != shop.ShopId)
         {
             SelectedShopServiceId = null;
+            SelectedShopServiceIds.Clear();
+            ClearProduct();
         }
 
         SelectedShopId = shop.ShopId;
@@ -323,9 +363,11 @@ internal static class BookingDraft
     {
         SelectedShopId = null;
         SelectedShopServiceId = null;
+        SelectedShopServiceIds.Clear();
         SelectedShopName = "";
         SelectedShopImageUrl = null;
         SelectedShopLogoUrl = null;
+        ClearProduct();
     }
 
     public static string DisplayShopName(string? requestShopName = null)
@@ -344,9 +386,19 @@ internal static class BookingDraft
 
     public static void SelectProduct(ProductDto product)
     {
-        SelectedProductId = product.ProductId;
-        SelectedProductName = product.ProductName;
-        SelectedProductPrice = product.Price;
+        if (SelectedProducts.Any(x => x.ProductId == product.ProductId))
+        {
+            SelectedProducts.RemoveAll(x => x.ProductId == product.ProductId);
+        }
+        else
+        {
+            SelectedProducts.Add(product);
+        }
+
+        var primary = SelectedProducts.FirstOrDefault();
+        SelectedProductId = primary?.ProductId;
+        SelectedProductName = primary?.ProductName ?? "";
+        SelectedProductPrice = primary?.Price;
     }
 
     public static void ClearProduct()
@@ -354,6 +406,25 @@ internal static class BookingDraft
         SelectedProductId = null;
         SelectedProductName = "";
         SelectedProductPrice = null;
+        SelectedProducts.Clear();
+    }
+
+    public static void ToggleService(ShopServiceDto service)
+    {
+        if (SelectedShopServiceIds.Contains(service.ShopServiceId))
+        {
+            SelectedShopServiceIds.Remove(service.ShopServiceId);
+        }
+        else
+        {
+            SelectedShopServiceIds.Add(service.ShopServiceId);
+        }
+
+        SelectedShopServiceId = SelectedShopServiceIds.FirstOrDefault();
+        if (SelectedShopServiceId == 0)
+        {
+            SelectedShopServiceId = null;
+        }
     }
 
     public static bool IsModificationService(ShopServiceDto service)
@@ -528,11 +599,17 @@ internal static class BookingFlowActions
 
         var motorcycle = BookingDraft.SelectedMotorcycle();
         var shopId = BookingDraft.SelectedShopId;
+        var shopServiceIds = shopId is null ? Array.Empty<int>() : BookingDraft.SelectedShopServiceIds.ToArray();
         var shopServiceId = shopId is null ? null : BookingDraft.SelectedShopServiceId;
-        if (shopId is not null && shopServiceId is null)
+        if (shopId is not null && shopServiceIds.Length == 0 && shopServiceId is null)
         {
             shopServiceId = BookingDraft.Services.FirstOrDefault(x => x.ShopId == shopId)?.ShopServiceId;
             BookingDraft.SelectedShopServiceId = shopServiceId;
+            if (shopServiceId is not null)
+            {
+                BookingDraft.SelectedShopServiceIds.Add(shopServiceId.Value);
+                shopServiceIds = [shopServiceId.Value];
+            }
         }
 
         ServiceRequestDto request;
@@ -546,7 +623,9 @@ internal static class BookingFlowActions
                 BookingDraft.ServiceAddress(),
                 BookingDraft.Latitude,
                 BookingDraft.Longitude,
-                BookingDraft.IsReservation ? BookingDraft.ScheduledAt.ToUniversalTime() : null));
+                BookingDraft.IsReservation ? BookingDraft.ScheduledAt.ToUniversalTime() : null,
+                shopServiceIds,
+                BookingDraft.SelectedProducts.Select(x => x.ProductId).ToArray()));
             BookingDraft.RequestId = request.RequestId;
         }
         else
@@ -574,26 +653,35 @@ internal static class BookingFlowActions
 
     public static async Task<ServiceRequestDto> SelectShopAsync(int shopId, int? shopServiceId)
     {
-        if (shopServiceId is null)
+        if (BookingDraft.SelectedShopServiceIds.Count == 0 && shopServiceId is not null)
         {
-            throw new InvalidOperationException("Choose an exact shop service before continuing to payment.");
+            BookingDraft.SelectedShopServiceIds.Add(shopServiceId.Value);
+        }
+
+        if (BookingDraft.SelectedShopServiceIds.Count == 0)
+        {
+            throw new InvalidOperationException("Choose at least one exact shop service before continuing to payment.");
         }
 
         BookingDraft.SelectedShopId = shopId;
-        BookingDraft.SelectedShopServiceId = shopServiceId;
+        BookingDraft.SelectedShopServiceId = BookingDraft.SelectedShopServiceIds.FirstOrDefault();
         var request = await EnsureRequestAsync(true);
         var selected = await CustomerApiClient.SelectShopAsync(
             request.RequestId,
             new SelectShopDto(
                 shopId,
                 BookingDraft.SelectedShopServiceId,
-                BookingDraft.IsModification ? BookingDraft.SelectedProductId : null));
+                BookingDraft.SelectedProductId,
+                BookingDraft.SelectedShopServiceIds.ToArray(),
+                BookingDraft.SelectedProducts.Select(x => x.ProductId).ToArray()));
         if (!string.IsNullOrWhiteSpace(selected.ShopName))
         {
             BookingDraft.SelectedShopName = selected.ShopName;
             BookingDraft.SelectedShopImageUrl = selected.ShopImageUrl;
             BookingDraft.SelectedShopLogoUrl = selected.ShopLogoUrl;
         }
+
+        await CustomerPageBase.ScheduleBookingRemindersAsync(new[] { selected });
 
         return selected;
     }
@@ -608,17 +696,27 @@ internal static class BookingVisuals
 
     public static ImageSource ShopImageSource(string? url)
     {
-        return ImageSource.FromUri(new Uri(ApiConfig.ToPublicUrl(url, ShopImage)));
+        return PublicOrAssetImageSource(url, ShopImage);
     }
 
     public static ImageSource MechanicImageSource(string? url)
     {
-        return ImageSource.FromUri(new Uri(ApiConfig.ToPublicUrl(url, MechanicImage)));
+        return PublicOrAssetImageSource(url, MechanicImage);
     }
 
     public static ImageSource ProductImageSource(string? url)
     {
-        return ImageSource.FromUri(new Uri(ApiConfig.ToPublicUrl(url, ShopImage)));
+        return PublicOrAssetImageSource(url, ShopImage);
+    }
+
+    public static ImageSource AssetImageSource(string asset)
+    {
+        return CustomerUi.Image(asset);
+    }
+
+    private static ImageSource PublicOrAssetImageSource(string? url, string fallbackAsset)
+    {
+        return CustomerUi.PublicOrAssetImage(url, fallbackAsset);
     }
 
     public static View ShopProfileCard(
@@ -752,7 +850,7 @@ internal static class BookingVisuals
         grid.Add(new Button
         {
             Text = "<",
-            BackgroundColor = Color.FromArgb("#FFF2EA"),
+            BackgroundColor = Color.FromArgb("#FFF3EA"),
             TextColor = CustomerUi.Dark,
             FontSize = 18,
             WidthRequest = 40,
@@ -1056,7 +1154,8 @@ internal static class BookingVisuals
                         var page = Shell.Current?.CurrentPage ?? Application.Current?.Windows.FirstOrDefault()?.Page;
                         if (page is not null)
                         {
-                            await page.DisplayAlertAsync("Location", ex.Message, "OK");
+                            Debug.WriteLine($"Location lookup failed: {ex}");
+                            await page.DisplayAlertAsync("Location", "Location could not be completed. Check permissions and try again.", "OK");
                         }
                     }
                 })
@@ -1195,7 +1294,7 @@ internal static class BookingVisuals
             HeightRequest = 48,
             Stroke = Colors.Transparent,
             StrokeShape = new RoundRectangle { CornerRadius = 8 },
-            BackgroundColor = uploaded ? Color.FromArgb("#E8F6EF") : Color.FromArgb("#FFF2EA"),
+            BackgroundColor = uploaded ? Color.FromArgb("#E8F6EF") : Color.FromArgb("#FFF3EA"),
             Content = new Label
             {
                 Text = mediaLabel,
@@ -1266,7 +1365,13 @@ internal static class BookingVisuals
 
     public static string Money(decimal amount)
     {
-        return string.Format(CultureInfo.GetCultureInfo("en-PH"), "PHP {0:N0}", amount);
+        return string.Format(CultureInfo.GetCultureInfo("en-PH"), "PHP {0:N2}", amount);
+    }
+
+    public static string FriendlyError(string message, Exception ex)
+    {
+        Debug.WriteLine($"{message}: {ex}");
+        return message;
     }
 }
 
@@ -1300,7 +1405,7 @@ internal sealed class LocationAccessPage : ContentPage
             {
                 new Image
                 {
-                    Source = ImageSource.FromUri(new Uri("https://img.icons8.com/color/240/google-maps-new.png")),
+                    Source = CustomerUi.Image("https://img.icons8.com/color/240/google-maps-new.png"),
                     HeightRequest = 96,
                     WidthRequest = 96
                 },
@@ -1346,7 +1451,8 @@ internal sealed class LocationAccessPage : ContentPage
         }
         catch (Exception ex)
         {
-            await DisplayAlertAsync("Location unavailable", ex.Message, "OK");
+            Debug.WriteLine($"Location access failed: {ex}");
+            await DisplayAlertAsync("Location unavailable", "Location could not be completed. Check permissions and try again.", "OK");
         }
         finally
         {
@@ -1407,7 +1513,7 @@ public sealed class BookingFillUpPage : CustomerPageBase
         }
         catch (Exception ex)
         {
-            Render($"Connect the API to load fill-up details. {ex.Message}");
+            Render(BookingVisuals.FriendlyError("Booking details could not be prepared. Check your connection and try again.", ex));
         }
     }
 
@@ -1701,7 +1807,7 @@ public sealed class BookingFillUpPage : CustomerPageBase
     {
         return new Border
         {
-            BackgroundColor = selected ? Color.FromArgb("#FFF2EA") : Colors.White,
+            BackgroundColor = selected ? Color.FromArgb("#FFF3EA") : Colors.White,
             Stroke = selected ? CustomerUi.Orange : CustomerUi.Border,
             StrokeThickness = selected ? 2 : 1,
             StrokeShape = new RoundRectangle { CornerRadius = 8 },
@@ -1941,7 +2047,7 @@ public sealed class BookingServiceTypePage : CustomerPageBase
         {
             Stroke = Colors.Transparent,
             StrokeShape = new RoundRectangle { CornerRadius = 12 },
-            BackgroundColor = Color.FromArgb("#FFF2EA"),
+            BackgroundColor = Color.FromArgb("#FFF3EA"),
             Padding = new Thickness(10, 5),
             Content = BookingVisuals.Text("Booking", 10, CustomerUi.Orange, FontAttributes.Bold)
         }, 1, 0);
@@ -2339,7 +2445,7 @@ public sealed class BookingSchedulePage : CustomerPageBase
                 Stroke = selected ? CustomerUi.Orange : CustomerUi.Border,
                 StrokeThickness = selected ? 2 : 1,
                 StrokeShape = new RoundRectangle { CornerRadius = 8 },
-                BackgroundColor = selected ? Color.FromArgb("#FFF2EA") : Colors.White,
+                BackgroundColor = selected ? Color.FromArgb("#FFF3EA") : Colors.White,
                 Content = new Label
                 {
                     Text = candidate.ToString("h:mm tt", CultureInfo.InvariantCulture),
@@ -2455,7 +2561,7 @@ public sealed class BookingUploadPage : CustomerPageBase
         }
         catch (Exception ex)
         {
-            Render($"Upload failed. {ex.Message}");
+            Render(BookingVisuals.FriendlyError("Upload failed. Check the file and try again.", ex));
         }
     }
 
@@ -2513,7 +2619,7 @@ public sealed class BookingConfirmationPage : CustomerPageBase
         }
         catch (Exception ex)
         {
-            Render($"Connect the API to load confirmation details. {ex.Message}");
+            Render(BookingVisuals.FriendlyError("Confirmation details could not be loaded. Check your connection and try again.", ex));
         }
     }
 
@@ -2606,7 +2712,7 @@ public sealed class BookingConfirmationPage : CustomerPageBase
             HeightRequest = 48,
             Stroke = Colors.Transparent,
             StrokeShape = new RoundRectangle { CornerRadius = 24 },
-            BackgroundColor = Color.FromArgb("#FFF2EA"),
+            BackgroundColor = Color.FromArgb("#FFF3EA"),
             Content = new Label
             {
                 Text = "BM",
@@ -2683,7 +2789,7 @@ public sealed class BookingConfirmationPage : CustomerPageBase
     private static View PriceCard(ShopServiceDto? service)
     {
         var hasShop = BookingDraft.SelectedShopId is not null;
-        var amount = (service?.BasePrice ?? 0m) + (BookingDraft.SelectedProductPrice ?? 0m);
+        var amount = BookingDraft.SelectedItemsTotal();
         var stack = new VerticalStackLayout { Spacing = 12 };
 
         var header = new Grid
@@ -2695,15 +2801,15 @@ public sealed class BookingConfirmationPage : CustomerPageBase
             }
         };
         header.Add(BookingVisuals.Text("Shop and pricing", 13, CustomerUi.Dark, FontAttributes.Bold), 0, 0);
-        header.Add(Pill(hasShop ? "Selected" : "Next step", hasShop ? Color.FromArgb("#E8F6EF") : Color.FromArgb("#FFF2EA"), hasShop ? Color.FromArgb("#147A3D") : CustomerUi.Orange), 1, 0);
+        header.Add(Pill(hasShop ? "Selected" : "Next step", hasShop ? Color.FromArgb("#E8F6EF") : Color.FromArgb("#FFF3EA"), hasShop ? Color.FromArgb("#147A3D") : CustomerUi.Orange), 1, 0);
         stack.Add(header);
 
         stack.Add(DetailRow(BookingDraft.IsModification ? "Bike shop" : "Repair shop", hasShop ? $"Shop #{BookingDraft.SelectedShopId}" : "Choose from nearby shops"));
-        if (BookingDraft.IsModification)
+        if (BookingDraft.SelectedProducts.Count > 0 || BookingDraft.IsModification)
         {
-            stack.Add(DetailRow("Selected item", string.IsNullOrWhiteSpace(BookingDraft.SelectedProductName) ? "Choose after selecting a shop" : BookingDraft.SelectedProductName));
+            stack.Add(DetailRow("Selected items", BookingDraft.SelectedProducts.Count == 0 ? "Optional" : BookingDraft.SelectedProductsSummary()));
         }
-        stack.Add(DetailRow("Exact service", hasShop && service is not null ? service.ServiceName : "Choose after selecting a shop"));
+        stack.Add(DetailRow("Exact services", hasShop ? BookingDraft.SelectedServicesSummary() : "Choose after selecting a shop"));
         stack.Add(DetailRow("Estimated price", hasShop ? BookingVisuals.Money(amount) : "Shown after shop selection"));
 
         return BookingVisuals.WhiteCard(stack, 8, new Thickness(14));
@@ -2801,8 +2907,11 @@ public sealed class BookingSearchShopPage : CustomerPageBase
 public sealed class StoreSelectionPage : CustomerPageBase
 {
     private IReadOnlyList<ShopSummaryDto> _shops = [];
+    private IReadOnlyList<ShopSummaryDto> _nearbyShops = [];
+    private IReadOnlyList<ShopSummaryDto> _otherShops = [];
     private IReadOnlyList<ShopServiceDto> _services = [];
     private bool _isLoading = true;
+    private const decimal NearbyRadiusKm = 50m;
 
     public StoreSelectionPage()
     {
@@ -2816,8 +2925,8 @@ public sealed class StoreSelectionPage : CustomerPageBase
         try
         {
             var shopsTask = CustomerApiClient.GetShopsAsync(
-                BookingDraft.Latitude,
-                BookingDraft.Longitude,
+                null,
+                null,
                 BookingDraft.IsModification ? null : BookingDraft.ProblemCategory);
             var servicesTask = CustomerApiClient.SearchServicesAsync();
             await Task.WhenAll(shopsTask, servicesTask);
@@ -2827,13 +2936,24 @@ public sealed class StoreSelectionPage : CustomerPageBase
             _shops = (await shopsTask)
                 .Where(shop => _services.Any(service => service.ShopId == shop.ShopId))
                 .ToArray();
+            _nearbyShops = _shops
+                .Where(IsNearbyOrSameArea)
+                .OrderBy(shop => ShopDistance(shop) ?? decimal.MaxValue)
+                .ThenBy(shop => shop.ShopName)
+                .ToArray();
+            var nearbyIds = _nearbyShops.Select(shop => shop.ShopId).ToHashSet();
+            _otherShops = _shops
+                .Where(shop => !nearbyIds.Contains(shop.ShopId))
+                .OrderBy(shop => ShopDistance(shop) ?? decimal.MaxValue)
+                .ThenBy(shop => shop.ShopName)
+                .ToArray();
             _isLoading = false;
             Render();
         }
         catch (Exception ex)
         {
             _isLoading = false;
-            Render($"Connect the API to load nearby shops. {ex.Message}");
+            Render(BookingVisuals.FriendlyError("Nearby shops could not be loaded. Check your connection and try again.", ex));
         }
     }
 
@@ -2904,9 +3024,43 @@ public sealed class StoreSelectionPage : CustomerPageBase
         }
         else
         {
-            foreach (var shop in _shops)
+            body.Add(SectionHeader(
+                BookingDraft.IsModification ? "Nearby modification shops" : "Nearby repair shops"));
+            if (_nearbyShops.Count == 0)
             {
-                body.Add(StoreCard(shop));
+                body.Add(BookingVisuals.WhiteCard(
+                    BookingVisuals.Text(
+                        BookingDraft.Latitude is null || BookingDraft.Longitude is null
+                            ? "BikeMate does not have mapped coordinates for your service area yet, so all available shops are listed below."
+                            : $"No mapped shop is within {NearbyRadiusKm:N0} km of your service area. Other verified shops are listed below.",
+                        11,
+                        CustomerUi.Muted),
+                    8,
+                    new Thickness(12)));
+            }
+            else
+            {
+                foreach (var shop in _nearbyShops)
+                {
+                    body.Add(StoreCard(shop));
+                }
+            }
+
+            body.Add(SectionHeader(
+                BookingDraft.IsModification ? "Other available shops" : "Other shops outside your range"));
+            if (_otherShops.Count == 0)
+            {
+                body.Add(BookingVisuals.WhiteCard(
+                    BookingVisuals.Text("Every available shop is already shown above.", 11, CustomerUi.Muted),
+                    8,
+                    new Thickness(12)));
+            }
+            else
+            {
+                foreach (var shop in _otherShops)
+                {
+                    body.Add(StoreCard(shop));
+                }
             }
         }
 
@@ -2987,7 +3141,7 @@ public sealed class StoreSelectionPage : CustomerPageBase
             10,
             CustomerUi.Muted));
         details.Add(BookingVisuals.Text(
-            distance is null ? "Verified BikeMate partner" : $"{distance:0.0} km away | Verified partner",
+            DistanceLine(shop, distance),
             10,
             Color.FromArgb("#147A3D"),
             FontAttributes.Bold));
@@ -3012,6 +3166,68 @@ public sealed class StoreSelectionPage : CustomerPageBase
         });
         grid.Add(details, 1, 0);
         return BookingVisuals.WhiteCard(grid, 8, new Thickness(12));
+    }
+
+    private static string DistanceLine(ShopSummaryDto shop, decimal? distance)
+    {
+        if (distance is not null)
+        {
+            return $"{distance:0.0} km away | Verified partner";
+        }
+
+        return IsSameServiceArea(shop)
+            ? "Same service area | Location not mapped"
+            : "Location not mapped | Verified partner";
+    }
+
+    private static bool IsNearbyOrSameArea(ShopSummaryDto shop)
+    {
+        var distance = ShopDistance(shop);
+        return distance is not null
+            ? distance <= NearbyRadiusKm
+            : IsSameServiceArea(shop);
+    }
+
+    private static bool IsSameServiceArea(ShopSummaryDto shop)
+    {
+        var serviceArea = string.Join(" ", new[]
+            {
+                BookingDraft.LocationName,
+                BookingDraft.AddressLine,
+                BookingDraft.Province
+            })
+            .Trim();
+        if (string.IsNullOrWhiteSpace(serviceArea))
+        {
+            return false;
+        }
+
+        return ContainsArea(serviceArea, shop.City) ||
+            ContainsArea(serviceArea, shop.AddressLine) ||
+            ContainsArea(shop.City, BookingDraft.LocationName) ||
+            ContainsArea(shop.AddressLine, BookingDraft.LocationName);
+    }
+
+    private static bool ContainsArea(string? source, string? value)
+    {
+        if (string.IsNullOrWhiteSpace(source) || string.IsNullOrWhiteSpace(value))
+        {
+            return false;
+        }
+
+        var normalizedSource = NormalizeArea(source);
+        var normalizedValue = NormalizeArea(value);
+        return normalizedSource.Contains(normalizedValue, StringComparison.OrdinalIgnoreCase) ||
+            normalizedValue.Contains(normalizedSource, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static string NormalizeArea(string value)
+    {
+        return value
+            .Replace("City of ", "", StringComparison.OrdinalIgnoreCase)
+            .Replace("city", "", StringComparison.OrdinalIgnoreCase)
+            .Replace(",", " ", StringComparison.Ordinal)
+            .Trim();
     }
 
     private static decimal? ShopDistance(ShopSummaryDto shop)
@@ -3097,23 +3313,31 @@ public sealed class StoreDetailsPage : CustomerPageBase, IQueryAttributable
                     .ToArray();
                 _products = await LoadProductsOptionalAsync(_shopId);
                 _reputation = await LoadReputationOptionalAsync(_shopId);
-                if (BookingDraft.SelectedShopServiceId is not null &&
-                    _services.All(x => x.ShopServiceId != BookingDraft.SelectedShopServiceId))
+                BookingDraft.SelectedShopServiceIds.RemoveAll(id => _services.All(x => x.ShopServiceId != id));
+                BookingDraft.SelectedShopServiceId = BookingDraft.SelectedShopServiceIds.FirstOrDefault();
+                if (BookingDraft.SelectedShopServiceId == 0)
                 {
                     BookingDraft.SelectedShopServiceId = null;
                 }
 
-                if (BookingDraft.SelectedProductId is not null &&
-                    _products.All(x => x.ProductId != BookingDraft.SelectedProductId))
+                BookingDraft.SelectedProducts.RemoveAll(product => _products.All(x => x.ProductId != product.ProductId));
+                if (BookingDraft.SelectedProducts.Count == 0)
                 {
                     BookingDraft.ClearProduct();
+                }
+                else
+                {
+                    var primary = BookingDraft.SelectedProducts.First();
+                    BookingDraft.SelectedProductId = primary.ProductId;
+                    BookingDraft.SelectedProductName = primary.ProductName;
+                    BookingDraft.SelectedProductPrice = primary.Price;
                 }
             }
             Render();
         }
         catch (Exception ex)
         {
-            Render($"Connect the API to load shop details. {ex.Message}");
+            Render(BookingVisuals.FriendlyError("Shop details could not be loaded. Check your connection and try again.", ex));
         }
     }
 
@@ -3199,10 +3423,10 @@ public sealed class StoreDetailsPage : CustomerPageBase, IQueryAttributable
         }
 
         body.Add(SectionHeading(
-            BookingDraft.IsModification ? "Optional item" : "Products and parts",
+            BookingDraft.IsModification ? "Optional items" : "Products and parts",
             BookingDraft.IsModification
-                ? "Choose a shop item only if this modification needs one. Service-only custom work can continue without a product."
-                : "Customer-visible parts from this shop inventory."));
+                ? "Choose any shop items this modification needs. Service-only custom work can continue without products."
+                : "Choose any customer-visible parts needed for this repair."));
         if (_products.Count == 0)
         {
             body.Add(BookingVisuals.WhiteCard(
@@ -3257,7 +3481,7 @@ public sealed class StoreDetailsPage : CustomerPageBase, IQueryAttributable
         continueButton.IsEnabled =
             !_isSubmitting &&
             _services.Count > 0 &&
-            BookingDraft.SelectedShopServiceId is not null;
+            BookingDraft.SelectedShopServiceIds.Count > 0;
         continueButton.Opacity = continueButton.IsEnabled ? 1 : 0.55;
         body.Add(continueButton);
 
@@ -3474,7 +3698,7 @@ public sealed class StoreDetailsPage : CustomerPageBase, IQueryAttributable
         {
             Stroke = Colors.Transparent,
             StrokeShape = new RoundRectangle { CornerRadius = 14 },
-            BackgroundColor = Color.FromArgb("#FFF2EA"),
+            BackgroundColor = Color.FromArgb("#FFF3EA"),
             Padding = new Thickness(9, 5),
             Content = BookingVisuals.Text($"{review.Rating}.0", 11, CustomerUi.Orange, FontAttributes.Bold)
         }, 2, 0);
@@ -3543,7 +3767,7 @@ public sealed class StoreDetailsPage : CustomerPageBase, IQueryAttributable
     {
         var (category, description) = SplitProductDescription(product.ProductDescription);
         description = CleanRepeatedDescription(description, product.ProductName, category);
-        var selected = BookingDraft.SelectedProductId == product.ProductId;
+        var selected = BookingDraft.SelectedProducts.Any(x => x.ProductId == product.ProductId);
         var canSelect = product.StockQuantity > 0;
         var selectCommand = new Command(() =>
         {
@@ -3602,7 +3826,7 @@ public sealed class StoreDetailsPage : CustomerPageBase, IQueryAttributable
         var price = BookingVisuals.Text(BookingVisuals.Money(product.Price), 12, CustomerUi.Orange, FontAttributes.Bold);
         price.HorizontalTextAlignment = TextAlignment.End;
         action.Add(price);
-        action.Add(ChoiceButton(selected ? "Selected" : "Select", selectCommand, canSelect, selected));
+        action.Add(ChoiceButton(selected ? "Added" : "Add", selectCommand, canSelect, selected));
         grid.Add(action, 3, 0);
         var card = BookingVisuals.WhiteCard(grid, 8, new Thickness(12));
         card.BackgroundColor = selected ? Color.FromArgb("#FFF7F2") : Colors.White;
@@ -3636,10 +3860,10 @@ public sealed class StoreDetailsPage : CustomerPageBase, IQueryAttributable
 
     private View ServiceChoice(ShopServiceDto service)
     {
-        var selected = BookingDraft.SelectedShopServiceId == service.ShopServiceId;
+        var selected = BookingDraft.SelectedShopServiceIds.Contains(service.ShopServiceId);
         var selectCommand = new Command(() =>
         {
-            BookingDraft.SelectedShopServiceId = service.ShopServiceId;
+            BookingDraft.ToggleService(service);
             Render();
         });
         var grid = new Grid
@@ -3667,7 +3891,7 @@ public sealed class StoreDetailsPage : CustomerPageBase, IQueryAttributable
         var price = BookingVisuals.Text(BookingVisuals.Money(service.BasePrice), 13, CustomerUi.Orange, FontAttributes.Bold);
         price.HorizontalTextAlignment = TextAlignment.End;
         action.Add(price);
-        action.Add(ChoiceButton(selected ? "Selected" : "Select", selectCommand, true, selected));
+        action.Add(ChoiceButton(selected ? "Added" : "Add", selectCommand, true, selected));
         grid.Add(action, 2, 0);
         var card = BookingVisuals.WhiteCard(grid, 8, new Thickness(12));
         card.BackgroundColor = selected ? Color.FromArgb("#FFF7F2") : Colors.White;
@@ -3750,9 +3974,9 @@ public sealed class StoreDetailsPage : CustomerPageBase, IQueryAttributable
             }
 
             var serviceId = BookingDraft.SelectedShopServiceId;
-            if (serviceId is null)
+            if (BookingDraft.SelectedShopServiceIds.Count == 0)
             {
-                await DisplayAlertAsync("Choose a service", "Select an available service before payment.", "OK");
+                await DisplayAlertAsync("Choose a service", "Select at least one available service before payment.", "OK");
                 return;
             }
 
@@ -3795,7 +4019,7 @@ public sealed class TaskerProfilePage : CustomerPageBase
         }
         catch (Exception ex)
         {
-            Render($"Connect the API to load technician profile. {ex.Message}");
+            Render(BookingVisuals.FriendlyError("Technician profile could not be loaded. Check your connection and try again.", ex));
         }
     }
 
@@ -3828,7 +4052,7 @@ public sealed class TaskerProfilePage : CustomerPageBase
                     HorizontalOptions = LayoutOptions.Center,
                     Content = new Image
                     {
-                        Source = ImageSource.FromUri(new Uri(BookingVisuals.MechanicImage)),
+                        Source = BookingVisuals.MechanicImageSource(_mechanic?.ProfileImageUrl),
                         Aspect = Aspect.AspectFill
                     }
                 },
@@ -3949,7 +4173,7 @@ public sealed class BookingTrackMapPage : CustomerPageBase
         }
         catch (Exception ex)
         {
-            Render($"Connect the API to load tracking details. {ex.Message}");
+            Render(BookingVisuals.FriendlyError("Tracking details could not be loaded. Check your connection and try again.", ex));
         }
     }
 
@@ -4209,7 +4433,7 @@ public sealed class TrackOrderPage : CustomerPageBase
         }
         catch (Exception ex)
         {
-            _banner = $"BikeMate could not load the latest booking status. {ex.Message}";
+            _banner = BookingVisuals.FriendlyError("BikeMate could not load the latest booking status. Check your connection and try again.", ex);
             Render(_banner);
         }
     }
@@ -4218,13 +4442,13 @@ public sealed class TrackOrderPage : CustomerPageBase
     {
         var request = _request;
         var currentStatus = request?.CurrentStatus ?? "pending";
-        var serviceName = request?.ServiceName ?? BookingDraft.SelectedService()?.ServiceName ?? "Basic Service";
+        var serviceName = request is null ? BookingDraft.SelectedServicesSummary() : RequestServiceTitle(request);
         var shopName = request?.ShopName ?? "Waiting for repair shop";
         var mechanicName = request?.MechanicName ?? "Not assigned yet";
         var bookingId = Math.Max(BookingDraft.RequestId, request?.RequestId ?? 0);
         var amount = request is null
-            ? BookingDraft.SelectedService()?.BasePrice ?? 0m
-            : request.FinalTotal > 0 ? request.FinalTotal : request.EstimatedTotal;
+            ? BookingDraft.SelectedItemsTotal()
+            : RequestTotal(request);
 
         var body = new VerticalStackLayout
         {
@@ -4263,7 +4487,8 @@ public sealed class TrackOrderPage : CustomerPageBase
             [
                 DetailRow("Repair shop", shopName),
                 DetailRow("Assigned mechanic", mechanicName),
-                DetailRow("Service", serviceName),
+                DetailRow("Services", serviceName),
+                DetailRow("Products", request is null ? BookingDraft.SelectedProductsSummary() : RequestProductsTitle(request)),
                 DetailRow("Total", amount > 0 ? BookingVisuals.Money(amount) : "To be finalized")
             ]));
         body.Add(ProgressCard(currentStatus, request));

@@ -103,7 +103,7 @@ public sealed record MechanicStatusItem(string Initials, string Name, string Sta
         return status.Trim().ToLowerInvariant() switch
         {
             "available" or "online" => Color.FromArgb("#16A34A"),
-            "dispatched" or "on_job" or "accepted" or "en_route" or "in_progress" => Color.FromArgb("#FF7A2D"),
+            "dispatched" or "on_job" or "accepted" or "en_route" or "in_progress" => Color.FromArgb("#C45500"),
             "arrived" => Color.FromArgb("#CA8A04"),
             _ => Color.FromArgb("#DC2626")
         };

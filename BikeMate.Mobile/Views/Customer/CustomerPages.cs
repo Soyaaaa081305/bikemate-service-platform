@@ -6,16 +6,18 @@ using BikeMate.Helpers;
 using BikeMate.Services;
 using BikeMate.Views.Auth;
 using BikeMate.Views.Customer.Emergency;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Maui.ApplicationModel;
 using Microsoft.Maui.Controls.Shapes;
 using Microsoft.Maui.Devices;
+using Microsoft.Maui.Devices.Sensors;
 using Microsoft.Maui.Storage;
 
 namespace BikeMate.Views.Customer;
 
 internal static class CustomerUi
 {
-    public static readonly Color Orange = Color.FromArgb("#FF6B2C");
+    public static readonly Color Orange = Color.FromArgb("#FF6B00");
     public static readonly Color LightOrange = Color.FromArgb("#FFE1D2");
     public static readonly Color Dark = Color.FromArgb("#242424");
     public static readonly Color Muted = Color.FromArgb("#6E6E6E");
@@ -44,6 +46,32 @@ internal static class CustomerUi
     public static double SizeFor(double size)
     {
         return AppTypography.SizeFor(size);
+    }
+
+    public static ImageSource Image(string assetOrUrl)
+    {
+        if (Uri.TryCreate(assetOrUrl, UriKind.Absolute, out var uri))
+        {
+            return ImageSource.FromUri(uri);
+        }
+
+        var logicalAssetName = System.IO.Path.GetFileNameWithoutExtension(assetOrUrl);
+        return string.IsNullOrWhiteSpace(logicalAssetName)
+            ? ImageSource.FromFile(assetOrUrl)
+            : ImageSource.FromFile(logicalAssetName);
+    }
+
+    public static ImageSource PublicOrAssetImage(string? url, string fallbackAsset)
+    {
+        if (string.IsNullOrWhiteSpace(url))
+        {
+            return Image(fallbackAsset);
+        }
+
+        var publicUrl = ApiConfig.ToPublicUrl(url, fallbackAsset);
+        return Uri.TryCreate(publicUrl, UriKind.Absolute, out var uri)
+            ? ImageSource.FromUri(uri)
+            : Image(publicUrl);
     }
 }
 
@@ -164,6 +192,28 @@ public abstract class CustomerPageBase : ContentPage
             FontAttributes = FontAttributes.Bold,
             FontSize = CustomerUi.BodySize
         };
+    }
+
+    internal static async Task ScheduleBookingRemindersAsync(IEnumerable<ServiceRequestDto> requests)
+    {
+        try
+        {
+            var scheduler = Application.Current?.Handler?.MauiContext?.Services.GetService<IBookingReminderService>();
+            if (scheduler is not null)
+            {
+                await scheduler.ScheduleUpcomingBookingRemindersAsync(requests);
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Booking reminder scheduling failed: {ex}");
+        }
+    }
+
+    protected static string FriendlyError(string message, Exception ex)
+    {
+        Debug.WriteLine($"{message}: {ex}");
+        return message;
     }
 
     protected static View Header(string title, bool back = true, string? right = null, ICommand? rightCommand = null)
@@ -411,7 +461,7 @@ public abstract class CustomerPageBase : ContentPage
         };
     }
 
-    private static void AddNav(Grid grid, int column, string text, string iconUrl, string route, bool active)
+    private static void AddNav(Grid grid, int column, string text, string iconAsset, string route, bool active)
     {
         var stack = new VerticalStackLayout
         {
@@ -419,7 +469,7 @@ public abstract class CustomerPageBase : ContentPage
             HorizontalOptions = LayoutOptions.Center,
             Children =
             {
-                new Image { Source = ImageSource.FromUri(new Uri(iconUrl)), WidthRequest = 22, HeightRequest = 22, Opacity = active ? 1 : 0.70 },
+                new Image { Source = CustomerUi.Image(iconAsset), WidthRequest = 22, HeightRequest = 22, Opacity = active ? 1 : 0.70 },
                 new Label
                 {
                     Text = text,
@@ -446,7 +496,50 @@ public abstract class CustomerPageBase : ContentPage
 
     protected static string Money(decimal amount)
     {
-        return string.Format(CultureInfo.GetCultureInfo("en-PH"), "PHP {0:N0}", amount);
+        return string.Format(CultureInfo.GetCultureInfo("en-PH"), "PHP {0:N2}", amount);
+    }
+
+    protected static decimal RequestTotal(ServiceRequestDto? request)
+    {
+        return request is null ? 0m : request.FinalTotal > 0 ? request.FinalTotal : request.EstimatedTotal;
+    }
+
+    protected static decimal ReceiptAmount(PaymentDto? payment, ServiceRequestDto? request)
+    {
+        var requestTotal = RequestTotal(request);
+        return requestTotal > 0 ? requestTotal : payment?.Amount ?? 0m;
+    }
+
+    protected static string RequestServiceTitle(ServiceRequestDto? request)
+    {
+        if (request?.LineItems is { Count: > 0 } items)
+        {
+            var services = items
+                .Where(x => string.Equals(x.ItemType, "service", StringComparison.OrdinalIgnoreCase))
+                .Select(x => x.ItemName)
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .ToArray();
+            if (services.Length > 0)
+            {
+                return string.Join(", ", services);
+            }
+        }
+
+        return request?.ServiceName ?? "Bike repair";
+    }
+
+    protected static string RequestProductsTitle(ServiceRequestDto? request)
+    {
+        if (request?.LineItems is not { Count: > 0 } items)
+        {
+            return "None";
+        }
+
+        var products = items
+            .Where(x => string.Equals(x.ItemType, "product", StringComparison.OrdinalIgnoreCase))
+            .Select(x => $"{x.ItemName} ({Money(x.LineTotal)})")
+            .ToArray();
+        return products.Length == 0 ? "None" : string.Join(", ", products);
     }
 
     protected static string FormatStatus(string status)
@@ -497,7 +590,7 @@ public abstract class CustomerPageBase : ContentPage
     {
         if (!Uri.TryCreate(value, UriKind.Absolute, out var uri))
         {
-            return ImageSource.FromFile(value);
+            return CustomerUi.Image(value);
         }
 
         var builder = new UriBuilder(uri);
@@ -569,12 +662,13 @@ public sealed class CustomerHomePage : CustomerPageBase
         {
             _customer = await CustomerApiClient.GetCustomerAsync();
             _requests = await CustomerApiClient.GetMyRequestsAsync();
+            await ScheduleBookingRemindersAsync(_requests);
             Render();
             await PromptForAccountFixAsync();
         }
         catch (Exception ex)
         {
-            Render($"Connect the API to load live customer data. {ex.Message}");
+            Render(FriendlyError("BikeMate could not load your dashboard. Check your connection and try again.", ex));
         }
     }
 
@@ -667,7 +761,7 @@ public sealed class CustomerHomePage : CustomerPageBase
             VerticalOptions = LayoutOptions.Center
         };
         welcome.Add(Label($"Hello, {customer?.FirstName ?? "there"}", 18, Colors.White, FontAttributes.Bold));
-        welcome.Add(Label("What can BikeMate help with today?", 11, Color.FromArgb("#FFF2EA")));
+        welcome.Add(Label("What can BikeMate help with today?", 11, Color.FromArgb("#FFF3EA")));
         grid.Add(welcome, 1, 0);
 
         grid.Add(new Button
@@ -708,7 +802,7 @@ public sealed class CustomerHomePage : CustomerPageBase
         card.Add(left, 0, 0);
         card.Add(new Image
         {
-            Source = ImageSource.FromUri(new Uri(CustomerUi.OnlineBikeRepairImage)),
+            Source = CustomerUi.Image(CustomerUi.OnlineBikeRepairImage),
             HeightRequest = 74,
             WidthRequest = 74,
             Aspect = Aspect.AspectFill
@@ -751,6 +845,7 @@ public sealed class CustomerHomePage : CustomerPageBase
         var scroller = new ScrollView { Orientation = ScrollOrientation.Horizontal };
         var cards = new HorizontalStackLayout { Spacing = 10 };
         cards.Add(HomeShortcut("Scheduled", CustomerUi.ScheduleIcon, new Command(async () => await Shell.Current.GoToAsync("//CustomerSchedulePage"))));
+        cards.Add(HomeShortcut("Nearby shops", CustomerUi.HomeIcon, new Command(async () => await Shell.Current.GoToAsync(nameof(CustomerNearbyShopsPage)))));
         cards.Add(HomeShortcut("Messages", CustomerUi.MessagesIcon, new Command(async () => await Shell.Current.GoToAsync("//CustomerMessagesPage"))));
         cards.Add(HomeShortcut("Payments", CustomerUi.PaymentsIcon, new Command(async () => await Shell.Current.GoToAsync("//CustomerPaymentsPage"))));
         cards.Add(HomeShortcut("Alerts", CustomerUi.HomeIcon, new Command(async () => await Shell.Current.GoToAsync(nameof(CustomerNotificationsPage)))));
@@ -767,9 +862,7 @@ public sealed class CustomerHomePage : CustomerPageBase
         {
             body.Add(EmptyState(
                 "No bookings yet",
-                "Start with your service address, vehicle details, and preferred repair shop. BikeMate will guide you step by step.",
-                "Book a repair",
-                new Command(async () => await OpenBookingAsync())));
+                "Start from the booking card above when you are ready to choose your concern, service flow, shop, and exact service."));
         }
         else
         {
@@ -833,8 +926,6 @@ public sealed class CustomerHomePage : CustomerPageBase
         return EmptyState(
             "Ready when your bike needs help",
             "Book a repair, request emergency roadside help, or review past work from your dashboard.",
-            "Book a repair",
-            new Command(async () => await OpenBookingAsync()),
             "Emergency help",
             new Command(async () => await OpenEmergencyAsync()));
     }
@@ -909,7 +1000,7 @@ public sealed class CustomerHomePage : CustomerPageBase
         return CustomerAvatar(customer, 46, Colors.White);
     }
 
-    private static View HomeShortcut(string title, string iconUrl, ICommand command)
+    private static View HomeShortcut(string title, string iconAsset, ICommand command)
     {
         var stack = new VerticalStackLayout
         {
@@ -917,7 +1008,7 @@ public sealed class CustomerHomePage : CustomerPageBase
             HorizontalOptions = LayoutOptions.Center,
             Children =
             {
-                new Image { Source = ImageSource.FromUri(new Uri(iconUrl)), HeightRequest = 38, WidthRequest = 38, Aspect = Aspect.AspectFit },
+                new Image { Source = CustomerUi.Image(iconAsset), HeightRequest = 38, WidthRequest = 38, Aspect = Aspect.AspectFit },
                 new Label { Text = title, FontSize = 11, TextColor = CustomerUi.Muted, HorizontalTextAlignment = TextAlignment.Center }
             }
         };
@@ -941,7 +1032,7 @@ public sealed class CustomerHomePage : CustomerPageBase
             }
         };
 
-        grid.Add(new Image { Source = ImageSource.FromUri(new Uri(CustomerUi.OnlineBikeRepairImage)), WidthRequest = 42, HeightRequest = 42, Aspect = Aspect.AspectFill }, 0, 0);
+        grid.Add(new Image { Source = CustomerUi.Image(CustomerUi.OnlineBikeRepairImage), WidthRequest = 42, HeightRequest = 42, Aspect = Aspect.AspectFill }, 0, 0);
 
         var text = new VerticalStackLayout { Spacing = 2, Margin = new Thickness(10, 0, 0, 0) };
         text.Add(Label(request.ServiceName ?? "Bike repair", 13, CustomerUi.Dark, FontAttributes.Bold));
@@ -957,6 +1048,825 @@ public sealed class CustomerHomePage : CustomerPageBase
             Command = new Command(async () => await Shell.Current.GoToAsync($"{nameof(BookingDetailsPage)}?requestId={request.RequestId}"))
         });
         return border;
+    }
+}
+
+public sealed class CustomerNearbyShopsPage : CustomerPageBase
+{
+    private CustomerMeDto? _customer;
+    private IReadOnlyList<ShopSummaryDto> _nearbyShops = [];
+    private IReadOnlyList<ShopSummaryDto> _allShops = [];
+    private IReadOnlyList<ShopServiceDto> _matchingServices = [];
+    private IReadOnlyList<ProductDto> _matchingProducts = [];
+    private decimal? _originLatitude;
+    private decimal? _originLongitude;
+    private string _searchText = string.Empty;
+    private bool _isLoading;
+    private int _searchVersion;
+    private const decimal NearbyRadiusKm = 50m;
+
+    public CustomerNearbyShopsPage()
+    {
+        Title = "Nearby shops";
+        Render("Loading nearby shops...");
+    }
+
+    protected override async void OnAppearing()
+    {
+        base.OnAppearing();
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        if (_isLoading)
+        {
+            return;
+        }
+
+        _isLoading = true;
+        try
+        {
+            _customer = await CustomerApiClient.GetCustomerAsync();
+            var address = DefaultAddress(_customer);
+            _originLatitude = address?.Latitude;
+            _originLongitude = address?.Longitude;
+            await TryUseLastKnownLocationAsync();
+            _allShops = await CustomerApiClient.GetShopsAsync();
+            _nearbyShops = NearbyFromAllShops(_allShops);
+            await LoadSearchResultsAsync();
+            Render();
+        }
+        catch (Exception ex)
+        {
+            Render(FriendlyError("Nearby shops could not be loaded. Check your connection and try again.", ex));
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task TryUseLastKnownLocationAsync()
+    {
+        if (_originLatitude is not null && _originLongitude is not null)
+        {
+            return;
+        }
+
+        try
+        {
+            var location = await Geolocation.GetLastKnownLocationAsync();
+            if (location is not null)
+            {
+                _originLatitude = (decimal)location.Latitude;
+                _originLongitude = (decimal)location.Longitude;
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Last known location lookup failed: {ex}");
+        }
+    }
+
+    private void Render(string? banner = null)
+    {
+        var body = new VerticalStackLayout
+        {
+            Spacing = 14,
+            Padding = new Thickness(18, 0, 18, 24),
+            BackgroundColor = CustomerUi.Page
+        };
+
+        body.Add(Header("Nearby shops"));
+        body.Add(SearchBox());
+
+        if (!string.IsNullOrWhiteSpace(banner))
+        {
+            body.Add(NoticeCard(banner));
+        }
+
+        if (_originLatitude is null || _originLongitude is null)
+        {
+            body.Add(NoticeCard("Add a default address with map coordinates in your profile to show distance and routes."));
+        }
+
+        if (!string.IsNullOrWhiteSpace(_searchText))
+        {
+            RenderSearchResults(body);
+        }
+        else
+        {
+            RenderBrowseSections(body);
+        }
+
+        SetScaffold(new ScrollView { Content = body }, "Home", false);
+    }
+
+    private View SearchBox()
+    {
+        var search = new SearchBar
+        {
+            Text = _searchText,
+            Placeholder = "Search shops, services, or products",
+            BackgroundColor = Colors.White,
+            TextColor = CustomerUi.Dark,
+            PlaceholderColor = CustomerUi.Muted,
+            CancelButtonColor = CustomerUi.Orange,
+            FontSize = CustomerUi.BodySize,
+            HeightRequest = 48,
+            MaxLength = 80,
+            SearchCommand = new Command(async () => await LoadSearchResultsAsync())
+        };
+        search.TextChanged += async (_, args) =>
+        {
+            _searchText = args.NewTextValue ?? string.Empty;
+            await DebouncedSearchAsync();
+        };
+
+        return Card(search, Colors.White, 8, new Thickness(0));
+    }
+
+    private async Task DebouncedSearchAsync()
+    {
+        var version = ++_searchVersion;
+        await Task.Delay(350);
+        if (version != _searchVersion)
+        {
+            return;
+        }
+
+        await LoadSearchResultsAsync();
+        Render();
+    }
+
+    private async Task LoadSearchResultsAsync()
+    {
+        var query = _searchText.Trim();
+        if (string.IsNullOrWhiteSpace(query))
+        {
+            _matchingServices = [];
+            _matchingProducts = [];
+            return;
+        }
+
+        try
+        {
+            _matchingServices = await CustomerApiClient.SearchServicesAsync(query);
+            _matchingProducts = await CustomerApiClient.SearchProductsAsync(query);
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Shop search failed: {ex}");
+            _matchingServices = [];
+            _matchingProducts = [];
+        }
+    }
+
+    private void RenderBrowseSections(VerticalStackLayout body)
+    {
+        body.Add(SectionHeader("Nearby shops"));
+        if (_nearbyShops.Count == 0)
+        {
+            body.Add(EmptyState(
+                _originLatitude is null || _originLongitude is null ? "Location needed" : "No nearby shops",
+                _originLatitude is null || _originLongitude is null
+                    ? "BikeMate can show nearby shops after your profile address has map coordinates."
+                    : $"No verified repair shop is within {NearbyRadiusKm:N0} km right now.",
+                "Refresh",
+                new Command(async () => await LoadAsync())));
+        }
+        else
+        {
+            foreach (var shop in _nearbyShops)
+            {
+                body.Add(ShopCard(shop));
+            }
+        }
+
+        var outsideShops = OutsideRangeShops().ToArray();
+        body.Add(SectionHeader(_originLatitude is null || _originLongitude is null ? "All shops" : "All shops outside your range"));
+        if (outsideShops.Length == 0)
+        {
+            body.Add(EmptyState("No more shops", "Every available verified shop is already shown above."));
+            return;
+        }
+
+        foreach (var shop in outsideShops)
+        {
+            body.Add(ShopCard(shop));
+        }
+    }
+
+    private void RenderSearchResults(VerticalStackLayout body)
+    {
+        var query = _searchText.Trim();
+        var matchingShops = _allShops
+            .Where(shop => Matches(query, shop.ShopName, shop.AddressLine, shop.City, shop.ContactNumber))
+            .OrderBy(shop => SortDistance(shop) ?? decimal.MaxValue)
+            .ThenBy(shop => shop.ShopName)
+            .ToArray();
+
+        body.Add(SectionHeader("Matching shops"));
+        if (matchingShops.Length == 0)
+        {
+            body.Add(EmptyState("No shop matches", "Services and products can still match below."));
+        }
+        else
+        {
+            foreach (var shop in matchingShops)
+            {
+                body.Add(ShopCard(shop));
+            }
+        }
+
+        body.Add(SectionHeader("Matching services"));
+        if (_matchingServices.Count == 0)
+        {
+            body.Add(EmptyState("No service matches", "Try a concern like tire, oil, brakes, or battery."));
+        }
+        else
+        {
+            foreach (var service in _matchingServices.Take(20))
+            {
+                body.Add(SearchServiceCard(service));
+            }
+        }
+
+        body.Add(SectionHeader("Matching products"));
+        if (_matchingProducts.Count == 0)
+        {
+            body.Add(EmptyState("No product matches", "Try a product name or part type."));
+        }
+        else
+        {
+            foreach (var product in _matchingProducts.Take(20))
+            {
+                body.Add(SearchProductCard(product));
+            }
+        }
+    }
+
+    private View ShopCard(ShopSummaryDto shop)
+    {
+        var grid = new Grid
+        {
+            ColumnDefinitions =
+            {
+                new ColumnDefinition(GridLength.Auto),
+                new ColumnDefinition(GridLength.Star)
+            },
+            ColumnSpacing = 12
+        };
+
+        grid.Add(new Border
+        {
+            WidthRequest = 66,
+            HeightRequest = 66,
+            Stroke = Colors.Transparent,
+            StrokeShape = new RoundRectangle { CornerRadius = 8 },
+            BackgroundColor = Color.FromArgb("#F0F0F0"),
+            Content = new Image
+            {
+                Source = BookingVisuals.ShopImageSource(shop.ShopLogoUrl ?? shop.ShopImageUrl),
+                WidthRequest = 66,
+                HeightRequest = 66,
+                Aspect = Aspect.AspectFill
+            }
+        }, 0, 0);
+
+        var text = new VerticalStackLayout { Spacing = 4, VerticalOptions = LayoutOptions.Center };
+        text.Add(Label(shop.ShopName, 14, CustomerUi.Dark, FontAttributes.Bold));
+        text.Add(Label(LocationLine(shop), 11, CustomerUi.Muted));
+        text.Add(Label($"{shop.ActiveServiceCount} services available", 11, CustomerUi.Muted));
+        text.Add(Label(shop.StartingPrice is decimal price ? $"Starts at {Money(price)}" : "Pricing varies by service", 11, CustomerUi.Dark));
+        grid.Add(text, 1, 0);
+
+        var card = Card(grid, Colors.White, 8, new Thickness(12));
+        card.GestureRecognizers.Add(new TapGestureRecognizer
+        {
+            Command = new Command(async () => await Shell.Current.GoToAsync(DetailsRoute(shop.ShopId)))
+        });
+        return card;
+    }
+
+    private View SearchServiceCard(ShopServiceDto service)
+    {
+        var row = new Grid
+        {
+            ColumnDefinitions =
+            {
+                new ColumnDefinition(GridLength.Star),
+                new ColumnDefinition(GridLength.Auto)
+            },
+            ColumnSpacing = 10
+        };
+        var copy = new VerticalStackLayout { Spacing = 3 };
+        copy.Add(Label(service.ServiceName, 13, CustomerUi.Dark, FontAttributes.Bold));
+        copy.Add(Label($"{ShopName(service.ShopId)} - {service.CategoryName} - {service.EstimatedMinutes} mins", 11, CustomerUi.Muted));
+        row.Add(copy, 0, 0);
+        row.Add(Label(Money(service.BasePrice), 12, CustomerUi.Dark, FontAttributes.Bold), 1, 0);
+
+        var card = Card(row, Colors.White, 8, new Thickness(12));
+        card.GestureRecognizers.Add(new TapGestureRecognizer
+        {
+            Command = new Command(async () => await Shell.Current.GoToAsync(DetailsRoute(service.ShopId)))
+        });
+        return card;
+    }
+
+    private View SearchProductCard(ProductDto product)
+    {
+        var row = new Grid
+        {
+            ColumnDefinitions =
+            {
+                new ColumnDefinition(GridLength.Auto),
+                new ColumnDefinition(GridLength.Star),
+                new ColumnDefinition(GridLength.Auto)
+            },
+            ColumnSpacing = 10
+        };
+
+        row.Add(new Image
+        {
+            Source = BookingVisuals.ProductImageSource(product.ProductImageUrl),
+            WidthRequest = 46,
+            HeightRequest = 46,
+            Aspect = Aspect.AspectFill
+        }, 0, 0);
+
+        var copy = new VerticalStackLayout { Spacing = 3, VerticalOptions = LayoutOptions.Center };
+        copy.Add(Label(product.ProductName, 13, CustomerUi.Dark, FontAttributes.Bold));
+        copy.Add(Label($"{ShopName(product.ShopId)} - {(product.StockQuantity > 0 ? $"{product.StockQuantity} in stock" : "Out of stock")}", 11, CustomerUi.Muted));
+        row.Add(copy, 1, 0);
+        row.Add(Label(Money(product.Price), 12, CustomerUi.Dark, FontAttributes.Bold), 2, 0);
+
+        var card = Card(row, Colors.White, 8, new Thickness(12));
+        card.GestureRecognizers.Add(new TapGestureRecognizer
+        {
+            Command = new Command(async () => await Shell.Current.GoToAsync(DetailsRoute(product.ShopId)))
+        });
+        return card;
+    }
+
+    private string DetailsRoute(int shopId)
+    {
+        var route = $"{nameof(CustomerShopDetailsPage)}?shopId={shopId}";
+        if (_originLatitude is decimal latitude && _originLongitude is decimal longitude)
+        {
+            route += $"&originLat={latitude.ToString(CultureInfo.InvariantCulture)}&originLng={longitude.ToString(CultureInfo.InvariantCulture)}";
+        }
+
+        return route;
+    }
+
+    private string LocationLine(ShopSummaryDto shop)
+    {
+        var address = string.Join(", ", new[] { shop.AddressLine, shop.City }.Where(x => !string.IsNullOrWhiteSpace(x)));
+        if (_originLatitude is decimal originLat &&
+            _originLongitude is decimal originLng &&
+            shop.Latitude is decimal shopLat &&
+            shop.Longitude is decimal shopLng)
+        {
+            var km = DistanceKm(originLat, originLng, shopLat, shopLng);
+            return string.IsNullOrWhiteSpace(address)
+                ? $"{km:N1} km away"
+                : $"{address} - {km:N1} km away";
+        }
+
+        return string.IsNullOrWhiteSpace(address) ? "Verified BikeMate shop" : address;
+    }
+
+    private IReadOnlyList<ShopSummaryDto> NearbyFromAllShops(IReadOnlyList<ShopSummaryDto> shops)
+    {
+        if (_originLatitude is not decimal originLat || _originLongitude is not decimal originLng)
+        {
+            return [];
+        }
+
+        return shops
+            .Where(shop => shop.Latitude is decimal shopLat &&
+                shop.Longitude is decimal shopLng &&
+                DistanceKm(originLat, originLng, shopLat, shopLng) <= NearbyRadiusKm)
+            .OrderBy(shop => SortDistance(shop) ?? decimal.MaxValue)
+            .ThenBy(shop => shop.ShopName)
+            .ToArray();
+    }
+
+    private IEnumerable<ShopSummaryDto> OutsideRangeShops()
+    {
+        if (_originLatitude is null || _originLongitude is null)
+        {
+            return _allShops.OrderBy(shop => shop.ShopName);
+        }
+
+        var nearbyIds = _nearbyShops.Select(shop => shop.ShopId).ToHashSet();
+        return _allShops
+            .Where(shop => !nearbyIds.Contains(shop.ShopId))
+            .OrderBy(shop => SortDistance(shop) ?? decimal.MaxValue)
+            .ThenBy(shop => shop.ShopName);
+    }
+
+    private decimal? SortDistance(ShopSummaryDto shop)
+    {
+        return _originLatitude is decimal originLat &&
+            _originLongitude is decimal originLng &&
+            shop.Latitude is decimal shopLat &&
+            shop.Longitude is decimal shopLng
+            ? DistanceKm(originLat, originLng, shopLat, shopLng)
+            : null;
+    }
+
+    private string ShopName(int shopId)
+    {
+        return _allShops.FirstOrDefault(shop => shop.ShopId == shopId)?.ShopName ?? "BikeMate shop";
+    }
+
+    private static bool Matches(string query, params string?[] values)
+    {
+        return values.Any(value => !string.IsNullOrWhiteSpace(value) &&
+            value.Contains(query, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private static CustomerAddressDto? DefaultAddress(CustomerMeDto? customer)
+    {
+        return customer?.Addresses.FirstOrDefault(x => x.IsDefault) ?? customer?.Addresses.FirstOrDefault();
+    }
+
+    private static decimal DistanceKm(decimal latitudeA, decimal longitudeA, decimal latitudeB, decimal longitudeB)
+    {
+        const double radiusKm = 6371d;
+        var dLat = DegreesToRadians((double)(latitudeB - latitudeA));
+        var dLon = DegreesToRadians((double)(longitudeB - longitudeA));
+        var lat1 = DegreesToRadians((double)latitudeA);
+        var lat2 = DegreesToRadians((double)latitudeB);
+        var a = Math.Pow(Math.Sin(dLat / 2d), 2d) +
+            Math.Pow(Math.Sin(dLon / 2d), 2d) * Math.Cos(lat1) * Math.Cos(lat2);
+        return (decimal)(radiusKm * 2d * Math.Asin(Math.Sqrt(a)));
+    }
+
+    private static double DegreesToRadians(double degrees)
+    {
+        return degrees * Math.PI / 180d;
+    }
+}
+
+public sealed class CustomerShopDetailsPage : CustomerPageBase, IQueryAttributable
+{
+    private int _shopId;
+    private decimal? _originLatitude;
+    private decimal? _originLongitude;
+    private ShopDetailsDto? _shop;
+    private IReadOnlyList<ShopServiceDto> _services = [];
+    private IReadOnlyList<ProductDto> _products = [];
+    private string _detailSearchText = string.Empty;
+    private bool _isLoading;
+
+    public CustomerShopDetailsPage()
+    {
+        Title = "Shop details";
+        Render("Loading shop details...");
+    }
+
+    public void ApplyQueryAttributes(IDictionary<string, object> query)
+    {
+        if (query.TryGetValue("shopId", out var shopIdValue) &&
+            int.TryParse(Uri.UnescapeDataString(shopIdValue?.ToString() ?? ""), out var shopId))
+        {
+            _shopId = shopId;
+        }
+
+        if (query.TryGetValue("originLat", out var latValue) &&
+            decimal.TryParse(Uri.UnescapeDataString(latValue?.ToString() ?? ""), NumberStyles.Float, CultureInfo.InvariantCulture, out var latitude))
+        {
+            _originLatitude = latitude;
+        }
+
+        if (query.TryGetValue("originLng", out var lngValue) &&
+            decimal.TryParse(Uri.UnescapeDataString(lngValue?.ToString() ?? ""), NumberStyles.Float, CultureInfo.InvariantCulture, out var longitude))
+        {
+            _originLongitude = longitude;
+        }
+    }
+
+    protected override async void OnAppearing()
+    {
+        base.OnAppearing();
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        if (_isLoading || _shopId <= 0)
+        {
+            return;
+        }
+
+        _isLoading = true;
+        try
+        {
+            _shop = await CustomerApiClient.GetShopDetailsAsync(_shopId);
+            _services = await CustomerApiClient.GetShopServicesAsync(_shopId);
+            _products = await CustomerApiClient.GetShopProductsAsync(_shopId);
+            await FillOriginFromProfileAsync();
+            Render();
+        }
+        catch (Exception ex)
+        {
+            Render(FriendlyError("Shop details could not be loaded. Check your connection and try again.", ex));
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task FillOriginFromProfileAsync()
+    {
+        if (_originLatitude is not null && _originLongitude is not null)
+        {
+            return;
+        }
+
+        try
+        {
+            var customer = await CustomerApiClient.GetCustomerAsync();
+            var address = customer.Addresses.FirstOrDefault(x => x.IsDefault) ?? customer.Addresses.FirstOrDefault();
+            _originLatitude = address?.Latitude;
+            _originLongitude = address?.Longitude;
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Profile address lookup failed: {ex}");
+        }
+    }
+
+    private void Render(string? banner = null)
+    {
+        var body = new VerticalStackLayout
+        {
+            Spacing = 14,
+            Padding = new Thickness(18, 0, 18, 24),
+            BackgroundColor = CustomerUi.Page
+        };
+
+        body.Add(Header("Shop details"));
+
+        if (!string.IsNullOrWhiteSpace(banner))
+        {
+            body.Add(NoticeCard(banner));
+        }
+
+        if (_shop is null)
+        {
+            body.Add(EmptyState("Shop unavailable", "BikeMate could not load this repair shop."));
+            SetScaffold(new ScrollView { Content = body }, "Home", false);
+            return;
+        }
+
+        var address = string.Join(", ", new[] { _shop.AddressLine, _shop.City, _shop.Province }.Where(x => !string.IsNullOrWhiteSpace(x)));
+        body.Add(BookingVisuals.ShopProfileCard(_shop.ShopName, _shop.ShopImageUrl, _shop.ShopLogoUrl, address, "Verified repair shop"));
+        if (!string.IsNullOrWhiteSpace(_shop.ShopDescription))
+        {
+            body.Add(Card(Label(_shop.ShopDescription, 11, CustomerUi.Muted), Colors.White, 8, new Thickness(12)));
+        }
+
+        body.Add(ActionButtons());
+        body.Add(RouteCard());
+        body.Add(DetailSearchBox());
+
+        var visibleServices = VisibleServices().ToArray();
+        body.Add(SectionHeader(string.IsNullOrWhiteSpace(_detailSearchText) ? "Services" : "Matching services"));
+        if (visibleServices.Length == 0)
+        {
+            body.Add(EmptyState(
+                string.IsNullOrWhiteSpace(_detailSearchText) ? "No services listed" : "No matching services",
+                string.IsNullOrWhiteSpace(_detailSearchText)
+                    ? "This shop has not published active services yet."
+                    : "Try another service or concern."));
+        }
+        else
+        {
+            foreach (var service in visibleServices)
+            {
+                body.Add(ServiceCard(service));
+            }
+        }
+
+        var visibleProducts = VisibleProducts().ToArray();
+        body.Add(SectionHeader(string.IsNullOrWhiteSpace(_detailSearchText) ? "Products" : "Matching products"));
+        if (visibleProducts.Length == 0)
+        {
+            body.Add(EmptyState(
+                string.IsNullOrWhiteSpace(_detailSearchText) ? "No products listed" : "No matching products",
+                string.IsNullOrWhiteSpace(_detailSearchText)
+                    ? "This shop has not published products yet."
+                    : "Try another product or part name."));
+        }
+        else
+        {
+            foreach (var product in visibleProducts)
+            {
+                body.Add(ProductCard(product));
+            }
+        }
+
+        SetScaffold(new ScrollView { Content = body }, "Home", false);
+    }
+
+    private View ActionButtons()
+    {
+        var grid = new Grid
+        {
+            ColumnDefinitions =
+            {
+                new ColumnDefinition(GridLength.Star),
+                new ColumnDefinition(GridLength.Star)
+            },
+            ColumnSpacing = 10
+        };
+
+        grid.Add(OrangeButton("Message shop", new Command(async () => await MessageShopAsync())), 0, 0);
+        grid.Add(GhostButton("Book repair", new Command(async () => await Shell.Current.GoToAsync(nameof(BookServicePage)))), 1, 0);
+        return grid;
+    }
+
+    private View DetailSearchBox()
+    {
+        var search = new SearchBar
+        {
+            Text = _detailSearchText,
+            Placeholder = "Search this shop's services or products",
+            BackgroundColor = Colors.White,
+            TextColor = CustomerUi.Dark,
+            PlaceholderColor = CustomerUi.Muted,
+            CancelButtonColor = CustomerUi.Orange,
+            FontSize = CustomerUi.BodySize,
+            HeightRequest = 48,
+            MaxLength = 80
+        };
+        search.TextChanged += (_, args) =>
+        {
+            _detailSearchText = args.NewTextValue ?? string.Empty;
+            Render();
+        };
+
+        return Card(search, Colors.White, 8, new Thickness(0));
+    }
+
+    private View RouteCard()
+    {
+        if (_shop?.Latitude is not decimal destinationLat ||
+            _shop.Longitude is not decimal destinationLng)
+        {
+            return NoticeCard("This shop has no map coordinates yet.");
+        }
+
+        var stack = new VerticalStackLayout { Spacing = 10 };
+        var hasRoute = _originLatitude is not null && _originLongitude is not null;
+        var originLat = _originLatitude ?? 0m;
+        var originLng = _originLongitude ?? 0m;
+        var title = hasRoute
+            ? $"{DistanceKm(originLat, originLng, destinationLat, destinationLng):N1} km from your location"
+            : "Shop location";
+        stack.Add(Label(title, 13, CustomerUi.Dark, FontAttributes.Bold));
+
+        stack.Add(new WebView
+        {
+            HeightRequest = 180,
+            Source = hasRoute
+                ? BookingVisuals.GoogleDirectionsSource(originLat, originLng, destinationLat, destinationLng)
+                : BookingVisuals.GoogleMapSource(destinationLat, destinationLng)
+        });
+
+        stack.Add(GhostButton(
+            hasRoute ? "Open route in Maps" : "Open in Maps",
+            new Command(async () =>
+            {
+                if (hasRoute)
+                {
+                    await BookingVisuals.OpenGoogleDirectionsAsync(originLat, originLng, destinationLat, destinationLng);
+                }
+                else
+                {
+                    await BookingVisuals.OpenGoogleMapsAsync($"{destinationLat.ToString(CultureInfo.InvariantCulture)},{destinationLng.ToString(CultureInfo.InvariantCulture)}");
+                }
+            })));
+
+        return Card(stack, Colors.White, 8, new Thickness(12));
+    }
+
+    private View ServiceCard(ShopServiceDto service)
+    {
+        var row = new Grid
+        {
+            ColumnDefinitions =
+            {
+                new ColumnDefinition(GridLength.Star),
+                new ColumnDefinition(GridLength.Auto)
+            },
+            ColumnSpacing = 10
+        };
+        var copy = new VerticalStackLayout { Spacing = 3 };
+        copy.Add(Label(service.ServiceName, 13, CustomerUi.Dark, FontAttributes.Bold));
+        copy.Add(Label($"{service.CategoryName} - {service.EstimatedMinutes} mins", 11, CustomerUi.Muted));
+        if (!string.IsNullOrWhiteSpace(service.ServiceDescription))
+        {
+            copy.Add(Label(service.ServiceDescription, 10, CustomerUi.Muted));
+        }
+
+        row.Add(copy, 0, 0);
+        row.Add(Label(Money(service.BasePrice), 12, CustomerUi.Dark, FontAttributes.Bold), 1, 0);
+        return Card(row, Colors.White, 8, new Thickness(12));
+    }
+
+    private IEnumerable<ShopServiceDto> VisibleServices()
+    {
+        var query = _detailSearchText.Trim();
+        var services = _services.Where(x => x.IsActive);
+        return string.IsNullOrWhiteSpace(query)
+            ? services
+            : services.Where(service => Matches(query, service.ServiceName, service.CategoryName, service.ServiceDescription));
+    }
+
+    private IEnumerable<ProductDto> VisibleProducts()
+    {
+        var query = _detailSearchText.Trim();
+        var products = _products.Where(x => x.IsActive);
+        return string.IsNullOrWhiteSpace(query)
+            ? products
+            : products.Where(product => Matches(query, product.ProductName, product.ProductDescription));
+    }
+
+    private View ProductCard(ProductDto product)
+    {
+        var row = new Grid
+        {
+            ColumnDefinitions =
+            {
+                new ColumnDefinition(GridLength.Auto),
+                new ColumnDefinition(GridLength.Star),
+                new ColumnDefinition(GridLength.Auto)
+            },
+            ColumnSpacing = 10
+        };
+
+        row.Add(new Image
+        {
+            Source = BookingVisuals.ProductImageSource(product.ProductImageUrl),
+            WidthRequest = 46,
+            HeightRequest = 46,
+            Aspect = Aspect.AspectFill
+        }, 0, 0);
+
+        var copy = new VerticalStackLayout { Spacing = 3, VerticalOptions = LayoutOptions.Center };
+        copy.Add(Label(product.ProductName, 13, CustomerUi.Dark, FontAttributes.Bold));
+        copy.Add(Label(product.StockQuantity > 0 ? $"{product.StockQuantity} in stock" : "Out of stock", 11, CustomerUi.Muted));
+        row.Add(copy, 1, 0);
+        row.Add(Label(Money(product.Price), 12, CustomerUi.Dark, FontAttributes.Bold), 2, 0);
+        return Card(row, Colors.White, 8, new Thickness(12));
+    }
+
+    private async Task MessageShopAsync()
+    {
+        if (_shop is null)
+        {
+            return;
+        }
+
+        try
+        {
+            var conversation = await CustomerApiClient.StartShopInquiryAsync(_shop.ShopId);
+            await Shell.Current.Navigation.PushAsync(new CustomerChatPage(conversation.ConversationId));
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlertAsync("Message shop", FriendlyError("BikeMate could not open a shop chat. Check your connection and try again.", ex), "OK");
+        }
+    }
+
+    private static decimal DistanceKm(decimal latitudeA, decimal longitudeA, decimal latitudeB, decimal longitudeB)
+    {
+        const double radiusKm = 6371d;
+        var dLat = DegreesToRadians((double)(latitudeB - latitudeA));
+        var dLon = DegreesToRadians((double)(longitudeB - longitudeA));
+        var lat1 = DegreesToRadians((double)latitudeA);
+        var lat2 = DegreesToRadians((double)latitudeB);
+        var a = Math.Pow(Math.Sin(dLat / 2d), 2d) +
+            Math.Pow(Math.Sin(dLon / 2d), 2d) * Math.Cos(lat1) * Math.Cos(lat2);
+        return (decimal)(radiusKm * 2d * Math.Asin(Math.Sqrt(a)));
+    }
+
+    private static double DegreesToRadians(double degrees)
+    {
+        return degrees * Math.PI / 180d;
+    }
+
+    private static bool Matches(string query, params string?[] values)
+    {
+        return values.Any(value => !string.IsNullOrWhiteSpace(value) &&
+            value.Contains(query, StringComparison.OrdinalIgnoreCase));
     }
 }
 
@@ -994,7 +1904,7 @@ public sealed class CustomerNotificationsPage : CustomerPageBase
         }
         catch (Exception ex)
         {
-            _banner = $"Connect the API to load notifications. {ex.Message}";
+            _banner = FriendlyError("Notifications could not be loaded right now. Try again in a moment.", ex);
         }
         finally
         {
@@ -1125,7 +2035,7 @@ public sealed class CustomerProfilePage : CustomerPageBase
         }
         catch (Exception ex)
         {
-            Render($"Account details could not be loaded. Check your connection and try again. {ex.Message}");
+            Render(FriendlyError("Account details could not be loaded. Check your connection and try again.", ex));
         }
         finally
         {
@@ -1200,7 +2110,7 @@ public sealed class CustomerProfilePage : CustomerPageBase
         }
         catch (Exception ex)
         {
-            _locationMessage = $"Philippine locations could not be loaded. {ex.Message}";
+            _locationMessage = FriendlyError("Philippine locations could not be loaded. Check your connection and try again.", ex);
         }
         finally
         {
@@ -1243,7 +2153,7 @@ public sealed class CustomerProfilePage : CustomerPageBase
         }
         catch (Exception ex)
         {
-            _locationMessage = $"Saved address could not be matched automatically. {ex.Message}";
+            _locationMessage = FriendlyError("Saved address could not be matched automatically. Choose the address manually.", ex);
         }
     }
 
@@ -1275,7 +2185,7 @@ public sealed class CustomerProfilePage : CustomerPageBase
         }
         catch (Exception ex)
         {
-            _locationMessage = $"Cities and municipalities could not be loaded. {ex.Message}";
+            _locationMessage = FriendlyError("Cities and municipalities could not be loaded. Check your connection and try again.", ex);
         }
         finally
         {
@@ -1309,7 +2219,7 @@ public sealed class CustomerProfilePage : CustomerPageBase
         }
         catch (Exception ex)
         {
-            _locationMessage = $"Barangays could not be loaded. {ex.Message}";
+            _locationMessage = FriendlyError("Barangays could not be loaded. Check your connection and try again.", ex);
         }
         finally
         {
@@ -1742,7 +2652,7 @@ public sealed class CustomerProfilePage : CustomerPageBase
         catch (Exception ex)
         {
             _isSaving = false;
-            Render($"Account details were not saved. {ex.Message}");
+            Render(FriendlyError("Account details were not saved. Please review your entries and try again.", ex));
         }
     }
 
@@ -1768,7 +2678,7 @@ public sealed class CustomerProfilePage : CustomerPageBase
         }
         catch (Exception ex)
         {
-            Render($"Profile photo was not updated. {ex.Message}");
+            Render(FriendlyError("Profile photo was not updated. Try another image or retry in a moment.", ex));
         }
     }
 
@@ -1786,7 +2696,7 @@ public sealed class CustomerProfilePage : CustomerPageBase
         }
         catch (Exception ex)
         {
-            Render($"Valid ID scan did not start. {ex.Message}");
+            Render(FriendlyError("Valid ID scan did not start. Check camera permissions and try again.", ex));
             return;
         }
 
@@ -1823,7 +2733,7 @@ public sealed class CustomerProfilePage : CustomerPageBase
         }
         catch (Exception ex)
         {
-            Render($"Valid ID was not updated. {ex.Message}");
+            Render(FriendlyError("Valid ID was not updated. Try another image or retry in a moment.", ex));
         }
     }
 
@@ -2219,11 +3129,12 @@ public sealed class CustomerSchedulePage : CustomerPageBase
         try
         {
             _requests = await CustomerApiClient.GetMyRequestsAsync();
+            await ScheduleBookingRemindersAsync(_requests);
             Render();
         }
         catch (Exception ex)
         {
-            Render($"Connect the API to load booked repairs. {ex.Message}");
+            Render(FriendlyError("Booked repairs could not be loaded. Check your connection and try again.", ex));
         }
     }
 
@@ -2249,14 +3160,14 @@ public sealed class CustomerSchedulePage : CustomerPageBase
                 _showHistory
                     ? "Completed, cancelled, and rejected bookings will appear here after your first service cycle."
                     : "When you book a repair or request emergency help, the live status will appear here.",
-                _showHistory ? "View active repairs" : "Book a repair",
+                _showHistory ? "View active repairs" : "Go to home",
                 _showHistory
                     ? new Command(() =>
                     {
                         _showHistory = false;
                         Render();
                     })
-                    : new Command(async () => await Shell.Current.GoToAsync(nameof(BookServicePage))),
+                    : new Command(async () => await Shell.Current.GoToAsync("//CustomerHomePage")),
                 _showHistory ? null : "Emergency help",
                 _showHistory ? null : new Command(async () => await Shell.Current.GoToAsync(nameof(EmergencySosPage)))));
         }
@@ -2341,7 +3252,7 @@ public sealed class CustomerSchedulePage : CustomerPageBase
                 new ColumnDefinition(GridLength.Auto)
             }
         };
-        grid.Add(new Image { Source = ImageSource.FromUri(new Uri(CustomerUi.OnlineBikeRepairImage)), WidthRequest = 54, HeightRequest = 54, Aspect = Aspect.AspectFill }, 0, 0);
+        grid.Add(new Image { Source = CustomerUi.Image(CustomerUi.OnlineBikeRepairImage), WidthRequest = 54, HeightRequest = 54, Aspect = Aspect.AspectFill }, 0, 0);
 
         var text = new VerticalStackLayout { Spacing = 2, Margin = new Thickness(10, 0, 0, 0) };
         text.Add(Label(request.ServiceName ?? "Bike repair", 13, CustomerUi.Dark, FontAttributes.Bold));
@@ -2404,7 +3315,7 @@ public sealed class CustomerMessagesPage : CustomerPageBase
         }
         catch (Exception ex)
         {
-            Render($"Messages could not be loaded. Check your connection and try again. {ex.Message}");
+            Render(FriendlyError("Messages could not be loaded. Check your connection and try again.", ex));
         }
         finally
         {
@@ -2461,9 +3372,9 @@ public sealed class CustomerMessagesPage : CustomerPageBase
                 string.IsNullOrWhiteSpace(_searchText)
                     ? "Messages open automatically when a shop, mechanic, or BikeMate emergency responder is connected to your booking."
                     : "Try a booking ID, shop name, mechanic name, or clear the search to see all conversations.",
-                string.IsNullOrWhiteSpace(_searchText) ? "Book a repair" : "Clear search",
+                string.IsNullOrWhiteSpace(_searchText) ? "Go to home" : "Clear search",
                 string.IsNullOrWhiteSpace(_searchText)
-                    ? new Command(async () => await Shell.Current.GoToAsync(nameof(BookServicePage)))
+                    ? new Command(async () => await Shell.Current.GoToAsync("//CustomerHomePage"))
                     : new Command(() =>
                     {
                         _searchText = string.Empty;
@@ -2764,7 +3675,7 @@ public sealed class CustomerChatPage : CustomerPageBase, IQueryAttributable
         }
         catch (Exception ex)
         {
-            Render($"Connect the API to load this chat. {ex.Message}");
+            Render(FriendlyError("This chat could not be loaded. Check your connection and try again.", ex));
         }
     }
 
@@ -3290,11 +4201,12 @@ public sealed class CustomerPaymentsPage : CustomerPageBase
         {
             _payments = await CustomerApiClient.GetPaymentHistoryAsync();
             _requests = await CustomerApiClient.GetMyRequestsAsync();
+            await ScheduleBookingRemindersAsync(_requests);
             Render();
         }
         catch (Exception ex)
         {
-            Render($"Connect the API to load payment data. {ex.Message}");
+            Render(FriendlyError("Payment data could not be loaded. Check your connection and try again.", ex));
         }
     }
 
@@ -3320,16 +4232,16 @@ public sealed class CustomerPaymentsPage : CustomerPageBase
                 _showHistory
                     ? "Paid, cancelled, failed, and refunded payments will appear here once a checkout has been processed."
                     : "When a shop confirms pricing for a booking, the secure PayMongo checkout will appear here.",
-                _showHistory ? "View ongoing" : "Book a repair",
+                _showHistory ? "View ongoing" : "View schedule",
                 _showHistory
                     ? new Command(() =>
                     {
                         _showHistory = false;
                         Render();
                     })
-                    : new Command(async () => await Shell.Current.GoToAsync(nameof(BookServicePage))),
-                _showHistory ? null : "View schedule",
-                _showHistory ? null : new Command(async () => await Shell.Current.GoToAsync("//CustomerSchedulePage"))));
+                    : new Command(async () => await Shell.Current.GoToAsync("//CustomerSchedulePage")),
+                _showHistory ? null : "Go to home",
+                _showHistory ? null : new Command(async () => await Shell.Current.GoToAsync("//CustomerHomePage"))));
         }
         else
         {
@@ -3414,7 +4326,7 @@ public sealed class CustomerPaymentsPage : CustomerPageBase
                 new ColumnDefinition(GridLength.Auto)
             }
         };
-        grid.Add(new Image { Source = ImageSource.FromUri(new Uri(CustomerUi.OnlineBikeRepairImage)), WidthRequest = 64, HeightRequest = 64, Aspect = Aspect.AspectFill }, 0, 0);
+        grid.Add(new Image { Source = CustomerUi.Image(CustomerUi.OnlineBikeRepairImage), WidthRequest = 64, HeightRequest = 64, Aspect = Aspect.AspectFill }, 0, 0);
 
         var text = new VerticalStackLayout { Spacing = 6, Margin = new Thickness(8, 0, 0, 0) };
         text.Add(Label(request?.ServiceName ?? $"Request #{payment.RequestId}", 12, CustomerUi.Dark, FontAttributes.Bold));
@@ -3480,8 +4392,8 @@ public sealed class PaymentOptionsPage : CustomerPageBase
             BookingDraft.SelectedShopId is not null &&
             BookingDraft.SelectedShopServiceId is not null;
         var amount = _request is null
-            ? selectedService?.BasePrice ?? 0m
-            : _request.FinalTotal > 0 ? _request.FinalTotal : _request.EstimatedTotal;
+            ? BookingDraft.SelectedItemsTotal()
+            : RequestTotal(_request);
         var body = new VerticalStackLayout
         {
             Padding = new Thickness(14, 0, 14, 18),
@@ -3500,7 +4412,7 @@ public sealed class PaymentOptionsPage : CustomerPageBase
                 BookingDraft.DisplayShopName(_request?.ShopName),
                 _request?.ShopImageUrl ?? BookingDraft.SelectedShopImageUrl,
                 _request?.ShopLogoUrl ?? BookingDraft.SelectedShopLogoUrl,
-                _request?.ServiceName ?? selectedService?.ServiceName ?? "Selected service"));
+                RequestServiceTitle(_request) ?? selectedService?.ServiceName ?? "Selected service"));
         }
 
         if (_isLoading)
@@ -3548,7 +4460,7 @@ public sealed class PaymentOptionsPage : CustomerPageBase
         var stack = new VerticalStackLayout { Spacing = 5 };
         stack.Add(BookingVisuals.Text("AMOUNT DUE", 9, CustomerUi.Muted, FontAttributes.Bold));
         stack.Add(BookingVisuals.Text(
-            hasPricedBooking ? Money(amount) : "Price unavailable",
+            hasPricedBooking ? Money(amount) : "To be finalized",
             22,
             CustomerUi.Dark,
             FontAttributes.Bold));
@@ -3566,7 +4478,8 @@ public sealed class PaymentOptionsPage : CustomerPageBase
         var stack = new VerticalStackLayout { Spacing = 11 };
         stack.Add(BookingVisuals.Text("Booking summary", 13, CustomerUi.Dark, FontAttributes.Bold));
         stack.Add(PaymentDetailRow("Repair shop", BookingDraft.DisplayShopName(_request?.ShopName)));
-        stack.Add(PaymentDetailRow("Service", _request?.ServiceName ?? service?.ServiceName ?? BookingDraft.ProblemCategory));
+        stack.Add(PaymentDetailRow("Services", _request is null ? BookingDraft.SelectedServicesSummary() : RequestServiceTitle(_request)));
+        stack.Add(PaymentDetailRow("Products", _request is null ? BookingDraft.SelectedProductsSummary() : RequestProductsTitle(_request)));
         stack.Add(PaymentDetailRow("Vehicle", $"{BookingDraft.Brand} {BookingDraft.Model}".Trim()));
         stack.Add(PaymentDetailRow("Plate number", BookingDraft.NormalizePlate(BookingDraft.PlateNumber)));
         stack.Add(PaymentDetailRow("Assistance method", BookingDraft.AssistanceMethod));
@@ -3729,7 +4642,7 @@ public sealed class PaymentCheckoutPage : CustomerPageBase, IQueryAttributable
         }
         catch (Exception ex)
         {
-            var message = $"Connect the API to load payment details. {ex.Message}";
+            var message = FriendlyError("Payment details could not be loaded. Check your connection and try again.", ex);
             Render(string.IsNullOrWhiteSpace(banner) ? message : $"{banner}\n{message}");
         }
     }
@@ -3828,7 +4741,7 @@ public sealed class PaymentCheckoutPage : CustomerPageBase, IQueryAttributable
     private static View PaymentStatusHero(string status, decimal amount, bool isPaid)
     {
         var color = isPaid ? Color.FromArgb("#147A3D") : CustomerUi.Orange;
-        var background = isPaid ? Color.FromArgb("#E8F6EF") : Color.FromArgb("#FFF2EA");
+        var background = isPaid ? Color.FromArgb("#E8F6EF") : Color.FromArgb("#FFF3EA");
         var grid = new Grid
         {
             ColumnDefinitions =
@@ -4033,6 +4946,7 @@ public sealed class PaymentReceiptPage : CustomerPageBase, IQueryAttributable
 {
     private int _paymentId;
     private PaymentDto? _payment;
+    private ServiceRequestDto? _request;
     private CustomerMeDto? _customer;
 
     public PaymentReceiptPage()
@@ -4061,20 +4975,21 @@ public sealed class PaymentReceiptPage : CustomerPageBase, IQueryAttributable
             if (_payment is not null)
             {
                 _paymentId = _payment.PaymentId;
+                _request = await CustomerApiClient.GetRequestAsync(_payment.RequestId);
             }
 
             Render();
         }
         catch (Exception ex)
         {
-            Render($"Connect the API to load receipt data. {ex.Message}");
+            Render(FriendlyError("Receipt data could not be loaded. Check your connection and try again.", ex));
         }
     }
 
     private void Render(string? banner = null)
     {
         var name = _customer is null ? "Customer" : $"{_customer.FirstName} {_customer.LastName}";
-        var amount = _payment?.Amount ?? 0m;
+        var amount = ReceiptAmount(_payment, _request);
         var paidAt = (_payment?.PaidAt ?? _payment?.CreatedAt)?.ToLocalTime();
 
         var body = new VerticalStackLayout
@@ -4104,12 +5019,14 @@ public sealed class PaymentReceiptPage : CustomerPageBase, IQueryAttributable
         receipt.Add(Separator());
         receipt.Add(Row("Customer", name));
         receipt.Add(Row("Booking", $"BM-{(_payment?.RequestId ?? 0):000000}"));
+        receipt.Add(Row("Services", RequestServiceTitle(_request)));
+        receipt.Add(Row("Products", RequestProductsTitle(_request)));
         receipt.Add(Row("Provider", FormatStatus(_payment?.ProviderName ?? "PayMongo")));
         receipt.Add(Row("Paid on", paidAt?.ToString("MMM d, yyyy, h:mm tt", CultureInfo.InvariantCulture) ?? "Pending"));
         receipt.Add(Row("Status", FormatStatus(_payment?.Status ?? "pending")));
         receipt.Add(new Border
         {
-            BackgroundColor = Color.FromArgb("#FFF2EA"),
+            BackgroundColor = Color.FromArgb("#FFF3EA"),
             Stroke = Colors.Transparent,
             StrokeShape = new RoundRectangle { CornerRadius = 8 },
             Padding = new Thickness(14, 12),
@@ -4135,6 +5052,7 @@ public sealed class PaymentInvoicePage : CustomerPageBase, IQueryAttributable
 {
     private int _paymentId;
     private PaymentDto? _payment;
+    private ServiceRequestDto? _request;
     private CustomerMeDto? _customer;
 
     public PaymentInvoicePage()
@@ -4163,20 +5081,21 @@ public sealed class PaymentInvoicePage : CustomerPageBase, IQueryAttributable
             if (_payment is not null)
             {
                 _paymentId = _payment.PaymentId;
+                _request = await CustomerApiClient.GetRequestAsync(_payment.RequestId);
             }
 
             Render();
         }
         catch (Exception ex)
         {
-            Render($"Connect the API to load invoice data. {ex.Message}");
+            Render(FriendlyError("Invoice data could not be loaded. Check your connection and try again.", ex));
         }
     }
 
     private void Render(string? banner = null)
     {
         var name = _customer is null ? "Customer" : $"{_customer.FirstName} {_customer.LastName}";
-        var amount = _payment?.Amount ?? 0m;
+        var amount = ReceiptAmount(_payment, _request);
         var created = (_payment?.CreatedAt ?? DateTime.UtcNow).ToLocalTime();
 
         var body = new VerticalStackLayout
@@ -4211,11 +5130,23 @@ public sealed class PaymentInvoicePage : CustomerPageBase, IQueryAttributable
         invoice.Add(Row("Issued to", name));
         invoice.Add(Row("Issued on", created.ToString("MMM d, yyyy, h:mm tt", CultureInfo.InvariantCulture)));
         invoice.Add(Row("Booking reference", $"BM-{(_payment?.RequestId ?? 0):000000}"));
+        invoice.Add(Row("Services", RequestServiceTitle(_request)));
+        invoice.Add(Row("Products", RequestProductsTitle(_request)));
         invoice.Add(Row("Payment provider", FormatStatus(_payment?.ProviderName ?? "PayMongo")));
         invoice.Add(Row("Provider reference", _payment?.ReferenceNumber ?? $"BM-PAY-{_paymentId:000000}"));
         invoice.Add(Row("Payment status", FormatStatus(_payment?.Status ?? "pending")));
         invoice.Add(Separator());
-        invoice.Add(Row("Service payment", Money(amount)));
+        if (_request?.LineItems is { Count: > 0 } items)
+        {
+            foreach (var item in items)
+            {
+                invoice.Add(Row($"{FormatStatus(item.ItemType)}: {item.ItemName}", Money(item.LineTotal)));
+            }
+        }
+        else
+        {
+            invoice.Add(Row("Service payment", Money(amount)));
+        }
         var totalGrid = new Grid
         {
             ColumnDefinitions =
@@ -4306,7 +5237,7 @@ public sealed class BookServicePage : CustomerPageBase
         }
         catch (Exception ex)
         {
-            _bookingError = $"BikeMate could not prepare your booking. {ex.Message}";
+            _bookingError = FriendlyError("BikeMate could not prepare your booking. Check your connection and try again.", ex);
         }
 
         try
@@ -4317,7 +5248,7 @@ public sealed class BookServicePage : CustomerPageBase
         }
         catch (Exception ex)
         {
-            _locationMessage = $"Philippine location data could not be loaded. {ex.Message}";
+            _locationMessage = FriendlyError("Philippine location data could not be loaded. Check your connection and try again.", ex);
         }
         finally
         {
@@ -4536,7 +5467,7 @@ public sealed class BookServicePage : CustomerPageBase
         }
         catch (Exception ex)
         {
-            _locationMessage = $"Cities and municipalities could not be loaded. {ex.Message}";
+            _locationMessage = FriendlyError("Cities and municipalities could not be loaded. Check your connection and try again.", ex);
         }
         finally
         {
@@ -4603,7 +5534,7 @@ public sealed class BookServicePage : CustomerPageBase
         }
         catch (Exception ex)
         {
-            _locationMessage = $"Current location could not be completed. {ex.Message}";
+            _locationMessage = FriendlyError("Current location could not be completed. Check location permission and try again.", ex);
         }
         finally
         {
@@ -4737,11 +5668,16 @@ public sealed class BookingDetailsPage : CustomerPageBase, IQueryAttributable
                 _requestId = _request?.RequestId ?? 0;
             }
 
+            if (_request is not null)
+            {
+                await ScheduleBookingRemindersAsync(new[] { _request });
+            }
+
             Render();
         }
         catch (Exception ex)
         {
-            Render($"Connect the API to load booking details. {ex.Message}");
+            Render(FriendlyError("Booking details could not be loaded. Check your connection and try again.", ex));
         }
     }
 
@@ -4887,6 +5823,11 @@ public sealed class TrackMechanicPage : CustomerPageBase, IQueryAttributable
                 ? await CustomerApiClient.GetRequestAsync(_requestId)
                 : (await CustomerApiClient.GetMyRequestsAsync()).OrderByDescending(x => x.CreatedAt).FirstOrDefault();
             _requestId = _request?.RequestId ?? _requestId;
+            if (_request is not null)
+            {
+                await ScheduleBookingRemindersAsync(new[] { _request });
+            }
+
             BookingDraft.RequestId = _requestId;
             if (_requestId > 0 && !await CustomerPaymentGate.EnsurePaidOrRedirectAsync(this, _requestId))
             {
@@ -4905,7 +5846,7 @@ public sealed class TrackMechanicPage : CustomerPageBase, IQueryAttributable
         {
             if (!silent)
             {
-                Render($"Connect the API to load tracking data. {ex.Message}");
+                Render(FriendlyError("Tracking data could not be loaded. Check your connection and try again.", ex));
             }
         }
         finally
@@ -4932,7 +5873,7 @@ public sealed class TrackMechanicPage : CustomerPageBase, IQueryAttributable
             destinationLat,
             destinationLng,
             destination);
-        var amount = request is null ? 0m : request.FinalTotal > 0 ? request.FinalTotal : request.EstimatedTotal;
+        var amount = RequestTotal(request);
 
         var body = new VerticalStackLayout
         {
@@ -4951,7 +5892,8 @@ public sealed class TrackMechanicPage : CustomerPageBase, IQueryAttributable
         body.Add(RouteStats(route));
         body.Add(SectionCard("Repair details",
         [
-            DetailRow("Service", request?.ServiceName ?? "Bike repair"),
+            DetailRow("Services", RequestServiceTitle(request)),
+            DetailRow("Products", RequestProductsTitle(request)),
             DetailRow("Repair concern", request?.IssueDescription ?? "Repair request"),
             DetailRow("Shop", request?.ShopName ?? "Waiting for shop assignment"),
             DetailRow("Mechanic", request?.MechanicName ?? "Waiting for mechanic assignment")

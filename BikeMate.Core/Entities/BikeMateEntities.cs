@@ -290,6 +290,7 @@ public sealed class Product
 
     public Shop? Shop { get; set; }
     public List<ProductImage> Images { get; set; } = [];
+    public List<ServiceRequestLineItem> RequestLineItems { get; set; } = [];
 }
 
 public sealed class ProductImage
@@ -351,7 +352,26 @@ public sealed class ServiceRequest
     public List<RequestMedia> Media { get; set; } = [];
     public List<LiveLocation> LiveLocations { get; set; } = [];
     public List<Payment> Payments { get; set; } = [];
+    public List<ServiceRequestLineItem> LineItems { get; set; } = [];
     public Review? Review { get; set; }
+}
+
+public sealed class ServiceRequestLineItem
+{
+    public int LineItemId { get; set; }
+    public int RequestId { get; set; }
+    public string ItemType { get; set; } = "service";
+    public int? ShopServiceId { get; set; }
+    public int? ProductId { get; set; }
+    public string ItemName { get; set; } = string.Empty;
+    public int Quantity { get; set; } = 1;
+    public decimal UnitPrice { get; set; }
+    public decimal LineTotal { get; set; }
+    public DateTime CreatedAt { get; set; }
+
+    public ServiceRequest? Request { get; set; }
+    public ShopService? ShopService { get; set; }
+    public Product? Product { get; set; }
 }
 
 public sealed class RequestStatusHistory

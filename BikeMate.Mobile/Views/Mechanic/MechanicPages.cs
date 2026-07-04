@@ -13,12 +13,12 @@ namespace BikeMate.Views.Mechanic;
 
 public abstract class MechanicPageBase : ContentPage
 {
-    protected static readonly Color Orange = Color.FromArgb("#FF6B2C");
+    protected static readonly Color Orange = Color.FromArgb("#FF6B00");
     protected static readonly Color Dark = Color.FromArgb("#242424");
     protected static readonly Color Muted = Color.FromArgb("#6E6E6E");
     protected static readonly Color BorderColor = Color.FromArgb("#E6E6E6");
     protected static readonly Color PageColor = Color.FromArgb("#F6F6F6");
-    protected static readonly Color SoftOrange = Color.FromArgb("#FFF2EA");
+    protected static readonly Color SoftOrange = Color.FromArgb("#FFF3EA");
     protected static readonly Color SoftGreen = Color.FromArgb("#EAF8EF");
     protected static readonly Color SoftBlue = Color.FromArgb("#EEF6FF");
     protected static readonly Color SoftRed = Color.FromArgb("#FFECEC");
@@ -67,7 +67,7 @@ public abstract class MechanicPageBase : ContentPage
                 Text = "<",
                 BackgroundColor = Colors.Transparent,
                 TextColor = Colors.White,
-                BorderColor = Color.FromArgb("#FFF2EA"),
+                BorderColor = Color.FromArgb("#FFF3EA"),
                 BorderWidth = 1,
                 CornerRadius = 8,
                 WidthRequest = 40,
@@ -79,7 +79,7 @@ public abstract class MechanicPageBase : ContentPage
 
         var text = new VerticalStackLayout { Spacing = 4 };
         text.Add(Text(title, 20, Colors.White, FontAttributes.Bold));
-        text.Add(Text(subtitle, 11, Color.FromArgb("#FFF2EA")));
+        text.Add(Text(subtitle, 11, Color.FromArgb("#FFF3EA")));
         grid.Add(text, 1, 0);
         grid.Add(new Button
         {
@@ -289,7 +289,7 @@ public abstract class MechanicPageBase : ContentPage
     protected static View JobCard(ServiceRequestDto job, Func<int, Task>? details = null, Func<int, Task>? accept = null, Func<int, Task>? reject = null)
     {
         var stack = new VerticalStackLayout { Spacing = 10 };
-        var title = string.IsNullOrWhiteSpace(job.ServiceName) ? $"Request #{job.RequestId}" : job.ServiceName!;
+        var title = RequestServiceTitle(job);
         var top = new Grid
         {
             ColumnDefinitions =
@@ -418,9 +418,46 @@ public abstract class MechanicPageBase : ContentPage
         return string.Create(CultureInfo.InvariantCulture, $"PHP {amount:N2}");
     }
 
+    protected static decimal RequestTotal(ServiceRequestDto job)
+    {
+        return job.FinalTotal > 0 ? job.FinalTotal : job.EstimatedTotal;
+    }
+
+    protected static string RequestServiceTitle(ServiceRequestDto job)
+    {
+        if (job.LineItems is { Count: > 0 } items)
+        {
+            var services = items
+                .Where(x => string.Equals(x.ItemType, "service", StringComparison.OrdinalIgnoreCase))
+                .Select(x => x.ItemName)
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .ToArray();
+            if (services.Length > 0)
+            {
+                return string.Join(", ", services);
+            }
+        }
+
+        return string.IsNullOrWhiteSpace(job.ServiceName) ? $"Request #{job.RequestId}" : job.ServiceName!;
+    }
+
+    protected static string RequestProductsTitle(ServiceRequestDto job)
+    {
+        if (job.LineItems is not { Count: > 0 } items)
+        {
+            return "None";
+        }
+
+        var products = items
+            .Where(x => string.Equals(x.ItemType, "product", StringComparison.OrdinalIgnoreCase))
+            .Select(x => $"{x.ItemName} ({Money(x.LineTotal)})")
+            .ToArray();
+        return products.Length == 0 ? "None" : string.Join(", ", products);
+    }
+
     protected static string JobMeta(ServiceRequestDto job)
     {
-        var total = job.FinalTotal > 0 ? job.FinalTotal : job.EstimatedTotal;
+        var total = RequestTotal(job);
         var distance = DistanceFromYou(job);
         var schedule = job.ScheduledAt?.ToLocalTime().ToString("MMM d, h:mm tt", CultureInfo.InvariantCulture) ?? "ASAP";
         return $"{distance} - {schedule} - {Money(total)}";
@@ -952,7 +989,7 @@ public sealed class MechanicJobDetailsPage : MechanicPageBase, IQueryAttributabl
 
     private static View JobOverview(ServiceRequestDto job)
     {
-        var title = string.IsNullOrWhiteSpace(job.ServiceName) ? $"Request #{job.RequestId}" : job.ServiceName!;
+        var title = RequestServiceTitle(job);
         var stack = new VerticalStackLayout { Spacing = 8 };
         var top = new Grid
         {
@@ -974,10 +1011,12 @@ public sealed class MechanicJobDetailsPage : MechanicPageBase, IQueryAttributabl
 
     private static View JobDetails(ServiceRequestDto job)
     {
-        var total = job.FinalTotal > 0 ? job.FinalTotal : job.EstimatedTotal;
+        var total = RequestTotal(job);
         var rows = new VerticalStackLayout { Spacing = 10 };
         rows.Add(Text("Booking details", 13, Dark, FontAttributes.Bold));
         rows.Add(DetailRow("Booking ID", $"BM-{job.RequestId:000000}"));
+        rows.Add(DetailRow("Services", RequestServiceTitle(job)));
+        rows.Add(DetailRow("Products", RequestProductsTitle(job)));
         rows.Add(DetailRow("Location", job.ServiceLocationAddress ?? "No address provided"));
         rows.Add(DetailRow("Distance from you", DistanceFromYou(job)));
         rows.Add(DetailRow("Schedule", job.ScheduledAt?.ToLocalTime().ToString("MMM d, yyyy h:mm tt", CultureInfo.InvariantCulture) ?? "ASAP"));
@@ -1953,7 +1992,7 @@ public sealed class MechanicHistoryPage : MechanicPageBase
 
     private static View HistoryCard(ServiceRequestDto job)
     {
-        var total = job.FinalTotal > 0 ? job.FinalTotal : job.EstimatedTotal;
+        var total = RequestTotal(job);
         var stack = new VerticalStackLayout { Spacing = 8 };
         var top = new Grid
         {
@@ -1964,14 +2003,15 @@ public sealed class MechanicHistoryPage : MechanicPageBase
             },
             ColumnSpacing = 10
         };
-        top.Add(Text(string.IsNullOrWhiteSpace(job.ServiceName) ? $"BM-{job.RequestId:000000}" : job.ServiceName!, 14, Dark, FontAttributes.Bold), 0, 0);
+        top.Add(Text(RequestServiceTitle(job), 14, Dark, FontAttributes.Bold), 0, 0);
         top.Add(StatusPill(FormatStatus(job.CurrentStatus), StatusColor(job.CurrentStatus)), 1, 0);
         stack.Add(top);
         stack.Add(DetailRow("Booking", $"BM-{job.RequestId:000000}"));
         stack.Add(DetailRow("Customer", job.CustomerName));
+        stack.Add(DetailRow("Products", RequestProductsTitle(job)));
         stack.Add(DetailRow("Distance from you", DistanceFromYou(job)));
         stack.Add(DetailRow("Schedule", job.ScheduledAt?.ToLocalTime().ToString("MMM d, yyyy h:mm tt", CultureInfo.InvariantCulture) ?? "ASAP"));
-        stack.Add(DetailRow("Total", total > 0 ? Money(total) : "No charge"));
+        stack.Add(DetailRow("Total", total > 0 ? Money(total) : "To be finalized"));
         stack.Add(SecondaryButton(
             "View details",
             async () => await Shell.Current.GoToAsync($"{nameof(MechanicHistoryDetailsPage)}?requestId={job.RequestId}")));
@@ -2054,7 +2094,7 @@ public sealed class MechanicHistoryDetailsPage : MechanicPageBase, IQueryAttribu
 
     private static View HistoryHero(ServiceRequestDto job)
     {
-        var title = string.IsNullOrWhiteSpace(job.ServiceName) ? $"BM-{job.RequestId:000000}" : job.ServiceName!;
+        var title = RequestServiceTitle(job);
         var stack = new VerticalStackLayout { Spacing = 8 };
         var top = new Grid
         {
@@ -2087,7 +2127,8 @@ public sealed class MechanicHistoryDetailsPage : MechanicPageBase, IQueryAttribu
     private static View ServiceCard(ServiceRequestDto job)
     {
         var rows = SectionStack("Service");
-        rows.Add(DetailRow("Service", string.IsNullOrWhiteSpace(job.ServiceName) ? "Service not specified" : job.ServiceName!));
+        rows.Add(DetailRow("Services", RequestServiceTitle(job)));
+        rows.Add(DetailRow("Products", RequestProductsTitle(job)));
         rows.Add(DetailRow("Schedule", job.ScheduledAt is null ? "ASAP" : FormatDateTime(job.ScheduledAt.Value)));
         rows.Add(DetailRow("Distance from you", DistanceFromYou(job)));
         return Card(rows, Colors.White);
@@ -2119,8 +2160,8 @@ public sealed class MechanicHistoryDetailsPage : MechanicPageBase, IQueryAttribu
     private static View FinancialCard(ServiceRequestDto job)
     {
         var rows = SectionStack("Payment");
-        rows.Add(DetailRow("Estimated total", job.EstimatedTotal > 0 ? Money(job.EstimatedTotal) : "Not set"));
-        rows.Add(DetailRow("Final total", job.FinalTotal > 0 ? Money(job.FinalTotal) : "Not finalized"));
+        rows.Add(DetailRow("Estimated total", job.EstimatedTotal > 0 ? Money(job.EstimatedTotal) : "To be finalized"));
+        rows.Add(DetailRow("Final total", job.FinalTotal > 0 ? Money(job.FinalTotal) : "To be finalized"));
         rows.Add(DetailRow("History value", HistoryValue(job)));
         return Card(rows, Colors.White);
     }
@@ -2148,7 +2189,7 @@ public sealed class MechanicHistoryDetailsPage : MechanicPageBase, IQueryAttribu
     private static string HistoryValue(ServiceRequestDto job)
     {
         var total = job.FinalTotal > 0 ? job.FinalTotal : job.EstimatedTotal;
-        return total > 0 ? Money(total) : "No charge";
+        return total > 0 ? Money(total) : "To be finalized";
     }
 
     private static string EndedFallback(ServiceRequestDto job)
@@ -2349,7 +2390,7 @@ public sealed class MechanicLogoutPage : ContentPage
                 new ActivityIndicator
                 {
                     IsRunning = true,
-                    Color = Color.FromArgb("#FF6B2C"),
+                    Color = Color.FromArgb("#FF6B00"),
                     HorizontalOptions = LayoutOptions.Center,
                     VerticalOptions = LayoutOptions.Center
                 }
