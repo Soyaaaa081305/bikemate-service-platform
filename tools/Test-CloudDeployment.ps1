@@ -127,7 +127,7 @@ Invoke-Check "public shops" {
     "count=$($shops.Count)"
 } | Out-Null
 
-$admin = Invoke-Check "admin login" { Login-DemoUser "admin1@bikemate.test" }
+$admin = Invoke-Check "admin login" { Login-DemoUser "isaiahandreinoda@gmail.com" }
 $customer = Invoke-Check "customer login" { Login-DemoUser "customer1@bikemate.test" }
 $shop = Invoke-Check "shop login" { Login-DemoUser "shop1@bikemate.test" }
 $mechanic = Invoke-OptionalCheck "mechanic demo login" `

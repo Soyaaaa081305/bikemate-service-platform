@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -31,18 +31,18 @@ namespace BikeMate.Infrastructure.Migrations
                 columns: new[] { "UserId", "AccountStatus", "CreatedAt", "Email", "EmailVerified", "FirstName", "LastName", "PasswordHash", "PhoneNumber", "PhoneVerified", "ProfileImageUrl", "UpdatedAt" },
                 values: new object[,]
                 {
-                    { 101, "active", new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc), "southside.owner@bikemate.test", true, "Sofia", "Mendoza", "sha256:a109e36947ad56de1dca1cc49f0ef8ac9ad9a7b1aa0df41fb3c4cb73c1ff01ea", "+639181010101", true, null, null },
-                    { 102, "active", new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc), "alabang.owner@bikemate.test", true, "Marco", "Reyes", "sha256:a109e36947ad56de1dca1cc49f0ef8ac9ad9a7b1aa0df41fb3c4cb73c1ff01ea", "+639181010102", true, null, null },
-                    { 103, "active", new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc), "laspinas.owner@bikemate.test", true, "Lea", "Santos", "sha256:a109e36947ad56de1dca1cc49f0ef8ac9ad9a7b1aa0df41fb3c4cb73c1ff01ea", "+639181010103", true, null, null },
-                    { 104, "active", new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc), "binan.owner@bikemate.test", true, "Paolo", "Cruz", "sha256:a109e36947ad56de1dca1cc49f0ef8ac9ad9a7b1aa0df41fb3c4cb73c1ff01ea", "+639181010104", true, null, null },
-                    { 111, "active", new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc), "daniel.ramos@bikemate.test", true, "Daniel", "Ramos", "sha256:a109e36947ad56de1dca1cc49f0ef8ac9ad9a7b1aa0df41fb3c4cb73c1ff01ea", "+639181010111", true, null, null },
-                    { 112, "active", new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc), "ken.bautista@bikemate.test", true, "Ken", "Bautista", "sha256:a109e36947ad56de1dca1cc49f0ef8ac9ad9a7b1aa0df41fb3c4cb73c1ff01ea", "+639181010112", true, null, null },
-                    { 113, "active", new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc), "miguel.flores@bikemate.test", true, "Miguel", "Flores", "sha256:a109e36947ad56de1dca1cc49f0ef8ac9ad9a7b1aa0df41fb3c4cb73c1ff01ea", "+639181010113", true, null, null },
-                    { 114, "active", new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc), "carlo.navarro@bikemate.test", true, "Carlo", "Navarro", "sha256:a109e36947ad56de1dca1cc49f0ef8ac9ad9a7b1aa0df41fb3c4cb73c1ff01ea", "+639181010114", true, null, null },
-                    { 115, "active", new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc), "nina.garcia@bikemate.test", true, "Nina", "Garcia", "sha256:a109e36947ad56de1dca1cc49f0ef8ac9ad9a7b1aa0df41fb3c4cb73c1ff01ea", "+639181010115", true, null, null },
-                    { 116, "active", new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc), "jomar.villanueva@bikemate.test", true, "Jomar", "Villanueva", "sha256:a109e36947ad56de1dca1cc49f0ef8ac9ad9a7b1aa0df41fb3c4cb73c1ff01ea", "+639181010116", true, null, null },
-                    { 117, "active", new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc), "ella.torres@bikemate.test", true, "Ella", "Torres", "sha256:a109e36947ad56de1dca1cc49f0ef8ac9ad9a7b1aa0df41fb3c4cb73c1ff01ea", "+639181010117", true, null, null },
-                    { 118, "active", new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc), "anton.lim@bikemate.test", true, "Anton", "Lim", "sha256:a109e36947ad56de1dca1cc49f0ef8ac9ad9a7b1aa0df41fb3c4cb73c1ff01ea", "+639181010118", true, null, null }
+                    { 101, "active", new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc), "southside.owner@bikemate.test", true, "Sofia", "Mendoza", "sha256:588c55f3ce2b8569b153c5abbf13f9f74308b88a20017cc699b835cc93195d16", "+639181010101", true, null, null },
+                    { 102, "active", new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc), "alabang.owner@bikemate.test", true, "Marco", "Reyes", "sha256:588c55f3ce2b8569b153c5abbf13f9f74308b88a20017cc699b835cc93195d16", "+639181010102", true, null, null },
+                    { 103, "active", new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc), "laspinas.owner@bikemate.test", true, "Lea", "Santos", "sha256:588c55f3ce2b8569b153c5abbf13f9f74308b88a20017cc699b835cc93195d16", "+639181010103", true, null, null },
+                    { 104, "active", new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc), "binan.owner@bikemate.test", true, "Paolo", "Cruz", "sha256:588c55f3ce2b8569b153c5abbf13f9f74308b88a20017cc699b835cc93195d16", "+639181010104", true, null, null },
+                    { 111, "active", new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc), "daniel.ramos@bikemate.test", true, "Daniel", "Ramos", "sha256:588c55f3ce2b8569b153c5abbf13f9f74308b88a20017cc699b835cc93195d16", "+639181010111", true, null, null },
+                    { 112, "active", new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc), "ken.bautista@bikemate.test", true, "Ken", "Bautista", "sha256:588c55f3ce2b8569b153c5abbf13f9f74308b88a20017cc699b835cc93195d16", "+639181010112", true, null, null },
+                    { 113, "active", new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc), "miguel.flores@bikemate.test", true, "Miguel", "Flores", "sha256:588c55f3ce2b8569b153c5abbf13f9f74308b88a20017cc699b835cc93195d16", "+639181010113", true, null, null },
+                    { 114, "active", new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc), "carlo.navarro@bikemate.test", true, "Carlo", "Navarro", "sha256:588c55f3ce2b8569b153c5abbf13f9f74308b88a20017cc699b835cc93195d16", "+639181010114", true, null, null },
+                    { 115, "active", new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc), "nina.garcia@bikemate.test", true, "Nina", "Garcia", "sha256:588c55f3ce2b8569b153c5abbf13f9f74308b88a20017cc699b835cc93195d16", "+639181010115", true, null, null },
+                    { 116, "active", new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc), "jomar.villanueva@bikemate.test", true, "Jomar", "Villanueva", "sha256:588c55f3ce2b8569b153c5abbf13f9f74308b88a20017cc699b835cc93195d16", "+639181010116", true, null, null },
+                    { 117, "active", new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc), "ella.torres@bikemate.test", true, "Ella", "Torres", "sha256:588c55f3ce2b8569b153c5abbf13f9f74308b88a20017cc699b835cc93195d16", "+639181010117", true, null, null },
+                    { 118, "active", new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc), "anton.lim@bikemate.test", true, "Anton", "Lim", "sha256:588c55f3ce2b8569b153c5abbf13f9f74308b88a20017cc699b835cc93195d16", "+639181010118", true, null, null }
                 });
 
             migrationBuilder.InsertData(

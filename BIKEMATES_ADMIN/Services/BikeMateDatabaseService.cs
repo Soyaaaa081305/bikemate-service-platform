@@ -54,7 +54,10 @@ public sealed record AdminShopProfile(
     decimal? Latitude,
     decimal? Longitude,
     string? ShopImageUrl = null,
-    string? ShopLogoUrl = null);
+    string? ShopLogoUrl = null,
+    bool AllowsReservations = true,
+    bool AllowsPickup = true,
+    bool AllowsOnsiteRepair = true);
 
 public sealed record ShopSetupStatus(
     AdminShopProfile Profile,
@@ -446,11 +449,25 @@ public static class BikeMateDatabaseService
         try
         {
             var normalizedEmail = string.IsNullOrWhiteSpace(email) ? string.Empty : NormalizeEmail(email);
-            var json = string.IsNullOrWhiteSpace(normalizedEmail)
-                ? null
-                : Preferences.Get(SubmittedShopApplicationKey + ":" + normalizedEmail, null);
+            if (!string.IsNullOrWhiteSpace(normalizedEmail))
+            {
+                var emailJson = Preferences.Get(SubmittedShopApplicationKey + ":" + normalizedEmail, null);
+                if (!string.IsNullOrWhiteSpace(emailJson))
+                {
+                    return JsonSerializer.Deserialize<AccountCreationDraft>(emailJson, JsonOptions);
+                }
 
-            json ??= Preferences.Get(SubmittedShopApplicationKey, null);
+                var sharedJson = Preferences.Get(SubmittedShopApplicationKey, null);
+                var sharedDraft = string.IsNullOrWhiteSpace(sharedJson)
+                    ? null
+                    : JsonSerializer.Deserialize<AccountCreationDraft>(sharedJson, JsonOptions);
+                return sharedDraft is not null &&
+                    string.Equals(NormalizeEmail(sharedDraft.Email), normalizedEmail, StringComparison.OrdinalIgnoreCase)
+                        ? sharedDraft
+                        : null;
+            }
+
+            var json = Preferences.Get(SubmittedShopApplicationKey, null);
             return string.IsNullOrWhiteSpace(json)
                 ? null
                 : JsonSerializer.Deserialize<AccountCreationDraft>(json, JsonOptions);
@@ -476,7 +493,8 @@ public static class BikeMateDatabaseService
             using var response = await http.GetAsync($"shop-onboarding/application-status?email={Uri.EscapeDataString(normalizedEmail)}");
             if (response.StatusCode == HttpStatusCode.NotFound)
             {
-                return draft;
+                ClearSubmittedShopApplication(normalizedEmail);
+                return null;
             }
 
             var status = await ReadApiAsync<ShopApplicationStatus>(response);
@@ -683,7 +701,10 @@ public static class BikeMateDatabaseService
                 profile.Province,
                 profile.Latitude,
                 profile.Longitude,
-                profile.ContactNumber
+                profile.ContactNumber,
+                profile.AllowsReservations,
+                profile.AllowsPickup,
+                profile.AllowsOnsiteRepair
             },
             JsonOptions);
         return await ReadApiAsync<AdminShopProfile>(response);

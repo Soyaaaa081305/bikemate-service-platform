@@ -180,10 +180,19 @@ public sealed class ServiceRequestsController(
             .Include(x => x.Client)
             .Include(x => x.LineItems)
             .SingleAsync(x => x.RequestId == id && x.Client!.UserId == userId, cancellationToken);
-        var shopExists = await db.Shops.AnyAsync(x => x.ShopId == dto.ShopId && x.ShopStatus == "verified", cancellationToken);
-        if (!shopExists)
+        var shop = await db.Shops
+            .Where(x => x.ShopId == dto.ShopId && x.ShopStatus == "verified")
+            .Select(x => new ShopAvailability(x.AllowsReservations, x.AllowsPickup, x.AllowsOnsiteRepair))
+            .SingleOrDefaultAsync(cancellationToken);
+        if (shop is null)
         {
             return BadRequest(new { error = "Select an available repair shop." });
+        }
+
+        var availabilityError = ShopAvailabilityError(shop, request.ScheduledAt, request.IssueDescription);
+        if (availabilityError is not null)
+        {
+            return BadRequest(new { error = availabilityError });
         }
 
         var serviceIds = ServiceRequestService.MergeIds(dto.ShopServiceId, dto.ShopServiceIds);
@@ -325,6 +334,23 @@ public sealed class ServiceRequestsController(
             .Select(ServiceRequestService.ToDtoExpression())
             .ToArrayAsync(cancellationToken));
     }
+
+    private static string? ShopAvailabilityError(ShopAvailability shop, DateTime? scheduledAt, string issueDescription)
+    {
+        if (scheduledAt is not null)
+        {
+            return shop.AllowsReservations ? null : "This shop is not accepting reservations right now.";
+        }
+
+        if (issueDescription.Contains("Assistance method: Pick-up Repair", StringComparison.OrdinalIgnoreCase))
+        {
+            return shop.AllowsPickup ? null : "This shop is not accepting pickup repair right now.";
+        }
+
+        return shop.AllowsOnsiteRepair ? null : "This shop is not accepting on-site repair right now.";
+    }
+
+    private sealed record ShopAvailability(bool AllowsReservations, bool AllowsPickup, bool AllowsOnsiteRepair);
 
     private async Task EnsureCanViewAsync(int requestId, CancellationToken cancellationToken)
     {

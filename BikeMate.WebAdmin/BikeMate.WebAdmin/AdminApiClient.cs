@@ -2,6 +2,7 @@
 
 using System.Globalization;
 using System.Security.Cryptography;
+using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
 using BikeMate.Core.Entities;
@@ -35,9 +36,49 @@ public class RequestMessageDto
     public bool IsAdminSender { get; set; }
 }
 
-public class AdminApiClient(BikeMateDbContext context, ILogger<AdminApiClient> logger)
+public class AdminApiClient(
+    BikeMateDbContext context,
+    ILogger<AdminApiClient> logger,
+    IAdminOtpEmailService adminOtpEmailService,
+    IHttpContextAccessor httpContextAccessor)
 {
+    private const string AdminLoginOtpPurpose = "admin_login";
+    private static readonly TimeSpan AdminLoginOtpLifetime = TimeSpan.FromMinutes(10);
+
     public string? LastError { get; private set; }
+
+    public async Task<AuditLogDto[]?> GetAuditLogsAsync(int take = 250)
+    {
+        try
+        {
+            LastError = null;
+            take = Math.Clamp(take, 25, 1000);
+            return await context.AuditLogs
+                .AsNoTracking()
+                .Include(x => x.ActorUser)
+                .OrderByDescending(x => x.CreatedAt)
+                .Take(take)
+                .Select(x => new AuditLogDto
+                {
+                    AuditId = x.AuditId,
+                    ActorName = x.ActorUser == null
+                        ? "System"
+                        : (x.ActorUser.FirstName + " " + x.ActorUser.LastName).Trim(),
+                    ActorEmail = x.ActorUser == null ? string.Empty : x.ActorUser.Email,
+                    ActionName = x.ActionName,
+                    EntityName = x.EntityName,
+                    EntityId = x.EntityId,
+                    OldValuesJson = x.OldValuesJson,
+                    NewValuesJson = x.NewValuesJson,
+                    CreatedAt = x.CreatedAt
+                })
+                .ToArrayAsync();
+        }
+        catch (Exception ex)
+        {
+            return Fail(ex, "Unable to load audit trail.", Array.Empty<AuditLogDto>());
+        }
+    }
 
     public async Task<AdminDashboardDto?> GetDashboardAsync()
     {
@@ -139,7 +180,10 @@ public class AdminApiClient(BikeMateDbContext context, ILogger<AdminApiClient> l
         {
             var normalizedStatus = NormalizeAccountStatus(status);
             var user = await context.Users.FindAsync(userId) ?? throw new InvalidOperationException("User not found.");
+            var oldStatus = user.AccountStatus;
             user.AccountStatus = normalizedStatus;
+            user.UpdatedAt = DateTime.UtcNow;
+            AddAudit("UpdateUserStatus", "users", user.UserId, new { user.Email, AccountStatus = oldStatus }, new { user.Email, AccountStatus = normalizedStatus });
             await context.SaveChangesAsync();
             LastError = null;
         }
@@ -191,6 +235,8 @@ public class AdminApiClient(BikeMateDbContext context, ILogger<AdminApiClient> l
             };
 
             context.Users.Add(user);
+            await context.SaveChangesAsync();
+            AddAudit("CreateUser", "users", user.UserId, null, new { user.Email, Role = "Customer", user.AccountStatus, user.EmailVerified });
             await context.SaveChangesAsync();
             LastError = null;
 
@@ -382,6 +428,7 @@ public class AdminApiClient(BikeMateDbContext context, ILogger<AdminApiClient> l
                 OwnerActivated = string.Equals(owner.AccountStatus, "active", StringComparison.OrdinalIgnoreCase)
             };
 
+            AddAudit("CreateShop", "shops", shop.ShopId, null, new { shop.ShopName, shop.ShopStatus, shop.City, shop.Province, OwnerUserId = owner.UserId });
             await context.SaveChangesAsync();
             await transaction.CommitAsync();
             return result;
@@ -544,6 +591,7 @@ public class AdminApiClient(BikeMateDbContext context, ILogger<AdminApiClient> l
             var city = Require(dto.City, "City");
             var province = Require(dto.Province, "Province");
             var status = NormalizeShopStatus(dto.ShopStatus);
+            var oldValues = new { shop.ShopName, shop.ShopStatus, shop.AddressLine, shop.City, shop.Province, shop.ContactNumber };
 
             if (await ShopExistsAsync(shopName, addressLine, city, province, id))
             {
@@ -565,6 +613,7 @@ public class AdminApiClient(BikeMateDbContext context, ILogger<AdminApiClient> l
             shop.ShopStatus = status;
             shop.UpdatedAt = DateTime.UtcNow;
 
+            AddAudit("UpdateShop", "shops", shop.ShopId, oldValues, new { shop.ShopName, shop.ShopStatus, shop.AddressLine, shop.City, shop.Province, shop.ContactNumber });
             await context.SaveChangesAsync();
             LastError = null;
         }
@@ -777,6 +826,7 @@ public class AdminApiClient(BikeMateDbContext context, ILogger<AdminApiClient> l
             context.Mechanics.Add(mechanic);
             await context.SaveChangesAsync();
             await UpsertMechanicShopAssignmentAsync(mechanic, dto.ShopId, dto.AssignmentActive);
+            AddAudit("CreateMechanic", "mechanics", mechanic.MechanicId, null, new { user.Email, Name = $"{user.FirstName} {user.LastName}", user.AccountStatus, mechanic.IsVerified, mechanic.AvailabilityStatus, dto.ShopId });
             await context.SaveChangesAsync();
             LastError = null;
 
@@ -810,6 +860,15 @@ public class AdminApiClient(BikeMateDbContext context, ILogger<AdminApiClient> l
             var accountStatus = NormalizeAccountStatus(dto.AccountStatus);
             var availabilityStatus = NormalizeMechanicStatus(dto.AvailabilityStatus);
             ValidatePasswordPair(dto.Password, dto.ConfirmPassword, false);
+            var oldValues = new
+            {
+                mechanic.User.Email,
+                Name = $"{mechanic.User.FirstName} {mechanic.User.LastName}",
+                mechanic.User.AccountStatus,
+                mechanic.IsVerified,
+                mechanic.AvailabilityStatus,
+                ShopIds = mechanic.ShopMechanics.Where(x => x.IsActive).Select(x => x.ShopId).ToArray()
+            };
 
             if (!string.Equals(mechanic.User.Email, email, StringComparison.OrdinalIgnoreCase) &&
                 await EmailInUseAsync(email, mechanic.UserId))
@@ -850,6 +909,16 @@ public class AdminApiClient(BikeMateDbContext context, ILogger<AdminApiClient> l
             mechanic.UpdatedAt = DateTime.UtcNow;
 
             await UpsertMechanicShopAssignmentAsync(mechanic, dto.ShopId, dto.AssignmentActive);
+            AddAudit("UpdateMechanic", "mechanics", mechanic.MechanicId, oldValues, new
+            {
+                mechanic.User.Email,
+                Name = $"{mechanic.User.FirstName} {mechanic.User.LastName}",
+                mechanic.User.AccountStatus,
+                mechanic.IsVerified,
+                mechanic.AvailabilityStatus,
+                dto.ShopId,
+                dto.AssignmentActive
+            });
             await context.SaveChangesAsync();
             LastError = null;
         }
@@ -870,6 +939,14 @@ public class AdminApiClient(BikeMateDbContext context, ILogger<AdminApiClient> l
                 .Include(m => m.ShopMechanics)
                 .FirstOrDefaultAsync(m => m.MechanicId == id)
                 ?? throw new InvalidOperationException("Mechanic not found.");
+            var oldValues = new
+            {
+                mechanic.User?.Email,
+                Name = mechanic.User is null ? string.Empty : $"{mechanic.User.FirstName} {mechanic.User.LastName}",
+                mechanic.User?.AccountStatus,
+                mechanic.IsVerified,
+                mechanic.AvailabilityStatus
+            };
 
             mechanic.IsVerified = false;
             mechanic.AvailabilityStatus = "offline";
@@ -885,6 +962,7 @@ public class AdminApiClient(BikeMateDbContext context, ILogger<AdminApiClient> l
                 AnonymizeDeletedUser(mechanic.User);
             }
 
+            AddAudit("DeleteMechanic", "mechanics", mechanic.MechanicId, oldValues, new { AccountStatus = mechanic.User?.AccountStatus, mechanic.IsVerified, mechanic.AvailabilityStatus });
             await context.SaveChangesAsync();
             LastError = null;
         }
@@ -922,11 +1000,13 @@ public class AdminApiClient(BikeMateDbContext context, ILogger<AdminApiClient> l
         {
             var normalizedStatus = NormalizeAccountStatus(userDto.AccountStatus);
             var user = await context.Users.FindAsync(id) ?? throw new InvalidOperationException("User not found.");
+            var oldValues = new { user.Email, Name = $"{user.FirstName} {user.LastName}", user.PhoneNumber, user.AccountStatus };
             user.FirstName = Require(userDto.FirstName, "First name");
             user.LastName = Require(userDto.LastName, "Last name");
             user.PhoneNumber = CleanOptional(userDto.PhoneNumber);
             user.AccountStatus = normalizedStatus;
             user.UpdatedAt = DateTime.UtcNow;
+            AddAudit("UpdateUser", "users", user.UserId, oldValues, new { user.Email, Name = $"{user.FirstName} {user.LastName}", user.PhoneNumber, user.AccountStatus });
             await context.SaveChangesAsync();
             LastError = null;
         }
@@ -958,7 +1038,9 @@ public class AdminApiClient(BikeMateDbContext context, ILogger<AdminApiClient> l
                 return;
             }
 
+            var oldValues = new { user.Email, Name = $"{user.FirstName} {user.LastName}", user.PhoneNumber, user.AccountStatus };
             AnonymizeDeletedUser(user);
+            AddAudit("DeleteUser", "users", id, oldValues, new { user.AccountStatus });
             await context.SaveChangesAsync();
             LastError = null;
         }
@@ -1075,6 +1157,8 @@ public class AdminApiClient(BikeMateDbContext context, ILogger<AdminApiClient> l
 
             context.Users.Add(user);
             await context.SaveChangesAsync();
+            AddAudit("CreateAdmin", "users", user.UserId, null, new { user.Email, Role = "SystemAdmin", user.AccountStatus });
+            await context.SaveChangesAsync();
             LastError = null;
 
             return ToAdminAccountDto(user);
@@ -1082,6 +1166,53 @@ public class AdminApiClient(BikeMateDbContext context, ILogger<AdminApiClient> l
         catch (Exception ex)
         {
             throw FailForWrite(ex, ex is InvalidOperationException ? ex.Message : "Unable to create admin account.");
+        }
+    }
+
+    public async Task SendAdminLoginCodeAsync(int id)
+    {
+        try
+        {
+            var user = await context.Users
+                .Include(u => u.UserRoles).ThenInclude(ur => ur.Role)
+                .FirstOrDefaultAsync(user => user.UserId == id)
+                ?? throw new InvalidOperationException("Admin account not found.");
+
+            EnsureSystemAdminUser(user);
+            if (!string.Equals(user.AccountStatus, "active", StringComparison.OrdinalIgnoreCase))
+            {
+                throw new InvalidOperationException("Only active admin accounts can receive login codes.");
+            }
+
+            var now = DateTime.UtcNow;
+            var existing = await context.OtpVerifications
+                .Where(x => x.UserId == user.UserId && x.Purpose == AdminLoginOtpPurpose && x.ConsumedAt == null)
+                .ToListAsync();
+
+            foreach (var otp in existing)
+            {
+                otp.ConsumedAt = now;
+            }
+
+            var code = RandomNumberGenerator.GetInt32(100000, 1000000).ToString("D6");
+            context.OtpVerifications.Add(new OtpVerification
+            {
+                UserId = user.UserId,
+                OtpHash = BCrypt.Net.BCrypt.HashPassword(code),
+                Purpose = AdminLoginOtpPurpose,
+                ExpiresAt = now.Add(AdminLoginOtpLifetime),
+                CreatedAt = now
+            });
+
+            await context.SaveChangesAsync();
+            await adminOtpEmailService.SendLoginOtpAsync(user, code, CancellationToken.None);
+            AddAudit("SendAdminLoginCode", "users", user.UserId, null, new { user.Email, Purpose = AdminLoginOtpPurpose, ExpiresAt = now.Add(AdminLoginOtpLifetime) });
+            await context.SaveChangesAsync();
+            LastError = null;
+        }
+        catch (Exception ex)
+        {
+            throw FailForWrite(ex, ex is InvalidOperationException ? ex.Message : "Unable to send admin login code.");
         }
     }
 
@@ -1095,6 +1226,7 @@ public class AdminApiClient(BikeMateDbContext context, ILogger<AdminApiClient> l
                 ?? throw new InvalidOperationException("Admin account not found.");
 
             EnsureSystemAdminUser(user);
+            var oldValues = new { user.Email, Name = $"{user.FirstName} {user.LastName}", user.PhoneNumber, user.AccountStatus };
 
             var firstName = Require(dto.FirstName, "First name");
             var lastName = Require(dto.LastName, "Last name");
@@ -1142,6 +1274,7 @@ public class AdminApiClient(BikeMateDbContext context, ILogger<AdminApiClient> l
             user.AccountStatus = normalizedStatus;
             user.UpdatedAt = DateTime.UtcNow;
 
+            AddAudit("UpdateAdmin", "users", user.UserId, oldValues, new { user.Email, Name = $"{user.FirstName} {user.LastName}", user.PhoneNumber, user.AccountStatus, PasswordChanged = !string.IsNullOrWhiteSpace(dto.NewPassword) });
             await context.SaveChangesAsync();
             LastError = null;
         }
@@ -1182,7 +1315,9 @@ public class AdminApiClient(BikeMateDbContext context, ILogger<AdminApiClient> l
                 throw new InvalidOperationException("Create or activate another system admin before deleting this account.");
             }
 
+            var oldValues = new { user.Email, Name = $"{user.FirstName} {user.LastName}", user.PhoneNumber, user.AccountStatus };
             AnonymizeDeletedUser(user);
+            AddAudit("DeleteAdmin", "users", id, oldValues, new { user.AccountStatus });
             await context.SaveChangesAsync();
             LastError = null;
         }
@@ -1216,6 +1351,7 @@ public class AdminApiClient(BikeMateDbContext context, ILogger<AdminApiClient> l
             shop.Owner.AccountStatus = "active";
             shop.Owner.UpdatedAt = DateTime.UtcNow;
 
+            AddAudit("ApproveShop", "shops", shop.ShopId, new { ShopStatus = "pending", OwnerStatus = "pending" }, new { shop.ShopName, shop.ShopStatus, OwnerUserId = shop.OwnerUserId, OwnerStatus = shop.Owner.AccountStatus });
             await context.SaveChangesAsync();
             LastError = null;
             return new ShopApprovalResultDto
@@ -1240,6 +1376,7 @@ public class AdminApiClient(BikeMateDbContext context, ILogger<AdminApiClient> l
                 .Include(s => s.Owner)
                 .FirstOrDefaultAsync(s => s.ShopId == id)
                 ?? throw new InvalidOperationException("Shop not found.");
+            var oldValues = new { shop.ShopName, shop.ShopStatus, OwnerStatus = shop.Owner?.AccountStatus };
 
             shop.ShopStatus = "suspended";
             shop.UpdatedAt = DateTime.UtcNow;
@@ -1249,6 +1386,7 @@ public class AdminApiClient(BikeMateDbContext context, ILogger<AdminApiClient> l
                 shop.Owner.UpdatedAt = DateTime.UtcNow;
             }
 
+            AddAudit("SuspendShop", "shops", shop.ShopId, oldValues, new { shop.ShopName, shop.ShopStatus, OwnerStatus = shop.Owner?.AccountStatus });
             await context.SaveChangesAsync();
             LastError = null;
         }
@@ -1266,6 +1404,7 @@ public class AdminApiClient(BikeMateDbContext context, ILogger<AdminApiClient> l
                 .Include(s => s.Owner)
                 .FirstOrDefaultAsync(s => s.ShopId == id)
                 ?? throw new InvalidOperationException("Shop not found.");
+            var oldValues = new { shop.ShopName, shop.ShopStatus, OwnerStatus = shop.Owner?.AccountStatus };
             shop.ShopStatus = "rejected";
             shop.UpdatedAt = DateTime.UtcNow;
             if (shop.Owner is not null)
@@ -1274,6 +1413,7 @@ public class AdminApiClient(BikeMateDbContext context, ILogger<AdminApiClient> l
                 shop.Owner.UpdatedAt = DateTime.UtcNow;
             }
 
+            AddAudit("RejectShop", "shops", shop.ShopId, oldValues, new { shop.ShopName, shop.ShopStatus, OwnerStatus = shop.Owner?.AccountStatus });
             await context.SaveChangesAsync();
             LastError = null;
         }
@@ -1330,6 +1470,7 @@ public class AdminApiClient(BikeMateDbContext context, ILogger<AdminApiClient> l
 
             customer.User.AccountStatus = "active";
             customer.User.UpdatedAt = DateTime.UtcNow;
+            AddAudit("ApproveCustomer", "clients", customer.ClientId, new { AccountStatus = "pending" }, new { customer.User.Email, customer.User.AccountStatus });
             await context.SaveChangesAsync();
             LastError = null;
         }
@@ -1350,8 +1491,10 @@ public class AdminApiClient(BikeMateDbContext context, ILogger<AdminApiClient> l
 
             if (customer.User is not null)
             {
+                var oldValues = new { customer.User.Email, customer.User.AccountStatus };
                 customer.User.AccountStatus = "rejected";
                 customer.User.UpdatedAt = DateTime.UtcNow;
+                AddAudit("RejectCustomer", "clients", customer.ClientId, oldValues, new { customer.User.Email, customer.User.AccountStatus });
             }
 
             await context.SaveChangesAsync();
@@ -1374,7 +1517,6 @@ public class AdminApiClient(BikeMateDbContext context, ILogger<AdminApiClient> l
                 .Include(mechanic => mechanic.ShopMechanics).ThenInclude(assignment => assignment.Shop)
                 .Where(mechanic =>
                     mechanic.User != null &&
-                    mechanic.User.EmailVerified &&
                     mechanic.User.AccountStatus.ToLower().Trim() != "deleted" &&
                     mechanic.User.AccountStatus.ToLower().Trim() != "rejected" &&
                     (!mechanic.IsVerified || mechanic.User.AccountStatus.ToLower().Trim() == "pending"))
@@ -1428,6 +1570,7 @@ public class AdminApiClient(BikeMateDbContext context, ILogger<AdminApiClient> l
                 assignment.IsActive = true;
             }
 
+            AddAudit("ApproveMechanic", "mechanics", mechanic.MechanicId, new { mechanic.User.Email, AccountStatus = "pending", mechanic.IsVerified }, new { mechanic.User.Email, mechanic.User.AccountStatus, mechanic.IsVerified, mechanic.AvailabilityStatus });
             await context.SaveChangesAsync();
             LastError = null;
         }
@@ -1446,6 +1589,7 @@ public class AdminApiClient(BikeMateDbContext context, ILogger<AdminApiClient> l
                 .Include(item => item.ShopMechanics)
                 .FirstOrDefaultAsync(item => item.MechanicId == mechanicId)
                 ?? throw new InvalidOperationException("Mechanic account not found.");
+            var oldValues = new { mechanic.User?.Email, mechanic.User?.AccountStatus, mechanic.IsVerified, mechanic.AvailabilityStatus };
 
             mechanic.IsVerified = false;
             mechanic.UpdatedAt = DateTime.UtcNow;
@@ -1460,6 +1604,7 @@ public class AdminApiClient(BikeMateDbContext context, ILogger<AdminApiClient> l
                 assignment.IsActive = false;
             }
 
+            AddAudit("RejectMechanic", "mechanics", mechanic.MechanicId, oldValues, new { mechanic.User?.Email, mechanic.User?.AccountStatus, mechanic.IsVerified });
             await context.SaveChangesAsync();
             LastError = null;
         }
@@ -1489,6 +1634,7 @@ public class AdminApiClient(BikeMateDbContext context, ILogger<AdminApiClient> l
                 return;
             }
 
+            var oldValues = new { shop.ShopName, shop.ShopStatus, OwnerEmail = shop.Owner?.Email, OwnerStatus = shop.Owner?.AccountStatus };
             var now = DateTime.UtcNow;
             shop.ShopStatus = "deleted";
             shop.UpdatedAt = now;
@@ -1526,6 +1672,7 @@ public class AdminApiClient(BikeMateDbContext context, ILogger<AdminApiClient> l
                 }
             }
 
+            AddAudit("DeleteShop", "shops", shop.ShopId, oldValues, new { shop.ShopStatus, OwnerStatus = shop.Owner?.AccountStatus });
             await context.SaveChangesAsync();
             LastError = null;
         }
@@ -1543,9 +1690,12 @@ public class AdminApiClient(BikeMateDbContext context, ILogger<AdminApiClient> l
                 .Include(m => m.User)
                 .FirstOrDefaultAsync(m => m.MechanicId == id)
                 ?? throw new InvalidOperationException("Mechanic not found.");
+            var oldValues = new { mechanic.User.Email, mechanic.User.AccountStatus, mechanic.AvailabilityStatus };
 
             mechanic.User.AccountStatus = "suspended";
             mechanic.AvailabilityStatus = "offline";
+            mechanic.UpdatedAt = DateTime.UtcNow;
+            AddAudit("SuspendMechanic", "mechanics", mechanic.MechanicId, oldValues, new { mechanic.User.Email, mechanic.User.AccountStatus, mechanic.AvailabilityStatus });
             await context.SaveChangesAsync();
             LastError = null;
         }
@@ -1747,6 +1897,7 @@ public class AdminApiClient(BikeMateDbContext context, ILogger<AdminApiClient> l
             AddAssignmentNotification(mechanic.UserId, serviceRequest.RequestId, "Emergency request assigned",
                 $"You have been assigned to emergency request #{serviceRequest.RequestId}.");
 
+            AddAudit("AssignEmergencyMechanic", "service_requests", serviceRequest.RequestId, new { MechanicId = (int?)null, StatusId = oldStatusId }, new { MechanicId = mechanic.MechanicId, MechanicName = $"{mechanic.User.FirstName} {mechanic.User.LastName}", serviceRequest.CurrentStatusId, adminNote });
             await context.SaveChangesAsync();
             LastError = null;
         }
@@ -1830,6 +1981,7 @@ public class AdminApiClient(BikeMateDbContext context, ILogger<AdminApiClient> l
             conversation.LastMessageAt = DateTime.UtcNow;
 
             AddAssignmentNotification(request.Client.UserId, requestId, "Admin message", cleanMessage);
+            AddAudit("SendAdminMessage", "service_requests", requestId, null, new { MessagePreview = cleanMessage.Length > 160 ? cleanMessage[..160] : cleanMessage });
             await context.SaveChangesAsync();
             LastError = null;
         }
@@ -1880,6 +2032,37 @@ public class AdminApiClient(BikeMateDbContext context, ILogger<AdminApiClient> l
         LastError = message;
         logger.LogError(ex, message);
         return new InvalidOperationException(message, ex);
+    }
+
+    private void AddAudit(string actionName, string entityName, object? entityId, object? oldValues = null, object? newValues = null)
+    {
+        context.AuditLogs.Add(new AuditLog
+        {
+            ActorUserId = GetCurrentAdminUserId(),
+            ActionName = actionName,
+            EntityName = entityName,
+            EntityId = entityId?.ToString(),
+            OldValuesJson = ToAuditJson(oldValues),
+            NewValuesJson = ToAuditJson(newValues),
+            CreatedAt = DateTime.UtcNow
+        });
+    }
+
+    private int? GetCurrentAdminUserId()
+    {
+        var value = httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
+        return int.TryParse(value, out var userId) ? userId : null;
+    }
+
+    private static string? ToAuditJson(object? values)
+    {
+        if (values is null) return null;
+        if (values is string text) return text;
+
+        return JsonSerializer.Serialize(values, new JsonSerializerOptions
+        {
+            WriteIndented = false
+        });
     }
 
     private async Task<bool> ShopExistsAsync(string shopName, string addressLine, string city, string province, int? excludeShopId = null)

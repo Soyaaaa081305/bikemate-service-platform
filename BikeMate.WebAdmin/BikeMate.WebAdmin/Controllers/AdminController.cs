@@ -4,6 +4,7 @@ using BCrypt.Net;
 using BikeMate.Core.Entities;
 using BikeMate.Infrastructure.Data;
 using BikeMate.WebAdmin.DTOs;
+using BikeMate.WebAdmin.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
@@ -20,11 +21,24 @@ namespace BikeMate.WebAdmin.Controllers;
 [Route("api/admin")]
 public class AdminController : ControllerBase
 {
-    private readonly BikeMateDbContext _context;
+    private const string AdminLoginOtpPurpose = "admin_login";
+    private const string AdminTrustedBrowserPurpose = "admin_login_trust";
+    private const string AdminTrustedBrowserCookie = "bm_admin_otp_trust";
+    private static readonly TimeSpan AdminLoginOtpLifetime = TimeSpan.FromMinutes(10);
+    private static readonly TimeSpan AdminTrustedBrowserLifetime = TimeSpan.FromHours(12);
 
-    public AdminController(BikeMateDbContext context)
+    private readonly BikeMateDbContext _context;
+    private readonly IAdminOtpEmailService _adminOtpEmailService;
+    private readonly ILogger<AdminController> _logger;
+
+    public AdminController(
+        BikeMateDbContext context,
+        IAdminOtpEmailService adminOtpEmailService,
+        ILogger<AdminController> logger)
     {
         _context = context;
+        _adminOtpEmailService = adminOtpEmailService;
+        _logger = logger;
     }
 
     [HttpGet("dashboard")]
@@ -472,51 +486,233 @@ public class AdminController : ControllerBase
     [HttpPost("cookie-login")]
     [AllowAnonymous]
     [IgnoreAntiforgeryToken] // Allows standard HTML forms to post securely
-    public async Task<IActionResult> CookieLogin([FromForm] string email, [FromForm] string password)
+    public async Task<IActionResult> CookieLogin(
+        [FromForm] string email,
+        [FromForm] string password,
+        [FromForm] bool rememberDevice,
+        CancellationToken cancellationToken)
     {
-        User? user;
+        var user = await ValidateAdminCredentialsAsync(email, password, cancellationToken);
+        if (user is null) return Redirect("/login?error=true");
+
+        if (await HasValidTrustedBrowserAsync(user, cancellationToken))
+        {
+            await SignInAdminAsync(user);
+            return Redirect("/");
+        }
+
         try
         {
-            var normalizedEmail = email.Trim().ToLowerInvariant();
-            user = await _context.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == normalizedEmail);
+            await CreateAndSendAdminLoginOtpAsync(user, cancellationToken);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            return Redirect("/login?error=db");
+            _logger.LogWarning(ex, "Admin login OTP could not be sent to {Email}.", user.Email);
+            return Redirect(LoginRedirect(email, rememberDevice, "email"));
         }
 
-        if (user == null) return Redirect("/login?error=true");
-        if (!string.Equals(user.AccountStatus, "active", StringComparison.OrdinalIgnoreCase))
+        return Redirect(LoginRedirect(user.Email, rememberDevice, otpSent: true));
+    }
+
+    [HttpPost("cookie-login/verify")]
+    [AllowAnonymous]
+    [IgnoreAntiforgeryToken]
+    public async Task<IActionResult> VerifyCookieLoginOtp(
+        [FromForm] string email,
+        [FromForm] string otpCode,
+        [FromForm] bool rememberDevice,
+        CancellationToken cancellationToken)
+    {
+        var user = await GetActiveSystemAdminByEmailAsync(email, cancellationToken);
+        if (user is null) return Redirect("/login?error=true");
+
+        var normalizedCode = NormalizeOtpCode(otpCode);
+        if (normalizedCode is null)
         {
-            return Redirect("/login?error=true");
+            return Redirect(LoginRedirect(user.Email, rememberDevice, "otp", otpSent: true));
         }
 
-        if (!PasswordMatches(password, user.PasswordHash))
+        var now = DateTime.UtcNow;
+        var otp = await _context.OtpVerifications
+            .Where(x =>
+                x.UserId == user.UserId &&
+                x.Purpose == AdminLoginOtpPurpose &&
+                x.ConsumedAt == null)
+            .OrderByDescending(x => x.CreatedAt)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (otp is null || otp.ExpiresAt <= now)
         {
-            return Redirect("/login?error=true");
+            return Redirect(LoginRedirect(user.Email, rememberDevice, "otp_expired", otpSent: true));
         }
 
-        bool isSystemAdmin;
+        if (otp.Attempts >= 5)
+        {
+            return Redirect(LoginRedirect(user.Email, rememberDevice, "otp_locked", otpSent: true));
+        }
+
+        if (!BCrypt.Net.BCrypt.Verify(normalizedCode, otp.OtpHash))
+        {
+            otp.Attempts++;
+            await _context.SaveChangesAsync(cancellationToken);
+            return Redirect(LoginRedirect(user.Email, rememberDevice, "otp", otpSent: true));
+        }
+
+        otp.ConsumedAt = now;
+        if (rememberDevice)
+        {
+            await CreateTrustedBrowserAsync(user, cancellationToken);
+        }
+
+        await _context.SaveChangesAsync(cancellationToken);
+        await SignInAdminAsync(user);
+
+        return Redirect("/");
+    }
+
+    private async Task<User?> ValidateAdminCredentialsAsync(string email, string password, CancellationToken cancellationToken)
+    {
         try
         {
-            isSystemAdmin = await _context.UserRoles.AnyAsync(ur =>
-                ur.UserId == user.UserId &&
-                ur.Role != null &&
-                ur.Role.RoleName == "SystemAdmin");
+            var user = await GetActiveSystemAdminByEmailAsync(email, cancellationToken);
+            return user is not null && PasswordMatches(password, user.PasswordHash)
+                ? user
+                : null;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            return Redirect("/login?error=db");
+            _logger.LogWarning(ex, "Admin login validation failed.");
+            return null;
+        }
+    }
+
+    private async Task<User?> GetActiveSystemAdminByEmailAsync(string email, CancellationToken cancellationToken)
+    {
+        var normalizedEmail = email.Trim().ToLowerInvariant();
+        var user = await _context.Users.FirstOrDefaultAsync(u => u.Email.ToLower() == normalizedEmail, cancellationToken);
+        if (user is null) return null;
+        if (!string.Equals(user.AccountStatus, "active", StringComparison.OrdinalIgnoreCase)) return null;
+
+        var isSystemAdmin = await _context.UserRoles.AnyAsync(ur =>
+            ur.UserId == user.UserId &&
+            ur.Role != null &&
+            ur.Role.RoleName == "SystemAdmin", cancellationToken);
+
+        return isSystemAdmin ? user : null;
+    }
+
+    private async Task CreateAndSendAdminLoginOtpAsync(User user, CancellationToken cancellationToken)
+    {
+        var now = DateTime.UtcNow;
+        var existing = await _context.OtpVerifications
+            .Where(x => x.UserId == user.UserId && x.Purpose == AdminLoginOtpPurpose && x.ConsumedAt == null)
+            .ToListAsync(cancellationToken);
+
+        foreach (var otp in existing)
+        {
+            otp.ConsumedAt = now;
         }
 
-        if (!isSystemAdmin) return Redirect("/login?error=true");
+        var code = GenerateOtpCode();
+        _context.OtpVerifications.Add(new OtpVerification
+        {
+            UserId = user.UserId,
+            OtpHash = BCrypt.Net.BCrypt.HashPassword(code),
+            Purpose = AdminLoginOtpPurpose,
+            ExpiresAt = now.Add(AdminLoginOtpLifetime),
+            CreatedAt = now
+        });
 
-        // Issue the Secure Cookie
-        var claims = new[] { new Claim(ClaimTypes.Name, email), new Claim(ClaimTypes.Role, "SystemAdmin") };
+        await _context.SaveChangesAsync(cancellationToken);
+        await _adminOtpEmailService.SendLoginOtpAsync(user, code, cancellationToken);
+    }
+
+    private async Task<bool> HasValidTrustedBrowserAsync(User user, CancellationToken cancellationToken)
+    {
+        var cookieValue = Request.Cookies[AdminTrustedBrowserCookie];
+        if (string.IsNullOrWhiteSpace(cookieValue)) return false;
+
+        var parts = cookieValue.Split(':', 2);
+        if (parts.Length != 2 || !int.TryParse(parts[0], out var userId) || userId != user.UserId)
+        {
+            return false;
+        }
+
+        var token = parts[1];
+        if (string.IsNullOrWhiteSpace(token) || token.Length < 32) return false;
+
+        var now = DateTime.UtcNow;
+        var trustedTokens = await _context.OtpVerifications
+            .Where(x =>
+                x.UserId == user.UserId &&
+                x.Purpose == AdminTrustedBrowserPurpose &&
+                x.ConsumedAt == null &&
+                x.ExpiresAt > now)
+            .OrderByDescending(x => x.CreatedAt)
+            .Take(5)
+            .ToListAsync(cancellationToken);
+
+        return trustedTokens.Any(x => BCrypt.Net.BCrypt.Verify(token, x.OtpHash));
+    }
+
+    private async Task CreateTrustedBrowserAsync(User user, CancellationToken cancellationToken)
+    {
+        var now = DateTime.UtcNow;
+        var token = Convert.ToHexString(RandomNumberGenerator.GetBytes(32)).ToLowerInvariant();
+        _context.OtpVerifications.Add(new OtpVerification
+        {
+            UserId = user.UserId,
+            OtpHash = BCrypt.Net.BCrypt.HashPassword(token),
+            Purpose = AdminTrustedBrowserPurpose,
+            ExpiresAt = now.Add(AdminTrustedBrowserLifetime),
+            CreatedAt = now
+        });
+
+        Response.Cookies.Append(
+            AdminTrustedBrowserCookie,
+            $"{user.UserId}:{token}",
+            new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = Request.IsHttps,
+                SameSite = SameSiteMode.Lax,
+                Expires = DateTimeOffset.UtcNow.Add(AdminTrustedBrowserLifetime)
+            });
+    }
+
+    private async Task SignInAdminAsync(User user)
+    {
+        var claims = new[]
+        {
+            new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
+            new Claim(ClaimTypes.Name, user.Email),
+            new Claim(ClaimTypes.Email, user.Email),
+            new Claim(ClaimTypes.Role, "SystemAdmin")
+        };
         var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
         await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, new ClaimsPrincipal(identity));
+    }
 
-        return Redirect("/"); // Redirects to Dashboard
+    private static string GenerateOtpCode()
+    {
+        return RandomNumberGenerator.GetInt32(100000, 1000000).ToString("D6");
+    }
+
+    private static string? NormalizeOtpCode(string? code)
+    {
+        if (string.IsNullOrWhiteSpace(code)) return null;
+        var normalized = new string(code.Where(char.IsDigit).ToArray());
+        return normalized.Length == 6 ? normalized : null;
+    }
+
+    private static string LoginRedirect(string email, bool rememberDevice, string? error = null, bool otpSent = false)
+    {
+        var query = new List<string>();
+        if (otpSent) query.Add("otp=sent");
+        if (!string.IsNullOrWhiteSpace(error)) query.Add($"error={Uri.EscapeDataString(error)}");
+        if (!string.IsNullOrWhiteSpace(email)) query.Add($"email={Uri.EscapeDataString(email.Trim().ToLowerInvariant())}");
+        if (rememberDevice) query.Add("remember=true");
+        return "/login" + (query.Count == 0 ? string.Empty : "?" + string.Join("&", query));
     }
 
     [HttpGet("logout")]

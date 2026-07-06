@@ -16,7 +16,7 @@ namespace BikeMate.Infrastructure.Migrations
         {
             migrationBuilder.Sql(
                 """
-                DECLARE @RequiredAdminEmail nvarchar(255) = N'admin@bikemate.test';
+                DECLARE @RequiredAdminEmail nvarchar(255) = N'isaiahandreinoda@gmail.com';
 
                 DECLARE @SeedUserIds TABLE ([UserId] int PRIMARY KEY);
                 INSERT INTO @SeedUserIds ([UserId])

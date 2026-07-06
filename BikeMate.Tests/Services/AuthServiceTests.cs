@@ -243,6 +243,84 @@ public sealed class AuthServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task VerifyOtpAsync_AcceptsLegacyRoleSpecificEmailVerificationPurpose()
+    {
+        var user = new User
+        {
+            FirstName = "Manual",
+            LastName = "Mechanic",
+            Email = "manual-mechanic@test.com",
+            PasswordHash = "not-used",
+            EmailVerified = false,
+            AccountStatus = "pending",
+            CreatedAt = DateTime.UtcNow
+        };
+        _db.Users.Add(user);
+        await _db.SaveChangesAsync();
+
+        var otpService = new OtpService();
+        var otp = new OtpVerification
+        {
+            UserId = user.UserId,
+            Purpose = "mechanic_email_verification",
+            OtpHash = otpService.HashCode("123456"),
+            ExpiresAt = DateTime.UtcNow.AddMinutes(10),
+            CreatedAt = DateTime.UtcNow
+        };
+        _db.OtpVerifications.Add(otp);
+        await _db.SaveChangesAsync();
+
+        await _sut.VerifyOtpAsync(new VerifyOtpRequestDto("manual-mechanic@test.com", "123456", "email_verification"), CancellationToken.None);
+
+        Assert.True(user.EmailVerified);
+        Assert.NotNull(otp.ConsumedAt);
+    }
+
+    [Fact]
+    public async Task ResendOtpAsync_ConsumesLegacyEmailVerificationCodesBeforeSendingLatestCode()
+    {
+        var user = new User
+        {
+            FirstName = "Manual",
+            LastName = "Admin",
+            Email = "manual-admin@test.com",
+            PasswordHash = "not-used",
+            EmailVerified = false,
+            AccountStatus = "pending",
+            CreatedAt = DateTime.UtcNow
+        };
+        _db.Users.Add(user);
+        await _db.SaveChangesAsync();
+
+        var otpService = new OtpService();
+        var staleOtp = new OtpVerification
+        {
+            UserId = user.UserId,
+            Purpose = "shop_admin_email_verification",
+            OtpHash = otpService.HashCode("111111"),
+            ExpiresAt = DateTime.UtcNow.AddMinutes(10),
+            CreatedAt = DateTime.UtcNow.AddMinutes(-2)
+        };
+        _db.OtpVerifications.Add(staleOtp);
+        await _db.SaveChangesAsync();
+
+        await _sut.ResendOtpAsync(new ResendOtpRequestDto("manual-admin@test.com", "shop_admin_email_verification"), CancellationToken.None);
+
+        var otps = await _db.OtpVerifications
+            .Where(x => x.UserId == user.UserId)
+            .OrderBy(x => x.CreatedAt)
+            .ToArrayAsync();
+
+        Assert.NotNull(staleOtp.ConsumedAt);
+        Assert.Equal(2, otps.Length);
+        Assert.Equal("email_verification", otps.Last().Purpose);
+        Assert.Null(otps.Last().ConsumedAt);
+        _emailService.Verify(
+            e => e.SendOtpAsync(user, It.IsAny<string>(), "email_verification", It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
+    [Fact]
     public async Task RegisterAsync_ReleasesEmailAndPhoneFromDeletedAccount()
     {
         var deleted = new User

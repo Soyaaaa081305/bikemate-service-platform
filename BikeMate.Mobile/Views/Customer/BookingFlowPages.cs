@@ -43,6 +43,9 @@ internal static class BookingDraft
     public static string SelectedShopName { get; set; } = "";
     public static string? SelectedShopImageUrl { get; set; }
     public static string? SelectedShopLogoUrl { get; set; }
+    public static bool SelectedShopAllowsReservations { get; set; } = true;
+    public static bool SelectedShopAllowsPickup { get; set; } = true;
+    public static bool SelectedShopAllowsOnsiteRepair { get; set; } = true;
     public static int? SelectedProductId { get; set; }
     public static string SelectedProductName { get; set; } = "";
     public static decimal? SelectedProductPrice { get; set; }
@@ -84,6 +87,9 @@ internal static class BookingDraft
         SelectedShopName = "";
         SelectedShopImageUrl = null;
         SelectedShopLogoUrl = null;
+        SelectedShopAllowsReservations = true;
+        SelectedShopAllowsPickup = true;
+        SelectedShopAllowsOnsiteRepair = true;
         SelectedProductId = null;
         SelectedProductName = "";
         SelectedProductPrice = null;
@@ -349,6 +355,9 @@ internal static class BookingDraft
         SelectedShopName = shop.ShopName;
         SelectedShopImageUrl = shop.ShopImageUrl;
         SelectedShopLogoUrl = shop.ShopLogoUrl;
+        SelectedShopAllowsReservations = shop.AllowsReservations;
+        SelectedShopAllowsPickup = shop.AllowsPickup;
+        SelectedShopAllowsOnsiteRepair = shop.AllowsOnsiteRepair;
     }
 
     public static void SelectShop(ShopDetailsDto shop)
@@ -357,6 +366,9 @@ internal static class BookingDraft
         SelectedShopName = shop.ShopName;
         SelectedShopImageUrl = shop.ShopImageUrl;
         SelectedShopLogoUrl = shop.ShopLogoUrl;
+        SelectedShopAllowsReservations = shop.AllowsReservations;
+        SelectedShopAllowsPickup = shop.AllowsPickup;
+        SelectedShopAllowsOnsiteRepair = shop.AllowsOnsiteRepair;
     }
 
     public static void ClearSelectedShop()
@@ -367,7 +379,49 @@ internal static class BookingDraft
         SelectedShopName = "";
         SelectedShopImageUrl = null;
         SelectedShopLogoUrl = null;
+        SelectedShopAllowsReservations = true;
+        SelectedShopAllowsPickup = true;
+        SelectedShopAllowsOnsiteRepair = true;
         ClearProduct();
+    }
+
+    public static bool ShopAllowsCurrentAssistance(ShopSummaryDto shop)
+    {
+        if (IsReservation)
+        {
+            return shop.AllowsReservations;
+        }
+
+        if (string.Equals(AssistanceMethod, AssistancePickup, StringComparison.OrdinalIgnoreCase))
+        {
+            return shop.AllowsPickup;
+        }
+
+        return shop.AllowsOnsiteRepair;
+    }
+
+    public static bool SelectedShopAllowsCurrentAssistance()
+    {
+        if (IsReservation)
+        {
+            return SelectedShopAllowsReservations;
+        }
+
+        if (string.Equals(AssistanceMethod, AssistancePickup, StringComparison.OrdinalIgnoreCase))
+        {
+            return SelectedShopAllowsPickup;
+        }
+
+        return SelectedShopAllowsOnsiteRepair;
+    }
+
+    public static string CurrentAssistanceUnavailableMessage()
+    {
+        return IsReservation
+            ? "This shop is not accepting reservations right now."
+            : string.Equals(AssistanceMethod, AssistancePickup, StringComparison.OrdinalIgnoreCase)
+                ? "This shop is not accepting pickup repair right now."
+                : "This shop is not accepting on-site repair right now.";
     }
 
     public static string DisplayShopName(string? requestShopName = null)
@@ -3110,6 +3164,7 @@ public sealed class StoreSelectionPage : CustomerPageBase
         var distance = ShopDistance(shop);
         var area = string.Join(", ", new[] { shop.AddressLine, shop.City }
             .Where(value => !string.IsNullOrWhiteSpace(value)));
+        var isAvailableForFlow = BookingDraft.ShopAllowsCurrentAssistance(shop);
 
         var grid = new Grid
         {
@@ -3154,14 +3209,23 @@ public sealed class StoreSelectionPage : CustomerPageBase
                 FontAttributes.Bold));
         }
 
+        details.Add(BookingVisuals.Text(
+            AvailabilityLine(shop),
+            10,
+            isAvailableForFlow ? CustomerUi.Muted : Color.FromArgb("#A23232"),
+            isAvailableForFlow ? FontAttributes.None : FontAttributes.Bold));
+
         details.Add(new Button
         {
-            Text = BookingDraft.IsModification ? "View shop inventory" : "View shop and services",
-            BackgroundColor = CustomerUi.Orange,
-            TextColor = Colors.White,
+            Text = isAvailableForFlow
+                ? BookingDraft.IsModification ? "View shop inventory" : "View shop and services"
+                : "Unavailable for this booking",
+            BackgroundColor = isAvailableForFlow ? CustomerUi.Orange : Color.FromArgb("#E6E6E6"),
+            TextColor = isAvailableForFlow ? Colors.White : CustomerUi.Muted,
             FontSize = AppTypography.BodySize,
             CornerRadius = 8,
             HeightRequest = 42,
+            IsEnabled = isAvailableForFlow,
             Command = new Command(async () => await BookHereAsync(shop))
         });
         grid.Add(details, 1, 0);
@@ -3178,6 +3242,32 @@ public sealed class StoreSelectionPage : CustomerPageBase
         return IsSameServiceArea(shop)
             ? "Same service area | Location not mapped"
             : "Location not mapped | Verified partner";
+    }
+
+    private static string AvailabilityLine(ShopSummaryDto shop)
+    {
+        if (!BookingDraft.ShopAllowsCurrentAssistance(shop))
+        {
+            return BookingDraft.CurrentAssistanceUnavailableMessage();
+        }
+
+        var enabled = new List<string>(3);
+        if (shop.AllowsOnsiteRepair)
+        {
+            enabled.Add("On-site");
+        }
+
+        if (shop.AllowsPickup)
+        {
+            enabled.Add("Pickup");
+        }
+
+        if (shop.AllowsReservations)
+        {
+            enabled.Add("Reservation");
+        }
+
+        return enabled.Count == 0 ? "No booking modes available" : $"Available: {string.Join(", ", enabled)}";
     }
 
     private static bool IsNearbyOrSameArea(ShopSummaryDto shop)
@@ -3258,6 +3348,12 @@ public sealed class StoreSelectionPage : CustomerPageBase
         if (shop is null)
         {
             await DisplayAlertAsync("Choose a shop", "Select a verified shop to view its services.", "OK");
+            return;
+        }
+
+        if (!BookingDraft.ShopAllowsCurrentAssistance(shop))
+        {
+            await DisplayAlertAsync("Shop unavailable", BookingDraft.CurrentAssistanceUnavailableMessage(), "OK");
             return;
         }
 
@@ -3372,6 +3468,7 @@ public sealed class StoreDetailsPage : CustomerPageBase, IQueryAttributable
         var address = string.Join(", ", new[] { _shop.AddressLine, _shop.City, _shop.Province }
             .Where(value => !string.IsNullOrWhiteSpace(value)));
         body.Add(ShopHero(address));
+        body.Add(ShopAvailabilityCard());
         if (!string.IsNullOrWhiteSpace(_shop.ShopDescription))
         {
             body.Add(BookingVisuals.Text(_shop.ShopDescription, 11, CustomerUi.Dark));
@@ -3480,6 +3577,7 @@ public sealed class StoreDetailsPage : CustomerPageBase, IQueryAttributable
             new Command(async () => await ContinueToPaymentAsync()));
         continueButton.IsEnabled =
             !_isSubmitting &&
+            BookingDraft.SelectedShopAllowsCurrentAssistance() &&
             _services.Count > 0 &&
             BookingDraft.SelectedShopServiceIds.Count > 0;
         continueButton.Opacity = continueButton.IsEnabled ? 1 : 0.55;
@@ -3563,6 +3661,39 @@ public sealed class StoreDetailsPage : CustomerPageBase, IQueryAttributable
         }, 1, 0);
         stack.Add(header);
         return stack;
+    }
+
+    private View ShopAvailabilityCard()
+    {
+        var available = BookingDraft.SelectedShopAllowsCurrentAssistance();
+        var stack = new VerticalStackLayout { Spacing = 6 };
+        stack.Add(BookingVisuals.Text(
+            available ? "Available for this booking flow" : BookingDraft.CurrentAssistanceUnavailableMessage(),
+            11,
+            available ? Color.FromArgb("#147A3D") : Color.FromArgb("#A23232"),
+            FontAttributes.Bold));
+
+        var modes = new List<string>(3);
+        if (_shop!.AllowsOnsiteRepair)
+        {
+            modes.Add("On-site repair");
+        }
+
+        if (_shop.AllowsPickup)
+        {
+            modes.Add("Pickup repair");
+        }
+
+        if (_shop.AllowsReservations)
+        {
+            modes.Add("Reservations");
+        }
+
+        stack.Add(BookingVisuals.Text(
+            modes.Count == 0 ? "No booking modes are enabled." : $"Enabled: {string.Join(", ", modes)}",
+            10,
+            CustomerUi.Muted));
+        return BookingVisuals.WhiteCard(stack, 8, new Thickness(12));
     }
 
     private View ShopRatingCard()
@@ -3970,6 +4101,12 @@ public sealed class StoreDetailsPage : CustomerPageBase, IQueryAttributable
             {
                 await DisplayAlertAsync("Choose a shop", "Select a shop before continuing.", "OK");
                 await Shell.Current.GoToAsync(nameof(StoreSelectionPage));
+                return;
+            }
+
+            if (!BookingDraft.SelectedShopAllowsCurrentAssistance())
+            {
+                await DisplayAlertAsync("Shop unavailable", BookingDraft.CurrentAssistanceUnavailableMessage(), "OK");
                 return;
             }
 

@@ -236,6 +236,9 @@ public sealed class BikeMateDbContext(DbContextOptions<BikeMateDbContext> option
             entity.Property(x => x.OwnerZipCode).HasMaxLength(10);
             entity.Property(x => x.ContactNumber).HasMaxLength(50);
             entity.Property(x => x.ShopStatus).HasMaxLength(30).HasDefaultValue("pending");
+            entity.Property(x => x.AllowsReservations).HasDefaultValue(true);
+            entity.Property(x => x.AllowsPickup).HasDefaultValue(true);
+            entity.Property(x => x.AllowsOnsiteRepair).HasDefaultValue(true);
             entity.Property(x => x.CreatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
             entity.HasOne(x => x.Owner).WithMany(x => x.OwnedShops).HasForeignKey(x => x.OwnerUserId).OnDelete(DeleteBehavior.Restrict);
         });

@@ -157,6 +157,9 @@
     {
         if (model == null) return;
 
+        var confirmed = await JS.InvokeAsync<bool>("confirm", $"Save changes to {model.ShopName}?");
+        if (!confirmed) return;
+
         try
         {
             isSaving = true;

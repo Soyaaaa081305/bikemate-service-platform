@@ -4,6 +4,7 @@
 @using BikeMate.WebAdmin.Services
 @inject AdminApiClient AdminApi
 @inject IConfiguration Configuration
+@inject IJSRuntime JS
 
 <PageTitle>Admin - Account Approvals</PageTitle>
 
@@ -465,6 +466,12 @@
 
     private async Task HandleDecision(Func<Task> action, string successMessage, string successType)
     {
+        var confirmed = await JS.InvokeAsync<bool>("confirm", $"{successMessage}\n\nContinue?");
+        if (!confirmed)
+        {
+            return;
+        }
+
         try
         {
             statusMessage = null;

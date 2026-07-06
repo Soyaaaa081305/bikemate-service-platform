@@ -62,6 +62,36 @@
                     <Entry x:Name="ContactNumberEntry" Placeholder="Contact number" Style="{StaticResource InputEntry}" IsReadOnly="True" />
                 </VerticalStackLayout>
             </Frame>
+            <Label Text="BOOKING AVAILABILITY" Style="{StaticResource SectionLabel}" />
+            <Frame Style="{StaticResource CardFrame}">
+                <VerticalStackLayout Spacing="10">
+                    <Label Text="Control what customers can book with your shop." Style="{StaticResource SmallMuted}" />
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                        <VerticalStackLayout Spacing="2">
+                            <Label Text="Reservations" Style="{StaticResource ItemTitle}" />
+                            <Label Text="Customers can reserve a shop visit date and time." Style="{StaticResource TinyMuted}" />
+                        </VerticalStackLayout>
+                        <Switch Grid.Column="1" x:Name="ReservationsSwitch" />
+                    </Grid>
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                        <VerticalStackLayout Spacing="2">
+                            <Label Text="Pickup repair" Style="{StaticResource ItemTitle}" />
+                            <Label Text="Customers can request vehicle pickup for workshop service." Style="{StaticResource TinyMuted}" />
+                        </VerticalStackLayout>
+                        <Switch Grid.Column="1" x:Name="PickupSwitch" />
+                    </Grid>
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                        <VerticalStackLayout Spacing="2">
+                            <Label Text="On-site repair" Style="{StaticResource ItemTitle}" />
+                            <Label Text="Customers can book repairs at their service address." Style="{StaticResource TinyMuted}" />
+                        </VerticalStackLayout>
+                        <Switch Grid.Column="1" x:Name="OnsiteRepairSwitch" />
+                    </Grid>
+                    <Button Text="Save Availability"
+                            Style="{StaticResource PrimaryButton}"
+                            Clicked="SaveAvailability_Clicked" />
+                </VerticalStackLayout>
+            </Frame>
             <Label Text="OPERATING HOURS" Style="{StaticResource SectionLabel}" />
             <Frame Style="{StaticResource CardFrame}">
                 <Label Text="Operating hours can be connected when the API exposes shop_operating_hours endpoints." Style="{StaticResource SmallMuted}" />

@@ -9,6 +9,7 @@ using BikeMate.Core.DTOs;
 using BikeMate.Services;
 using Microsoft.Maui.ApplicationModel;
 using System.Runtime.Versioning;
+using Uri = Android.Net.Uri;
 
 #pragma warning disable CA1416
 
@@ -24,6 +25,52 @@ public sealed class AndroidBookingReminderService : IBookingReminderService
     internal const string ExtraMessage = "message";
     private const string PostNotificationsPermissionName = "android.permission.POST_NOTIFICATIONS";
 
+    public Task<NotificationPermissionState> GetNotificationPermissionStateAsync(CancellationToken cancellationToken = default)
+    {
+        var context = Platform.AppContext;
+        if (context is null)
+        {
+            return Task.FromResult(NotificationPermissionState.Disabled);
+        }
+
+        EnsureNotificationChannel(context);
+        return Task.FromResult(AreNotificationsEnabled(context)
+            ? NotificationPermissionState.Enabled
+            : NotificationPermissionState.Disabled);
+    }
+
+    public async Task<bool> EnsureNotificationsEnabledAsync(CancellationToken cancellationToken = default)
+    {
+        var context = Platform.AppContext;
+        if (context is null)
+        {
+            return false;
+        }
+
+        EnsureNotificationChannel(context);
+        if (AreNotificationsEnabled(context))
+        {
+            return true;
+        }
+
+        await RequestNotificationPermissionAsync();
+        return AreNotificationsEnabled(context);
+    }
+
+    public Task OpenNotificationSettingsAsync(CancellationToken cancellationToken = default)
+    {
+        var context = Platform.AppContext;
+        if (context is null)
+        {
+            return Task.CompletedTask;
+        }
+
+        var intent = BuildNotificationSettingsIntent(context);
+        intent.AddFlags(ActivityFlags.NewTask);
+        context.StartActivity(intent);
+        return Task.CompletedTask;
+    }
+
     public async Task ScheduleUpcomingBookingRemindersAsync(IEnumerable<ServiceRequestDto> requests, CancellationToken cancellationToken = default)
     {
         var context = Platform.AppContext;
@@ -33,7 +80,10 @@ public sealed class AndroidBookingReminderService : IBookingReminderService
         }
 
         EnsureNotificationChannel(context);
-        await RequestNotificationPermissionAsync();
+        if (!await EnsureNotificationsEnabledAsync(cancellationToken))
+        {
+            return;
+        }
 
         var alarmManager = context.GetSystemService(Context.AlarmService) as AlarmManager;
         if (alarmManager is null)
@@ -167,6 +217,29 @@ public sealed class AndroidBookingReminderService : IBookingReminderService
         });
     }
 
+    private static bool AreNotificationsEnabled(Context context)
+    {
+        if (Build.VERSION.SdkInt >= BuildVersionCodes.Tiramisu &&
+            ContextCompat.CheckSelfPermission(context, PostNotificationsPermissionName) != Permission.Granted)
+        {
+            return false;
+        }
+
+        return NotificationManagerCompat.From(context)?.AreNotificationsEnabled() == true;
+    }
+
+    private static Intent BuildNotificationSettingsIntent(Context context)
+    {
+        if (Build.VERSION.SdkInt >= BuildVersionCodes.O)
+        {
+            return new Intent(global::Android.Provider.Settings.ActionAppNotificationSettings)
+                .PutExtra(global::Android.Provider.Settings.ExtraAppPackage, context.PackageName);
+        }
+
+        return new Intent(global::Android.Provider.Settings.ActionApplicationDetailsSettings)
+            .SetData(Uri.Parse($"package:{context.PackageName}"));
+    }
+
     private static int NotificationId(int requestId, int minutesBefore)
     {
         unchecked
@@ -248,11 +321,18 @@ public sealed class BookingReminderReceiver : BroadcastReceiver
         }
 
         var notificationManager = NotificationManagerCompat.From(context);
-        if (notificationManager is null)
+        if (notificationManager is null || !notificationManager.AreNotificationsEnabled())
         {
             return;
         }
 
-        notificationManager.Notify(notificationId, notification);
+        try
+        {
+            notificationManager.Notify(notificationId, notification);
+        }
+        catch (Java.Lang.SecurityException)
+        {
+            // Android 13+ can revoke notification permission after reminders are scheduled.
+        }
     }
 }

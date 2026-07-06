@@ -214,6 +214,9 @@ public sealed class Shop
     public string? OwnerZipCode { get; set; }
     public string? ContactNumber { get; set; }
     public string ShopStatus { get; set; } = "pending";
+    public bool AllowsReservations { get; set; } = true;
+    public bool AllowsPickup { get; set; } = true;
+    public bool AllowsOnsiteRepair { get; set; } = true;
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
 

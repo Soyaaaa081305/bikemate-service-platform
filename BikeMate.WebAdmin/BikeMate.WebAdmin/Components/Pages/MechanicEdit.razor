@@ -247,6 +247,11 @@
     {
         if (model == null) return;
 
+        var name = $"{model.FirstName} {model.LastName}".Trim();
+        var action = IsCreate ? "Create" : "Save changes to";
+        var confirmed = await JS.InvokeAsync<bool>("confirm", $"{action} {(string.IsNullOrWhiteSpace(name) ? "this mechanic" : name)}?");
+        if (!confirmed) return;
+
         try
         {
             isSaving = true;

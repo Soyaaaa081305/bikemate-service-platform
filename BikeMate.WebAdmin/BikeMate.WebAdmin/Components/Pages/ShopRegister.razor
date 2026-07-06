@@ -4,6 +4,7 @@
 @using BikeMate.WebAdmin.Services
 @inject AdminApiClient AdminApi
 @inject NavigationManager Navigation
+@inject IJSRuntime JS
 
 <PageTitle>Admin - Register Shop</PageTitle>
 
@@ -112,6 +113,13 @@
 
     private async Task RegisterShop()
     {
+        var shopName = string.IsNullOrWhiteSpace(newShop.ShopName) ? "this shop" : newShop.ShopName.Trim();
+        var confirmed = await JS.InvokeAsync<bool>("confirm", $"Register {shopName} for admin review?");
+        if (!confirmed)
+        {
+            return;
+        }
+
         try
         {
             isSaving = true;

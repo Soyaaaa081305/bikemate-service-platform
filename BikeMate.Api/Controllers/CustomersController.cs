@@ -184,7 +184,7 @@ public sealed class CustomersController(BikeMateDbContext db) : ControllerBase
             .Where(x => x.ShopStatus == "verified")
             .OrderBy(x => x.ShopName)
             .Take(5)
-            .Select(x => new ShopSummaryDto(x.ShopId, x.ShopName, x.AddressLine, x.City, x.ContactNumber, x.ShopStatus, x.Latitude, x.Longitude, x.ShopImageUrl, x.ShopLogoUrl))
+            .Select(x => new ShopSummaryDto(x.ShopId, x.ShopName, x.AddressLine, x.City, x.ContactNumber, x.ShopStatus, x.Latitude, x.Longitude, x.ShopImageUrl, x.ShopLogoUrl, 0, null, x.AllowsReservations, x.AllowsPickup, x.AllowsOnsiteRepair))
             .ToArrayAsync(cancellationToken);
         var mechanics = await db.Mechanics
             .Include(x => x.User)

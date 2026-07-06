@@ -4,6 +4,7 @@
 @using BikeMate.WebAdmin.Services
 @inject AdminApiClient AdminApi
 @inject NavigationManager Navigation
+@inject IJSRuntime JS
 
 <PageTitle>Admin - Create User</PageTitle>
 
@@ -90,6 +91,13 @@
 
     private async Task CreateUser()
     {
+        var email = string.IsNullOrWhiteSpace(model.Email) ? "this customer" : model.Email.Trim();
+        var confirmed = await JS.InvokeAsync<bool>("confirm", $"Create a customer account for {email}?");
+        if (!confirmed)
+        {
+            return;
+        }
+
         try
         {
             isSaving = true;

@@ -68,6 +68,9 @@ public sealed class ShopController(
         shop.Latitude = dto.Latitude;
         shop.Longitude = dto.Longitude;
         shop.ContactNumber = dto.ContactNumber;
+        shop.AllowsReservations = dto.AllowsReservations;
+        shop.AllowsPickup = dto.AllowsPickup;
+        shop.AllowsOnsiteRepair = dto.AllowsOnsiteRepair;
         shop.UpdatedAt = DateTime.UtcNow;
         await db.SaveChangesAsync(cancellationToken);
         return Ok(ToDetails(shop));
@@ -571,7 +574,7 @@ public sealed class ShopController(
 
     private static ShopDetailsDto ToDetails(Shop shop)
     {
-        return new ShopDetailsDto(shop.ShopId, shop.ShopName, RemoveDtiLine(shop.ShopDescription), shop.AddressLine, shop.City, shop.Province, shop.ContactNumber, shop.ShopStatus, shop.Latitude, shop.Longitude, shop.ShopImageUrl, shop.ShopLogoUrl);
+        return new ShopDetailsDto(shop.ShopId, shop.ShopName, RemoveDtiLine(shop.ShopDescription), shop.AddressLine, shop.City, shop.Province, shop.ContactNumber, shop.ShopStatus, shop.Latitude, shop.Longitude, shop.ShopImageUrl, shop.ShopLogoUrl, shop.AllowsReservations, shop.AllowsPickup, shop.AllowsOnsiteRepair);
     }
 
     private static ShopApplicationDetailsDto ToApplicationDetails(Shop shop)

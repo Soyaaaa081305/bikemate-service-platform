@@ -166,6 +166,13 @@
 
     private async Task HandleSuspendToggle(int userId, bool isSuspending)
     {
+        var actionLabel = isSuspending ? "suspend" : "reactivate";
+        var confirmed = await JS.InvokeAsync<bool>("confirm", $"Are you sure you want to {actionLabel} user #{userId}?");
+        if (!confirmed)
+        {
+            return;
+        }
+
         try
         {
             statusMessage = null;

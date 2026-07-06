@@ -75,7 +75,10 @@ public sealed record ShopSummaryDto(
     string? ShopImageUrl = null,
     string? ShopLogoUrl = null,
     int ActiveServiceCount = 0,
-    decimal? StartingPrice = null);
+    decimal? StartingPrice = null,
+    bool AllowsReservations = true,
+    bool AllowsPickup = true,
+    bool AllowsOnsiteRepair = true);
 
 public sealed record ShopDetailsDto(
     int ShopId,
@@ -89,7 +92,10 @@ public sealed record ShopDetailsDto(
     decimal? Latitude,
     decimal? Longitude,
     string? ShopImageUrl = null,
-    string? ShopLogoUrl = null);
+    string? ShopLogoUrl = null,
+    bool AllowsReservations = true,
+    bool AllowsPickup = true,
+    bool AllowsOnsiteRepair = true);
 
 public sealed record ShopApplicationDetailsDto(
     int ShopId,
@@ -130,7 +136,10 @@ public sealed record UpsertShopDto(
     string? Province,
     decimal? Latitude,
     decimal? Longitude,
-    string? ContactNumber);
+    string? ContactNumber,
+    bool AllowsReservations = true,
+    bool AllowsPickup = true,
+    bool AllowsOnsiteRepair = true);
 
 public sealed record ShopServiceDto(
     int ShopServiceId,

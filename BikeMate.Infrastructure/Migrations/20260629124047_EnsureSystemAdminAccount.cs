@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -12,8 +12,8 @@ namespace BikeMate.Infrastructure.Migrations
         {
             migrationBuilder.Sql(
                 """
-                DECLARE @AdminEmail nvarchar(255) = N'admin@bikemate.test';
-                DECLARE @AdminPasswordHash nvarchar(500) = N'sha256:a109e36947ad56de1dca1cc49f0ef8ac9ad9a7b1aa0df41fb3c4cb73c1ff01ea';
+                DECLARE @AdminEmail nvarchar(255) = N'isaiahandreinoda@gmail.com';
+                DECLARE @AdminPasswordHash nvarchar(500) = N'sha256:588c55f3ce2b8569b153c5abbf13f9f74308b88a20017cc699b835cc93195d16';
                 DECLARE @AdminUserId int;
                 DECLARE @SystemAdminRoleId int;
 
@@ -46,15 +46,15 @@ namespace BikeMate.Infrastructure.Migrations
                     INSERT INTO [dbo].[users]
                         ([FirstName], [LastName], [Email], [PhoneNumber], [PasswordHash], [ProfileImageUrl], [EmailVerified], [PhoneVerified], [AccountStatus], [CreatedAt], [UpdatedAt])
                     VALUES
-                        (N'BikeMate', N'Admin', @AdminEmail, N'+639000000000', @AdminPasswordHash, NULL, 1, 1, N'active', SYSUTCDATETIME(), NULL);
+                        (N'Isaiah', N'Noda', @AdminEmail, N'+639170000001', @AdminPasswordHash, NULL, 1, 1, N'active', SYSUTCDATETIME(), NULL);
 
                     SET @AdminUserId = CONVERT(int, SCOPE_IDENTITY());
                 END
                 ELSE
                 BEGIN
                     UPDATE [dbo].[users]
-                    SET [FirstName] = CASE WHEN NULLIF(LTRIM(RTRIM([FirstName])), N'') IS NULL THEN N'BikeMate' ELSE [FirstName] END,
-                        [LastName] = CASE WHEN NULLIF(LTRIM(RTRIM([LastName])), N'') IS NULL THEN N'Admin' ELSE [LastName] END,
+                    SET [FirstName] = CASE WHEN NULLIF(LTRIM(RTRIM([FirstName])), N'') IS NULL THEN N'Isaiah' ELSE [FirstName] END,
+                        [LastName] = CASE WHEN NULLIF(LTRIM(RTRIM([LastName])), N'') IS NULL THEN N'Noda' ELSE [LastName] END,
                         [PasswordHash] = @AdminPasswordHash,
                         [EmailVerified] = 1,
                         [PhoneVerified] = 1,

@@ -116,7 +116,10 @@ public sealed class ServicesController(BikeMateDbContext db) : ControllerBase
                 x.ShopImageUrl,
                 x.ShopLogoUrl,
                 x.Services.Count(service => service.IsActive),
-                x.Services.Where(service => service.IsActive).Select(service => (decimal?)service.BasePrice).Min()))
+                x.Services.Where(service => service.IsActive).Select(service => (decimal?)service.BasePrice).Min(),
+                x.AllowsReservations,
+                x.AllowsPickup,
+                x.AllowsOnsiteRepair))
             .ToArray());
     }
 

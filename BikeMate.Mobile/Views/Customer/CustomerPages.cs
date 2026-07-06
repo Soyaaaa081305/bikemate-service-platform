@@ -1873,6 +1873,7 @@ public sealed class CustomerShopDetailsPage : CustomerPageBase, IQueryAttributab
 public sealed class CustomerNotificationsPage : CustomerPageBase
 {
     private IReadOnlyList<NotificationDto> _notifications = [];
+    private NotificationPermissionState _notificationPermissionState = NotificationPermissionState.NotRequired;
     private string? _banner;
     private bool _isLoading;
 
@@ -1899,6 +1900,7 @@ public sealed class CustomerNotificationsPage : CustomerPageBase
         Render("Refreshing notifications...");
         try
         {
+            await RefreshNotificationPermissionStateAsync();
             _notifications = await CustomerApiClient.GetNotificationsAsync();
             _banner = null;
         }
@@ -1922,6 +1924,11 @@ public sealed class CustomerNotificationsPage : CustomerPageBase
             body.Add(NoticeCard(banner));
         }
 
+        if (_notificationPermissionState == NotificationPermissionState.Disabled)
+        {
+            body.Add(NotificationPermissionCard());
+        }
+
         body.Add(GhostButton(_isLoading ? "Refreshing..." : "Refresh status", new Command(async () => await LoadAsync())));
 
         if (_notifications.Count == 0 && !_isLoading)
@@ -1941,6 +1948,58 @@ public sealed class CustomerNotificationsPage : CustomerPageBase
         }
 
         SetScaffold(new ScrollView { Content = body }, "Home", false);
+    }
+
+    private async Task RefreshNotificationPermissionStateAsync()
+    {
+        var reminderService = Application.Current?.Handler?.MauiContext?.Services.GetService<IBookingReminderService>();
+        if (reminderService is null)
+        {
+            _notificationPermissionState = NotificationPermissionState.NotRequired;
+            return;
+        }
+
+        _notificationPermissionState = await reminderService.GetNotificationPermissionStateAsync();
+    }
+
+    private View NotificationPermissionCard()
+    {
+        var stack = new VerticalStackLayout { Spacing = 10 };
+        stack.Add(Label(
+            "Phone notifications are off. BikeMate can still show alerts here, but Android will block reminder popups until permission is enabled.",
+            11,
+            CustomerUi.Muted));
+        stack.Add(OrangeButton("Enable notifications", new Command(async () => await EnableNotificationsAsync())));
+        return Card(stack, Colors.White, 8, new Thickness(14));
+    }
+
+    private async Task EnableNotificationsAsync()
+    {
+        var reminderService = Application.Current?.Handler?.MauiContext?.Services.GetService<IBookingReminderService>();
+        if (reminderService is null)
+        {
+            return;
+        }
+
+        var enabled = await reminderService.EnsureNotificationsEnabledAsync();
+        if (!enabled)
+        {
+            await reminderService.OpenNotificationSettingsAsync();
+        }
+        else
+        {
+            try
+            {
+                await ScheduleBookingRemindersAsync(await CustomerApiClient.GetMyRequestsAsync());
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Booking reminder reschedule failed after enabling notifications: {ex}");
+            }
+        }
+
+        await RefreshNotificationPermissionStateAsync();
+        Render(_banner);
     }
 
     private View NotificationRow(NotificationDto notification)

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -1092,10 +1092,10 @@ namespace BikeMate.Infrastructure.Migrations
                 columns: new[] { "UserId", "AccountStatus", "CreatedAt", "Email", "EmailVerified", "FirstName", "LastName", "PasswordHash", "PhoneNumber", "PhoneVerified", "ProfileImageUrl", "UpdatedAt" },
                 values: new object[,]
                 {
-                    { 1, "active", new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc), "customer@bikemate.test", true, "Juan", "Customer", "sha256:a109e36947ad56de1dca1cc49f0ef8ac9ad9a7b1aa0df41fb3c4cb73c1ff01ea", "+639171234567", true, null, null },
-                    { 2, "active", new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc), "mechanic@bikemate.test", true, "Rico", "Mechanic", "sha256:a109e36947ad56de1dca1cc49f0ef8ac9ad9a7b1aa0df41fb3c4cb73c1ff01ea", "+639171234567", true, null, null },
-                    { 3, "active", new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc), "shop@bikemate.test", true, "Maya", "ShopAdmin", "sha256:a109e36947ad56de1dca1cc49f0ef8ac9ad9a7b1aa0df41fb3c4cb73c1ff01ea", "+639171234567", true, null, null },
-                    { 4, "active", new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc), "admin@bikemate.test", true, "Ana", "Admin", "sha256:a109e36947ad56de1dca1cc49f0ef8ac9ad9a7b1aa0df41fb3c4cb73c1ff01ea", "+639171234567", true, null, null }
+                    { 1, "active", new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc), "customer@bikemate.test", true, "Juan", "Customer", "sha256:588c55f3ce2b8569b153c5abbf13f9f74308b88a20017cc699b835cc93195d16", "+639171234567", true, null, null },
+                    { 2, "active", new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc), "mechanic@bikemate.test", true, "Rico", "Mechanic", "sha256:588c55f3ce2b8569b153c5abbf13f9f74308b88a20017cc699b835cc93195d16", "+639171234567", true, null, null },
+                    { 3, "active", new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc), "shop@bikemate.test", true, "Maya", "ShopAdmin", "sha256:588c55f3ce2b8569b153c5abbf13f9f74308b88a20017cc699b835cc93195d16", "+639171234567", true, null, null },
+                    { 4, "active", new DateTime(2026, 6, 8, 0, 0, 0, 0, DateTimeKind.Utc), "isaiahandreinoda@gmail.com", true, "Isaiah", "Noda", "sha256:588c55f3ce2b8569b153c5abbf13f9f74308b88a20017cc699b835cc93195d16", "+639170000001", true, null, null }
                 });
 
             migrationBuilder.InsertData(

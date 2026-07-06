@@ -79,11 +79,7 @@ SET IDENTITY_INSERT dbo.users ON;
 INSERT INTO dbo.users
     (UserId, FirstName, LastName, Email, PhoneNumber, PasswordHash, ProfileImageUrl, EmailVerified, PhoneVerified, AccountStatus, CreatedAt, UpdatedAt)
 VALUES
-    (1, N'Admin', N'One', N'admin1@bikemate.test', N'+639170000001', @PasswordHash, N'https://placehold.co/160x160/1f2937/ffffff.png?text=A1', 1, 1, N'active', DATEADD(day, -30, @Now), @Now),
-    (2, N'Admin', N'Two', N'admin2@bikemate.test', N'+639170000002', @PasswordHash, N'https://placehold.co/160x160/374151/ffffff.png?text=A2', 1, 1, N'active', DATEADD(day, -29, @Now), @Now),
-    (3, N'Admin', N'Pending', N'admin3@bikemate.test', N'+639170000003', @PasswordHash, N'https://placehold.co/160x160/f59e0b/111827.png?text=AP', 1, 1, N'pending', DATEADD(day, -28, @Now), @Now),
-    (4, N'Admin', N'Suspended', N'admin4@bikemate.test', N'+639170000004', @PasswordHash, N'https://placehold.co/160x160/dc2626/ffffff.png?text=AS', 1, 1, N'suspended', DATEADD(day, -27, @Now), @Now),
-    (5, N'Admin', N'Ops', N'admin5@bikemate.test', N'+639170000005', @PasswordHash, N'https://placehold.co/160x160/0f766e/ffffff.png?text=A5', 1, 1, N'active', DATEADD(day, -26, @Now), @Now),
+    (1, N'Isaiah', N'Noda', N'isaiahandreinoda@gmail.com', N'+639170000001', @PasswordHash, N'https://placehold.co/160x160/1f2937/ffffff.png?text=A1', 1, 1, N'active', DATEADD(day, -30, @Now), @Now),
 
     (101, N'Cora', N'Active', N'customer1@bikemate.test', N'+639181000001', @PasswordHash, N'https://placehold.co/160x160/2563eb/ffffff.png?text=C1', 1, 1, N'active', DATEADD(day, -20, @Now), @Now),
     (102, N'Pia', N'Pending', N'customer2@bikemate.test', N'+639181000002', @PasswordHash, N'https://placehold.co/160x160/f59e0b/111827.png?text=C2', 0, 1, N'pending', DATEADD(day, -19, @Now), @Now),
@@ -105,7 +101,7 @@ VALUES
 SET IDENTITY_INSERT dbo.users OFF;
 
 INSERT INTO dbo.user_roles (UserId, RoleId, AssignedAt)
-SELECT UserId, 4, @Now FROM dbo.users WHERE UserId BETWEEN 1 AND 5
+SELECT UserId, 4, @Now FROM dbo.users WHERE UserId = 1
 UNION ALL SELECT UserId, 1, @Now FROM dbo.users WHERE UserId BETWEEN 101 AND 105
 UNION ALL SELECT UserId, 3, @Now FROM dbo.users WHERE UserId BETWEEN 201 AND 205
 UNION ALL SELECT UserId, 2, @Now FROM dbo.users WHERE UserId BETWEEN 301 AND 305;

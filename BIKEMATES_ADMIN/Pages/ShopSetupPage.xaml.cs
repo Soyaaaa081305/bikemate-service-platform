@@ -101,6 +101,9 @@ public partial class ShopSetupPage : ContentPage
         var profile = _status.Profile;
         ShopNameLabel.Text = profile.ShopName;
         DescriptionEditor.Text = profile.ShopDescription ?? string.Empty;
+        ReservationsSwitch.IsToggled = profile.AllowsReservations;
+        PickupSwitch.IsToggled = profile.AllowsPickup;
+        OnsiteRepairSwitch.IsToggled = profile.AllowsOnsiteRepair;
 
         ApplyImage(CoverImage, CoverPlaceholder, profile.ShopImageUrl);
         ApplyImage(LogoImage, LogoPlaceholder, profile.ShopLogoUrl);
@@ -217,11 +220,20 @@ public partial class ShopSetupPage : ContentPage
             return false;
         }
 
+        if (!ReservationsSwitch.IsToggled && !PickupSwitch.IsToggled && !OnsiteRepairSwitch.IsToggled)
+        {
+            await DisplayAlertAsync("Booking Availability", "Keep at least one booking option enabled so customers can request service.", "OK");
+            return false;
+        }
+
         try
         {
             await BikeMateDatabaseService.UpdateShopProfileAsync(_status.Profile with
             {
-                ShopDescription = description
+                ShopDescription = description,
+                AllowsReservations = ReservationsSwitch.IsToggled,
+                AllowsPickup = PickupSwitch.IsToggled,
+                AllowsOnsiteRepair = OnsiteRepairSwitch.IsToggled
             });
             await RefreshStatusAsync();
             if (showConfirmation)

@@ -16,6 +16,7 @@ if (builder.Environment.IsDevelopment())
 // Add services
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 builder.Services.AddControllers();
+builder.Services.AddHttpClient();
 var connectionString = builder.Configuration.GetConnectionString("BikeMateDb")
     ?? "Server=localhost\\SQLEXPRESS;Database=BikeMatesDB_Dev;Trusted_Connection=True;TrustServerCertificate=True;Command Timeout=300;";
 
@@ -25,6 +26,7 @@ builder.Services.AddDbContext<BikeMateDbContext>(options =>
 // UI data service
 builder.Services.AddScoped<AdminApiClient>();
 builder.Services.AddScoped<IWebAdminAgoraCallService, WebAdminAgoraCallService>();
+builder.Services.AddScoped<IAdminOtpEmailService, AdminOtpEmailService>();
 
 // AUTHENTICATION & AUTHORIZATION SETUP
 builder.Services.AddHttpContextAccessor();

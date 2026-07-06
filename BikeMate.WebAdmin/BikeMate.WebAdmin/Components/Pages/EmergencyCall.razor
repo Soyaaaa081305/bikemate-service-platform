@@ -90,6 +90,12 @@
 
     private async Task JoinAsync()
     {
+        var confirmed = await Js.InvokeAsync<bool>("confirm", $"Join emergency call for request #{RequestId}?");
+        if (!confirmed)
+        {
+            return;
+        }
+
         isJoining = true;
         statusMessage = null;
         callStatus = "Preparing Agora session...";
@@ -142,6 +148,12 @@
 
     private async Task LeaveAsync()
     {
+        var confirmed = await Js.InvokeAsync<bool>("confirm", "Leave this emergency call?");
+        if (!confirmed)
+        {
+            return;
+        }
+
         await Js.InvokeVoidAsync("bikeMateEmergencyCall.leave");
         isConnected = false;
         callStatus = "Call ended on this browser.";

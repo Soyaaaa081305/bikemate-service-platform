@@ -66,6 +66,19 @@ public class AdminAccountEditDto
     public string? ConfirmPassword { get; set; }
 }
 
+public class AuditLogDto
+{
+    public int AuditId { get; set; }
+    public string ActorName { get; set; } = "System";
+    public string ActorEmail { get; set; } = string.Empty;
+    public string ActionName { get; set; } = string.Empty;
+    public string EntityName { get; set; } = string.Empty;
+    public string? EntityId { get; set; }
+    public string? OldValuesJson { get; set; }
+    public string? NewValuesJson { get; set; }
+    public DateTime CreatedAt { get; set; }
+}
+
 public class UserDto
 {
     public int UserId { get; set; }

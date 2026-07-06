@@ -452,6 +452,17 @@ public sealed class AuthService(
     IEmailService emailService,
     IGoogleAuthService googleAuthService) : IAuthService
 {
+    private const string EmailVerificationPurpose = "email_verification";
+
+    private static readonly string[] EmailVerificationPurposeAliases =
+    [
+        EmailVerificationPurpose,
+        "customer_email_verification",
+        "mechanic_email_verification",
+        "shop_email_verification",
+        "shop_admin_email_verification"
+    ];
+
     public async Task<AuthResponseDto> RegisterAsync(RegisterRequestDto dto, CancellationToken cancellationToken)
     {
         ValidatePassword(dto.Password);
@@ -618,11 +629,12 @@ public sealed class AuthService(
     {
         var email = NormalizeEmail(dto.Email);
         var purpose = NormalizeOtpPurpose(dto.Purpose);
+        var purposeLookup = PurposeLookupSet(purpose);
         var code = NormalizeOtpCode(dto.OtpCode);
         var user = await db.Users.SingleOrDefaultAsync(x => x.Email == email, cancellationToken)
             ?? throw new InvalidOperationException("User was not found.");
         var otp = await db.OtpVerifications
-            .Where(x => x.UserId == user.UserId && x.Purpose == purpose && x.ConsumedAt == null)
+            .Where(x => x.UserId == user.UserId && purposeLookup.Contains(x.Purpose) && x.ConsumedAt == null)
             .OrderByDescending(x => x.CreatedAt)
             .FirstOrDefaultAsync(cancellationToken)
             ?? throw new InvalidOperationException("OTP was not found.");
@@ -645,7 +657,7 @@ public sealed class AuthService(
         }
 
         otp.ConsumedAt = DateTime.UtcNow;
-        if (purpose == "email_verification")
+        if (purpose == EmailVerificationPurpose)
         {
             user.EmailVerified = true;
             user.UpdatedAt = DateTime.UtcNow;
@@ -658,7 +670,7 @@ public sealed class AuthService(
     {
         var email = NormalizeEmail(dto.Email);
         var purpose = NormalizeOtpPurpose(dto.Purpose);
-        var user = await db.Users.SingleOrDefaultAsync(x => x.Email == email, cancellationToken)
+        var user = await db.Users.SingleOrDefaultAsync(x => x.Email == email && x.AccountStatus != "deleted", cancellationToken)
             ?? throw new InvalidOperationException("User was not found.");
         await CreateAndSendOtpAsync(user, purpose, cancellationToken);
     }
@@ -752,14 +764,25 @@ public sealed class AuthService(
 
     private async Task CreateAndSendOtpAsync(User user, string purpose, CancellationToken cancellationToken)
     {
+        purpose = NormalizeOtpPurpose(purpose);
+        var now = DateTime.UtcNow;
+        var purposeLookup = PurposeLookupSet(purpose);
+        var openOtps = await db.OtpVerifications
+            .Where(x => x.UserId == user.UserId && purposeLookup.Contains(x.Purpose) && x.ConsumedAt == null)
+            .ToListAsync(cancellationToken);
+        foreach (var openOtp in openOtps)
+        {
+            openOtp.ConsumedAt = now;
+        }
+
         var code = otpService.GenerateCode();
         db.OtpVerifications.Add(new OtpVerification
         {
             UserId = user.UserId,
             Purpose = purpose,
             OtpHash = otpService.HashCode(code),
-            ExpiresAt = DateTime.UtcNow.AddMinutes(10),
-            CreatedAt = DateTime.UtcNow
+            ExpiresAt = now.AddMinutes(10),
+            CreatedAt = now
         });
         await db.SaveChangesAsync(cancellationToken);
         await db.Entry(user)
@@ -772,9 +795,20 @@ public sealed class AuthService(
 
     private static string NormalizeOtpPurpose(string? purpose)
     {
-        return string.IsNullOrWhiteSpace(purpose)
-            ? "email_verification"
+        var normalized = string.IsNullOrWhiteSpace(purpose)
+            ? EmailVerificationPurpose
             : purpose.Trim().ToLowerInvariant();
+
+        return EmailVerificationPurposeAliases.Contains(normalized)
+            ? EmailVerificationPurpose
+            : normalized;
+    }
+
+    private static string[] PurposeLookupSet(string purpose)
+    {
+        return purpose == EmailVerificationPurpose
+            ? EmailVerificationPurposeAliases
+            : [purpose];
     }
 
     private static string NormalizeOtpCode(string? code)
@@ -1180,6 +1214,20 @@ public sealed class ServiceRequestService(BikeMateDbContext db) : IServiceReques
             throw new InvalidOperationException("Selected services must come from one shop.");
         }
 
+        if (selectedShopId is not null)
+        {
+            var shopAvailability = await db.Shops
+                .Where(x => x.ShopId == selectedShopId && x.ShopStatus == "verified")
+                .Select(x => new ShopAvailability(x.AllowsReservations, x.AllowsPickup, x.AllowsOnsiteRepair))
+                .SingleOrDefaultAsync(cancellationToken);
+            if (shopAvailability is null)
+            {
+                throw new InvalidOperationException("Select an available repair shop.");
+            }
+
+            EnsureShopAllowsRequestMode(shopAvailability, dto.ScheduledAt, dto.IssueDescription);
+        }
+
         var productIds = MergeIds(null, dto.ProductIds);
         var selectedProducts = productIds.Count == 0 || selectedShopId is null
             ? []
@@ -1302,6 +1350,42 @@ public sealed class ServiceRequestService(BikeMateDbContext db) : IServiceReques
             throw new InvalidOperationException("Choose an available service time from 8:00 AM to 5:00 PM in 1 hour 30 minute intervals.");
         }
     }
+
+    private static void EnsureShopAllowsRequestMode(ShopAvailability shop, DateTime? scheduledAt, string? issueDescription)
+    {
+        if (scheduledAt is not null)
+        {
+            if (!shop.AllowsReservations)
+            {
+                throw new InvalidOperationException("This shop is not accepting reservations right now.");
+            }
+
+            return;
+        }
+
+        if (ContainsAssistanceMethod(issueDescription, "Pick-up Repair"))
+        {
+            if (!shop.AllowsPickup)
+            {
+                throw new InvalidOperationException("This shop is not accepting pickup repair right now.");
+            }
+
+            return;
+        }
+
+        if (!shop.AllowsOnsiteRepair)
+        {
+            throw new InvalidOperationException("This shop is not accepting on-site repair right now.");
+        }
+    }
+
+    private static bool ContainsAssistanceMethod(string? issueDescription, string assistanceMethod)
+    {
+        return !string.IsNullOrWhiteSpace(issueDescription) &&
+            issueDescription.Contains($"Assistance method: {assistanceMethod}", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private sealed record ShopAvailability(bool AllowsReservations, bool AllowsPickup, bool AllowsOnsiteRepair);
 
     private static DateTime ToPhilippineLocalTime(DateTime scheduledUtc)
     {
@@ -1508,7 +1592,8 @@ public sealed class BookingConversationService(BikeMateDbContext db) : IBookingC
 
         var supportUserId = await db.UserRoles
             .Where(x => x.Role!.RoleName == AppRoles.SystemAdmin)
-            .OrderBy(x => x.UserId)
+            .OrderBy(x => x.UserId == request.Client.UserId)
+            .ThenBy(x => x.UserId)
             .Select(x => (int?)x.UserId)
             .FirstOrDefaultAsync(cancellationToken);
         if (supportUserId is null)
@@ -1526,6 +1611,14 @@ public sealed class BookingConversationService(BikeMateDbContext db) : IBookingC
                  x.ConversationType == "emergency_request"),
                 cancellationToken);
 
+        var now = DateTime.UtcNow;
+        var requiredParticipants = new HashSet<int> { request.Client.UserId, supportUserId.Value };
+        var mechanicJoined = false;
+        if (request.Mechanic?.User is not null)
+        {
+            mechanicJoined = requiredParticipants.Add(request.Mechanic.UserId);
+        }
+
         if (conversation is null)
         {
             conversation = new Conversation
@@ -1534,11 +1627,9 @@ public sealed class BookingConversationService(BikeMateDbContext db) : IBookingC
                 ConversationType = "emergency_support",
                 CreatedAt = request.CreatedAt,
                 LastMessageAt = request.CreatedAt,
-                Participants =
-                [
-                    new ConversationParticipant { UserId = request.Client.UserId, JoinedAt = request.CreatedAt },
-                    new ConversationParticipant { UserId = supportUserId.Value, JoinedAt = request.CreatedAt }
-                ]
+                Participants = requiredParticipants
+                    .Select(userId => new ConversationParticipant { UserId = userId, JoinedAt = request.CreatedAt })
+                    .ToList()
             };
             AddAutomatedMessage(
                 conversation,
@@ -1552,32 +1643,29 @@ public sealed class BookingConversationService(BikeMateDbContext db) : IBookingC
             conversation.ConversationType = "emergency_support";
         }
 
-        if (conversation.Participants.All(x => x.UserId != request.Client.UserId))
+        var participantUserIds = conversation.Participants
+            .Select(x => x.UserId)
+            .ToHashSet();
+        var addedMechanicToConversation = false;
+        foreach (var userId in requiredParticipants)
         {
-            conversation.Participants.Add(new ConversationParticipant
+            if (participantUserIds.Add(userId))
             {
-                UserId = request.Client.UserId,
-                JoinedAt = DateTime.UtcNow
-            });
+                conversation.Participants.Add(new ConversationParticipant
+                {
+                    UserId = userId,
+                    JoinedAt = now
+                });
+                if (request.Mechanic?.UserId == userId)
+                {
+                    addedMechanicToConversation = true;
+                }
+            }
         }
 
-        if (conversation.Participants.All(x => x.UserId != supportUserId.Value))
+        if ((mechanicJoined && conversation.ConversationId == 0 || addedMechanicToConversation) &&
+            request.Mechanic?.User is not null)
         {
-            conversation.Participants.Add(new ConversationParticipant
-            {
-                UserId = supportUserId.Value,
-                JoinedAt = DateTime.UtcNow
-            });
-        }
-
-        if (request.Mechanic?.User is not null &&
-            conversation.Participants.All(x => x.UserId != request.Mechanic.UserId))
-        {
-            conversation.Participants.Add(new ConversationParticipant
-            {
-                UserId = request.Mechanic.UserId,
-                JoinedAt = DateTime.UtcNow
-            });
             AddAutomatedMessage(
                 conversation,
                 supportUserId.Value,

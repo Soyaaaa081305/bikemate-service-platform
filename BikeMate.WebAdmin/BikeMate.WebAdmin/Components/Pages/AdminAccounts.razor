@@ -75,6 +75,7 @@
                                             <td class="text-muted small">@admin.CreatedAt.ToString("MMM dd, yyyy")</td>
                                             <td class="text-end pe-4">
                                                 <div class="btn-group btn-group-sm" role="group" aria-label="Admin account actions">
+                                                    <button type="button" class="btn btn-outline-success" @onclick="() => SendCode(admin)" disabled="@(isBusy || !IsActive(admin))">Send code</button>
                                                     <button type="button" class="btn btn-outline-primary" @onclick="() => SelectAdmin(admin.UserId)" disabled="@isBusy">Edit</button>
                                                     <button type="button" class="btn btn-outline-danger" @onclick="() => DeleteAdmin(admin)" disabled="@isBusy">Delete</button>
                                                 </div>
@@ -108,7 +109,7 @@
                             </div>
                             <div class="col-12">
                                 <label class="form-label fw-semibold">Email address</label>
-                                <input class="form-control" type="email" @bind="createModel.Email" autocomplete="email" placeholder="admin@bikemate.test" />
+                                <input class="form-control" type="email" @bind="createModel.Email" autocomplete="email" placeholder="admin@example.com" />
                             </div>
                             <div class="col-12">
                                 <label class="form-label fw-semibold">Phone number</label>
@@ -244,14 +245,57 @@
 
     private async Task CreateAdmin()
     {
+        var email = string.IsNullOrWhiteSpace(createModel.Email) ? "this admin" : createModel.Email.Trim();
+        var confirmed = await JS.InvokeAsync<bool>("confirm", $"Create a new system admin account for {email} and send a login code?");
+        if (!confirmed)
+        {
+            return;
+        }
+
         isBusy = true;
         try
         {
             var created = await AdminApi.CreateAdminAccountAsync(createModel);
             createModel = new();
-            statusType = "success";
-            statusMessage = $"Admin account created for {created.Email}.";
+            try
+            {
+                await AdminApi.SendAdminLoginCodeAsync(created.UserId);
+                statusType = "success";
+                statusMessage = $"Admin account created for {created.Email}. A login code was sent to their email.";
+            }
+            catch (Exception emailEx)
+            {
+                statusType = "warning";
+                statusMessage = $"Admin account created for {created.Email}, but the login code email was not sent: {emailEx.Message}";
+            }
+
             await LoadAdmins();
+        }
+        catch (Exception ex)
+        {
+            statusType = "danger";
+            statusMessage = ex.Message;
+        }
+        finally
+        {
+            isBusy = false;
+        }
+    }
+
+    private async Task SendCode(AdminAccountDto admin)
+    {
+        var confirmed = await JS.InvokeAsync<bool>("confirm", $"Send a fresh admin login code to {admin.Email}?");
+        if (!confirmed)
+        {
+            return;
+        }
+
+        isBusy = true;
+        try
+        {
+            await AdminApi.SendAdminLoginCodeAsync(admin.UserId);
+            statusType = "success";
+            statusMessage = $"A fresh admin login code was sent to {admin.Email}.";
         }
         catch (Exception ex)
         {
@@ -290,6 +334,12 @@
     private async Task SaveAdmin()
     {
         if (editModel == null)
+        {
+            return;
+        }
+
+        var confirmed = await JS.InvokeAsync<bool>("confirm", $"Save admin account changes for {editModel.Email}?");
+        if (!confirmed)
         {
             return;
         }
@@ -364,6 +414,11 @@
         return string.IsNullOrWhiteSpace(status)
             ? "Unknown"
             : char.ToUpperInvariant(status[0]) + status[1..].ToLowerInvariant();
+    }
+
+    private static bool IsActive(AdminAccountDto admin)
+    {
+        return string.Equals(admin.AccountStatus, "active", StringComparison.OrdinalIgnoreCase);
     }
 
     private static string StatusBadgeClass(string status)

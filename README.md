@@ -267,13 +267,16 @@ az webapp config appsettings set `
     "Agora__PrimaryCertificate=<agora-primary-certificate>"
 ```
 
-Update WebAdmin Agora settings if web emergency calls are enabled:
+Update WebAdmin email and Agora settings:
 
 ```powershell
 az webapp config appsettings set `
   --resource-group BikeMateDemoRG `
   --name bikemate-webadmin-demo `
   --settings `
+    "SendGrid__ApiKey=<sendgrid-api-key>" `
+    "SendGrid__FromEmail=<verified-sender-email>" `
+    "SendGrid__FromName=BikeMate" `
     "Agora__AppId=<agora-app-id>" `
     "Agora__PrimaryCertificate=<agora-primary-certificate>"
 ```
@@ -287,6 +290,23 @@ az webapp restart --resource-group BikeMateDemoRG --name bikemate-webadmin-demo
 powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\Test-CloudDeployment.ps1
 powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\Stop-BikeMateAzureDemo.ps1
 ```
+
+Check that SendGrid is configured in Azure without printing secret values:
+
+```powershell
+$apps = @("bikemate-api-demo", "bikemate-webadmin-demo")
+foreach ($app in $apps) {
+  $settings = az webapp config appsettings list --resource-group BikeMateDemoRG --name $app | ConvertFrom-Json
+  Write-Host "[$app]"
+  foreach ($name in @("SendGrid__ApiKey", "SendGrid__FromEmail", "SendGrid__FromName")) {
+    $item = $settings | Where-Object { $_.name -eq $name } | Select-Object -First 1
+    $configured = $null -ne $item -and -not [string]::IsNullOrWhiteSpace($item.value) -and -not $item.value.StartsWith("YOUR_", [StringComparison]::OrdinalIgnoreCase)
+    Write-Host "$name configured: $configured"
+  }
+}
+```
+
+Admin website OTP is sent to the email typed at login, as long as that account is active and has the `SystemAdmin` role. Admin accounts created from the Admin Accounts page are active by default and can receive a fresh login code from the same page.
 
 ### Before Pushing To GitHub
 
@@ -317,7 +337,7 @@ The second command should print nothing.
 | Customer | `customer1@bikemate.test` | `Demo123!` |
 | Mechanic | `mechanic1@bikemate.test` | `Demo123!` |
 | ShopAdmin | `shop1@bikemate.test` | `Demo123!` |
-| SystemAdmin | `admin1@bikemate.test` | `Demo123!` |
+| SystemAdmin | `isaiahandreinoda@gmail.com` | `Demo123!` |
 
 ## Configuration And Secrets
 

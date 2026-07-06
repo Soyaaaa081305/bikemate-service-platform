@@ -1,0 +1,223 @@
+@page "/audit-trail"
+@rendermode InteractiveServer
+@using System.Text.Json
+@using BikeMate.WebAdmin.DTOs
+@using BikeMate.WebAdmin.Services
+@inject AdminApiClient AdminApi
+
+<PageTitle>Admin - Audit Trail</PageTitle>
+
+<div class="admin-page">
+    <div class="admin-page-header">
+        <div>
+            <h1 class="admin-page-title">Audit Trail</h1>
+            <p class="admin-page-description">Review admin actions, affected records, and before/after summaries.</p>
+        </div>
+
+        <div class="admin-page-actions">
+            <div class="input-group admin-search shadow-sm">
+                <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+                <input type="text" class="form-control border-start-0" placeholder="Search audit trail"
+                       @bind="searchTerm" @bind:event="oninput" />
+            </div>
+            <button class="btn btn-outline-primary shadow-sm" @onclick="LoadAuditLogs" disabled="@isLoading">
+                <i class="bi bi-arrow-clockwise me-1"></i> Refresh
+            </button>
+        </div>
+    </div>
+
+    <ActionMessage Message="@statusMessage" AlertType="@statusType" OnMessageCleared="() => statusMessage = null" />
+
+    @if (auditLogs != null)
+    {
+        <div class="admin-summary-strip">
+            <div class="admin-summary-chip">
+                <i class="bi bi-activity"></i>
+                <div>
+                    <small>Loaded</small>
+                    <strong>@auditLogs.Length</strong>
+                </div>
+            </div>
+            <div class="admin-summary-chip">
+                <i class="bi bi-person-badge"></i>
+                <div>
+                    <small>Actors</small>
+                    <strong>@auditLogs.Select(x => x.ActorEmail).Where(x => !string.IsNullOrWhiteSpace(x)).Distinct(StringComparer.OrdinalIgnoreCase).Count()</strong>
+                </div>
+            </div>
+            <div class="admin-summary-chip">
+                <i class="bi bi-clock-history"></i>
+                <div>
+                    <small>Latest</small>
+                    <strong>@LatestLabel</strong>
+                </div>
+            </div>
+        </div>
+    }
+
+    <div class="card admin-table-card">
+        <div class="card-body p-0">
+            @if (isLoading && auditLogs is null)
+            {
+                <div class="empty-state">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="mt-2 mb-0">Loading audit trail...</p>
+                </div>
+            }
+            else if (!FilteredAuditLogs.Any())
+            {
+                <div class="empty-state">No audit entries match the current search.</div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-light text-muted text-uppercase">
+                            <tr>
+                                <th class="ps-4">Time</th>
+                                <th>Admin</th>
+                                <th>Action</th>
+                                <th>Target</th>
+                                <th>Before</th>
+                                <th class="pe-4">After</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var entry in FilteredAuditLogs)
+                            {
+                                <tr>
+                                    <td class="ps-4 text-nowrap">
+                                        <div class="fw-semibold">@entry.CreatedAt.ToLocalTime().ToString("MMM dd, h:mm tt")</div>
+                                        <div class="text-muted small">@entry.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd")</div>
+                                    </td>
+                                    <td>
+                                        <div class="fw-semibold">@entry.ActorName</div>
+                                        <div class="text-muted small">@Fallback(entry.ActorEmail)</div>
+                                    </td>
+                                    <td><span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25 rounded-pill">@LabelAction(entry.ActionName)</span></td>
+                                    <td>
+                                        <div class="fw-semibold">@entry.EntityName</div>
+                                        <div class="text-muted small">@Fallback(entry.EntityId)</div>
+                                    </td>
+                                    <td class="small audit-cell">@FormatPayload(entry.OldValuesJson)</td>
+                                    <td class="small audit-cell pe-4">@FormatPayload(entry.NewValuesJson)</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private AuditLogDto[]? auditLogs;
+    private string searchTerm = string.Empty;
+    private string? statusMessage;
+    private string statusType = "danger";
+    private bool isLoading;
+
+    private IEnumerable<AuditLogDto> FilteredAuditLogs
+    {
+        get
+        {
+            var source = auditLogs ?? Array.Empty<AuditLogDto>();
+            if (string.IsNullOrWhiteSpace(searchTerm))
+            {
+                return source;
+            }
+
+            return source.Where(entry =>
+                Contains(entry.ActorName, searchTerm) ||
+                Contains(entry.ActorEmail, searchTerm) ||
+                Contains(entry.ActionName, searchTerm) ||
+                Contains(entry.EntityName, searchTerm) ||
+                Contains(entry.EntityId, searchTerm) ||
+                Contains(entry.OldValuesJson, searchTerm) ||
+                Contains(entry.NewValuesJson, searchTerm));
+        }
+    }
+
+    private string LatestLabel => auditLogs?.Length > 0
+        ? auditLogs.Max(x => x.CreatedAt).ToLocalTime().ToString("h:mm tt")
+        : "None";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAuditLogs();
+    }
+
+    private async Task LoadAuditLogs()
+    {
+        isLoading = true;
+        try
+        {
+            auditLogs = await AdminApi.GetAuditLogsAsync() ?? Array.Empty<AuditLogDto>();
+            statusMessage = AdminApi.LastError;
+            statusType = string.IsNullOrWhiteSpace(statusMessage) ? statusType : "danger";
+        }
+        catch (Exception ex)
+        {
+            auditLogs = Array.Empty<AuditLogDto>();
+            statusType = "danger";
+            statusMessage = ex.Message;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private static bool Contains(string? value, string term)
+    {
+        return value?.Contains(term, StringComparison.OrdinalIgnoreCase) == true;
+    }
+
+    private static string Fallback(string? value)
+    {
+        return string.IsNullOrWhiteSpace(value) ? "Not set" : value;
+    }
+
+    private static string LabelAction(string action)
+    {
+        if (string.IsNullOrWhiteSpace(action)) return "Unknown";
+        return string.Concat(action.Select((ch, index) =>
+            index > 0 && char.IsUpper(ch) ? " " + ch : ch.ToString()));
+    }
+
+    private static string FormatPayload(string? payload)
+    {
+        if (string.IsNullOrWhiteSpace(payload)) return "None";
+
+        try
+        {
+            using var document = JsonDocument.Parse(payload);
+            if (document.RootElement.ValueKind != JsonValueKind.Object)
+            {
+                return payload;
+            }
+
+            var parts = new List<string>();
+            foreach (var property in document.RootElement.EnumerateObject())
+            {
+                var value = property.Value.ValueKind switch
+                {
+                    JsonValueKind.String => property.Value.GetString(),
+                    JsonValueKind.Number => property.Value.ToString(),
+                    JsonValueKind.True => "true",
+                    JsonValueKind.False => "false",
+                    JsonValueKind.Null => "null",
+                    _ => property.Value.ToString()
+                };
+                parts.Add($"{LabelAction(property.Name)}: {value}");
+            }
+
+            return string.Join("; ", parts);
+        }
+        catch
+        {
+            return payload;
+        }
+    }
+}

@@ -1,5 +1,6 @@
-﻿@page "/login"
+@page "/login"
 @attribute [AllowAnonymous]
+@using Microsoft.AspNetCore.WebUtilities
 @inject NavigationManager Navigation
 
 <PageTitle>BikeMate Admin | Login</PageTitle>
@@ -14,47 +15,156 @@
                 <p class="auth-copy">Authorized personnel only</p>
             </div>
 
-            @if (Navigation.Uri.Contains("error=db"))
+            @if (!string.IsNullOrWhiteSpace(AlertMessage))
             {
-                <div class="alert alert-danger bg-danger bg-opacity-25 text-white border-danger border-opacity-50 text-center" role="alert">
-                    Unable to connect to the BikeMate database. Check that SQL Server is running and try again.
-                </div>
-            }
-            else if (Navigation.Uri.Contains("error=true"))
-            {
-                <div class="alert alert-danger bg-danger bg-opacity-25 text-white border-danger border-opacity-50 text-center" role="alert">
-                    Invalid email or password.
+                <div class="@AlertClass" role="alert">
+                    @AlertMessage
                 </div>
             }
 
-            <form method="post" action="/api/admin/cookie-login">
-                <div class="auth-field mb-3">
-                    <label class="auth-label" for="emailInput">Email Address</label>
-                    <input type="email"
-                           name="email"
-                           class="auth-input"
-                           id="emailInput"
-                           placeholder="admin@bikemate.com"
-                           autocomplete="username"
-                           required />
-                </div>
+            @if (IsOtpStep)
+            {
+                <form method="post" action="/api/admin/cookie-login/verify">
+                    <input type="hidden" name="email" value="@EmailValue" />
 
-                <div class="auth-field mb-4">
-                    <label class="auth-label" for="passwordInput">Password</label>
-                    <input type="password"
-                           name="password"
-                           class="auth-input"
-                           id="passwordInput"
-                           placeholder="Enter password"
-                           autocomplete="current-password"
-                           required />
-                </div>
+                    <div class="auth-field mb-3">
+                        <label class="auth-label" for="otpInput">Security code</label>
+                        <input type="text"
+                               name="otpCode"
+                               class="auth-input text-center"
+                               id="otpInput"
+                               inputmode="numeric"
+                               pattern="[0-9]{6}"
+                               maxlength="6"
+                               placeholder="000000"
+                               autocomplete="one-time-code"
+                               required />
+                    </div>
 
-                <button type="submit" class="btn btn-primary w-100 py-3 shadow-sm">
-                    <i class="bi bi-box-arrow-in-right me-2"></i> Sign in
-                </button>
-            </form>
+                    <div class="form-check mb-4">
+                        <input class="form-check-input"
+                               type="checkbox"
+                               name="rememberDevice"
+                               value="true"
+                               id="rememberOtpDevice"
+                               checked="@RememberDevice" />
+                        <label class="form-check-label auth-copy text-start" for="rememberOtpDevice">
+                            Remember this browser for 12 hours
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-3 shadow-sm">
+                        <i class="bi bi-shield-check me-2"></i> Verify code
+                    </button>
+                </form>
+
+                <form method="get" action="/login" class="mt-2">
+                    <button type="submit" class="btn btn-link text-decoration-none w-100">
+                        Use a different account
+                    </button>
+                </form>
+            }
+            else
+            {
+                <form method="post" action="/api/admin/cookie-login">
+                    <div class="auth-field mb-3">
+                        <label class="auth-label" for="emailInput">Email Address</label>
+                        <input type="email"
+                               name="email"
+                               class="auth-input"
+                               id="emailInput"
+                               value="@EmailValue"
+                               placeholder="isaiahandreinoda@gmail.com"
+                               autocomplete="username"
+                               required />
+                    </div>
+
+                    <div class="auth-field mb-3">
+                        <label class="auth-label" for="passwordInput">Password</label>
+                        <input type="password"
+                               name="password"
+                               class="auth-input"
+                               id="passwordInput"
+                               placeholder="Enter password"
+                               autocomplete="current-password"
+                               required />
+                    </div>
+
+                    <div class="form-check mb-4">
+                        <input class="form-check-input"
+                               type="checkbox"
+                               name="rememberDevice"
+                               value="true"
+                               id="rememberDevice"
+                               checked="@RememberDevice" />
+                        <label class="form-check-label auth-copy text-start" for="rememberDevice">
+                            Remember this browser for 12 hours
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-3 shadow-sm">
+                        <i class="bi bi-box-arrow-in-right me-2"></i> Sign in
+                    </button>
+                </form>
+            }
 
         </div>
     </div>
 </div>
+
+@code {
+    private string ErrorCode => QueryValue("error");
+    private string EmailValue => QueryValue("email");
+    private bool IsOtpStep => string.Equals(QueryValue("otp"), "sent", StringComparison.OrdinalIgnoreCase);
+    private bool RememberDevice => string.Equals(QueryValue("remember"), "true", StringComparison.OrdinalIgnoreCase);
+
+    private string AlertClass
+    {
+        get
+        {
+            var isSuccess = IsOtpStep && string.IsNullOrWhiteSpace(ErrorCode);
+            var tone = isSuccess ? "alert-success text-dark border-success" : "alert-danger text-white border-danger border-opacity-50";
+            var background = isSuccess ? "bg-success bg-opacity-10" : "bg-danger bg-opacity-25";
+            return $"alert {background} {tone} text-center";
+        }
+    }
+
+    private string AlertMessage
+    {
+        get
+        {
+            if (IsOtpStep && string.IsNullOrWhiteSpace(ErrorCode))
+            {
+                return $"A six-digit code was sent to {MaskEmail(EmailValue)}.";
+            }
+
+            return ErrorCode switch
+            {
+                "db" => "Unable to connect to the BikeMate database. Check that SQL Server is running and try again.",
+                "email" => "BikeMate could not send the admin code. Check SendGrid and the verified sender.",
+                "otp" => "Invalid admin code. Use the latest code from your email.",
+                "otp_expired" => "That admin code expired. Sign in again to receive a new code.",
+                "otp_locked" => "Too many incorrect attempts. Sign in again to request a new code.",
+                "true" => "Invalid email or password.",
+                _ => string.Empty
+            };
+        }
+    }
+
+    private string QueryValue(string key)
+    {
+        var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
+        var query = QueryHelpers.ParseQuery(uri.Query);
+        return query.TryGetValue(key, out var values) ? values.ToString() : string.Empty;
+    }
+
+    private static string MaskEmail(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email) || !email.Contains('@')) return "your admin email";
+        var parts = email.Split('@', 2);
+        var prefix = parts[0].Length <= 2
+            ? parts[0][0] + "***"
+            : parts[0][0] + "***" + parts[0][^1];
+        return $"{prefix}@{parts[1]}";
+    }
+}

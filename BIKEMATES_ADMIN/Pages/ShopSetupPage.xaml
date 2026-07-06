@@ -102,6 +102,24 @@
                             <Editor x:Name="DescriptionEditor"
                                     Placeholder="Short shop description, specialties, and customer promise"
                                     Style="{StaticResource InputEditor}" />
+                            <Frame Style="{StaticResource SmallCardFrame}" BackgroundColor="{StaticResource SoftGray}" Padding="12">
+                                <VerticalStackLayout Spacing="10">
+                                    <Label Text="Booking availability" Style="{StaticResource SectionLabel}" />
+                                    <Label Text="Choose which booking flows customers can use with your shop." Style="{StaticResource SmallMuted}" />
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                                        <Label Text="Reservations" Style="{StaticResource BodyText}" />
+                                        <Switch Grid.Column="1" x:Name="ReservationsSwitch" IsToggled="True" />
+                                    </Grid>
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                                        <Label Text="Pickup repair" Style="{StaticResource BodyText}" />
+                                        <Switch Grid.Column="1" x:Name="PickupSwitch" IsToggled="True" />
+                                    </Grid>
+                                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                                        <Label Text="On-site repair" Style="{StaticResource BodyText}" />
+                                        <Switch Grid.Column="1" x:Name="OnsiteRepairSwitch" IsToggled="True" />
+                                    </Grid>
+                                </VerticalStackLayout>
+                            </Frame>
                             <Button x:Name="SaveIdentityButton"
                                     Text="Save Shop Identity"
                                     Style="{StaticResource PrimaryButton}"

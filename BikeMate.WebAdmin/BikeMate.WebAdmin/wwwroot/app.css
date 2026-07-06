@@ -465,6 +465,13 @@ h1:focus {
     background: #f9fafb;
 }
 
+.audit-cell {
+    color: var(--bm-muted);
+    max-width: 320px;
+    white-space: normal;
+    word-break: break-word;
+}
+
 .admin-form-card {
     max-width: 800px;
 }

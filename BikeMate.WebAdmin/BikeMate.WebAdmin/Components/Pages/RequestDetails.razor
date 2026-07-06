@@ -3,6 +3,7 @@
 @using BikeMate.WebAdmin.DTOs
 @using BikeMate.WebAdmin.Services
 @inject AdminApiClient AdminApi
+@inject IJSRuntime JS
 
 <PageTitle>Service Request #@Id</PageTitle>
 
@@ -324,6 +325,13 @@
             return;
         }
 
+        var mechanicName = mechanicCandidates.FirstOrDefault(x => x.Id == selectedMechanicId.Value)?.Name ?? $"mechanic #{selectedMechanicId.Value}";
+        var confirmed = await JS.InvokeAsync<bool>("confirm", $"Assign {mechanicName} to service request #{Id} and notify the conversation?");
+        if (!confirmed)
+        {
+            return;
+        }
+
         isAssigning = true;
         statusMessage = null;
 
@@ -351,6 +359,12 @@
     private async Task SendMessage()
     {
         if (string.IsNullOrWhiteSpace(newMessage))
+        {
+            return;
+        }
+
+        var confirmed = await JS.InvokeAsync<bool>("confirm", $"Send this admin message to service request #{Id}?");
+        if (!confirmed)
         {
             return;
         }

@@ -18,15 +18,15 @@ param(
     [string]$SqlPassword,
 
     [string]$JwtKey,
-    [string]$AgoraAppId = "fa02725c96dd450ea81fcc2bb5b0e3f7",
-    [string]$AgoraPrimaryCertificate = "033f1344bd5c493d91d5e600a7b60c2a",
-    [string]$AgoraSecondaryCertificate = "547dc1e13b2f45d48507ad0ec44b91af",
+    [string]$AgoraAppId = "",
+    [string]$AgoraPrimaryCertificate = "",
+    [string]$AgoraSecondaryCertificate = "",
     [string]$GoogleMapsApiKey = "",
     [string]$GoogleWebClientId = "",
     [string]$GoogleAndroidClientId = "",
     [string]$GoogleWebClientSecret = "",
     [string]$SendGridApiKey = "",
-    [string]$SendGridFromEmail = "no-reply@bikemate.local",
+    [string]$SendGridFromEmail = "",
     [string]$PayMongoPublicKey = "",
     [string]$PayMongoSecretKey = "",
     [string]$PayMongoWebhookSecret = "",
@@ -173,13 +173,9 @@ try {
         "Cors__AllowedOrigins__0=$webUrl",
         "GoogleAuth__RedirectUri=$apiUrl/api/auth/google/callback",
         "GoogleAuth__MobileCallbackUri=bikemate://auth/google",
-        "SendGrid__FromEmail=$SendGridFromEmail",
         "SendGrid__FromName=BikeMate",
         "PayMongo__SuccessUrl=bikemate://payment-success",
         "PayMongo__CancelUrl=bikemate://payment-cancelled",
-        "Agora__AppId=$AgoraAppId",
-        "Agora__PrimaryCertificate=$AgoraPrimaryCertificate",
-        "Agora__SecondaryCertificate=$AgoraSecondaryCertificate",
         "Agora__TokenLifetimeSeconds=1800",
         "Storage__MaxFileBytes=$StorageMaxFileBytes",
         "Cloudinary__Folder=$CloudinaryFolder"
@@ -197,9 +193,13 @@ try {
     Add-SettingIfValue -Settings $apiSettings -Name "GoogleAuth__ClientIds__0" -Value $GoogleAndroidClientId
     Add-SettingIfValue -Settings $apiSettings -Name "GoogleAuth__ClientIds__1" -Value $GoogleWebClientId
     Add-SettingIfValue -Settings $apiSettings -Name "SendGrid__ApiKey" -Value $SendGridApiKey
+    Add-SettingIfValue -Settings $apiSettings -Name "SendGrid__FromEmail" -Value $SendGridFromEmail
     Add-SettingIfValue -Settings $apiSettings -Name "PayMongo__PublicKey" -Value $PayMongoPublicKey
     Add-SettingIfValue -Settings $apiSettings -Name "PayMongo__SecretKey" -Value $PayMongoSecretKey
     Add-SettingIfValue -Settings $apiSettings -Name "PayMongo__WebhookSecret" -Value $PayMongoWebhookSecret
+    Add-SettingIfValue -Settings $apiSettings -Name "Agora__AppId" -Value $AgoraAppId
+    Add-SettingIfValue -Settings $apiSettings -Name "Agora__PrimaryCertificate" -Value $AgoraPrimaryCertificate
+    Add-SettingIfValue -Settings $apiSettings -Name "Agora__SecondaryCertificate" -Value $AgoraSecondaryCertificate
     Add-SettingIfValue -Settings $apiSettings -Name "Cloudinary__CloudName" -Value $CloudinaryCloudName
     Add-SettingIfValue -Settings $apiSettings -Name "Cloudinary__ApiKey" -Value $CloudinaryApiKey
     Add-SettingIfValue -Settings $apiSettings -Name "Cloudinary__ApiSecret" -Value $CloudinaryApiSecret
@@ -208,11 +208,14 @@ try {
         "ASPNETCORE_ENVIRONMENT=Production",
         "ConnectionStrings__BikeMateDb=$sqlConnectionString",
         "Api__PublicBaseUrl=$apiUrl",
-        "Agora__AppId=$AgoraAppId",
-        "Agora__PrimaryCertificate=$AgoraPrimaryCertificate",
-        "Agora__SecondaryCertificate=$AgoraSecondaryCertificate",
+        "SendGrid__FromName=BikeMate",
         "Agora__TokenLifetimeSeconds=1800"
     )
+    Add-SettingIfValue -Settings $webSettings -Name "SendGrid__ApiKey" -Value $SendGridApiKey
+    Add-SettingIfValue -Settings $webSettings -Name "SendGrid__FromEmail" -Value $SendGridFromEmail
+    Add-SettingIfValue -Settings $webSettings -Name "Agora__AppId" -Value $AgoraAppId
+    Add-SettingIfValue -Settings $webSettings -Name "Agora__PrimaryCertificate" -Value $AgoraPrimaryCertificate
+    Add-SettingIfValue -Settings $webSettings -Name "Agora__SecondaryCertificate" -Value $AgoraSecondaryCertificate
 
     Write-Host "Configuring app settings..."
     az webapp config appsettings set --resource-group $ResourceGroup --name $ApiAppName --settings $apiSettings --only-show-errors | Out-Null

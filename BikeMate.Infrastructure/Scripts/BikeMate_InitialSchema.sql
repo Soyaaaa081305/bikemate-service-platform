@@ -1,4 +1,4 @@
-﻿IF OBJECT_ID(N'[__EFMigrationsHistory]') IS NULL
+IF OBJECT_ID(N'[__EFMigrationsHistory]') IS NULL
 BEGIN
     CREATE TABLE [__EFMigrationsHistory] (
         [MigrationId] nvarchar(150) NOT NULL,
@@ -752,10 +752,10 @@ BEGIN
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'UserId', N'AccountStatus', N'CreatedAt', N'Email', N'EmailVerified', N'FirstName', N'LastName', N'PasswordHash', N'PhoneNumber', N'PhoneVerified', N'ProfileImageUrl', N'UpdatedAt') AND [object_id] = OBJECT_ID(N'[dbo].[users]'))
         SET IDENTITY_INSERT [dbo].[users] ON;
     EXEC(N'INSERT INTO [dbo].[users] ([UserId], [AccountStatus], [CreatedAt], [Email], [EmailVerified], [FirstName], [LastName], [PasswordHash], [PhoneNumber], [PhoneVerified], [ProfileImageUrl], [UpdatedAt])
-    VALUES (1, N''active'', ''2026-06-08T00:00:00.0000000Z'', N''customer@bikemate.test'', CAST(1 AS bit), N''Juan'', N''Customer'', N''sha256:a109e36947ad56de1dca1cc49f0ef8ac9ad9a7b1aa0df41fb3c4cb73c1ff01ea'', N''+639171234567'', CAST(1 AS bit), NULL, NULL),
-    (2, N''active'', ''2026-06-08T00:00:00.0000000Z'', N''mechanic@bikemate.test'', CAST(1 AS bit), N''Rico'', N''Mechanic'', N''sha256:a109e36947ad56de1dca1cc49f0ef8ac9ad9a7b1aa0df41fb3c4cb73c1ff01ea'', N''+639171234567'', CAST(1 AS bit), NULL, NULL),
-    (3, N''active'', ''2026-06-08T00:00:00.0000000Z'', N''shop@bikemate.test'', CAST(1 AS bit), N''Maya'', N''ShopAdmin'', N''sha256:a109e36947ad56de1dca1cc49f0ef8ac9ad9a7b1aa0df41fb3c4cb73c1ff01ea'', N''+639171234567'', CAST(1 AS bit), NULL, NULL),
-    (4, N''active'', ''2026-06-08T00:00:00.0000000Z'', N''admin@bikemate.test'', CAST(1 AS bit), N''Ana'', N''Admin'', N''sha256:a109e36947ad56de1dca1cc49f0ef8ac9ad9a7b1aa0df41fb3c4cb73c1ff01ea'', N''+639171234567'', CAST(1 AS bit), NULL, NULL)');
+    VALUES (1, N''active'', ''2026-06-08T00:00:00.0000000Z'', N''customer@bikemate.test'', CAST(1 AS bit), N''Juan'', N''Customer'', N''sha256:588c55f3ce2b8569b153c5abbf13f9f74308b88a20017cc699b835cc93195d16'', N''+639171234567'', CAST(1 AS bit), NULL, NULL),
+    (2, N''active'', ''2026-06-08T00:00:00.0000000Z'', N''mechanic@bikemate.test'', CAST(1 AS bit), N''Rico'', N''Mechanic'', N''sha256:588c55f3ce2b8569b153c5abbf13f9f74308b88a20017cc699b835cc93195d16'', N''+639171234567'', CAST(1 AS bit), NULL, NULL),
+    (3, N''active'', ''2026-06-08T00:00:00.0000000Z'', N''shop@bikemate.test'', CAST(1 AS bit), N''Maya'', N''ShopAdmin'', N''sha256:588c55f3ce2b8569b153c5abbf13f9f74308b88a20017cc699b835cc93195d16'', N''+639171234567'', CAST(1 AS bit), NULL, NULL),
+    (4, N''active'', ''2026-06-08T00:00:00.0000000Z'', N''isaiahandreinoda@gmail.com'', CAST(1 AS bit), N''Isaiah'', N''Noda'', N''sha256:588c55f3ce2b8569b153c5abbf13f9f74308b88a20017cc699b835cc93195d16'', N''+639170000001'', CAST(1 AS bit), NULL, NULL)');
     IF EXISTS (SELECT * FROM [sys].[identity_columns] WHERE [name] IN (N'UserId', N'AccountStatus', N'CreatedAt', N'Email', N'EmailVerified', N'FirstName', N'LastName', N'PasswordHash', N'PhoneNumber', N'PhoneVerified', N'ProfileImageUrl', N'UpdatedAt') AND [object_id] = OBJECT_ID(N'[dbo].[users]'))
         SET IDENTITY_INSERT [dbo].[users] OFF;
 END;

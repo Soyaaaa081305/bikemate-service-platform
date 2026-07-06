@@ -20,7 +20,7 @@ public sealed class ShopsController(BikeMateDbContext db) : ControllerBase
     {
         var shop = await db.Shops
             .Where(x => x.ShopId == id)
-            .Select(x => new ShopDetailsDto(x.ShopId, x.ShopName, x.ShopDescription, x.AddressLine, x.City, x.Province, x.ContactNumber, x.ShopStatus, x.Latitude, x.Longitude, x.ShopImageUrl, x.ShopLogoUrl))
+            .Select(x => new ShopDetailsDto(x.ShopId, x.ShopName, x.ShopDescription, x.AddressLine, x.City, x.Province, x.ContactNumber, x.ShopStatus, x.Latitude, x.Longitude, x.ShopImageUrl, x.ShopLogoUrl, x.AllowsReservations, x.AllowsPickup, x.AllowsOnsiteRepair))
             .SingleAsync(cancellationToken);
 
         return Ok(CleanPublicDetails(shop));
@@ -119,7 +119,7 @@ public sealed class ShopsController(BikeMateDbContext db) : ControllerBase
         {
             var shops = await db.Shops
                 .OrderBy(x => x.ShopId)
-                .Select(x => new ShopDetailsDto(x.ShopId, x.ShopName, x.ShopDescription, x.AddressLine, x.City, x.Province, x.ContactNumber, x.ShopStatus, x.Latitude, x.Longitude, x.ShopImageUrl, x.ShopLogoUrl))
+                .Select(x => new ShopDetailsDto(x.ShopId, x.ShopName, x.ShopDescription, x.AddressLine, x.City, x.Province, x.ContactNumber, x.ShopStatus, x.Latitude, x.Longitude, x.ShopImageUrl, x.ShopLogoUrl, x.AllowsReservations, x.AllowsPickup, x.AllowsOnsiteRepair))
                 .ToArrayAsync(cancellationToken);
 
             return Ok(shops.Select(CleanPublicDetails).ToArray());
@@ -128,7 +128,7 @@ public sealed class ShopsController(BikeMateDbContext db) : ControllerBase
         var userId = User.GetUserId();
         var ownedShops = await db.Shops
             .Where(x => x.OwnerUserId == userId)
-            .Select(x => new ShopDetailsDto(x.ShopId, x.ShopName, x.ShopDescription, x.AddressLine, x.City, x.Province, x.ContactNumber, x.ShopStatus, x.Latitude, x.Longitude, x.ShopImageUrl, x.ShopLogoUrl))
+            .Select(x => new ShopDetailsDto(x.ShopId, x.ShopName, x.ShopDescription, x.AddressLine, x.City, x.Province, x.ContactNumber, x.ShopStatus, x.Latitude, x.Longitude, x.ShopImageUrl, x.ShopLogoUrl, x.AllowsReservations, x.AllowsPickup, x.AllowsOnsiteRepair))
             .ToArrayAsync(cancellationToken);
 
         return Ok(ownedShops.Select(CleanPublicDetails).ToArray());
@@ -188,7 +188,10 @@ public sealed class ShopsController(BikeMateDbContext db) : ControllerBase
                 shop.ShopImageUrl,
                 shop.ShopLogoUrl,
                 shop.Services.Count(service => service.IsActive),
-                shop.Services.Where(service => service.IsActive).Select(service => (decimal?)service.BasePrice).Min()))
+                shop.Services.Where(service => service.IsActive).Select(service => (decimal?)service.BasePrice).Min(),
+                shop.AllowsReservations,
+                shop.AllowsPickup,
+                shop.AllowsOnsiteRepair))
             .ToArray());
     }
 
@@ -207,6 +210,9 @@ public sealed class ShopsController(BikeMateDbContext db) : ControllerBase
             Latitude = dto.Latitude,
             Longitude = dto.Longitude,
             ContactNumber = dto.ContactNumber,
+            AllowsReservations = dto.AllowsReservations,
+            AllowsPickup = dto.AllowsPickup,
+            AllowsOnsiteRepair = dto.AllowsOnsiteRepair,
             ShopStatus = "pending",
             CreatedAt = DateTime.UtcNow
         };
@@ -228,6 +234,9 @@ public sealed class ShopsController(BikeMateDbContext db) : ControllerBase
         shop.Latitude = dto.Latitude;
         shop.Longitude = dto.Longitude;
         shop.ContactNumber = dto.ContactNumber;
+        shop.AllowsReservations = dto.AllowsReservations;
+        shop.AllowsPickup = dto.AllowsPickup;
+        shop.AllowsOnsiteRepair = dto.AllowsOnsiteRepair;
         shop.UpdatedAt = DateTime.UtcNow;
         await db.SaveChangesAsync(cancellationToken);
         return Ok(ToDetails(shop));
@@ -425,7 +434,7 @@ public sealed class ShopsController(BikeMateDbContext db) : ControllerBase
 
     private static ShopDetailsDto ToDetails(Shop x)
     {
-        return CleanPublicDetails(new ShopDetailsDto(x.ShopId, x.ShopName, x.ShopDescription, x.AddressLine, x.City, x.Province, x.ContactNumber, x.ShopStatus, x.Latitude, x.Longitude, x.ShopImageUrl, x.ShopLogoUrl));
+        return CleanPublicDetails(new ShopDetailsDto(x.ShopId, x.ShopName, x.ShopDescription, x.AddressLine, x.City, x.Province, x.ContactNumber, x.ShopStatus, x.Latitude, x.Longitude, x.ShopImageUrl, x.ShopLogoUrl, x.AllowsReservations, x.AllowsPickup, x.AllowsOnsiteRepair));
     }
 
     private static ShopDetailsDto CleanPublicDetails(ShopDetailsDto shop)

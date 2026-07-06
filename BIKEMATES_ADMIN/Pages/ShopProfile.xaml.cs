@@ -53,6 +53,9 @@ public partial class ShopProfile : ContentPage
         ShopCityEntry.Text = profile.City;
         ShopProvinceEntry.Text = profile.Province;
         ContactNumberEntry.Text = profile.ContactNumber;
+        ReservationsSwitch.IsToggled = profile.AllowsReservations;
+        PickupSwitch.IsToggled = profile.AllowsPickup;
+        OnsiteRepairSwitch.IsToggled = profile.AllowsOnsiteRepair;
 
         if (Uri.TryCreate(profile.ShopImageUrl, UriKind.Absolute, out var imageUri))
         {
@@ -203,6 +206,37 @@ public partial class ShopProfile : ContentPage
     }
 
     private async void Reload_Clicked(object? sender, EventArgs e) => await LoadProfileAsync();
+
+    private async void SaveAvailability_Clicked(object? sender, EventArgs e)
+    {
+        if (_profile is null)
+        {
+            await DisplayAlertAsync("Availability", "Shop profile is still loading. Try again in a moment.", "OK");
+            return;
+        }
+
+        if (!ReservationsSwitch.IsToggled && !PickupSwitch.IsToggled && !OnsiteRepairSwitch.IsToggled)
+        {
+            await DisplayAlertAsync("Availability", "Keep at least one booking option enabled so customers can request service.", "OK");
+            return;
+        }
+
+        try
+        {
+            _profile = await BikeMateDatabaseService.UpdateShopProfileAsync(_profile with
+            {
+                AllowsReservations = ReservationsSwitch.IsToggled,
+                AllowsPickup = PickupSwitch.IsToggled,
+                AllowsOnsiteRepair = OnsiteRepairSwitch.IsToggled
+            });
+            ApplyProfile(_profile);
+            await DisplayAlertAsync("Availability", "Customer booking options were updated.", "OK");
+        }
+        catch (Exception ex)
+        {
+            await DisplayAlertAsync("Availability", ex.Message, "OK");
+        }
+    }
 
     private static View SnapshotSection(string title, params View[] rows)
     {
