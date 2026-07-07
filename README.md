@@ -92,7 +92,7 @@ API URLs:
 The Android demo defaults are configured for:
 
 ```text
-https://bikemate-api-demo.azurewebsites.net/api/
+https://bikemate-api-afaolandez.azurewebsites.net/api/
 ```
 
 Required scripts are kept in `tools`:
@@ -132,6 +132,69 @@ Use these commands from the repository root:
 
 ```powershell
 cd C:\Users\Admin\Documents\PROJECTSSS\BikeMate
+```
+
+### Switch To A New Azure Student Account
+
+Use this when the old Azure account is low on credit. First stop the old cloud apps:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\Stop-BikeMateAzureDemo.ps1
+```
+
+Log out, then sign in with the new Azure account in the browser/MFA prompt:
+
+```powershell
+az logout
+az login
+az account show -o table
+```
+
+Create the new low-cost BikeMate cloud stack. Use a short unique suffix because Azure Web App names are global:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\Provision-NewAzureDemo.ps1 `
+  -NameSuffix "afaolandez" `
+  -BudgetAmount 15 `
+  -BuildApks
+```
+
+That script creates:
+
+- Free F1 API and WebAdmin apps.
+- One SQL Serverless database only.
+- SQL auto-pause after 15 minutes.
+- A monthly budget guard.
+- APKs compiled against the new API URL.
+
+If you already know the provider keys, pass them as parameters instead of editing tracked files:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\Provision-NewAzureDemo.ps1 `
+  -NameSuffix "afaolandez" `
+  -BudgetAmount 15 `
+  -SendGridApiKey "<sendgrid-api-key>" `
+  -SendGridFromEmail "<verified-sender-email>" `
+  -GoogleMapsApiKey "<google-maps-api-key>" `
+  -GoogleWebClientId "<google-web-client-id>" `
+  -GoogleAndroidClientId "<google-android-client-id>" `
+  -GoogleWebClientSecret "<google-web-client-secret>" `
+  -PayMongoPublicKey "<paymongo-public-key>" `
+  -PayMongoSecretKey "<paymongo-secret-key>" `
+  -PayMongoWebhookSecret "<paymongo-webhook-secret>" `
+  -CloudinaryCloudName "<cloudinary-cloud-name>" `
+  -CloudinaryApiKey "<cloudinary-api-key>" `
+  -CloudinaryApiSecret "<cloudinary-api-secret>" `
+  -AgoraAppId "<agora-app-id>" `
+  -AgoraPrimaryCertificate "<agora-primary-certificate>" `
+  -BuildApks
+```
+
+If you rebuild APKs later for any cloud URL:
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\Build-PhoneDemoApks.ps1 `
+  -ApiBaseUrl "https://bikemate-api-afaolandez.azurewebsites.net/api/"
 ```
 
 ### Turn The Cloud Demo On Or Off
@@ -249,7 +312,7 @@ Update API app settings in Azure:
 ```powershell
 az webapp config appsettings set `
   --resource-group BikeMateDemoRG `
-  --name bikemate-api-demo `
+  --name bikemate-api-afaolandez `
   --settings `
     "GoogleMaps__ApiKey=<google-maps-api-key>" `
     "GoogleAuth__WebClientId=<google-web-client-id>" `
@@ -272,7 +335,7 @@ Update WebAdmin email and Agora settings:
 ```powershell
 az webapp config appsettings set `
   --resource-group BikeMateDemoRG `
-  --name bikemate-webadmin-demo `
+  --name bikemate-admin-afaolandez `
   --settings `
     "SendGrid__ApiKey=<sendgrid-api-key>" `
     "SendGrid__FromEmail=<verified-sender-email>" `
@@ -285,8 +348,8 @@ After changing credentials, restart and smoke-test:
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\Start-BikeMateAzureDemo.ps1
-az webapp restart --resource-group BikeMateDemoRG --name bikemate-api-demo
-az webapp restart --resource-group BikeMateDemoRG --name bikemate-webadmin-demo
+az webapp restart --resource-group BikeMateDemoRG --name bikemate-api-afaolandez
+az webapp restart --resource-group BikeMateDemoRG --name bikemate-admin-afaolandez
 powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\Test-CloudDeployment.ps1
 powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\Stop-BikeMateAzureDemo.ps1
 ```
@@ -294,7 +357,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\Stop-BikeMateAzureDe
 Check that SendGrid is configured in Azure without printing secret values:
 
 ```powershell
-$apps = @("bikemate-api-demo", "bikemate-webadmin-demo")
+$apps = @("bikemate-api-afaolandez", "bikemate-admin-afaolandez")
 foreach ($app in $apps) {
   $settings = az webapp config appsettings list --resource-group BikeMateDemoRG --name $app | ConvertFrom-Json
   Write-Host "[$app]"

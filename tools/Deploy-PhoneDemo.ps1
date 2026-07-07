@@ -2,8 +2,8 @@ param(
     [string]$ResourceGroup = "rg-bikemate-demo",
     [string]$Location = "southeastasia",
     [string]$PlanName = "bikemate-demo-f1-plan",
-    [string]$ApiAppName = "bikemate-api-demo",
-    [string]$WebAdminAppName = "bikemate-webadmin-demo",
+    [string]$ApiAppName = "bikemate-api-afaolandez",
+    [string]$WebAdminAppName = "bikemate-admin-afaolandez",
 
     [Parameter(Mandatory = $true)]
     [string]$SqlServer,
@@ -106,6 +106,27 @@ function Ensure-AppServicePlan {
     }
 
     az appservice plan create --name $Name --resource-group $Group --location $Region --sku F1 --only-show-errors | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to create App Service plan $Name in $Region. This Azure subscription may not allow that region."
+    }
+}
+
+function Ensure-ResourceGroup {
+    param(
+        [string]$Name,
+        [string]$Region
+    )
+
+    $existingLocation = az group show --name $Name --query "location" -o tsv --only-show-errors 2>$null
+    if ($LASTEXITCODE -eq 0 -and -not [string]::IsNullOrWhiteSpace($existingLocation)) {
+        Write-Host "Using existing resource group: $Name ($existingLocation)"
+        return
+    }
+
+    az group create --name $Name --location $Region --only-show-errors | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to create resource group $Name in $Region."
+    }
 }
 
 function Ensure-WebApp {
@@ -122,6 +143,9 @@ function Ensure-WebApp {
     }
 
     az webapp create --resource-group $Group --plan $Plan --name $Name --only-show-errors | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to create Web App $Name on plan $Plan."
+    }
 }
 
 function Add-SettingIfValue {
@@ -157,7 +181,7 @@ try {
     Compress-Archive -Path (Join-Path $webPublish "*") -DestinationPath $webZip -Force
 
     Write-Host "Creating Azure resource group and Free F1 App Service plan..."
-    az group create --name $ResourceGroup --location $Location --only-show-errors | Out-Null
+    Ensure-ResourceGroup -Name $ResourceGroup -Region $Location
     Ensure-AppServicePlan -Name $PlanName -Group $ResourceGroup -Region $Location
 
     Write-Host "Creating web apps if needed..."
@@ -219,15 +243,33 @@ try {
 
     Write-Host "Configuring app settings..."
     az webapp config appsettings set --resource-group $ResourceGroup --name $ApiAppName --settings $apiSettings --only-show-errors | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to configure app settings for $ApiAppName."
+    }
     az webapp config appsettings set --resource-group $ResourceGroup --name $WebAdminAppName --settings $webSettings --only-show-errors | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to configure app settings for $WebAdminAppName."
+    }
 
     Write-Host "Deploying zip packages..."
     az webapp deployment source config-zip --resource-group $ResourceGroup --name $ApiAppName --src $apiZip --only-show-errors | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to deploy $ApiAppName."
+    }
     az webapp deployment source config-zip --resource-group $ResourceGroup --name $WebAdminAppName --src $webZip --only-show-errors | Out-Null
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to deploy $WebAdminAppName."
+    }
 
     Write-Host "Restarting apps..."
     az webapp restart --resource-group $ResourceGroup --name $ApiAppName --only-show-errors
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to restart $ApiAppName."
+    }
     az webapp restart --resource-group $ResourceGroup --name $WebAdminAppName --only-show-errors
+    if ($LASTEXITCODE -ne 0) {
+        throw "Failed to restart $WebAdminAppName."
+    }
 
     Write-Host "API: $apiUrl"
     Write-Host "WebAdmin: $webUrl"

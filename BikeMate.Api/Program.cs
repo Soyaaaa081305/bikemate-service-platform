@@ -127,6 +127,19 @@ app.UseCors("MobileApp");
 app.UseAuthentication();
 app.UseAuthorization();
 
+app.MapGet("/", () => Results.Json(new
+{
+    status = "ok",
+    service = "BikeMate.Api",
+    health = "/api/health",
+    utcNow = DateTimeOffset.UtcNow
+}));
+app.MapGet("/health", () => Results.Json(new
+{
+    status = "ok",
+    service = "BikeMate.Api",
+    utcNow = DateTimeOffset.UtcNow
+}));
 app.MapControllers();
 app.MapHub<BookingHub>("/hubs/booking").RequireAuthorization();
 app.MapHub<ChatHub>("/hubs/chat").RequireAuthorization();

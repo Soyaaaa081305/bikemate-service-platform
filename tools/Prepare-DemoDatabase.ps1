@@ -36,6 +36,9 @@ try {
     Write-Host "Applying EF migrations to $Database on $SqlServer..."
     $env:ConnectionStrings__DefaultConnection = $connectionString
     dotnet tool run dotnet-ef database update --project .\BikeMate.Infrastructure\BikeMate.Infrastructure.csproj --startup-project .\BikeMate.Api\BikeMate.Api.csproj
+    if ($LASTEXITCODE -ne 0) {
+        throw "EF database migration failed with exit code $LASTEXITCODE."
+    }
 
     Write-Host "Preparing cloud-safe seed script..."
     $seedSql = Get-Content $resetScript -Raw
@@ -44,6 +47,9 @@ try {
 
     Write-Host "Resetting and seeding demo data..."
     sqlcmd -S "tcp:$SqlServer,1433" -d $Database -U $SqlUser -P $SqlPassword -N -C -b -i $cloudResetScript -W
+    if ($LASTEXITCODE -ne 0) {
+        throw "Database seed failed with exit code $LASTEXITCODE."
+    }
 
     Write-Host "Demo database is ready."
 }

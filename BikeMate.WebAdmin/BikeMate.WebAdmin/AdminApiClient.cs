@@ -53,7 +53,7 @@ public class AdminApiClient(
         {
             LastError = null;
             take = Math.Clamp(take, 25, 1000);
-            return await context.AuditLogs
+            var logs = await context.AuditLogs
                 .AsNoTracking()
                 .Include(x => x.ActorUser)
                 .OrderByDescending(x => x.CreatedAt)
@@ -73,6 +73,9 @@ public class AdminApiClient(
                     CreatedAt = x.CreatedAt
                 })
                 .ToArrayAsync();
+
+            await TrackViewAsync("ViewAuditTrail", "audit_logs", null, new { Loaded = logs.Length, Take = take });
+            return logs;
         }
         catch (Exception ex)
         {
@@ -123,7 +126,7 @@ public class AdminApiClient(
                 .ToListAsync();
 
             LastError = null;
-            return new AdminDashboardDto
+            var dashboard = new AdminDashboardDto
             {
                 TotalCustomers = await context.Clients.CountAsync(),
                 TotalMechanics = await context.Mechanics.CountAsync(),
@@ -136,6 +139,15 @@ public class AdminApiClient(
                 WeeklyRegistrations = weeklyStats,
                 RecentActiveRequests = recentRequests
             };
+
+            await TrackViewAsync("ViewDashboard", "dashboard", null, new
+            {
+                dashboard.TotalCustomers,
+                dashboard.TotalMechanics,
+                dashboard.TotalShops,
+                dashboard.PendingServiceRequests
+            });
+            return dashboard;
         }
         catch (Exception ex)
         {
@@ -148,7 +160,7 @@ public class AdminApiClient(
         try
         {
             LastError = null;
-            return await context.Users
+            var users = await context.Users
                 .Where(u =>
                     u.AccountStatus != "deleted" &&
                     u.UserRoles.Any(ur => ur.Role != null && ur.Role.RoleName == "Customer"))
@@ -167,6 +179,9 @@ public class AdminApiClient(
                         .ToArray()
                 })
                 .ToArrayAsync();
+
+            await TrackViewAsync("ViewCustomerDirectory", "users", null, new { Loaded = users.Length, Role = "Customer" });
+            return users;
         }
         catch (Exception ex)
         {
@@ -263,7 +278,7 @@ public class AdminApiClient(
         try
         {
             LastError = null;
-            return await context.Mechanics
+            var mechanics = await context.Mechanics
                 .Include(m => m.User)
                 .Include(m => m.ShopMechanics).ThenInclude(sm => sm.Shop)
                 .Where(m => m.User != null && m.User.AccountStatus.ToLower().Trim() != "deleted")
@@ -282,6 +297,9 @@ public class AdminApiClient(
                     TotalJobs = m.TotalCompletedJobs
                 })
                 .ToArrayAsync();
+
+            await TrackViewAsync("ViewMechanicDirectory", "mechanics", null, new { Loaded = mechanics.Length });
+            return mechanics;
         }
         catch (Exception ex)
         {
@@ -301,7 +319,9 @@ public class AdminApiClient(
                 .OrderByDescending(s => s.CreatedAt)
                 .ToArrayAsync();
 
-            return shops.Select(ToShopDto).ToArray();
+            var result = shops.Select(ToShopDto).ToArray();
+            await TrackViewAsync("ViewPendingShops", "shops", null, new { Loaded = result.Length, Status = "pending" });
+            return result;
         }
         catch (Exception ex)
         {
@@ -321,7 +341,9 @@ public class AdminApiClient(
                 .OrderByDescending(s => s.CreatedAt)
                 .ToArrayAsync();
 
-            return shops.Select(ToShopDto).ToArray();
+            var result = shops.Select(ToShopDto).ToArray();
+            await TrackViewAsync("ViewShopDirectory", "shops", null, new { Loaded = result.Length });
+            return result;
         }
         catch (Exception ex)
         {
@@ -334,7 +356,7 @@ public class AdminApiClient(
         try
         {
             LastError = null;
-            return await context.Shops
+            var options = await context.Shops
                 .AsNoTracking()
                 .Where(shop => shop.ShopStatus.ToLower().Trim() != "deleted")
                 .OrderBy(shop => shop.ShopName)
@@ -346,6 +368,9 @@ public class AdminApiClient(
                     Status = shop.ShopStatus
                 })
                 .ToArrayAsync();
+
+            await TrackViewAsync("LoadShopOptions", "shops", null, new { Loaded = options.Length });
+            return options;
         }
         catch (Exception ex)
         {
@@ -444,7 +469,7 @@ public class AdminApiClient(
         try
         {
             LastError = null;
-            return await context.ServiceRequests
+            var requests = await context.ServiceRequests
                 .Include(sr => sr.Client).ThenInclude(c => c.User)
                 .Include(sr => sr.ShopService)
                 .Include(sr => sr.CurrentStatus)
@@ -458,6 +483,9 @@ public class AdminApiClient(
                     TotalAmount = sr.EstimatedTotal
                 })
                 .ToArrayAsync();
+
+            await TrackViewAsync("ViewActiveRequests", "service_requests", null, new { Loaded = requests.Length });
+            return requests;
         }
         catch (Exception ex)
         {
@@ -470,7 +498,7 @@ public class AdminApiClient(
         try
         {
             LastError = null;
-            return await context.ServiceRequests
+            var requests = await context.ServiceRequests
                 .Include(sr => sr.Client).ThenInclude(c => c.User)
                 .Include(sr => sr.ShopService)
                 .Include(sr => sr.CurrentStatus)
@@ -507,6 +535,9 @@ public class AdminApiClient(
                     TotalAmount = sr.EstimatedTotal
                 })
                 .ToArrayAsync();
+
+            await TrackViewAsync("ViewEmergencyRequests", "service_requests", null, new { Loaded = requests.Length, Filter = "emergency" });
+            return requests;
         }
         catch (Exception ex)
         {
@@ -529,7 +560,9 @@ public class AdminApiClient(
                 .Include(s => s.ShopMechanics).ThenInclude(sm => sm.Mechanic).ThenInclude(m => m.User)
                 .FirstOrDefaultAsync(s => s.ShopId == id);
 
-            return shop is null ? null : ToShopDetailsDto(shop);
+            var details = shop is null ? null : ToShopDetailsDto(shop);
+            await TrackViewAsync("ViewShopDetails", "shops", id, new { Found = details is not null, ShopName = details?.ShopName });
+            return details;
         }
         catch (Exception ex)
         {
@@ -549,11 +582,12 @@ public class AdminApiClient(
             if (shop is null)
             {
                 LastError = "Shop not found.";
+                await TrackViewAsync("OpenShopEdit", "shops", id, new { Found = false });
                 return null;
             }
 
             var description = shop.ShopDescription ?? string.Empty;
-            return new ShopEditDto
+            var dto = new ShopEditDto
             {
                 ShopId = shop.ShopId,
                 ShopName = shop.ShopName,
@@ -571,6 +605,9 @@ public class AdminApiClient(
                 DtiRegistrationNumber = ExtractDtiRegistration(description),
                 ShopStatus = shop.ShopStatus
             };
+
+            await TrackViewAsync("OpenShopEdit", "shops", id, new { Found = true, shop.ShopName, shop.ShopStatus });
+            return dto;
         }
         catch (Exception ex)
         {
@@ -628,7 +665,7 @@ public class AdminApiClient(
         try
         {
             LastError = null;
-            return await context.Payments
+            var payments = await context.Payments
                 .Include(p => p.Client).ThenInclude(c => c.User)
                 .Include(p => p.PaymentStatus)
                 .Include(p => p.PaymentMethod)
@@ -643,6 +680,9 @@ public class AdminApiClient(
                 })
                 .OrderByDescending(p => p.CreatedAt)
                 .ToArrayAsync();
+
+            await TrackViewAsync("ViewPayments", "payments", null, new { Loaded = payments.Length });
+            return payments;
         }
         catch (Exception ex)
         {
@@ -655,7 +695,7 @@ public class AdminApiClient(
         try
         {
             LastError = null;
-            return await context.Payments
+            var payment = await context.Payments
                 .Include(p => p.Client).ThenInclude(c => c.User)
                 .Include(p => p.PaymentStatus)
                 .Include(p => p.PaymentMethod)
@@ -677,6 +717,9 @@ public class AdminApiClient(
                     PaidAt = p.PaidAt
                 })
                 .FirstOrDefaultAsync();
+
+            await TrackViewAsync("ViewPaymentDetails", "payments", id, new { Found = payment is not null, RequestId = payment?.RequestId, payment?.Status });
+            return payment;
         }
         catch (Exception ex)
         {
@@ -689,7 +732,7 @@ public class AdminApiClient(
         try
         {
             LastError = null;
-            return await context.Mechanics
+            var mechanic = await context.Mechanics
                 .Include(m => m.User)
                 .Include(m => m.ShopMechanics).ThenInclude(sm => sm.Shop)
                 .Include(m => m.AssignedRequests).ThenInclude(sr => sr.CurrentStatus)
@@ -729,6 +772,9 @@ public class AdminApiClient(
                     }).OrderByDescending(x => x.Date).ToList()
                 })
                 .FirstOrDefaultAsync();
+
+            await TrackViewAsync("ViewMechanicDetails", "mechanics", id, new { Found = mechanic is not null, Name = mechanic?.FullName, mechanic?.AccountStatus });
+            return mechanic;
         }
         catch (Exception ex)
         {
@@ -750,10 +796,13 @@ public class AdminApiClient(
             if (mechanic is null)
             {
                 LastError = "Mechanic not found.";
+                await TrackViewAsync("OpenMechanicEdit", "mechanics", id, new { Found = false });
                 return null;
             }
 
-            return ToMechanicEditDto(mechanic);
+            var dto = ToMechanicEditDto(mechanic);
+            await TrackViewAsync("OpenMechanicEdit", "mechanics", id, new { Found = true, dto.Email, dto.AccountStatus, dto.IsVerified });
+            return dto;
         }
         catch (Exception ex)
         {
@@ -978,7 +1027,13 @@ public class AdminApiClient(
         {
             var user = await context.Users.FindAsync(id);
             LastError = user == null ? "User not found." : null;
-            return user == null ? null : new UserEditDto
+            if (user is null)
+            {
+                await TrackViewAsync("OpenUserEdit", "users", id, new { Found = false });
+                return null;
+            }
+
+            var dto = new UserEditDto
             {
                 UserId = user.UserId,
                 FirstName = user.FirstName,
@@ -987,6 +1042,9 @@ public class AdminApiClient(
                 PhoneNumber = user.PhoneNumber,
                 AccountStatus = user.AccountStatus
             };
+
+            await TrackViewAsync("OpenUserEdit", "users", id, new { Found = true, user.Email, user.AccountStatus });
+            return dto;
         }
         catch (Exception ex)
         {
@@ -1066,7 +1124,9 @@ public class AdminApiClient(
                 .ThenBy(user => user.FirstName)
                 .ToArrayAsync();
 
-            return admins.Select(ToAdminAccountDto).ToArray();
+            var result = admins.Select(ToAdminAccountDto).ToArray();
+            await TrackViewAsync("ViewAdminAccounts", "users", null, new { Loaded = result.Length, Role = "SystemAdmin" });
+            return result;
         }
         catch (Exception ex)
         {
@@ -1087,7 +1147,7 @@ public class AdminApiClient(
 
             EnsureSystemAdminUser(user);
 
-            return new AdminAccountEditDto
+            var dto = new AdminAccountEditDto
             {
                 UserId = user.UserId,
                 FirstName = user.FirstName,
@@ -1096,6 +1156,9 @@ public class AdminApiClient(
                 PhoneNumber = user.PhoneNumber,
                 AccountStatus = user.AccountStatus
             };
+
+            await TrackViewAsync("OpenAdminEdit", "users", id, new { Found = true, user.Email, user.AccountStatus });
+            return dto;
         }
         catch (Exception ex)
         {
@@ -1436,7 +1499,9 @@ public class AdminApiClient(
                 .OrderByDescending(client => client.CreatedAt)
                 .ToArrayAsync();
 
-            return customers.Select(ToCustomerApplicationDto).ToArray();
+            var result = customers.Select(ToCustomerApplicationDto).ToArray();
+            await TrackViewAsync("ViewPendingCustomers", "clients", null, new { Loaded = result.Length, Status = "pending" });
+            return result;
         }
         catch (Exception ex)
         {
@@ -1523,7 +1588,9 @@ public class AdminApiClient(
                 .OrderByDescending(mechanic => mechanic.CreatedAt)
                 .ToArrayAsync();
 
-            return mechanics.Select(ToMechanicApplicationDto).ToArray();
+            var result = mechanics.Select(ToMechanicApplicationDto).ToArray();
+            await TrackViewAsync("ViewPendingMechanics", "mechanics", null, new { Loaded = result.Length, Status = "pending_review" });
+            return result;
         }
         catch (Exception ex)
         {
@@ -1710,7 +1777,7 @@ public class AdminApiClient(
         try
         {
             LastError = null;
-            return await context.ServiceRequests
+            var request = await context.ServiceRequests
                 .Include(sr => sr.Client).ThenInclude(c => c.User)
                 .Include(sr => sr.Mechanic).ThenInclude(m => m!.User)
                 .Include(sr => sr.ShopService).ThenInclude(ss => ss!.Shop)
@@ -1739,6 +1806,9 @@ public class AdminApiClient(
                         .FirstOrDefault() ?? "Unpaid"
                 })
                 .FirstOrDefaultAsync();
+
+            await TrackViewAsync("ViewServiceRequestDetails", "service_requests", id, new { Found = request is not null, request?.Status, request?.PaymentStatus });
+            return request;
         }
         catch (Exception ex)
         {
@@ -1763,6 +1833,7 @@ public class AdminApiClient(
             if (request == null)
             {
                 LastError = "Service request not found.";
+                await TrackViewAsync("CheckEmergencyMechanicCandidates", "service_requests", requestId, new { Found = false, Loaded = 0 });
                 return Array.Empty<ServiceRequestMechanicCandidateDto>();
             }
 
@@ -1805,7 +1876,7 @@ public class AdminApiClient(
                 .ToListAsync();
 
             LastError = null;
-            return mechanics
+            var candidates = mechanics
                 .Select(m => new ServiceRequestMechanicCandidateDto
                 {
                     Id = m.MechanicId,
@@ -1824,6 +1895,14 @@ public class AdminApiClient(
                 .ThenByDescending(m => m.Rating ?? 0)
                 .ThenBy(m => m.Name)
                 .ToArray();
+
+            await TrackViewAsync("CheckEmergencyMechanicCandidates", "service_requests", requestId, new
+            {
+                Found = true,
+                Loaded = candidates.Length,
+                AvailableNow = candidates.Count(x => x.IsAvailableNow)
+            });
+            return candidates;
         }
         catch (Exception ex)
         {
@@ -1914,7 +1993,7 @@ public class AdminApiClient(
             var adminUserIds = await GetSystemAdminUserIdsAsync();
             LastError = null;
 
-            return await context.Messages
+            var messages = await context.Messages
                 .AsNoTracking()
                 .Include(m => m.Sender)
                 .Where(m => m.Conversation.RequestId == requestId)
@@ -1929,6 +2008,9 @@ public class AdminApiClient(
                     IsAdminSender = adminUserIds.Contains(m.SenderUserId)
                 })
                 .ToArrayAsync();
+
+            await TrackViewAsync("ViewRequestMessages", "service_requests", requestId, new { Loaded = messages.Length });
+            return messages;
         }
         catch (Exception ex)
         {
@@ -2032,6 +2114,17 @@ public class AdminApiClient(
         LastError = message;
         logger.LogError(ex, message);
         return new InvalidOperationException(message, ex);
+    }
+
+    private async Task TrackViewAsync(string actionName, string entityName, object? entityId = null, object? details = null)
+    {
+        if (GetCurrentAdminUserId() is null)
+        {
+            return;
+        }
+
+        AddAudit(actionName, entityName, entityId, null, details);
+        await context.SaveChangesAsync();
     }
 
     private void AddAudit(string actionName, string entityName, object? entityId, object? oldValues = null, object? newValues = null)

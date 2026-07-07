@@ -13,6 +13,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
+using System.Text.Json;
 
 namespace BikeMate.WebAdmin.Controllers;
 
@@ -493,10 +494,17 @@ public class AdminController : ControllerBase
         CancellationToken cancellationToken)
     {
         var user = await ValidateAdminCredentialsAsync(email, password, cancellationToken);
-        if (user is null) return Redirect("/login?error=true");
+        if (user is null)
+        {
+            AddAudit(null, "AdminLoginFailed", "admin_login", NormalizeEmailForAudit(email), null, new { Email = NormalizeEmailForAudit(email), Reason = "Invalid credentials" });
+            await _context.SaveChangesAsync(cancellationToken);
+            return Redirect("/login?error=true");
+        }
 
         if (await HasValidTrustedBrowserAsync(user, cancellationToken))
         {
+            AddAudit(user.UserId, "AdminLoginTrustedBrowser", "admin_login", user.UserId, null, new { user.Email, RememberDevice = true });
+            await _context.SaveChangesAsync(cancellationToken);
             await SignInAdminAsync(user);
             return Redirect("/");
         }
@@ -504,10 +512,14 @@ public class AdminController : ControllerBase
         try
         {
             await CreateAndSendAdminLoginOtpAsync(user, cancellationToken);
+            AddAudit(user.UserId, "AdminLoginOtpSent", "admin_login", user.UserId, null, new { user.Email, rememberDevice });
+            await _context.SaveChangesAsync(cancellationToken);
         }
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "Admin login OTP could not be sent to {Email}.", user.Email);
+            AddAudit(user.UserId, "AdminLoginOtpSendFailed", "admin_login", user.UserId, null, new { user.Email, Error = ex.Message });
+            await _context.SaveChangesAsync(cancellationToken);
             return Redirect(LoginRedirect(email, rememberDevice, "email"));
         }
 
@@ -529,6 +541,8 @@ public class AdminController : ControllerBase
         var normalizedCode = NormalizeOtpCode(otpCode);
         if (normalizedCode is null)
         {
+            AddAudit(user.UserId, "AdminLoginOtpFailed", "admin_login", user.UserId, null, new { user.Email, Reason = "Invalid code format" });
+            await _context.SaveChangesAsync(cancellationToken);
             return Redirect(LoginRedirect(user.Email, rememberDevice, "otp", otpSent: true));
         }
 
@@ -543,17 +557,22 @@ public class AdminController : ControllerBase
 
         if (otp is null || otp.ExpiresAt <= now)
         {
+            AddAudit(user.UserId, "AdminLoginOtpExpired", "admin_login", user.UserId, null, new { user.Email });
+            await _context.SaveChangesAsync(cancellationToken);
             return Redirect(LoginRedirect(user.Email, rememberDevice, "otp_expired", otpSent: true));
         }
 
         if (otp.Attempts >= 5)
         {
+            AddAudit(user.UserId, "AdminLoginOtpLocked", "admin_login", user.UserId, null, new { user.Email, otp.Attempts });
+            await _context.SaveChangesAsync(cancellationToken);
             return Redirect(LoginRedirect(user.Email, rememberDevice, "otp_locked", otpSent: true));
         }
 
         if (!BCrypt.Net.BCrypt.Verify(normalizedCode, otp.OtpHash))
         {
             otp.Attempts++;
+            AddAudit(user.UserId, "AdminLoginOtpFailed", "admin_login", user.UserId, null, new { user.Email, Reason = "Invalid code", otp.Attempts });
             await _context.SaveChangesAsync(cancellationToken);
             return Redirect(LoginRedirect(user.Email, rememberDevice, "otp", otpSent: true));
         }
@@ -564,6 +583,7 @@ public class AdminController : ControllerBase
             await CreateTrustedBrowserAsync(user, cancellationToken);
         }
 
+        AddAudit(user.UserId, "AdminLoginSucceeded", "admin_login", user.UserId, null, new { user.Email, rememberDevice });
         await _context.SaveChangesAsync(cancellationToken);
         await SignInAdminAsync(user);
 
@@ -718,8 +738,45 @@ public class AdminController : ControllerBase
     [HttpGet("logout")]
     public async Task<IActionResult> Logout()
     {
+        var actorUserId = GetCurrentAdminUserId();
+        AddAudit(actorUserId, "AdminLogout", "admin_login", actorUserId, null, new { Email = User.FindFirstValue(ClaimTypes.Email) });
+        await _context.SaveChangesAsync();
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         return Redirect("/login");
+    }
+
+    private void AddAudit(int? actorUserId, string actionName, string entityName, object? entityId, object? oldValues = null, object? newValues = null)
+    {
+        _context.AuditLogs.Add(new AuditLog
+        {
+            ActorUserId = actorUserId,
+            ActionName = actionName,
+            EntityName = entityName,
+            EntityId = entityId?.ToString(),
+            OldValuesJson = ToAuditJson(oldValues),
+            NewValuesJson = ToAuditJson(newValues),
+            CreatedAt = DateTime.UtcNow
+        });
+    }
+
+    private int? GetCurrentAdminUserId()
+    {
+        var value = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        return int.TryParse(value, out var userId) ? userId : null;
+    }
+
+    private static string? ToAuditJson(object? values)
+    {
+        if (values is null) return null;
+        if (values is string text) return text;
+        return JsonSerializer.Serialize(values);
+    }
+
+    private static string NormalizeEmailForAudit(string? email)
+    {
+        return string.IsNullOrWhiteSpace(email)
+            ? "not provided"
+            : email.Trim().ToLowerInvariant();
     }
 
     private static bool IsValidAccountStatus(string? status)

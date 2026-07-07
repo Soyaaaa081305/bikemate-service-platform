@@ -10,8 +10,8 @@ if (-not (Test-Path $az)) {
 }
 
 Write-Host "Starting BikeMate API and WebAdmin apps..."
-& $az webapp start --resource-group $ResourceGroup --name bikemate-api-demo | Out-Null
-& $az webapp start --resource-group $ResourceGroup --name bikemate-webadmin-demo | Out-Null
+& $az webapp start --resource-group $ResourceGroup --name bikemate-api-afaolandez | Out-Null
+& $az webapp start --resource-group $ResourceGroup --name bikemate-admin-afaolandez | Out-Null
 
 Write-Host "BikeMate cloud apps are running."
 & $az webapp list --resource-group $ResourceGroup --query "[].{name:name,state:state,defaultHostName:defaultHostName}" -o table

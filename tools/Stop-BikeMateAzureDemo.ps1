@@ -10,8 +10,8 @@ if (-not (Test-Path $az)) {
 }
 
 Write-Host "Stopping BikeMate API and WebAdmin apps..."
-& $az webapp stop --resource-group $ResourceGroup --name bikemate-api-demo | Out-Null
-& $az webapp stop --resource-group $ResourceGroup --name bikemate-webadmin-demo | Out-Null
+& $az webapp stop --resource-group $ResourceGroup --name bikemate-api-afaolandez | Out-Null
+& $az webapp stop --resource-group $ResourceGroup --name bikemate-admin-afaolandez | Out-Null
 
 Write-Host "BikeMate cloud apps are stopped. The SQL serverless database can auto-pause after its idle window."
 & $az webapp list --resource-group $ResourceGroup --query "[].{name:name,state:state}" -o table

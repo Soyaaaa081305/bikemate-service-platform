@@ -19,6 +19,7 @@
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">23.0</SupportedOSPlatformVersion>
 		<Platforms>AnyCPU</Platforms>
 		<NoWarn>$(NoWarn);NU1608</NoWarn>
+		<BikeMateApiBaseUrl Condition="'$(BikeMateApiBaseUrl)' == ''">https://bikemate-api-afaolandez.azurewebsites.net/api/</BikeMateApiBaseUrl>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
@@ -54,6 +55,13 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\BikeMate.Core\BikeMate.Core.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+	    <_Parameter1>BikeMateApiBaseUrl</_Parameter1>
+	    <_Parameter2>$(BikeMateApiBaseUrl)</_Parameter2>
+	  </AssemblyAttribute>
 	</ItemGroup>
 
 </Project>

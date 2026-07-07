@@ -1,6 +1,7 @@
 param(
     [ValidateSet("Debug", "Release")]
     [string]$Configuration = "Debug",
+    [string]$ApiBaseUrl = "https://bikemate-api-afaolandez.azurewebsites.net/api/",
     [switch]$InstallConnectedDevices
 )
 
@@ -12,16 +13,39 @@ $artifacts = Join-Path $repoRoot "artifacts\phone-demo\apk"
 $customerPackage = "com.bikemate.mobile"
 $shopAdminPackage = "com.bikemate.shop"
 
+function Ensure-ApiPath {
+    param([string]$Value)
+
+    if ([string]::IsNullOrWhiteSpace($Value)) {
+        throw "ApiBaseUrl is required."
+    }
+
+    $trimmed = $Value.Trim()
+    if (-not $trimmed.EndsWith("/")) {
+        $trimmed += "/"
+    }
+
+    if ($trimmed.EndsWith("/api/", [StringComparison]::OrdinalIgnoreCase)) {
+        return $trimmed
+    }
+
+    return "$($trimmed.TrimEnd('/'))/api/"
+}
+
+$resolvedApiBaseUrl = Ensure-ApiPath $ApiBaseUrl
+
 New-Item -ItemType Directory -Force -Path $rootArtifacts | Out-Null
 New-Item -ItemType Directory -Force -Path $artifacts | Out-Null
 
 Push-Location $repoRoot
 try {
+    Write-Host "Building APKs for API base URL: $resolvedApiBaseUrl"
+
     Write-Host "Building BikeMate.Mobile APK ($Configuration)..."
-    dotnet build .\BikeMate.Mobile\BikeMate.Mobile.csproj -f net10.0-android -c $Configuration -p:AndroidBuildApplicationPackage=true -p:AndroidPackageFormat=apk -p:DebugSymbols=false -p:DebugType=none
+    dotnet build .\BikeMate.Mobile\BikeMate.Mobile.csproj -f net10.0-android -c $Configuration -p:AndroidBuildApplicationPackage=true -p:AndroidPackageFormat=apk -p:DebugSymbols=false -p:DebugType=none "-p:BikeMateApiBaseUrl=$resolvedApiBaseUrl"
 
     Write-Host "Building BIKEMATES_ADMIN APK ($Configuration)..."
-    dotnet build .\BIKEMATES_ADMIN\BIKEMATES_ADMIN.csproj -f net10.0-android -c $Configuration -p:AndroidBuildApplicationPackage=true -p:AndroidPackageFormat=apk -p:DebugSymbols=false -p:DebugType=none
+    dotnet build .\BIKEMATES_ADMIN\BIKEMATES_ADMIN.csproj -f net10.0-android -c $Configuration -p:AndroidBuildApplicationPackage=true -p:AndroidPackageFormat=apk -p:DebugSymbols=false -p:DebugType=none "-p:BikeMateApiBaseUrl=$resolvedApiBaseUrl"
 
     $mobileApk = Get-ChildItem .\BikeMate.Mobile\bin\$Configuration\net10.0-android -Recurse -Filter *.apk | Sort-Object LastWriteTime -Descending | Select-Object -First 1
     $adminApk = Get-ChildItem .\BIKEMATES_ADMIN\bin\$Configuration\net10.0-android -Recurse -Filter *.apk | Sort-Object LastWriteTime -Descending | Select-Object -First 1

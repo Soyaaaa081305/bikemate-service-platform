@@ -351,8 +351,15 @@ public sealed class GoogleAccountSetupPage : CustomerPageBase
         if (!string.Equals(formatted, e.NewTextValue, StringComparison.Ordinal))
         {
             _formattingPhoneNumber = true;
-            _phoneEntry!.Text = formatted;
-            _formattingPhoneNumber = false;
+            try
+            {
+                _phoneEntry!.Text = formatted;
+                TryMoveCursorToEnd(_phoneEntry, formatted);
+            }
+            finally
+            {
+                _formattingPhoneNumber = false;
+            }
         }
 
         SaveDraft();
@@ -1381,6 +1388,18 @@ public sealed class GoogleAccountSetupPage : CustomerPageBase
         }
 
         return formatted;
+    }
+
+    private static void TryMoveCursorToEnd(Entry entry, string text)
+    {
+        try
+        {
+            entry.CursorPosition = Math.Min(text.Length, entry.Text?.Length ?? text.Length);
+        }
+        catch (Exception)
+        {
+            // Android can reject cursor changes while the native text box is still applying backspace.
+        }
     }
 
     private void DetachReusableControls()

@@ -74,9 +74,9 @@ These are required for build, runtime behavior, database setup, or phone demo de
 
 The Android phone-demo API defaults were verified:
 
-- `BikeMate.Mobile/Helpers/ApiConfig.cs` defaults to `https://bikemate-api-demo.azurewebsites.net/api/`.
-- `BIKEMATES_ADMIN/appsettings.json` contains `BaseUrl` and `AndroidBaseUrl` set to `https://bikemate-api-demo.azurewebsites.net/api/`.
-- `BIKEMATES_ADMIN/Services/BikeMateDatabaseService.cs` falls back to `https://bikemate-api-demo.azurewebsites.net/api/` for Android.
+- `BikeMate.Mobile/Helpers/ApiConfig.cs` defaults to `https://bikemate-api-afaolandez.azurewebsites.net/api/`.
+- `BIKEMATES_ADMIN/appsettings.json` contains `BaseUrl` and `AndroidBaseUrl` set to `https://bikemate-api-afaolandez.azurewebsites.net/api/`.
+- `BIKEMATES_ADMIN/Services/BikeMateDatabaseService.cs` falls back to `https://bikemate-api-afaolandez.azurewebsites.net/api/` for Android.
 
 ## Cleanup Decision
 

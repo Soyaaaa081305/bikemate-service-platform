@@ -1,5 +1,5 @@
 param(
-    [string]$ApiBaseUrl = "https://bikemate-api-demo.azurewebsites.net/api/",
+    [string]$ApiBaseUrl = "https://bikemate-api-afaolandez.azurewebsites.net/api/",
     [string]$DemoPassword = "Demo123!",
     [switch]$SkipUpload
 )

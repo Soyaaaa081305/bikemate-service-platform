@@ -743,10 +743,10 @@ internal static class BookingFlowActions
 
 internal static class BookingVisuals
 {
-    public const string FallenBikeImage = "https://images.unsplash.com/photo-1517649763962-0c623066013b?auto=format&fit=crop&w=700&q=80";
-    public const string RiderImage = "https://images.unsplash.com/photo-1534787238916-9ba6764efd4f?auto=format&fit=crop&w=700&q=80";
-    public const string ShopImage = "https://images.unsplash.com/photo-1558981806-ec527fa84c39?auto=format&fit=crop&w=700&q=80";
-    public const string MechanicImage = "https://images.unsplash.com/photo-1542046272227-d247df21628a?auto=format&fit=crop&w=500&q=80";
+    public const string FallenBikeImage = "bike_wrench.png";
+    public const string RiderImage = "running_man.png";
+    public const string ShopImage = "mechanic_door.png";
+    public const string MechanicImage = "running_man.png";
 
     public static ImageSource ShopImageSource(string? url)
     {
@@ -1459,7 +1459,7 @@ internal sealed class LocationAccessPage : ContentPage
             {
                 new Image
                 {
-                    Source = CustomerUi.Image("https://img.icons8.com/color/240/google-maps-new.png"),
+                    Source = CustomerUi.Image("location_pin.svg"),
                     HeightRequest = 96,
                     WidthRequest = 96
                 },

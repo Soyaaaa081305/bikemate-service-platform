@@ -461,13 +461,33 @@ h1:focus {
     overflow: hidden;
 }
 
+.admin-table-card .table {
+    min-width: 1040px;
+}
+
 .admin-table-card .table-light th {
     background: #f9fafb;
 }
 
+.audit-action-badge {
+    background: var(--bm-soft-orange);
+    border: 1px solid #ffd1bd;
+    border-radius: 999px;
+    color: var(--bm-orange-dark);
+    display: inline-flex;
+    font-family: var(--bm-font-caption);
+    font-size: var(--bm-text-caption);
+    font-weight: 800;
+    line-height: 1.2;
+    max-width: 220px;
+    padding: .35rem .55rem;
+    white-space: normal;
+}
+
 .audit-cell {
-    color: var(--bm-muted);
-    max-width: 320px;
+    color: var(--bm-text);
+    line-height: 1.45;
+    max-width: 360px;
     white-space: normal;
     word-break: break-word;
 }

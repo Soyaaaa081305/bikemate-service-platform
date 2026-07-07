@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.Http.Headers;
+using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Maui.Storage;
 
@@ -22,7 +23,7 @@ public static class ApiConfig
 
     private const string DefaultBaseUrl =
 #if ANDROID
-        "https://bikemate-api-demo.azurewebsites.net/api/";
+        "https://bikemate-api-afaolandez.azurewebsites.net/api/";
 #else
         "https://localhost:5001/api/";
 #endif
@@ -174,7 +175,21 @@ public static class ApiConfig
         Preferences.Default.Remove(ApiBaseUrlPreferenceKey);
 
         var environmentValue = Environment.GetEnvironmentVariable(ApiBaseUrlEnvironmentVariable);
-        return EnsureApiPath(string.IsNullOrWhiteSpace(environmentValue) ? DefaultBaseUrl : environmentValue);
+        if (!string.IsNullOrWhiteSpace(environmentValue))
+        {
+            return EnsureApiPath(environmentValue);
+        }
+
+        var buildConfiguredValue = ReadBuildConfiguredApiBaseUrl();
+        return EnsureApiPath(string.IsNullOrWhiteSpace(buildConfiguredValue) ? DefaultBaseUrl : buildConfiguredValue);
+    }
+
+    private static string? ReadBuildConfiguredApiBaseUrl()
+    {
+        return Assembly.GetExecutingAssembly()
+            .GetCustomAttributes<AssemblyMetadataAttribute>()
+            .FirstOrDefault(attribute => string.Equals(attribute.Key, "BikeMateApiBaseUrl", StringComparison.OrdinalIgnoreCase))
+            ?.Value;
     }
 
     private static string EnsureApiPath(string value)

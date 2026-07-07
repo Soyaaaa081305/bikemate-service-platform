@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Reflection;
 using System.Text.Json;
 using Microsoft.Maui.Storage;
 
@@ -1037,6 +1038,12 @@ public static class BikeMateDatabaseService
 
     private static string LoadPackagedOrDefaultApiBaseUrl()
     {
+        var buildConfiguredApiBaseUrl = ReadBuildConfiguredApiBaseUrl();
+        if (!string.IsNullOrWhiteSpace(buildConfiguredApiBaseUrl))
+        {
+            return buildConfiguredApiBaseUrl;
+        }
+
         var candidates = new[]
         {
             Path.Combine(AppContext.BaseDirectory, "appsettings.json"),
@@ -1062,6 +1069,14 @@ public static class BikeMateDatabaseService
         return string.IsNullOrWhiteSpace(packagedApiBaseUrl)
             ? DefaultApiBaseUrl()
             : packagedApiBaseUrl;
+    }
+
+    private static string? ReadBuildConfiguredApiBaseUrl()
+    {
+        return Assembly.GetExecutingAssembly()
+            .GetCustomAttributes<AssemblyMetadataAttribute>()
+            .FirstOrDefault(attribute => string.Equals(attribute.Key, "BikeMateApiBaseUrl", StringComparison.OrdinalIgnoreCase))
+            ?.Value;
     }
 
     private static string? ReadPackagedApiBaseUrl()
@@ -1102,7 +1117,7 @@ public static class BikeMateDatabaseService
     private static string DefaultApiBaseUrl()
     {
 #if ANDROID
-        return "https://bikemate-api-demo.azurewebsites.net/api/";
+        return "https://bikemate-api-afaolandez.azurewebsites.net/api/";
 #else
         return "https://localhost:5001/api/";
 #endif

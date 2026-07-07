@@ -32,11 +32,11 @@ internal static class CustomerUi
     public const string FontCaption = AppTypography.CaptionFont;
     public const string FontCaptionBold = AppTypography.CaptionBoldFont;
 
-    public const string OnlineBikeRepairImage = "https://img.icons8.com/color/96/bicycle.png";
-    public const string HomeIcon = "https://img.icons8.com/ios/50/home--v1.png";
-    public const string ScheduleIcon = "https://img.icons8.com/ios/50/calendar--v1.png";
-    public const string PaymentsIcon = "https://img.icons8.com/ios/50/wallet--v1.png";
-    public const string MessagesIcon = "https://img.icons8.com/ios/50/speech-bubble--v1.png";
+    public const string OnlineBikeRepairImage = "bike_wrench.png";
+    public const string HomeIcon = "home_icon.svg";
+    public const string ScheduleIcon = "calendar_icon.svg";
+    public const string PaymentsIcon = "wallet_icon.svg";
+    public const string MessagesIcon = "message_icon.svg";
 
     public static string FontFor(double size, FontAttributes attributes = FontAttributes.None)
     {
@@ -2973,6 +2973,7 @@ public sealed class CustomerProfilePage : CustomerPageBase
 
     private static void ConfigurePhilippineMobileEntry(Entry entry)
     {
+        var isFormatting = false;
         entry.Text = ToPhilippineMobileDisplay(entry.Text);
         entry.Focused += (_, _) =>
         {
@@ -2983,17 +2984,23 @@ public sealed class CustomerProfilePage : CustomerPageBase
         };
         entry.TextChanged += (_, args) =>
         {
+            if (isFormatting)
+            {
+                return;
+            }
+
             var normalized = ToPhilippineMobileDisplay(args.NewTextValue);
             if (!string.Equals(args.NewTextValue, normalized, StringComparison.Ordinal))
             {
-                entry.Text = normalized;
+                isFormatting = true;
                 try
                 {
-                    entry.CursorPosition = normalized.Length;
+                    entry.Text = normalized;
+                    TryMoveCursorToEnd(entry, normalized);
                 }
-                catch (ArgumentOutOfRangeException)
+                finally
                 {
-                    entry.CursorPosition = Math.Max(0, entry.Text?.Length ?? 0);
+                    isFormatting = false;
                 }
             }
         };
@@ -3036,6 +3043,18 @@ public sealed class CustomerProfilePage : CustomerPageBase
     {
         var display = ToPhilippineMobileDisplay(value);
         return string.Equals(display, "+63", StringComparison.Ordinal) ? null : display;
+    }
+
+    private static void TryMoveCursorToEnd(Entry entry, string text)
+    {
+        try
+        {
+            entry.CursorPosition = Math.Min(text.Length, entry.Text?.Length ?? text.Length);
+        }
+        catch (Exception)
+        {
+            // Android can reject cursor changes while the native text box is still applying backspace.
+        }
     }
 
     private static Editor EditorField(string? value, string placeholder)

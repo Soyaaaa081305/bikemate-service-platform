@@ -2666,6 +2666,7 @@ public sealed class MechanicEditProfilePage : MechanicPageBase
 
     private static void ConfigurePhilippineMobileEntry(Entry entry)
     {
+        var isFormatting = false;
         entry.Text = ToPhilippineMobileDisplay(entry.Text);
         entry.Focused += (_, _) =>
         {
@@ -2676,17 +2677,23 @@ public sealed class MechanicEditProfilePage : MechanicPageBase
         };
         entry.TextChanged += (_, args) =>
         {
+            if (isFormatting)
+            {
+                return;
+            }
+
             var normalized = ToPhilippineMobileDisplay(args.NewTextValue);
             if (!string.Equals(args.NewTextValue, normalized, StringComparison.Ordinal))
             {
-                entry.Text = normalized;
+                isFormatting = true;
                 try
                 {
-                    entry.CursorPosition = normalized.Length;
+                    entry.Text = normalized;
+                    TryMoveCursorToEnd(entry, normalized);
                 }
-                catch (ArgumentOutOfRangeException)
+                finally
                 {
-                    entry.CursorPosition = Math.Max(0, entry.Text?.Length ?? 0);
+                    isFormatting = false;
                 }
             }
         };
@@ -2729,6 +2736,18 @@ public sealed class MechanicEditProfilePage : MechanicPageBase
     {
         var display = ToPhilippineMobileDisplay(value);
         return string.Equals(display, "+63", StringComparison.Ordinal) ? null : display;
+    }
+
+    private static void TryMoveCursorToEnd(Entry entry, string text)
+    {
+        try
+        {
+            entry.CursorPosition = Math.Min(text.Length, entry.Text?.Length ?? text.Length);
+        }
+        catch (Exception)
+        {
+            // Android can reject cursor changes while the native text box is still applying backspace.
+        }
     }
 }
 
