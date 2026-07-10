@@ -23,7 +23,7 @@
                         <Label Text="Phone number *" FontSize="11" FontAttributes="Bold" TextColor="#242424" />
                         <Border Stroke="#DCDCDC" BackgroundColor="#FAFAFA" Padding="12,2">
                             <Border.StrokeShape><RoundRectangle CornerRadius="8" /></Border.StrokeShape>
-                            <Entry x:Name="PhoneEntry" Placeholder="09XXXXXXXXX" Keyboard="Telephone" MaxLength="11" ReturnType="Next" />
+                            <Entry x:Name="PhoneEntry" Placeholder="639XXXXXXXXX" Keyboard="Telephone" ReturnType="Next" />
                         </Border>
 
                         <Label Text="Email *" FontSize="11" FontAttributes="Bold" TextColor="#242424" />

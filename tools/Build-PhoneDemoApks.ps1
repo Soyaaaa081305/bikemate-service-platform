@@ -1,7 +1,7 @@
 param(
     [ValidateSet("Debug", "Release")]
     [string]$Configuration = "Debug",
-    [string]$ApiBaseUrl = "https://bikemate-api-afaolandez.azurewebsites.net/api/",
+    [string]$ApiBaseUrl = "https://10.0.2.2:5001/api/",
     [switch]$InstallConnectedDevices
 )
 

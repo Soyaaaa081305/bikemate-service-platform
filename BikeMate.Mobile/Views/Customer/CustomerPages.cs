@@ -55,7 +55,7 @@ internal static class CustomerUi
             return ImageSource.FromUri(uri);
         }
 
-        var logicalAssetName = System.IO.Path.GetFileNameWithoutExtension(assetOrUrl);
+        var logicalAssetName = System.IO.Path.GetFileName(assetOrUrl);
         return string.IsNullOrWhiteSpace(logicalAssetName)
             ? ImageSource.FromFile(assetOrUrl)
             : ImageSource.FromFile(logicalAssetName);

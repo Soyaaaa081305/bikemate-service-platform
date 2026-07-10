@@ -932,7 +932,7 @@ public static class BikeMateDatabaseService
             Timeout = TimeSpan.FromSeconds(30)
         };
 
-        if (baseUrl.Contains("ngrok-free.dev", StringComparison.OrdinalIgnoreCase))
+        if (baseUrl.Contains("ngrok", StringComparison.OrdinalIgnoreCase))
         {
             client.DefaultRequestHeaders.TryAddWithoutValidation("ngrok-skip-browser-warning", "true");
         }
@@ -1117,7 +1117,7 @@ public static class BikeMateDatabaseService
     private static string DefaultApiBaseUrl()
     {
 #if ANDROID
-        return "https://bikemate-api-afaolandez.azurewebsites.net/api/";
+        return "https://10.0.2.2:5001/api/";
 #else
         return "https://localhost:5001/api/";
 #endif

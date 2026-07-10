@@ -89,10 +89,18 @@ API URLs:
 
 ## Phone Demo
 
-The Android demo defaults are configured for:
+The Android demo defaults are local again. For a physical phone, run the local API through ngrok and build the APK with the tunnel URL:
 
-```text
-https://bikemate-api-afaolandez.azurewebsites.net/api/
+```powershell
+powershell -ExecutionPolicy Bypass -File .\tools\Run-LocalNgrokDemo.ps1 -App Mobile
+```
+
+That helper starts `BikeMate.Api` on `http://localhost:5000`, starts or reuses an ngrok tunnel, builds the selected Android app with the tunnel URL, installs it, and launches it.
+
+If ngrok is already running, you can point the Android runner at it directly:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\tools\Run-AndroidDemo.ps1 -App Mobile -UseNgrok
 ```
 
 Required scripts are kept in `tools`:
@@ -194,7 +202,7 @@ If you rebuild APKs later for any cloud URL:
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\tools\Build-PhoneDemoApks.ps1 `
-  -ApiBaseUrl "https://bikemate-api-afaolandez.azurewebsites.net/api/"
+  -ApiBaseUrl "https://your-ngrok-domain.ngrok-free.app/api/"
 ```
 
 ### Turn The Cloud Demo On Or Off

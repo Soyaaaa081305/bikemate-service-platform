@@ -23,7 +23,7 @@ public static class ApiConfig
 
     private const string DefaultBaseUrl =
 #if ANDROID
-        "https://bikemate-api-afaolandez.azurewebsites.net/api/";
+        "https://10.0.2.2:5001/api/";
 #else
         "https://localhost:5001/api/";
 #endif

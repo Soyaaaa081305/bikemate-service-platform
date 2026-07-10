@@ -4,6 +4,8 @@ param(
     [string]$App = "Mobile",
     [ValidateSet("Debug", "Release")]
     [string]$Configuration = "Debug",
+    [string]$ApiBaseUrl,
+    [switch]$UseNgrok,
     [switch]$SkipBuild,
     [switch]$NoClearData
 )
@@ -17,6 +19,43 @@ $emulator = Join-Path $androidSdk "emulator\emulator.exe"
 
 $mobilePackage = "com.bikemate.mobile"
 $adminPackage = "com.bikemate.shop"
+
+function Ensure-ApiPath {
+    param([string]$Value)
+
+    if ([string]::IsNullOrWhiteSpace($Value)) {
+        throw "ApiBaseUrl is required."
+    }
+
+    $trimmed = $Value.Trim()
+    if (-not $trimmed.EndsWith("/")) {
+        $trimmed += "/"
+    }
+
+    if ($trimmed.EndsWith("/api/", [StringComparison]::OrdinalIgnoreCase)) {
+        return $trimmed
+    }
+
+    return "$($trimmed.TrimEnd('/'))/api/"
+}
+
+function Get-NgrokPublicUrl {
+    try {
+        $response = Invoke-RestMethod -Uri "http://127.0.0.1:4040/api/tunnels" -TimeoutSec 3
+        $tunnel = @($response.tunnels) |
+            Where-Object { $_.public_url -like "https://*" } |
+            Select-Object -First 1
+
+        if ($null -ne $tunnel) {
+            return $tunnel.public_url
+        }
+    }
+    catch {
+        return $null
+    }
+
+    return $null
+}
 
 function Require-File {
     param(
@@ -100,18 +139,41 @@ function Install-And-Launch {
 Require-File -Path $adb -Message "adb was not found at $adb. Install Android SDK Platform Tools."
 Require-File -Path $emulator -Message "emulator.exe was not found at $emulator. Install Android Emulator from Android Studio."
 
+$resolvedApiBaseUrl = $ApiBaseUrl
+if ([string]::IsNullOrWhiteSpace($resolvedApiBaseUrl)) {
+    $resolvedApiBaseUrl = $env:BIKEMATE_API_BASE_URL
+}
+
+if ([string]::IsNullOrWhiteSpace($resolvedApiBaseUrl) -or $UseNgrok) {
+    $ngrokUrl = Get-NgrokPublicUrl
+    if (-not [string]::IsNullOrWhiteSpace($ngrokUrl)) {
+        $resolvedApiBaseUrl = $ngrokUrl
+    }
+    elseif ($UseNgrok) {
+        throw "No running ngrok tunnel was found at http://127.0.0.1:4040. Start ngrok first or run tools\Run-LocalNgrokDemo.ps1."
+    }
+}
+
+if ([string]::IsNullOrWhiteSpace($resolvedApiBaseUrl)) {
+    $resolvedApiBaseUrl = "https://10.0.2.2:5001/api/"
+}
+
+$resolvedApiBaseUrl = Ensure-ApiPath $resolvedApiBaseUrl
+
 Push-Location $repoRoot
 try {
     if (-not $SkipBuild) {
+        Write-Host "Building Android app(s) for API base URL: $resolvedApiBaseUrl"
+
         if ($App -in @("Mobile", "Both")) {
             Write-Host "Building BikeMate.Mobile ($Configuration)..."
-            dotnet build .\BikeMate.Mobile\BikeMate.Mobile.csproj -f net10.0-android -c $Configuration
+            dotnet build .\BikeMate.Mobile\BikeMate.Mobile.csproj -f net10.0-android -c $Configuration "-p:BikeMateApiBaseUrl=$resolvedApiBaseUrl"
             if ($LASTEXITCODE -ne 0) { throw "BikeMate.Mobile build failed." }
         }
 
         if ($App -in @("Admin", "Both")) {
             Write-Host "Building BIKEMATES_ADMIN ($Configuration)..."
-            dotnet build .\BIKEMATES_ADMIN\BIKEMATES_ADMIN.csproj -f net10.0-android -c $Configuration
+            dotnet build .\BIKEMATES_ADMIN\BIKEMATES_ADMIN.csproj -f net10.0-android -c $Configuration "-p:BikeMateApiBaseUrl=$resolvedApiBaseUrl"
             if ($LASTEXITCODE -ne 0) { throw "BIKEMATES_ADMIN build failed." }
         }
     }
@@ -141,7 +203,7 @@ try {
         Install-And-Launch -PackageName $adminPackage -ApkPath $adminApk
     }
 
-    Write-Host "Android demo app is ready."
+    Write-Host "Android demo app is ready. API base URL: $resolvedApiBaseUrl"
 }
 finally {
     Pop-Location

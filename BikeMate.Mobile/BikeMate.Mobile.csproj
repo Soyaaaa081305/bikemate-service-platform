@@ -19,7 +19,7 @@
 		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">23.0</SupportedOSPlatformVersion>
 		<Platforms>AnyCPU</Platforms>
 		<NoWarn>$(NoWarn);NU1608</NoWarn>
-		<BikeMateApiBaseUrl Condition="'$(BikeMateApiBaseUrl)' == ''">https://bikemate-api-afaolandez.azurewebsites.net/api/</BikeMateApiBaseUrl>
+		<BikeMateApiBaseUrl Condition="'$(BikeMateApiBaseUrl)' == ''">https://10.0.2.2:5001/api/</BikeMateApiBaseUrl>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">
@@ -38,10 +38,14 @@
 		<MauiSplashScreen Include="Resources\AppIcon\bikemate_appicon.png" Color="#FF6B00" BaseSize="128,128" />
 		<MauiImage Include="Resources\Images\bikemate_logo.png" />
 		<MauiImage Include="Resources\Images\bike_wrench.png" />
+		<MauiImage Include="Resources\Images\calendar_icon.svg" />
 		<MauiImage Include="Resources\Images\google_logo.svg" />
+		<MauiImage Include="Resources\Images\home_icon.svg" />
 		<MauiImage Include="Resources\Images\location_pin.svg" />
 		<MauiImage Include="Resources\Images\mechanic_door.png" />
+		<MauiImage Include="Resources\Images\message_icon.svg" />
 		<MauiImage Include="Resources\Images\running_man.png" />
+		<MauiImage Include="Resources\Images\wallet_icon.svg" />
 	</ItemGroup>
 
 	<ItemGroup>

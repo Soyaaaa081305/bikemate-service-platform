@@ -619,7 +619,7 @@
     {
         var configured = Configuration["Api:PublicBaseUrl"];
         return string.IsNullOrWhiteSpace(configured)
-            ? "https://bikemate-api-afaolandez.azurewebsites.net"
+            ? "http://localhost:5000"
             : configured.TrimEnd('/');
     }
 

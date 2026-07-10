@@ -34,7 +34,7 @@
 		<!-- Versions -->
 		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
 		<ApplicationVersion>3</ApplicationVersion>
-		<BikeMateApiBaseUrl Condition="'$(BikeMateApiBaseUrl)' == ''">https://bikemate-api-afaolandez.azurewebsites.net/api/</BikeMateApiBaseUrl>
+		<BikeMateApiBaseUrl Condition="'$(BikeMateApiBaseUrl)' == ''">https://10.0.2.2:5001/api/</BikeMateApiBaseUrl>
 
 		<!-- To develop, package, and publish an app to the Microsoft Store, see: https://aka.ms/MauiTemplateUnpackaged -->
 		<WindowsPackageType>None</WindowsPackageType>
