@@ -18,10 +18,12 @@ builder.Services.AddRazorComponents().AddInteractiveServerComponents();
 builder.Services.AddControllers();
 builder.Services.AddHttpClient();
 var connectionString = builder.Configuration.GetConnectionString("BikeMateDb")
-    ?? "Server=localhost\\SQLEXPRESS;Database=BikeMatesDB_Dev;Trusted_Connection=True;TrustServerCertificate=True;Command Timeout=300;";
+    ?? Environment.GetEnvironmentVariable("DATABASE_URL")
+    ?? "Host=localhost;Port=5432;Database=bikemate;Username=bikemate;Password=bikemate123";
 
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 builder.Services.AddDbContext<BikeMateDbContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseNpgsql(connectionString));
 
 // UI data service
 builder.Services.AddScoped<AdminApiClient>();
@@ -55,7 +57,10 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 app.UseStaticFiles();
 app.UseAntiforgery();
 

@@ -35,3 +35,9 @@ BikeMate.Api/wwwroot/uploads/*
 BikeMate.Api/appsettings.Local.json
 BikeMate.Api/firebase-service-account*.json
 BikeMate.Mobile/Platforms/Android/google-services.json
+
+# Local dev overrides (not for cloud)
+*.local.json
+
+# Temp Dockerfile copies from Dockerfile.api / .webadmin
+# NOT excluded from Railway deploys

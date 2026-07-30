@@ -23,9 +23,9 @@ public static class ApiConfig
 
     private const string DefaultBaseUrl =
 #if ANDROID
-        "https://10.0.2.2:5001/api/";
+        "https://api-production-02d4.up.railway.app/api/";
 #else
-        "https://localhost:5001/api/";
+        "https://api-production-02d4.up.railway.app/api/";
 #endif
 
     public static string BaseUrl => ResolveBaseUrl();

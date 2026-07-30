@@ -5,6 +5,28 @@ namespace BikeMate.Infrastructure.Data;
 
 public sealed class BikeMateDbContext(DbContextOptions<BikeMateDbContext> options) : DbContext(options)
 {
+    public override int SaveChanges()
+    {
+        SetAuditTimestamps();
+        return base.SaveChanges();
+    }
+
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        SetAuditTimestamps();
+        return base.SaveChangesAsync(cancellationToken);
+    }
+
+    private void SetAuditTimestamps()
+    {
+        foreach (var entry in ChangeTracker.Entries())
+        {
+            if (entry.State is not EntityState.Added) continue;
+            var createdAt = entry.Properties.FirstOrDefault(p => p.Metadata.Name == "CreatedAt");
+            if (createdAt?.CurrentValue is DateTime dt && dt == default)
+                createdAt.CurrentValue = DateTime.UtcNow;
+        }
+    }
     public DbSet<Role> Roles => Set<Role>();
     public DbSet<User> Users => Set<User>();
     public DbSet<UserRole> UserRoles => Set<UserRole>();
@@ -45,7 +67,6 @@ public sealed class BikeMateDbContext(DbContextOptions<BikeMateDbContext> option
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-        modelBuilder.HasDefaultSchema("dbo");
 
         ConfigureUsers(modelBuilder);
         ConfigureCustomerData(modelBuilder);
@@ -80,14 +101,14 @@ public sealed class BikeMateDbContext(DbContextOptions<BikeMateDbContext> option
             entity.Property(x => x.PasswordHash).HasMaxLength(500);
             entity.Property(x => x.ProfileImageUrl).HasMaxLength(500);
             entity.Property(x => x.AccountStatus).HasMaxLength(30).HasDefaultValue("pending");
-            entity.Property(x => x.CreatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
+            entity.Property(x => x.CreatedAt);
         });
 
         modelBuilder.Entity<UserRole>(entity =>
         {
             entity.ToTable("user_roles");
             entity.HasKey(x => new { x.UserId, x.RoleId });
-            entity.Property(x => x.AssignedAt).HasDefaultValueSql("SYSUTCDATETIME()");
+            entity.Property(x => x.AssignedAt);
             entity.HasOne(x => x.User).WithMany(x => x.UserRoles).HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
             entity.HasOne(x => x.Role).WithMany(x => x.UserRoles).HasForeignKey(x => x.RoleId).OnDelete(DeleteBehavior.Restrict);
         });
@@ -96,11 +117,11 @@ public sealed class BikeMateDbContext(DbContextOptions<BikeMateDbContext> option
         {
             entity.ToTable("user_auth_providers");
             entity.HasKey(x => x.AuthProviderId);
-            entity.HasIndex(x => new { x.ProviderName, x.ProviderSubject }).IsUnique().HasFilter("[ProviderSubject] IS NOT NULL");
+            entity.HasIndex(x => new { x.ProviderName, x.ProviderSubject }).IsUnique().HasFilter("\"ProviderSubject\" IS NOT NULL");
             entity.Property(x => x.ProviderName).HasMaxLength(50).IsRequired();
             entity.Property(x => x.ProviderSubject).HasMaxLength(255);
             entity.Property(x => x.ProviderEmail).HasMaxLength(255);
-            entity.Property(x => x.CreatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
+            entity.Property(x => x.CreatedAt);
             entity.HasOne(x => x.User).WithMany(x => x.AuthProviders).HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
         });
 
@@ -110,7 +131,7 @@ public sealed class BikeMateDbContext(DbContextOptions<BikeMateDbContext> option
             entity.HasKey(x => x.OtpId);
             entity.Property(x => x.OtpHash).HasMaxLength(500).IsRequired();
             entity.Property(x => x.Purpose).HasMaxLength(50).HasDefaultValue("email_verification");
-            entity.Property(x => x.CreatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
+            entity.Property(x => x.CreatedAt);
             entity.HasOne(x => x.User).WithMany(x => x.OtpVerifications).HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
         });
 
@@ -119,7 +140,7 @@ public sealed class BikeMateDbContext(DbContextOptions<BikeMateDbContext> option
             entity.ToTable("password_reset_tokens");
             entity.HasKey(x => x.TokenId);
             entity.Property(x => x.TokenHash).HasMaxLength(500).IsRequired();
-            entity.Property(x => x.CreatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
+            entity.Property(x => x.CreatedAt);
             entity.HasOne(x => x.User).WithMany(x => x.PasswordResetTokens).HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
         });
 
@@ -129,7 +150,7 @@ public sealed class BikeMateDbContext(DbContextOptions<BikeMateDbContext> option
             entity.HasKey(x => x.DeviceTokenId);
             entity.Property(x => x.DeviceToken).HasMaxLength(500).IsRequired();
             entity.Property(x => x.Platform).HasMaxLength(50).HasDefaultValue("android");
-            entity.Property(x => x.CreatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
+            entity.Property(x => x.CreatedAt);
             entity.HasOne(x => x.User).WithMany(x => x.DeviceTokens).HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
         });
     }
@@ -144,7 +165,7 @@ public sealed class BikeMateDbContext(DbContextOptions<BikeMateDbContext> option
             entity.Property(x => x.MiddleName).HasMaxLength(100);
             entity.Property(x => x.Sex).HasMaxLength(30);
             entity.Property(x => x.ValidIdImageUrl).HasMaxLength(500);
-            entity.Property(x => x.CreatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
+            entity.Property(x => x.CreatedAt);
             entity.HasOne(x => x.User).WithOne(x => x.Client).HasForeignKey<Client>(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
         });
 
@@ -160,7 +181,7 @@ public sealed class BikeMateDbContext(DbContextOptions<BikeMateDbContext> option
             entity.Property(x => x.PostalCode).HasMaxLength(20);
             entity.Property(x => x.Latitude).HasPrecision(10, 8);
             entity.Property(x => x.Longitude).HasPrecision(11, 8);
-            entity.Property(x => x.CreatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
+            entity.Property(x => x.CreatedAt);
             entity.HasOne(x => x.Client).WithMany(x => x.Addresses).HasForeignKey(x => x.ClientId).OnDelete(DeleteBehavior.Cascade);
         });
 
@@ -174,7 +195,7 @@ public sealed class BikeMateDbContext(DbContextOptions<BikeMateDbContext> option
             entity.Property(x => x.EngineType).HasMaxLength(100);
             entity.Property(x => x.Color).HasMaxLength(50);
             entity.Property(x => x.MotorcycleImageUrl).HasMaxLength(500);
-            entity.Property(x => x.CreatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
+            entity.Property(x => x.CreatedAt);
             entity.HasOne(x => x.Client).WithMany(x => x.Motorcycles).HasForeignKey(x => x.ClientId).OnDelete(DeleteBehavior.Cascade);
         });
     }
@@ -199,7 +220,7 @@ public sealed class BikeMateDbContext(DbContextOptions<BikeMateDbContext> option
             entity.Property(x => x.CurrentLatitude).HasPrecision(10, 8);
             entity.Property(x => x.CurrentLongitude).HasPrecision(11, 8);
             entity.Property(x => x.AverageRating).HasPrecision(3, 2);
-            entity.Property(x => x.CreatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
+            entity.Property(x => x.CreatedAt);
             entity.HasOne(x => x.User).WithOne(x => x.Mechanic).HasForeignKey<Mechanic>(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
         });
 
@@ -239,7 +260,7 @@ public sealed class BikeMateDbContext(DbContextOptions<BikeMateDbContext> option
             entity.Property(x => x.AllowsReservations).HasDefaultValue(true);
             entity.Property(x => x.AllowsPickup).HasDefaultValue(true);
             entity.Property(x => x.AllowsOnsiteRepair).HasDefaultValue(true);
-            entity.Property(x => x.CreatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
+            entity.Property(x => x.CreatedAt);
             entity.HasOne(x => x.Owner).WithMany(x => x.OwnedShops).HasForeignKey(x => x.OwnerUserId).OnDelete(DeleteBehavior.Restrict);
         });
 
@@ -265,7 +286,7 @@ public sealed class BikeMateDbContext(DbContextOptions<BikeMateDbContext> option
             entity.HasKey(x => x.ShopServiceId);
             entity.Property(x => x.ServiceName).HasMaxLength(255).IsRequired();
             entity.Property(x => x.BasePrice).HasPrecision(10, 2);
-            entity.Property(x => x.CreatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
+            entity.Property(x => x.CreatedAt);
             entity.HasOne(x => x.Shop).WithMany(x => x.Services).HasForeignKey(x => x.ShopId).OnDelete(DeleteBehavior.Cascade);
             entity.HasOne(x => x.Category).WithMany(x => x.ShopServices).HasForeignKey(x => x.CategoryId).OnDelete(DeleteBehavior.Restrict);
         });
@@ -275,7 +296,7 @@ public sealed class BikeMateDbContext(DbContextOptions<BikeMateDbContext> option
             entity.ToTable("service_images");
             entity.HasKey(x => x.ServiceImageId);
             entity.Property(x => x.ImageUrl).HasMaxLength(500).IsRequired();
-            entity.Property(x => x.CreatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
+            entity.Property(x => x.CreatedAt);
             entity.HasOne(x => x.ShopService).WithMany(x => x.Images).HasForeignKey(x => x.ShopServiceId).OnDelete(DeleteBehavior.Cascade);
         });
 
@@ -285,7 +306,7 @@ public sealed class BikeMateDbContext(DbContextOptions<BikeMateDbContext> option
             entity.HasKey(x => x.ProductId);
             entity.Property(x => x.ProductName).HasMaxLength(255).IsRequired();
             entity.Property(x => x.Price).HasPrecision(10, 2);
-            entity.Property(x => x.CreatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
+            entity.Property(x => x.CreatedAt);
             entity.HasOne(x => x.Shop).WithMany(x => x.Products).HasForeignKey(x => x.ShopId).OnDelete(DeleteBehavior.Cascade);
         });
 
@@ -294,7 +315,7 @@ public sealed class BikeMateDbContext(DbContextOptions<BikeMateDbContext> option
             entity.ToTable("product_images");
             entity.HasKey(x => x.ProductImageId);
             entity.Property(x => x.ImageUrl).HasMaxLength(500).IsRequired();
-            entity.Property(x => x.CreatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
+            entity.Property(x => x.CreatedAt);
             entity.HasOne(x => x.Product).WithMany(x => x.Images).HasForeignKey(x => x.ProductId).OnDelete(DeleteBehavior.Cascade);
         });
 
@@ -302,7 +323,7 @@ public sealed class BikeMateDbContext(DbContextOptions<BikeMateDbContext> option
         {
             entity.ToTable("shop_mechanics");
             entity.HasKey(x => new { x.ShopId, x.MechanicId });
-            entity.Property(x => x.AssignedAt).HasDefaultValueSql("SYSUTCDATETIME()");
+            entity.Property(x => x.AssignedAt);
             entity.HasOne(x => x.Shop).WithMany(x => x.ShopMechanics).HasForeignKey(x => x.ShopId).OnDelete(DeleteBehavior.Cascade);
             entity.HasOne(x => x.Mechanic).WithMany(x => x.ShopMechanics).HasForeignKey(x => x.MechanicId).OnDelete(DeleteBehavior.Restrict);
         });
@@ -320,11 +341,7 @@ public sealed class BikeMateDbContext(DbContextOptions<BikeMateDbContext> option
 
         modelBuilder.Entity<ServiceRequest>(entity =>
         {
-            entity.ToTable("service_requests", table =>
-            {
-                table.HasTrigger("trg_requests_update_completed_jobs");
-                table.HasTrigger("trg_service_request_status_history");
-            });
+            entity.ToTable("service_requests");
             entity.HasKey(x => x.RequestId);
             entity.Property(x => x.IssueDescription).IsRequired();
             entity.Property(x => x.ServiceLocationAddress).HasMaxLength(500);
@@ -332,7 +349,7 @@ public sealed class BikeMateDbContext(DbContextOptions<BikeMateDbContext> option
             entity.Property(x => x.ServiceLongitude).HasPrecision(11, 8);
             entity.Property(x => x.EstimatedTotal).HasPrecision(10, 2);
             entity.Property(x => x.FinalTotal).HasPrecision(10, 2);
-            entity.Property(x => x.CreatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
+            entity.Property(x => x.CreatedAt);
             entity.HasOne(x => x.Client).WithMany(x => x.ServiceRequests).HasForeignKey(x => x.ClientId).OnDelete(DeleteBehavior.Restrict);
             entity.HasOne(x => x.Shop).WithMany(x => x.ServiceRequests).HasForeignKey(x => x.ShopId).OnDelete(DeleteBehavior.Restrict);
             entity.HasOne(x => x.ShopService).WithMany(x => x.ServiceRequests).HasForeignKey(x => x.ShopServiceId).OnDelete(DeleteBehavior.Restrict);
@@ -350,7 +367,7 @@ public sealed class BikeMateDbContext(DbContextOptions<BikeMateDbContext> option
             entity.Property(x => x.Quantity).HasDefaultValue(1);
             entity.Property(x => x.UnitPrice).HasPrecision(10, 2);
             entity.Property(x => x.LineTotal).HasPrecision(10, 2);
-            entity.Property(x => x.CreatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
+            entity.Property(x => x.CreatedAt);
             entity.HasOne(x => x.Request).WithMany(x => x.LineItems).HasForeignKey(x => x.RequestId).OnDelete(DeleteBehavior.Cascade);
             entity.HasOne(x => x.ShopService).WithMany().HasForeignKey(x => x.ShopServiceId).OnDelete(DeleteBehavior.Restrict);
             entity.HasOne(x => x.Product).WithMany(x => x.RequestLineItems).HasForeignKey(x => x.ProductId).OnDelete(DeleteBehavior.Restrict);
@@ -360,7 +377,7 @@ public sealed class BikeMateDbContext(DbContextOptions<BikeMateDbContext> option
         {
             entity.ToTable("request_status_history");
             entity.HasKey(x => x.StatusHistoryId);
-            entity.Property(x => x.CreatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
+            entity.Property(x => x.CreatedAt);
             entity.HasOne(x => x.Request).WithMany(x => x.StatusHistory).HasForeignKey(x => x.RequestId).OnDelete(DeleteBehavior.Cascade);
             entity.HasOne(x => x.OldStatus).WithMany().HasForeignKey(x => x.OldStatusId).OnDelete(DeleteBehavior.Restrict);
             entity.HasOne(x => x.NewStatus).WithMany().HasForeignKey(x => x.NewStatusId).OnDelete(DeleteBehavior.Restrict);
@@ -374,7 +391,7 @@ public sealed class BikeMateDbContext(DbContextOptions<BikeMateDbContext> option
             entity.Property(x => x.MediaUrl).HasMaxLength(500).IsRequired();
             entity.Property(x => x.MediaType).HasMaxLength(50).HasDefaultValue("image");
             entity.Property(x => x.Caption).HasMaxLength(500);
-            entity.Property(x => x.CreatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
+            entity.Property(x => x.CreatedAt);
             entity.HasOne(x => x.Request).WithMany(x => x.Media).HasForeignKey(x => x.RequestId).OnDelete(DeleteBehavior.Cascade);
         });
 
@@ -385,7 +402,7 @@ public sealed class BikeMateDbContext(DbContextOptions<BikeMateDbContext> option
             entity.Property(x => x.Latitude).HasPrecision(10, 8);
             entity.Property(x => x.Longitude).HasPrecision(11, 8);
             entity.Property(x => x.AccuracyMeters).HasPrecision(10, 2);
-            entity.Property(x => x.CreatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
+            entity.Property(x => x.CreatedAt);
             entity.HasOne(x => x.Request).WithMany(x => x.LiveLocations).HasForeignKey(x => x.RequestId).OnDelete(DeleteBehavior.Cascade);
             entity.HasOne(x => x.Mechanic).WithMany(x => x.LiveLocations).HasForeignKey(x => x.MechanicId).OnDelete(DeleteBehavior.SetNull);
         });
@@ -398,7 +415,7 @@ public sealed class BikeMateDbContext(DbContextOptions<BikeMateDbContext> option
             entity.ToTable("conversations");
             entity.HasKey(x => x.ConversationId);
             entity.Property(x => x.ConversationType).HasMaxLength(50).HasDefaultValue("service_request");
-            entity.Property(x => x.CreatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
+            entity.Property(x => x.CreatedAt);
             entity.HasOne(x => x.Request).WithMany().HasForeignKey(x => x.RequestId).OnDelete(DeleteBehavior.SetNull);
         });
 
@@ -406,7 +423,7 @@ public sealed class BikeMateDbContext(DbContextOptions<BikeMateDbContext> option
         {
             entity.ToTable("conversation_participants");
             entity.HasKey(x => new { x.ConversationId, x.UserId });
-            entity.Property(x => x.JoinedAt).HasDefaultValueSql("SYSUTCDATETIME()");
+            entity.Property(x => x.JoinedAt);
             entity.HasOne(x => x.Conversation).WithMany(x => x.Participants).HasForeignKey(x => x.ConversationId).OnDelete(DeleteBehavior.Cascade);
             entity.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Restrict);
         });
@@ -416,7 +433,7 @@ public sealed class BikeMateDbContext(DbContextOptions<BikeMateDbContext> option
             entity.ToTable("messages");
             entity.HasKey(x => x.MessageId);
             entity.Property(x => x.AttachmentUrl).HasMaxLength(500);
-            entity.Property(x => x.CreatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
+            entity.Property(x => x.CreatedAt);
             entity.HasOne(x => x.Conversation).WithMany(x => x.Messages).HasForeignKey(x => x.ConversationId).OnDelete(DeleteBehavior.Cascade);
             entity.HasOne(x => x.Sender).WithMany().HasForeignKey(x => x.SenderUserId).OnDelete(DeleteBehavior.Restrict);
         });
@@ -451,7 +468,7 @@ public sealed class BikeMateDbContext(DbContextOptions<BikeMateDbContext> option
             entity.Property(x => x.ProviderPaymentId).HasMaxLength(255);
             entity.Property(x => x.ProviderReferenceNumber).HasMaxLength(255);
             entity.Property(x => x.CheckoutUrl).HasMaxLength(1000);
-            entity.Property(x => x.CreatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
+            entity.Property(x => x.CreatedAt);
             entity.HasOne(x => x.Request).WithMany(x => x.Payments).HasForeignKey(x => x.RequestId).OnDelete(DeleteBehavior.Restrict);
             entity.HasOne(x => x.Client).WithMany(x => x.Payments).HasForeignKey(x => x.ClientId).OnDelete(DeleteBehavior.Restrict);
             entity.HasOne(x => x.PaymentStatus).WithMany(x => x.Payments).HasForeignKey(x => x.PaymentStatusId).OnDelete(DeleteBehavior.Restrict);
@@ -465,7 +482,7 @@ public sealed class BikeMateDbContext(DbContextOptions<BikeMateDbContext> option
             entity.Property(x => x.ProviderEventId).HasMaxLength(255);
             entity.Property(x => x.EventType).HasMaxLength(255).IsRequired();
             entity.Property(x => x.PayloadJson).IsRequired();
-            entity.Property(x => x.ReceivedAt).HasDefaultValueSql("SYSUTCDATETIME()");
+            entity.Property(x => x.ReceivedAt);
             entity.HasOne(x => x.Payment).WithMany(x => x.Events).HasForeignKey(x => x.PaymentId).OnDelete(DeleteBehavior.SetNull);
         });
     }
@@ -474,10 +491,10 @@ public sealed class BikeMateDbContext(DbContextOptions<BikeMateDbContext> option
     {
         modelBuilder.Entity<Review>(entity =>
         {
-            entity.ToTable("reviews", table => table.HasTrigger("trg_reviews_update_mechanic_rating"));
+            entity.ToTable("reviews");
             entity.HasKey(x => x.ReviewId);
             entity.HasIndex(x => x.RequestId).IsUnique();
-            entity.Property(x => x.CreatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
+            entity.Property(x => x.CreatedAt);
             entity.HasOne(x => x.Request).WithOne(x => x.Review).HasForeignKey<Review>(x => x.RequestId).OnDelete(DeleteBehavior.Restrict);
             entity.HasOne(x => x.Client).WithMany().HasForeignKey(x => x.ClientId).OnDelete(DeleteBehavior.Restrict);
             entity.HasOne(x => x.Mechanic).WithMany(x => x.Reviews).HasForeignKey(x => x.MechanicId).OnDelete(DeleteBehavior.Restrict);
@@ -489,7 +506,7 @@ public sealed class BikeMateDbContext(DbContextOptions<BikeMateDbContext> option
             entity.HasKey(x => x.NotificationId);
             entity.Property(x => x.NotificationType).HasMaxLength(100);
             entity.Property(x => x.Title).HasMaxLength(255).IsRequired();
-            entity.Property(x => x.CreatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
+            entity.Property(x => x.CreatedAt);
             entity.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
         });
 
@@ -500,7 +517,7 @@ public sealed class BikeMateDbContext(DbContextOptions<BikeMateDbContext> option
             entity.Property(x => x.ActionName).HasMaxLength(100).IsRequired();
             entity.Property(x => x.EntityName).HasMaxLength(100).IsRequired();
             entity.Property(x => x.EntityId).HasMaxLength(100);
-            entity.Property(x => x.CreatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
+            entity.Property(x => x.CreatedAt);
             entity.HasOne(x => x.ActorUser).WithMany().HasForeignKey(x => x.ActorUserId).OnDelete(DeleteBehavior.SetNull);
         });
     }
@@ -557,5 +574,27 @@ public sealed class BikeMateDbContext(DbContextOptions<BikeMateDbContext> option
             new ServiceCategory { CategoryId = 9, CategoryName = "Accessories & Electrical Installation", Description = "Safe installation of approved motorcycle accessories and electrical upgrades", IsActive = true },
             new ServiceCategory { CategoryId = 10, CategoryName = "Preventive Maintenance & Tune-up", Description = "Periodic inspection, adjustment, and complete motorcycle tune-up", IsActive = true });
 
+        var passwordHash = "sha256:588c55f3ce2b8569b153c5abbf13f9f74308b88a20017cc699b835cc93195d16";
+
+        modelBuilder.Entity<User>().HasData(
+            new User { UserId = 1, FirstName = "Isaiah", LastName = "Noda", Email = "isaiahandreinoda@gmail.com", PhoneNumber = "+639170000001", PasswordHash = passwordHash, EmailVerified = true, PhoneVerified = true, AccountStatus = "active" },
+            new User { UserId = 2, FirstName = "John", LastName = "Doe", Email = "customer1@bikemate.test", PhoneNumber = "+639170000002", PasswordHash = passwordHash, EmailVerified = true, PhoneVerified = true, AccountStatus = "active" },
+            new User { UserId = 3, FirstName = "Jane", LastName = "Smith", Email = "mechanic1@bikemate.test", PhoneNumber = "+639170000003", PasswordHash = passwordHash, EmailVerified = true, PhoneVerified = true, AccountStatus = "active" },
+            new User { UserId = 4, FirstName = "Bob", LastName = "Williams", Email = "shop1@bikemate.test", PhoneNumber = "+639170000004", PasswordHash = passwordHash, EmailVerified = true, PhoneVerified = true, AccountStatus = "active" });
+
+        modelBuilder.Entity<UserRole>().HasData(
+            new UserRole { UserId = 1, RoleId = 4 },
+            new UserRole { UserId = 2, RoleId = 1 },
+            new UserRole { UserId = 3, RoleId = 2 },
+            new UserRole { UserId = 4, RoleId = 3 });
+
+        modelBuilder.Entity<Client>().HasData(
+            new Client { ClientId = 1, UserId = 2 });
+
+        modelBuilder.Entity<Mechanic>().HasData(
+            new Mechanic { MechanicId = 1, UserId = 3, IsVerified = false, AvailabilityStatus = "online", AverageRating = 0m, TotalCompletedJobs = 0 });
+
+        modelBuilder.Entity<Shop>().HasData(
+            new Shop { ShopId = 1, ShopName = "Demo Bike Shop", OwnerUserId = 4, City = "Manila", Province = "NCR", ShopStatus = "active", AllowsReservations = true, AllowsPickup = true, AllowsOnsiteRepair = true });
     }
 }

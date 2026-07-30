@@ -1116,11 +1116,7 @@ public static class BikeMateDatabaseService
 
     private static string DefaultApiBaseUrl()
     {
-#if ANDROID
-        return "https://10.0.2.2:5001/api/";
-#else
-        return "https://localhost:5001/api/";
-#endif
+        return "https://api-production-02d4.up.railway.app/api/";
     }
 
     private static string EnsureApiPath(string value)

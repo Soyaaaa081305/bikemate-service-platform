@@ -44,10 +44,12 @@ builder.Services.AddCors(options =>
 });
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-    ?? "Server=localhost;Database=BikeMatesDB;Trusted_Connection=True;TrustServerCertificate=True;";
+    ?? Environment.GetEnvironmentVariable("DATABASE_URL")
+    ?? "Host=localhost;Port=5432;Database=bikemate;Username=bikemate;Password=bikemate123";
 
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 builder.Services.AddDbContext<BikeMateDbContext>(options =>
-    options.UseSqlServer(connectionString));
+    options.UseNpgsql(connectionString));
 
 var jwtKey = builder.Configuration["Jwt:Key"]
     ?? throw new InvalidOperationException("FATAL: Jwt:Key is not configured. Set it in appsettings or environment variables.");
@@ -104,15 +106,6 @@ builder.Services.AddScoped<IAdminReportService, AdminReportService>();
 builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
-
-if (args.Any(arg => string.Equals(arg, "--migrate", StringComparison.OrdinalIgnoreCase)))
-{
-    await using var scope = app.Services.CreateAsyncScope();
-    var database = scope.ServiceProvider.GetRequiredService<BikeMateDbContext>();
-    await database.Database.MigrateAsync();
-    Console.WriteLine("BikeMate database migrations applied.");
-    return;
-}
 
 if (app.Environment.IsDevelopment())
 {

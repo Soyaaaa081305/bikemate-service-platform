@@ -1,0 +1,23 @@
+[build]
+  builder = "DOCKERFILE"
+  buildpacks = []
+
+[deploy]
+  healthcheck_path = "/health"
+
+[[services]]
+  name = "api"
+  dockerfile_path = "Dockerfile.api"
+
+  [services.build]
+    args = { BUILD_CONFIGURATION = "Release" }
+
+  [services.healthcheck]
+    path = "/health"
+
+[[services]]
+  name = "webadmin"
+  dockerfile_path = "Dockerfile.webadmin"
+
+  [services.build]
+    args = { BUILD_CONFIGURATION = "Release" }
