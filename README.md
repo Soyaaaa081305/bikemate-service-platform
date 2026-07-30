@@ -32,7 +32,7 @@ Your go-to motorcycle service platform. Book repairs, track mechanics, manage yo
 ### 🏪 BIKEMATES_ADMIN App (Shop Owner)
 | Shop Setup - Identity | Shop Setup - Products | Shop Setup - Services |
 |----------------------|----------------------|----------------------|
-| ![Shop Creation](docs/screenshots/shop-creation.png) | ![Products](docs/screenshots/shop-products.png) | ![Services](docs/screenshots/shop-services.png) |
+| ![Shop Creation](docs/screenshots/shop-creation.png) |
 
 ### 📹 Agora (Video/Voice Calls)
 | Call Screen |
