@@ -1,5 +1,6 @@
 [[services]]
   name = "api"
+  builder = "dockerfile"
   dockerfile_path = "Dockerfile.api"
 
   [services.build]
@@ -10,6 +11,7 @@
 
 [[services]]
   name = "webadmin"
+  builder = "dockerfile"
   dockerfile_path = "Dockerfile.webadmin"
 
   [services.build]
