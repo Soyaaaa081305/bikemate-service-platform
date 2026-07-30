@@ -17,7 +17,7 @@ Your go-to motorcycle service platform. Book repairs, track mechanics, manage yo
 ### 🌐 WebAdmin Portal (System Admin)
 | Login Page | Dashboard |
 |-----------|-----------|
-| ![WebAdmin Login](docs/screenshots/webadmin-login.png) | ![WebAdmin](docs/screenshots/webadmin.png) |
+| ![WebAdmin Login](docs/screenshots/webadmin-login.png) | ![WebAdmin Dashboard](docs/screenshots/webadmin-dashboard.png) |
 
 ### 📱 BikeMate App (Customer)
 | Login | Dashboard | Booking | Navigation |
@@ -37,7 +37,7 @@ Your go-to motorcycle service platform. Book repairs, track mechanics, manage yo
 ### 📹 Agora (Video/Voice Calls)
 | Call Screen |
 |-------------|
-| *[Add Agora call screenshot here]* |
+| ![Agora Call](docs/screenshots/agora-call.jpg) |
 
 ---
 
